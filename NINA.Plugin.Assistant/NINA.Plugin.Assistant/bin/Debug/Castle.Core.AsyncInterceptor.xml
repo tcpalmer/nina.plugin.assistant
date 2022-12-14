@@ -1,0 +1,389 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Castle.Core.AsyncInterceptor</name>
+    </assembly>
+    <members>
+        <member name="T:Castle.DynamicProxy.AsyncDeterminationInterceptor">
+            <summary>
+            Intercepts method invocations and determines if is an asynchronous method.
+            </summary>
+        </member>
+        <member name="M:Castle.DynamicProxy.AsyncDeterminationInterceptor.#ctor(Castle.DynamicProxy.IAsyncInterceptor)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Castle.DynamicProxy.AsyncDeterminationInterceptor"/> class.
+            </summary>
+            <param name="asyncInterceptor">The underlying <see cref="P:Castle.DynamicProxy.AsyncDeterminationInterceptor.AsyncInterceptor"/>.</param>
+        </member>
+        <member name="P:Castle.DynamicProxy.AsyncDeterminationInterceptor.AsyncInterceptor">
+            <summary>
+            Gets the underlying async interceptor.
+            </summary>
+        </member>
+        <member name="M:Castle.DynamicProxy.AsyncDeterminationInterceptor.Intercept(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Intercepts a method <paramref name="invocation"/>.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+        </member>
+        <member name="M:Castle.DynamicProxy.AsyncDeterminationInterceptor.GetMethodType(System.Type)">
+            <summary>
+            Gets the <see cref="T:Castle.DynamicProxy.AsyncDeterminationInterceptor.MethodType"/> based upon the <paramref name="returnType"/> of the method invocation.
+            </summary>
+        </member>
+        <member name="M:Castle.DynamicProxy.AsyncDeterminationInterceptor.GetHandler(System.Type)">
+            <summary>
+            Gets the <see cref="T:Castle.DynamicProxy.AsyncDeterminationInterceptor.GenericAsyncHandler"/> for the method invocation <paramref name="returnType"/>.
+            </summary>
+        </member>
+        <member name="M:Castle.DynamicProxy.AsyncDeterminationInterceptor.CreateHandler(System.Type)">
+            <summary>
+            Creates the generic delegate for the <paramref name="returnType"/> method invocation.
+            </summary>
+        </member>
+        <member name="M:Castle.DynamicProxy.AsyncDeterminationInterceptor.HandleAsyncWithResult``1(Castle.DynamicProxy.IInvocation,Castle.DynamicProxy.IAsyncInterceptor)">
+            <summary>
+            This method is created as a delegate and used to make the call to the generic
+            <see cref="M:Castle.DynamicProxy.IAsyncInterceptor.InterceptAsynchronous``1(Castle.DynamicProxy.IInvocation)"/> method.
+            </summary>
+            <typeparam name="TResult">The type of the <see cref="T:System.Threading.Tasks.Task`1"/> <see cref="P:System.Threading.Tasks.Task`1.Result"/> of the method
+            <paramref name="invocation"/>.</typeparam>
+        </member>
+        <member name="T:Castle.DynamicProxy.AsyncInterceptorBase">
+            <summary>
+            A base type for an <see cref="T:Castle.DynamicProxy.IAsyncInterceptor"/> to provided a simplified solution of method
+            <see cref="T:Castle.DynamicProxy.IInvocation"/> by enforcing only two types of interception, both asynchronous.
+            </summary>
+        </member>
+        <member name="F:Castle.DynamicProxy.AsyncInterceptorBase.CompletedTask">
+            <summary>
+            A completed <see cref="T:System.Threading.Tasks.Task"/>.
+            </summary>
+        </member>
+        <member name="M:Castle.DynamicProxy.AsyncInterceptorBase.InterceptSynchronous(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Intercepts a synchronous method <paramref name="invocation"/>.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+        </member>
+        <member name="M:Castle.DynamicProxy.AsyncInterceptorBase.InterceptAsynchronous(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Intercepts an asynchronous method <paramref name="invocation"/> with return type of <see cref="T:System.Threading.Tasks.Task"/>.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+        </member>
+        <member name="M:Castle.DynamicProxy.AsyncInterceptorBase.InterceptAsynchronous``1(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Intercepts an asynchronous method <paramref name="invocation"/> with return type of <see cref="T:System.Threading.Tasks.Task`1"/>.
+            </summary>
+            <typeparam name="TResult">The type of the <see cref="T:System.Threading.Tasks.Task`1"/> <see cref="P:System.Threading.Tasks.Task`1.Result"/>.</typeparam>
+            <param name="invocation">The method invocation.</param>
+        </member>
+        <member name="M:Castle.DynamicProxy.AsyncInterceptorBase.InterceptAsync(Castle.DynamicProxy.IInvocation,Castle.DynamicProxy.IInvocationProceedInfo,System.Func{Castle.DynamicProxy.IInvocation,Castle.DynamicProxy.IInvocationProceedInfo,System.Threading.Tasks.Task})">
+            <summary>
+            Override in derived classes to intercept method invocations.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+            <param name="proceedInfo">The <see cref="T:Castle.DynamicProxy.IInvocationProceedInfo"/>.</param>
+            <param name="proceed">The function to proceed the <paramref name="proceedInfo"/>.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task" /> object that represents the asynchronous operation.</returns>
+        </member>
+        <member name="M:Castle.DynamicProxy.AsyncInterceptorBase.InterceptAsync``1(Castle.DynamicProxy.IInvocation,Castle.DynamicProxy.IInvocationProceedInfo,System.Func{Castle.DynamicProxy.IInvocation,Castle.DynamicProxy.IInvocationProceedInfo,System.Threading.Tasks.Task{``0}})">
+            <summary>
+            Override in derived classes to intercept method invocations.
+            </summary>
+            <typeparam name="TResult">The type of the <see cref="T:System.Threading.Tasks.Task`1"/> <see cref="P:System.Threading.Tasks.Task`1.Result"/>.</typeparam>
+            <param name="invocation">The method invocation.</param>
+            <param name="proceedInfo">The <see cref="T:Castle.DynamicProxy.IInvocationProceedInfo"/>.</param>
+            <param name="proceed">The function to proceed the <paramref name="proceedInfo"/>.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task" /> object that represents the asynchronous operation.</returns>
+        </member>
+        <member name="T:Castle.DynamicProxy.AsyncTimingInterceptor">
+            <summary>
+            A base type for an <see cref="T:Castle.DynamicProxy.IAsyncInterceptor"/> which only wants timings for a method
+            <see cref="T:Castle.DynamicProxy.IInvocation"/>.
+            </summary>
+        </member>
+        <member name="M:Castle.DynamicProxy.AsyncTimingInterceptor.StartingInvocation(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Signals <see cref="M:Castle.DynamicProxy.AsyncTimingInterceptor.StartingTiming(Castle.DynamicProxy.IInvocation)"/> before starting a <see cref="T:System.Diagnostics.Stopwatch"/> to time the method
+            <paramref name="invocation"/>.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+            <returns>The <see cref="T:System.Diagnostics.Stopwatch"/> to time the method <paramref name="invocation"/>.</returns>
+        </member>
+        <member name="M:Castle.DynamicProxy.AsyncTimingInterceptor.CompletedInvocation(Castle.DynamicProxy.IInvocation,System.Diagnostics.Stopwatch)">
+            <summary>
+            Signals <see cref="M:Castle.DynamicProxy.AsyncTimingInterceptor.CompletedTiming(Castle.DynamicProxy.IInvocation,System.Diagnostics.Stopwatch)"/> after stopping a <see cref="T:System.Diagnostics.Stopwatch"/> to time the method
+            <paramref name="invocation"/>.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+            <param name="state">The <see cref="T:System.Diagnostics.Stopwatch"/> returned by <see cref="M:Castle.DynamicProxy.AsyncTimingInterceptor.StartingInvocation(Castle.DynamicProxy.IInvocation)"/> to time
+            the method <paramref name="invocation"/>.</param>
+        </member>
+        <member name="M:Castle.DynamicProxy.AsyncTimingInterceptor.StartingTiming(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Override in derived classes to receive signals prior method <paramref name="invocation"/> timing.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+        </member>
+        <member name="M:Castle.DynamicProxy.AsyncTimingInterceptor.CompletedTiming(Castle.DynamicProxy.IInvocation,System.Diagnostics.Stopwatch)">
+            <summary>
+            Override in derived classes to receive signals after method <paramref name="invocation"/> timing.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+            <param name="stopwatch">A <see cref="T:System.Diagnostics.Stopwatch"/> used to time the method <paramref name="invocation"/>.
+            </param>
+        </member>
+        <member name="T:Castle.DynamicProxy.IAsyncInterceptor">
+            <summary>
+            Implement this interface to intercept method invocations with DynamicProxy2.
+            </summary>
+        </member>
+        <member name="M:Castle.DynamicProxy.IAsyncInterceptor.InterceptSynchronous(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Intercepts a synchronous method <paramref name="invocation"/>.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+        </member>
+        <member name="M:Castle.DynamicProxy.IAsyncInterceptor.InterceptAsynchronous(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Intercepts an asynchronous method <paramref name="invocation"/> with return type of <see cref="T:System.Threading.Tasks.Task"/>.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+        </member>
+        <member name="M:Castle.DynamicProxy.IAsyncInterceptor.InterceptAsynchronous``1(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Intercepts an asynchronous method <paramref name="invocation"/> with return type of <see cref="T:System.Threading.Tasks.Task`1"/>.
+            </summary>
+            <typeparam name="TResult">The type of the <see cref="T:System.Threading.Tasks.Task`1"/> <see cref="P:System.Threading.Tasks.Task`1.Result"/>.</typeparam>
+            <param name="invocation">The method invocation.</param>
+        </member>
+        <member name="T:Castle.DynamicProxy.NoCoverage.RethrowHelper">
+            <summary>
+            A helper class to re-throw exceptions and retain the stack trace.
+            </summary>
+        </member>
+        <member name="M:Castle.DynamicProxy.NoCoverage.RethrowHelper.Rethrow(System.Exception)">
+            <summary>
+            Re-throws the supplied exception without losing its stack trace.
+            Prefer <c>throw;</c> where possible, this method is useful for re-throwing
+            <see cref="P:System.Exception.InnerException" /> which cannot be done with the <c>throw;</c> semantics.
+            </summary>
+            <param name="exception">The exception.</param>
+        </member>
+        <member name="M:Castle.DynamicProxy.NoCoverage.RethrowHelper.RethrowInnerIfAggregate(System.Exception)">
+            <summary>
+            If the <paramref name="exception"/> is an <see cref="T:System.AggregateException"/> the
+            <paramref name="exception"/>.<see cref="P:System.Exception.InnerException"/> is re-thrown; otherwise the
+            <paramref name="exception"/> is re-thrown.
+            </summary>
+            <param name="exception">The exception.</param>
+        </member>
+        <member name="M:Castle.DynamicProxy.NoCoverage.RethrowHelper.RethrowIfFaulted(System.Threading.Tasks.Task)">
+            <summary>
+            If the <paramref name="task"/> <see cref="P:System.Threading.Tasks.Task.IsFaulted"/> the inner exception is re-thrown; otherwise the
+            method is a no-op.
+            </summary>
+            <param name="task">The task.</param>
+        </member>
+        <member name="T:Castle.DynamicProxy.ProcessingAsyncInterceptor`1">
+            <summary>
+            A base type for an <see cref="T:Castle.DynamicProxy.IAsyncInterceptor"/> which executes only minimal processing when intercepting a
+            method <see cref="T:Castle.DynamicProxy.IInvocation"/>.
+            </summary>
+            <typeparam name="TState">
+            The type of the custom object used to maintain state between <see cref="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.StartingInvocation(Castle.DynamicProxy.IInvocation)"/> and
+            <see cref="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.CompletedInvocation(Castle.DynamicProxy.IInvocation,`0,System.Object)"/>.
+            </typeparam>
+        </member>
+        <member name="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.InterceptSynchronous(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Intercepts a synchronous method <paramref name="invocation"/>.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+        </member>
+        <member name="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.InterceptAsynchronous(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Intercepts an asynchronous method <paramref name="invocation"/> with return type of <see cref="T:System.Threading.Tasks.Task"/>.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+        </member>
+        <member name="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.InterceptAsynchronous``1(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Intercepts an asynchronous method <paramref name="invocation"/> with return type of <see cref="T:System.Threading.Tasks.Task`1"/>.
+            </summary>
+            <typeparam name="TResult">The type of the <see cref="T:System.Threading.Tasks.Task`1"/> <see cref="P:System.Threading.Tasks.Task`1.Result"/>.</typeparam>
+            <param name="invocation">The method invocation.</param>
+        </member>
+        <member name="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.StartingInvocation(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Override in derived classes to receive signals prior method <paramref name="invocation"/>.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+            <returns>The custom object used to maintain state between <see cref="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.StartingInvocation(Castle.DynamicProxy.IInvocation)"/> and
+            <see cref="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.CompletedInvocation(Castle.DynamicProxy.IInvocation,`0,System.Object)"/>.</returns>
+        </member>
+        <member name="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.CompletedInvocation(Castle.DynamicProxy.IInvocation,`0)">
+            <summary>
+            Override in derived classes to receive signals after method <paramref name="invocation"/>.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+            <param name="state">The custom object used to maintain state between
+            <see cref="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.StartingInvocation(Castle.DynamicProxy.IInvocation)"/> and
+            <see cref="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.CompletedInvocation(Castle.DynamicProxy.IInvocation,`0)"/>.</param>
+        </member>
+        <member name="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.CompletedInvocation(Castle.DynamicProxy.IInvocation,`0,System.Object)">
+            <summary>
+            Override in derived classes to receive signals after method <paramref name="invocation"/>.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+            <param name="state">The custom object used to maintain state between
+            <see cref="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.StartingInvocation(Castle.DynamicProxy.IInvocation)"/> and
+            <see cref="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.CompletedInvocation(Castle.DynamicProxy.IInvocation,`0,System.Object)"/>.</param>
+            <param name="returnValue">
+            The underlying return value of the <paramref name="invocation"/>; or <see langword="null"/> if the
+            invocation did not return a value.
+            </param>
+        </member>
+        <member name="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.Proceed(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Signals the <see cref="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.StartingInvocation(Castle.DynamicProxy.IInvocation)"/> then <see cref="M:Castle.DynamicProxy.IInvocation.Proceed"/> on the
+            <paramref name="invocation"/>.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+            <returns>The <typeparamref name="TState"/> returned by <see cref="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.StartingInvocation(Castle.DynamicProxy.IInvocation)"/>.</returns>
+        </member>
+        <member name="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.SignalWhenCompleteAsync(Castle.DynamicProxy.IInvocation,`0)">
+            <summary>
+            Returns a <see cref="T:System.Threading.Tasks.Task"/> that replaces the <paramref name="invocation"/>
+            <see cref="P:Castle.DynamicProxy.IInvocation.ReturnValue"/>, that only completes after
+            <see cref="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.CompletedInvocation(Castle.DynamicProxy.IInvocation,`0,System.Object)"/> has been signaled.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+            <param name="state">
+            The <typeparamref name="TState"/> returned by <see cref="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.StartingInvocation(Castle.DynamicProxy.IInvocation)"/>.
+            </param>
+        </member>
+        <member name="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.SignalWhenCompleteAsync``1(Castle.DynamicProxy.IInvocation,`0)">
+            <summary>
+            Returns a <see cref="T:System.Threading.Tasks.Task`1"/> that replaces the <paramref name="invocation"/>
+            <see cref="P:Castle.DynamicProxy.IInvocation.ReturnValue"/>, that only completes after
+            <see cref="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.CompletedInvocation(Castle.DynamicProxy.IInvocation,`0,System.Object)"/> has been signaled.
+            </summary>
+            <param name="invocation">The method invocation.</param>
+            <param name="state">
+            The <typeparamref name="TState"/> returned by <see cref="M:Castle.DynamicProxy.ProcessingAsyncInterceptor`1.StartingInvocation(Castle.DynamicProxy.IInvocation)"/>.
+            </param>
+        </member>
+        <member name="T:Castle.DynamicProxy.ProxyGeneratorExtensions">
+            <summary>
+            Extension methods to <see cref="T:Castle.DynamicProxy.IProxyGenerator"/>.
+            </summary>
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.ToInterceptor(Castle.DynamicProxy.IAsyncInterceptor)">
+            <summary>
+            Creates an <see cref="T:Castle.DynamicProxy.IInterceptor"/> for the supplied <paramref name="interceptor"/>.
+            </summary>
+            <param name="interceptor">The interceptor for asynchronous operations.</param>
+            <returns>The <see cref="T:Castle.DynamicProxy.IInterceptor"/> for the supplied <paramref name="interceptor"/>.</returns>
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.ToInterceptors(System.Collections.Generic.IEnumerable{Castle.DynamicProxy.IAsyncInterceptor})">
+            <summary>
+            Creates an array of <see cref="T:Castle.DynamicProxy.IInterceptor"/> objects for the supplied <paramref name="interceptors"/>.
+            </summary>
+            <param name="interceptors">The interceptors for asynchronous operations.</param>
+            <returns>The <see cref="T:Castle.DynamicProxy.IInterceptor"/> array for the supplied <paramref name="interceptors"/>.</returns>
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateInterfaceProxyWithTarget``1(Castle.DynamicProxy.IProxyGenerator,``0,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateInterfaceProxyWithTarget``1(``0,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateInterfaceProxyWithTarget``1(Castle.DynamicProxy.IProxyGenerator,``0,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateInterfaceProxyWithTarget``1(``0,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateInterfaceProxyWithTarget(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Object,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateInterfaceProxyWithTarget(System.Type,System.Object,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateInterfaceProxyWithTarget(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Object,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateInterfaceProxyWithTarget(System.Type,System.Object,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateInterfaceProxyWithTarget(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Type[],System.Object,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateInterfaceProxyWithTarget(System.Type,System.Type[],System.Object,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateInterfaceProxyWithTarget(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Type[],System.Object,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateInterfaceProxyWithTarget(System.Type,System.Type[],System.Object,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateInterfaceProxyWithTargetInterface(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Object,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateInterfaceProxyWithTargetInterface(System.Type,System.Object,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateInterfaceProxyWithTargetInterface``1(Castle.DynamicProxy.IProxyGenerator,``0,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateInterfaceProxyWithTargetInterface``1(``0,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateInterfaceProxyWithTargetInterface``1(Castle.DynamicProxy.IProxyGenerator,``0,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateInterfaceProxyWithTargetInterface``1(``0,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateInterfaceProxyWithTargetInterface(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Type[],System.Object,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateInterfaceProxyWithTargetInterface(System.Type,System.Type[],System.Object,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateInterfaceProxyWithTargetInterface(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Object,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateInterfaceProxyWithTargetInterface(System.Type,System.Object,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateInterfaceProxyWithTargetInterface(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Type[],System.Object,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateInterfaceProxyWithTargetInterface(System.Type,System.Type[],System.Object,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxyWithTarget``1(Castle.DynamicProxy.IProxyGenerator,``0,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxyWithTarget``1(``0,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxyWithTarget``1(Castle.DynamicProxy.IProxyGenerator,``0,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxyWithTarget``1(``0,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxyWithTarget(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Type[],System.Object,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxyWithTarget(System.Type,System.Type[],System.Object,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxyWithTarget(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Object,Castle.DynamicProxy.ProxyGenerationOptions,System.Object[],Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxyWithTarget(System.Type,System.Object,Castle.DynamicProxy.ProxyGenerationOptions,System.Object[],Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxyWithTarget(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Object,System.Object[],Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxyWithTarget(System.Type,System.Object,System.Object[],Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxyWithTarget(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Object,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxyWithTarget(System.Type,System.Object,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxyWithTarget(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Object,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxyWithTarget(System.Type,System.Object,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxyWithTarget(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Type[],System.Object,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxyWithTarget(System.Type,System.Type[],System.Object,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxyWithTarget(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Type[],System.Object,Castle.DynamicProxy.ProxyGenerationOptions,System.Object[],Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxyWithTarget(System.Type,System.Type[],System.Object,Castle.DynamicProxy.ProxyGenerationOptions,System.Object[],Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxy``1(Castle.DynamicProxy.IProxyGenerator,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxy``1(Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxy``1(Castle.DynamicProxy.IProxyGenerator,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxy``1(Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxy(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Type[],Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxy(System.Type,System.Type[],Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxy(Castle.DynamicProxy.IProxyGenerator,System.Type,Castle.DynamicProxy.ProxyGenerationOptions,System.Object[],Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxy(System.Type,Castle.DynamicProxy.ProxyGenerationOptions,System.Object[],Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxy(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Object[],Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxy(System.Type,System.Object[],Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxy(Castle.DynamicProxy.IProxyGenerator,System.Type,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxy(System.Type,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxy(Castle.DynamicProxy.IProxyGenerator,System.Type,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxy(System.Type,Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxy(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Type[],Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxy(System.Type,System.Type[],Castle.DynamicProxy.ProxyGenerationOptions,Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+        <member name="M:Castle.DynamicProxy.ProxyGeneratorExtensions.CreateClassProxy(Castle.DynamicProxy.IProxyGenerator,System.Type,System.Type[],Castle.DynamicProxy.ProxyGenerationOptions,System.Object[],Castle.DynamicProxy.IAsyncInterceptor[])">
+            <inheritdoc cref="M:Castle.DynamicProxy.IProxyGenerator.CreateClassProxy(System.Type,System.Type[],Castle.DynamicProxy.ProxyGenerationOptions,System.Object[],Castle.DynamicProxy.IInterceptor[])" />
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,343 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Nito.Mvvm.Core</name>
+    </assembly>
+    <members>
+        <member name="T:Nito.Mvvm.CanExecuteChangedFactories">
+            <summary>
+            Global factory methods for creating <see cref="T:Nito.Mvvm.ICanExecuteChanged"/> implementations.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.CanExecuteChangedFactories.WeakCanExecuteChangedFactory">
+            <summary>
+            Factory method for creating weak implementations of <see cref="T:Nito.Mvvm.ICanExecuteChanged"/>.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.CanExecuteChangedFactories.StrongCanExecuteChangedFactory">
+            <summary>
+            Factory method for creating strong implementations of <see cref="T:Nito.Mvvm.ICanExecuteChanged"/>.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.CanExecuteChangedFactories.DefaultCanExecuteChangedFactory">
+            <summary>
+            Default factory method for creating <see cref="T:Nito.Mvvm.ICanExecuteChanged"/> implementations.
+            </summary>
+        </member>
+        <member name="T:Nito.Mvvm.ExplicitCanExecute">
+            <summary>
+            An explicit implementation of <c>ICommand.CanExecuteChanged</c>.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.ExplicitCanExecute._canExecuteChanged">
+            <summary>
+            The weak event implementation.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.ExplicitCanExecute._canExecute">
+            <summary>
+            Whether the command can be executed.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.ExplicitCanExecute._threadAffinity">
+            <summary>
+            This object is thread-affine.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.ExplicitCanExecute.#ctor(System.Object)">
+            <summary>
+            Creates a new explicit implementation of <c>ICommand.CanExecuteChanged</c>.
+            </summary>
+            <param name="sender">The sender of the <c>ICommand.CanExecuteChanged</c> event.</param>
+        </member>
+        <member name="P:Nito.Mvvm.ExplicitCanExecute.CanExecute">
+            <summary>
+            Whether the command can be executed. This property does not raise <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/>; it raises <see cref="E:Nito.Mvvm.ICanExecute.CanExecuteChanged"/> instead.
+            </summary>
+        </member>
+        <member name="T:Nito.Mvvm.ICanExecute">
+            <summary>
+            An implementation of <c>ICommand.CanExecuteChanged</c> with <c>ICommand.CanExecute</c>.
+            </summary>
+        </member>
+        <member name="E:Nito.Mvvm.ICanExecute.CanExecuteChanged">
+            <summary>
+            Occurs when the return value of <see cref="M:Nito.Mvvm.ICanExecute.CanExecute(System.Object)"/> may have changed. This is a weak event.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.ICanExecute.CanExecute(System.Object)">
+            <summary>
+            Whether the command can execute.
+            </summary>
+            <param name="parameter">The parameter for the command.</param>
+        </member>
+        <member name="T:Nito.Mvvm.ICanExecuteChanged">
+            <summary>
+            An implementation of <c>ICommand.CanExecuteChanged</c>.
+            </summary>
+        </member>
+        <member name="E:Nito.Mvvm.ICanExecuteChanged.CanExecuteChanged">
+            <summary>
+            Provides notification that the result of <c>ICommand.CanExecute</c> may be different.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.ICanExecuteChanged.OnCanExecuteChanged">
+            <summary>
+            Raises the <see cref="E:Nito.Mvvm.ICanExecuteChanged.CanExecuteChanged"/> event.
+            </summary>
+        </member>
+        <member name="T:Nito.Mvvm.IRaisePropertyChanged">
+            <summary>
+            An object capable of raising <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/>. This interface is typically implemented explicitly.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.IRaisePropertyChanged.RaisePropertyChanged(System.ComponentModel.PropertyChangedEventArgs)">
+            <summary>
+            Raises <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/> with the specified arguments.
+            </summary>
+            <param name="args">The event arguments to pass to <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/>.</param>
+        </member>
+        <member name="T:Nito.Mvvm.PropertyChangedEventArgsCache">
+            <summary>
+            Provides a cache for <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instances.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.PropertyChangedEventArgsCache._cache">
+            <summary>
+            The underlying dictionary. This instance is its own mutex.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.PropertyChangedEventArgsCache.#ctor">
+            <summary>
+            Private constructor to prevent other instances.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.PropertyChangedEventArgsCache.Instance">
+            <summary>
+            The global instance of the cache.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.PropertyChangedEventArgsCache.Get(System.String)">
+            <summary>
+            Retrieves a <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for the specified property, creating it and adding it to the cache if necessary.
+            </summary>
+            <param name="propertyName">The name of the property that changed.</param>
+        </member>
+        <member name="T:Nito.Mvvm.PropertyChangedNotificationManager">
+            <summary>
+            Defers and consolidates <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/> events. Events may be raised out of order when notifications are resumed. Instances of <see cref="T:Nito.Mvvm.IRaisePropertyChanged"/> are compared using reference equality during consolidation.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.PropertyChangedNotificationManager._threadAffinity">
+            <summary>
+            This object is thread-affine.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.PropertyChangedNotificationManager.Instance">
+            <summary>
+            Gets the singleton instance.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.PropertyChangedNotificationManager.DeferNotifications">
+            <summary>
+            Defers <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/> events until the returned disposable is disposed. Deferrals are reference counted, so they are safe to nest.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.PropertyChangedNotificationManager.Register(Nito.Mvvm.IRaisePropertyChanged,System.ComponentModel.PropertyChangedEventArgs)">
+            <summary>
+            Registers a <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/> event. If events are not deferred, then the event is raised immediately.
+            </summary>
+            <param name="raisePropertyChanged">An object capable of raising <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/>. May not be <c>null</c>.</param>
+            <param name="args">The event arguments to pass to <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/>.</param>
+        </member>
+        <member name="M:Nito.Mvvm.PropertyChangedNotificationManager.Register(Nito.Mvvm.IRaisePropertyChanged,System.String)">
+            <summary>
+            Registers a <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/> event. If events are not deferred, then the event is raised immediately.
+            </summary>
+            <param name="raisePropertyChanged">An object capable of raising <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/>. May not be <c>null</c>.</param>
+            <param name="propertyName">The name of the property that changed.</param>
+        </member>
+        <member name="T:Nito.Mvvm.PropertyChangedSubscription">
+            <summary>
+            A subscription to a property changed event for a particular property.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.PropertyChangedSubscription._propertyName">
+            <summary>
+            The name of the property being observed. May be <c>null</c>.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.PropertyChangedSubscription._handler">
+            <summary>
+            The callback to invoke when the property changed. Never <c>null</c>.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.PropertyChangedSubscription._subscription">
+            <summary>
+            The actual subscription to <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/>. Never <c>null</c>.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.PropertyChangedSubscription._threadAffinity">
+            <summary>
+            This object is thread-affine.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.PropertyChangedSubscription.#ctor(System.ComponentModel.INotifyPropertyChanged,System.String,System.ComponentModel.PropertyChangedEventHandler)">
+            <summary>
+            Subscribes to the <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/> event for a particular property.
+            </summary>
+            <param name="source">The object whose property is observed. May not be <c>null</c>.</param>
+            <param name="propertyName">The name of the property to observe. May be <c>null</c> to indicate that all properties should be observed.</param>
+            <param name="handler">The callback that is called when the property has changed. May not be <c>null</c>.</param>
+        </member>
+        <member name="M:Nito.Mvvm.PropertyChangedSubscription.#ctor(System.ComponentModel.INotifyPropertyChanged,System.String,System.Action)">
+            <summary>
+            Subscribes to the <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/> event for a particular property.
+            </summary>
+            <param name="source">The object whose property is observed. May not be <c>null</c>.</param>
+            <param name="propertyName">The name of the property to observe. May be <c>null</c> to indicate that all properties should be observed.</param>
+            <param name="handler">The callback that is called when the property has changed. May not be <c>null</c>.</param>
+        </member>
+        <member name="M:Nito.Mvvm.PropertyChangedSubscription.Create(System.ComponentModel.INotifyPropertyChanged,System.String,System.ComponentModel.PropertyChangedEventHandler)">
+            <summary>
+            Subscribes to the <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/> event for a particular property.
+            </summary>
+            <param name="source">The object whose property is observed. May not be <c>null</c>.</param>
+            <param name="propertyName">The name of the property to observe. May be <c>null</c> to indicate that all properties should be observed.</param>
+            <param name="handler">The callback that is called when the property has changed. May not be <c>null</c>.</param>
+            <returns>The new subscription.</returns>
+        </member>
+        <member name="M:Nito.Mvvm.PropertyChangedSubscription.Create(System.ComponentModel.INotifyPropertyChanged,System.String,System.Action)">
+            <summary>
+            Subscribes to the <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/> event for a particular property.
+            </summary>
+            <param name="source">The object whose property is observed. May not be <c>null</c>.</param>
+            <param name="propertyName">The name of the property to observe. May be <c>null</c> to indicate that all properties should be observed.</param>
+            <param name="handler">The callback that is called when the property has changed. May not be <c>null</c>.</param>
+            <returns>The new subscription.</returns>
+        </member>
+        <member name="M:Nito.Mvvm.PropertyChangedSubscription.Dispose(System.ComponentModel.INotifyPropertyChanged)">
+            <summary>
+            Unsubscribes from the <see cref="E:System.ComponentModel.INotifyPropertyChanged.PropertyChanged"/> event.
+            </summary>
+        </member>
+        <member name="T:Nito.Mvvm.StrongCanExecuteChanged">
+            <summary>
+            Class that implements <c>ICommand.CanExecuteChanged</c> as a strong event.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.StrongCanExecuteChanged._sender">
+            <summary>
+            The sender of the <c>ICommand.CanExecuteChanged</c> event.
+            </summary>
+        </member>
+        <member name="E:Nito.Mvvm.StrongCanExecuteChanged._canExecuteChanged">
+            <summary>
+            The collection of delegates for <see cref="E:Nito.Mvvm.StrongCanExecuteChanged.CanExecuteChanged"/>.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.StrongCanExecuteChanged._threadAffinity">
+            <summary>
+            This object is thread-affine.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.StrongCanExecuteChanged.#ctor(System.Object)">
+            <summary>
+            Creates a new strong-event implementation of <c>ICommand.CanExecuteChanged</c>.
+            </summary>
+            <param name="sender">The sender of the <c>ICommand.CanExecuteChanged</c> event.</param>
+        </member>
+        <member name="E:Nito.Mvvm.StrongCanExecuteChanged.CanExecuteChanged">
+            <summary>
+            Provides notification that the result of <c>ICommand.CanExecute</c> may be different.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.StrongCanExecuteChanged.OnCanExecuteChanged">
+            <summary>
+            Raises the <see cref="E:Nito.Mvvm.StrongCanExecuteChanged.CanExecuteChanged"/> event.
+            </summary>
+        </member>
+        <member name="T:Nito.Mvvm.ThreadAffinity">
+            <summary>
+            A small type used to verify that the correct thread is used to access thread-affine objects.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.ThreadAffinity.BindToCurrentThread">
+            <summary>
+            Binds this object to the current thread.
+            </summary>
+            <returns>A <see cref="T:Nito.Mvvm.ThreadAffinity"/> instance that can be used to verify future access to this object.</returns>
+        </member>
+        <member name="M:Nito.Mvvm.ThreadAffinity.VerifyCurrentThread">
+            <summary>
+            Verifies that the current thread is the thread that is bound to this object.
+            </summary>
+        </member>
+        <member name="T:Nito.Mvvm.WeakCanExecuteChanged">
+            <summary>
+            Class that implements <c>ICommand.CanExecuteChanged</c> as a weak event.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.WeakCanExecuteChanged._sender">
+            <summary>
+            The sender of the <c>ICommand.CanExecuteChanged</c> event.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.WeakCanExecuteChanged._canExecuteChanged">
+            <summary>
+            The weak collection of delegates for <see cref="E:Nito.Mvvm.WeakCanExecuteChanged.CanExecuteChanged"/>.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.WeakCanExecuteChanged._threadAffinity">
+            <summary>
+            This object is thread-affine.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.WeakCanExecuteChanged.#ctor(System.Object)">
+            <summary>
+            Creates a new weak-event implementation of <c>ICommand.CanExecuteChanged</c>.
+            </summary>
+            <param name="sender">The sender of the <c>ICommand.CanExecuteChanged</c> event.</param>
+        </member>
+        <member name="E:Nito.Mvvm.WeakCanExecuteChanged.CanExecuteChanged">
+            <summary>
+            This is a weak event. Provides notification that the result of <c>ICommand.CanExecute</c> may be different.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.WeakCanExecuteChanged.OnCanExecuteChanged">
+            <summary>
+            Raises the <see cref="E:Nito.Mvvm.WeakCanExecuteChanged.CanExecuteChanged"/> event for any listeners still alive, and removes any references to garbage collected listeners.
+            </summary>
+        </member>
+        <member name="T:Nito.Mvvm.WeakCollection`1">
+            <summary>
+            A collection of weak references to objects.
+            </summary>
+            <typeparam name="T">The type of object to hold weak references to.</typeparam>
+        </member>
+        <member name="F:Nito.Mvvm.WeakCollection`1._list">
+            <summary>
+            The actual collection of strongly-typed weak references.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.WeakCollection`1.GetLiveItems">
+            <summary>
+            Gets a list of live objects from this collection, causing a purge.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Nito.Mvvm.WeakCollection`1.Add(`0)">
+            <summary>
+            Adds a weak reference to an object to the collection. Does not cause a purge.
+            </summary>
+            <param name="item">The object to add a weak reference to.</param>
+        </member>
+        <member name="M:Nito.Mvvm.WeakCollection`1.Remove(`0)">
+            <summary>
+            Removes a weak reference to an object from the collection. Does not cause a purge.
+            </summary>
+            <param name="item">The object to remove a weak reference to.</param>
+            <returns>True if the object was found and removed; false if the object was not found.</returns>
+        </member>
+    </members>
+</doc>

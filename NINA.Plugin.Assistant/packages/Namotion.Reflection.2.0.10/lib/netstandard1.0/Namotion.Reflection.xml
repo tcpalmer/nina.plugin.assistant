@@ -1,0 +1,1607 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Namotion.Reflection</name>
+    </assembly>
+    <members>
+        <member name="T:Namotion.Reflection.CachedType">
+            <summary>
+            A cached type object without context.
+            </summary>
+        </member>
+        <member name="M:Namotion.Reflection.CachedType.ClearCache">
+            <summary>
+            Clears the cache.
+            </summary>
+        </member>
+        <member name="F:Namotion.Reflection.CachedType._genericArguments">
+            <summary>
+            Internal generic arguments.
+            </summary>
+        </member>
+        <member name="F:Namotion.Reflection.CachedType._originalGenericArguments">
+            <summary>
+            Internal original generic arguments.
+            </summary>
+        </member>
+        <member name="F:Namotion.Reflection.CachedType._elementType">
+            <summary>
+            Internal element type.
+            </summary>
+        </member>
+        <member name="M:Namotion.Reflection.CachedType.op_Implicit(Namotion.Reflection.CachedType)~System.Type">
+            <summary>
+            Unwraps the OriginalType as <see cref="P:Namotion.Reflection.CachedType.Type"/> from the context type.
+            </summary>
+            <param name="type">The contextual type</param>
+        </member>
+        <member name="P:Namotion.Reflection.CachedType.OriginalType">
+            <summary>
+            Gets the original type (i.e. without unwrapping Nullable{T}).
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.CachedType.Attributes">
+            <summary>
+            Gets all type attributes.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.CachedType.TypeName">
+            <summary>
+            Gets the type name.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.CachedType.TypeInfo">
+            <summary>
+            Gest the original's type info.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.CachedType.InheritedAttributes">
+            <summary>
+            Gets the type's associated attributes of the type (inherited).
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.CachedType.Type">
+            <summary>
+            Gets the actual unwrapped type (e.g. gets T of a Nullable{T} type).
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.CachedType.IsNullableType">
+            <summary>
+            Gets a value indicating whether this type is wrapped with Nullable{T}.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.CachedType.GenericArguments">
+            <summary>
+            Gets the type's generic arguments (Nullable{T} is unwrapped).
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.CachedType.OriginalGenericArguments">
+            <summary>
+            Gets the type's original generic arguments (Nullable{T} is not unwrapped).
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.CachedType.ElementType">
+            <summary>
+            Gets the type's element type (i.e. array type).
+            </summary>
+        </member>
+        <member name="M:Namotion.Reflection.CachedType.GetInheritedAttribute``1">
+            <summary>
+            Gets an attribute of the given type which is defined on the type.
+            </summary>
+            <typeparam name="T">The attribute type.</typeparam>
+            <returns>The attribute or null.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.CachedType.GetInheritedAttributes``1">
+            <summary>
+            Gets the attributes of the given type which are defined on the type.
+            </summary>
+            <typeparam name="T">The attribute type.</typeparam>
+            <returns>The attributes.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.CachedType.ToString">
+            <inheritdocs />
+        </member>
+        <member name="M:Namotion.Reflection.CachedType.GetCachedType(System.Type,System.Int32@)">
+            <summary>Gets the cached type for the given type and nullable flags index.</summary>
+            <param name="type">The type.</param>
+            <param name="nullableFlagsIndex">The flags.</param>
+            <returns>The cached type.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.CachedType.UpdateOriginalGenericArguments">
+            <summary>
+            Updates the original generic arguments.
+            </summary>
+        </member>
+        <member name="M:Namotion.Reflection.CachedType.UpdateOriginalGenericArguments(System.Int32@)">
+            <summary>
+            Updates the original generic arguments.
+            </summary>
+        </member>
+        <member name="T:Namotion.Reflection.ContextualAccessorInfo">
+            <summary>Base class for a contextual property or field.</summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualAccessorInfo.AccessorType">
+            <summary>
+            Gets the accessor's type.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualAccessorInfo.Nullability">
+            <summary>
+            Gets the nullability information of this accessor's type in the given context by unwrapping Nullable{T}.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualAccessorInfo.ContextAttributes">
+            <summary>
+            Gets the accessor's contextual attributes (e.g. attributes on property or field).
+            </summary>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualAccessorInfo.GetValue(System.Object)">
+            <summary>
+            Returns the value of a field supported by a given object.
+            </summary>
+            <param name="obj">The object.</param>
+            <returns>The value.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualAccessorInfo.SetValue(System.Object,System.Object)">
+            <summary>
+            Sets the value of the field supported by the given object.
+            </summary>
+            <param name="obj">The object.</param>
+            <param name="value">The value.</param>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualAccessorInfo.GetContextAttribute``1">
+            <summary>
+            Gets an attribute of the given type which is defined on the context (property, field, parameter or contextual generic argument type).
+            </summary>
+            <typeparam name="T">The attribute type.</typeparam>
+            <returns>The attribute or null.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualAccessorInfo.GetContextAttributes``1">
+            <summary>
+            Gets the attributes of the given type which are defined on the context (property, field, parameter or contextual generic argument type).
+            </summary>
+            <typeparam name="T">The attribute type.</typeparam>
+            <returns>The attributes.</returns>
+        </member>
+        <member name="T:Namotion.Reflection.ContextualFieldInfo">
+            <summary>
+            A field info with contextual information.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualFieldInfo.FieldInfo">
+            <summary>
+            Gets the type context's field info.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualFieldInfo.MemberInfo">
+            <summary>
+            Gets the type context's member info.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualFieldInfo.AccessorType">
+            <inheritdoc />
+        </member>
+        <member name="P:Namotion.Reflection.ContextualFieldInfo.FieldType">
+            <summary>
+            Gets the field's contextual type.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualFieldInfo.Name">
+            <summary>
+            Gets the cached field name.
+            </summary>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualFieldInfo.GetValue(System.Object)">
+            <summary>
+            Returns the value of a field supported by a given object.
+            </summary>
+            <param name="obj">The object.</param>
+            <returns>The value.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualFieldInfo.SetValue(System.Object,System.Object)">
+            <summary>
+            Sets the value of the field supported by the given object.
+            </summary>
+            <param name="obj">The object.</param>
+            <param name="value">The value.</param>
+        </member>
+        <member name="T:Namotion.Reflection.ContextualMemberInfo">
+            <summary>
+            A member info with contextual information.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualMemberInfo.MemberInfo">
+            <summary>
+            Gets the type context's member info.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualMemberInfo.Name">
+            <summary>
+            Gets the name of the cached member name (property or parameter name).
+            </summary>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualMemberInfo.ToString">
+            <inheritdocs />
+        </member>
+        <member name="T:Namotion.Reflection.ContextualMethodInfo">
+            <summary>
+            A method info with contextual information.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualMethodInfo.MethodInfo">
+            <summary>
+            Gets the type context's method info.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualMethodInfo.Name">
+            <summary>
+            Gets the name of the cached method name.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualMethodInfo.Parameters">
+            <summary>
+            Gets the contextual parameters.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualMethodInfo.ReturnParameter">
+            <summary>
+            Gets the contextual return parameter.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualMethodInfo.MemberInfo">
+            <inheritdocs />
+        </member>
+        <member name="M:Namotion.Reflection.ContextualMethodInfo.ToString">
+            <inheritdocs />
+        </member>
+        <member name="T:Namotion.Reflection.ContextualParameterInfo">
+            <summary>
+            A parameter info with contextual information.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualParameterInfo.ParameterInfo">
+            <summary>
+            Gets the type context's parameter info.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualParameterInfo.Name">
+            <summary>
+            Gets the cached parameter name.
+            </summary>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualParameterInfo.ToString">
+            <inheritdocs />
+        </member>
+        <member name="T:Namotion.Reflection.ContextualPropertyInfo">
+            <summary>
+            A property info with contextual information.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualPropertyInfo.PropertyInfo">
+            <summary>
+            Gets the type context's property info.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualPropertyInfo.AccessorType">
+            <inheritdoc />
+        </member>
+        <member name="P:Namotion.Reflection.ContextualPropertyInfo.PropertyType">
+            <summary>
+            Gets the properties contextual type.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualPropertyInfo.Name">
+            <summary>
+            Gets the cached field name.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualPropertyInfo.MemberInfo">
+            <summary>
+            Gets the type context's member info.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualPropertyInfo.CanWrite">
+            <summary>
+            Gets a value indicating whether the property can be written to.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualPropertyInfo.CanRead">
+            <summary>
+            Gets a value indicating whether the property can be read from.
+            </summary>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualPropertyInfo.GetValue(System.Object)">
+            <summary>
+            Returns the value of a field supported by a given object.
+            </summary>
+            <param name="obj">The object.</param>
+            <returns>The value.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualPropertyInfo.SetValue(System.Object,System.Object)">
+            <summary>
+            Sets the value of the field supported by the given object.
+            </summary>
+            <param name="obj">The object.</param>
+            <param name="value">The value.</param>
+        </member>
+        <member name="T:Namotion.Reflection.ContextualType">
+            <summary>
+            A cached type with context information (e.g. parameter, field, property with nullability).
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualType.Parent">
+            <summary>
+            Gets the parent type with context.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualType.ContextAttributes">
+            <summary>
+            Gets the type's associated attributes of the given context (inherited).
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualType.OriginalNullability">
+            <summary>
+            Gets the original nullability information of this type in the given context (i.e. without unwrapping Nullable{T}).
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualType.Attributes">
+            <summary>
+            Gets all contextual and type attributes (in this order).
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualType.GenericArguments">
+            <summary>
+            Gets the generic type arguments of the type in the given context (empty when unwrapped from Nullable{T}).
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualType.OriginalGenericArguments">
+            <summary>
+            Gets the original generic type arguments of the type in the given context.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualType.ElementType">
+            <summary>
+            Gets the type's element type (i.e. array type).
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualType.EnumerableItemType">
+            <summary>
+            Gets the type's element type (i.e. array type).
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualType.BaseType">
+            <summary>
+            Gets the type's base type
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualType.Nullability">
+            <summary>
+            Gets the nullability information of this type in the given context by unwrapping Nullable{T} into account.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualType.IsValueType">
+            <summary>
+            Gets a value indicating whether the System.Type is a value type.
+            </summary>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualType.GetContextAttribute``1">
+            <summary>
+            Gets an attribute of the given type which is defined on the context (property, field, parameter or contextual generic argument type).
+            </summary>
+            <typeparam name="T">The attribute type.</typeparam>
+            <returns>The attribute or null.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualType.GetContextAttributes``1">
+            <summary>
+            Gets the attributes of the given type which are defined on the context (property, field, parameter or contextual generic argument type).
+            </summary>
+            <typeparam name="T">The attribute type.</typeparam>
+            <returns>The attributes.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualType.GetAttribute``1">
+            <summary>
+            Gets an attribute of the given type which is defined on the context or on the type.
+            </summary>
+            <typeparam name="T">The attribute type.</typeparam>
+            <returns>The attribute or null.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualType.GetAttributes``1">
+            <summary>
+            Gets the attributes of the given type which are defined on the context or on the type.
+            </summary>
+            <typeparam name="T">The attribute type.</typeparam>
+            <returns>The attributes.</returns>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualType.Properties">
+            <summary>
+            Gets the contextual properties of this type.
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualType.Methods">
+            <summary>
+            Gets the contextual methods of this type (runtime).
+            </summary>
+        </member>
+        <member name="P:Namotion.Reflection.ContextualType.Fields">
+            <summary>
+            Gets the contextual properties of this type.
+            </summary>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualType.GetProperty(System.String)">
+            <summary>
+            Gets a contextual property of the given contextual type (preserving the context).
+            </summary>
+            <param name="propertyName">The property name.</param>
+            <returns>The contextual property or null.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualType.GetField(System.String)">
+            <summary>
+            Gets a contextual field of the given contextual type (preserving the context).
+            </summary>
+            <param name="fieldName">The field name.</param>
+            <returns>The contextual field or null.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualType.ToString">
+            <inheritdocs />
+        </member>
+        <member name="M:Namotion.Reflection.ContextualType.GetCachedType(System.Type,System.Int32@)">
+            <summary>Gets the cached type for the given type and nullable flags index.</summary>
+            <param name="type">The type.</param>
+            <param name="nullableFlagsIndex">The flags.</param>
+            <returns>The cached type.</returns>
+        </member>
+        <member name="T:Namotion.Reflection.ArrayExt">
+            <summary>
+            Helper to support old runtimes.
+            </summary>
+        </member>
+        <member name="T:Namotion.Reflection.ContextualTypeExtensions">
+            <summary>
+            Type and member extension methods to extract contextual or cached types.
+            </summary>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualTypeExtensions.ToContextualType(System.Type)">
+            <summary>
+            Gets a <see cref="T:Namotion.Reflection.CachedType"/> for the given <see cref="T:System.Type"/> instance.
+            </summary>
+            <param name="type">The type.</param>
+            <returns>The <see cref="T:Namotion.Reflection.CachedType"/>.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualTypeExtensions.ToCachedType(System.Type)">
+            <summary>
+            Gets a <see cref="T:Namotion.Reflection.CachedType"/> for the given <see cref="T:System.Type"/> instance.
+            </summary>
+            <param name="type">The type.</param>
+            <returns>The <see cref="T:Namotion.Reflection.CachedType"/>.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualTypeExtensions.GetContextualAccessors(System.Type)">
+            <summary>
+            Gets an enumerable of <see cref="T:Namotion.Reflection.ContextualAccessorInfo"/>s (all properties and fields) for the given <see cref="T:System.Type"/> instance.
+            </summary>
+            <param name="type">The type.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualTypeExtensions.GetContextualProperties(System.Type)">
+            <summary>
+            Gets an array of <see cref="T:Namotion.Reflection.ContextualPropertyInfo"/> for the given <see cref="T:System.Type"/> instance.
+            </summary>
+            <param name="type">The type.</param>
+            <returns>The runtime properties.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualTypeExtensions.GetContextualFields(System.Type)">
+            <summary>
+            Gets an array of <see cref="T:Namotion.Reflection.ContextualFieldInfo"/> for the given <see cref="T:System.Type"/> instance.
+            </summary>
+            <param name="type">The type.</param>
+            <returns>The runtime fields.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualTypeExtensions.ToContextualType(System.Type,System.Collections.Generic.IEnumerable{System.Attribute})">
+            <summary>
+            Gets an uncached <see cref="T:Namotion.Reflection.ContextualType"/> for the given <see cref="T:System.Type"/> instance and attributes.
+            </summary>
+            <param name="type">The type.</param>
+            <param name="attributes">The attributes.</param>
+            <returns>The <see cref="T:Namotion.Reflection.CachedType"/>.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualTypeExtensions.ToContextualParameter(System.Reflection.ParameterInfo)">
+            <summary>
+            Gets a <see cref="T:Namotion.Reflection.ContextualParameterInfo"/> for the given <see cref="T:System.Reflection.ParameterInfo"/> instance.
+            Warning: Retrieving contextual information directly from <see cref="T:System.Reflection.ParameterInfo"/> might lose original context data (NRT on original generic type parameters).
+            </summary>
+            <param name="parameterInfo">The parameter info.</param>
+            <returns>The <see cref="T:Namotion.Reflection.ContextualParameterInfo"/>.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualTypeExtensions.ToContextualProperty(System.Reflection.PropertyInfo)">
+            <summary>
+            Gets a <see cref="T:Namotion.Reflection.ContextualPropertyInfo"/> for the given <see cref="T:System.Reflection.PropertyInfo"/> instance.
+            Warning: Retrieving contextual information directly from <see cref="T:System.Reflection.PropertyInfo"/> might lose original context data (NRT on original generic type parameters).
+            </summary>
+            <param name="propertyInfo">The property info.</param>
+            <returns>The <see cref="T:Namotion.Reflection.ContextualPropertyInfo"/>.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualTypeExtensions.ToContextualField(System.Reflection.FieldInfo)">
+            <summary>
+            Gets a <see cref="T:Namotion.Reflection.ContextualFieldInfo"/> for the given <see cref="T:System.Reflection.FieldInfo"/> instance.
+            Warning: Retrieving contextual information directly from <see cref="T:System.Reflection.FieldInfo"/> might lose original context data (NRT on original generic type parameters).
+            </summary>
+            <param name="fieldInfo">The field info.</param>
+            <returns>The <see cref="T:Namotion.Reflection.ContextualFieldInfo"/>.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ContextualTypeExtensions.ToContextualAccessor(System.Reflection.MemberInfo)">
+            <summary>
+            Gets a <see cref="T:Namotion.Reflection.ContextualMemberInfo"/> for the given <see cref="T:System.Reflection.MemberInfo"/> instance.
+            Warning: Retrieving contextual information directly from <see cref="T:System.Reflection.MemberInfo"/> might lose original context data (NRT on original generic type parameters).
+            </summary>
+            <param name="memberInfo">The member info.</param>
+            <returns>The <see cref="T:Namotion.Reflection.ContextualMemberInfo"/>.</returns>
+        </member>
+        <member name="T:Namotion.Reflection.Nullability">
+            <summary>
+            Specifies the nullability in the given context.
+            </summary>
+        </member>
+        <member name="F:Namotion.Reflection.Nullability.Unknown">
+            <summary>
+            Nullability is unknown (NRT is not enabled).
+            </summary>
+        </member>
+        <member name="F:Namotion.Reflection.Nullability.NotNullable">
+            <summary>
+            Reference type is not nullable.
+            </summary>
+        </member>
+        <member name="F:Namotion.Reflection.Nullability.Nullable">
+            <summary>
+            Reference type can be null.
+            </summary>
+        </member>
+        <member name="T:Namotion.Reflection.EnumerableExtensions">
+            <summary>
+            IEnumerable extensions.
+            </summary>
+        </member>
+        <member name="M:Namotion.Reflection.EnumerableExtensions.GetAssignableToTypeName``1(System.Collections.Generic.IEnumerable{``0},System.String,Namotion.Reflection.TypeNameStyle)">
+            <summary>Tries to get the first object which is assignable to the given type name.</summary>
+            <param name="objects">The objects.</param>
+            <param name="typeName">Type of the attribute.</param>
+            <param name="typeNameStyle">The type name style.</param>
+            <returns>The objects which are assignable.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.EnumerableExtensions.FirstAssignableToTypeNameOrDefault``1(System.Collections.Generic.IEnumerable{``0},System.String,Namotion.Reflection.TypeNameStyle)">
+            <summary>Tries to get the first object which is assignable to the given type name.</summary>
+            <param name="objects">The objects.</param>
+            <param name="typeName">Type of the attribute.</param>
+            <param name="typeNameStyle">The type name style.</param>
+            <returns>May return null (not found).</returns>
+        </member>
+        <member name="M:Namotion.Reflection.EnumerableExtensions.GetCommonBaseType(System.Collections.Generic.IEnumerable{System.Type})">
+            <summary>Finds the first common base type of the given types.</summary>
+            <param name="types">The types.</param>
+            <returns>The common base type.</returns>
+        </member>
+        <member name="T:Namotion.Reflection.Infrastructure.DynamicApis">
+            <summary>Provides dynamic access to framework APIs.</summary>
+        </member>
+        <member name="P:Namotion.Reflection.Infrastructure.DynamicApis.SupportsFileApis">
+            <summary>Gets a value indicating whether file APIs are available.</summary>
+        </member>
+        <member name="P:Namotion.Reflection.Infrastructure.DynamicApis.SupportsPathApis">
+            <summary>Gets a value indicating whether path APIs are available.</summary>
+        </member>
+        <member name="P:Namotion.Reflection.Infrastructure.DynamicApis.SupportsDirectoryApis">
+            <summary>Gets a value indicating whether path APIs are available.</summary>
+        </member>
+        <member name="P:Namotion.Reflection.Infrastructure.DynamicApis.SupportsXPathApis">
+            <summary>Gets a value indicating whether XPath APIs are available.</summary>
+        </member>
+        <member name="M:Namotion.Reflection.Infrastructure.DynamicApis.DirectoryGetCurrentDirectory">
+            <summary>Gets the current working directory.</summary>
+            <returns>The directory path.</returns>
+            <exception cref="T:System.NotSupportedException">The System.IO.Directory API is not available on this platform.</exception>
+        </member>
+        <member name="M:Namotion.Reflection.Infrastructure.DynamicApis.FileExists(System.String)">
+            <summary>Checks whether a file exists.</summary>
+            <param name="filePath">The file path.</param>
+            <returns>true or false</returns>
+            <exception cref="T:System.NotSupportedException">The System.IO.File API is not available on this platform.</exception>
+        </member>
+        <member name="M:Namotion.Reflection.Infrastructure.DynamicApis.FileReadAllText(System.String)">
+            <summary>Read a file.</summary>
+            <param name="filePath">The file path.</param>
+            <returns>The file content.</returns>
+            <exception cref="T:System.NotSupportedException">The System.IO.File API is not available on this platform.</exception>
+        </member>
+        <member name="M:Namotion.Reflection.Infrastructure.DynamicApis.DirectoryExists(System.String)">
+            <summary>Checks whether a directory exists.</summary>
+            <param name="directoryPath">The directory path.</param>
+            <returns>true or false</returns>
+            <exception cref="T:System.NotSupportedException">The System.IO.File API is not available on this platform.</exception>
+        </member>
+        <member name="M:Namotion.Reflection.Infrastructure.DynamicApis.DirectoryGetAllFiles(System.String,System.String)">
+            <summary>Gets all files of directory.</summary>
+            <param name="path">The directory path.</param>
+            <param name="searchPattern">The search pattern.</param>
+            <returns>true or false</returns>
+            <exception cref="T:System.NotSupportedException">The System.IO.Directory API is not available on this platform.</exception>
+        </member>
+        <member name="M:Namotion.Reflection.Infrastructure.DynamicApis.PathCombine(System.String,System.String)">
+            <summary>Combines two paths.</summary>
+            <param name="path1">The path1.</param>
+            <param name="path2">The path2.</param>
+            <returns>The combined path.</returns>
+            <exception cref="T:System.NotSupportedException">The System.IO.Path API is not available on this platform.</exception>
+        </member>
+        <member name="M:Namotion.Reflection.Infrastructure.DynamicApis.PathGetDirectoryName(System.String)">
+            <summary>Gets the directory path of a file path.</summary>
+            <param name="filePath">The file path.</param>
+            <returns>The directory name.</returns>
+            <exception cref="T:System.NotSupportedException">The System.IO.Path API is not available on this platform.</exception>
+        </member>
+        <member name="M:Namotion.Reflection.Infrastructure.DynamicApis.XPathEvaluate(System.Xml.Linq.XDocument,System.String)">
+            <summary>Evaluates the XPath for a given XML document.</summary>
+            <param name="document">The document.</param>
+            <param name="path">The path.</param>
+            <returns>The value.</returns>
+            <exception cref="T:System.NotSupportedException">The System.Xml.XPath.Extensions API is not available on this platform.</exception>
+        </member>
+        <member name="T:Namotion.Reflection.ObjectExtensions">
+            <summary>
+            Object extensions.
+            </summary>
+        </member>
+        <member name="M:Namotion.Reflection.ObjectExtensions.HasProperty(System.Object,System.String)">
+            <summary>Determines whether the specified property name exists.</summary>
+            <param name="obj">The object.</param>
+            <param name="propertyName">Name of the property.</param>
+            <returns><c>true</c> if the property exists; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ObjectExtensions.TryGetPropertyValue``1(System.Object,System.String,``0)">
+            <summary>Determines whether the specified property name exists.</summary>
+            <param name="obj">The object.</param>
+            <param name="propertyName">Name of the property.</param>
+            <param name="defaultValue">The default value if the property does not exist.</param>
+            <returns>The property or the default value.</returns>
+        </member>
+        <member name="P:Namotion.Reflection.ObjectExtensions.DisableNullabilityValidation">
+            <summary>
+            Gets or sets a value indicating whether to disable nullability validation completely (global).
+            </summary>
+        </member>
+        <member name="M:Namotion.Reflection.ObjectExtensions.HasValidNullability(System.Object,System.Boolean)">
+            <summary>Checks whether the object has valid non nullable properties.</summary>
+            <param name="obj">The object.</param>
+            <param name="checkChildren">Specifies whether to also recursively check children.</param>
+            <returns>The result.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ObjectExtensions.EnsureValidNullability(System.Object,System.Boolean)">
+            <summary>Checks whether the object has valid non nullable properties.</summary>
+            <param name="obj">The object.</param>
+            <param name="checkChildren">Specifies whether to also recursively check children.</param>
+            <returns>The result.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.ObjectExtensions.ValidateNullability(System.Object,System.Boolean)">
+            <summary>Checks which non nullable properties are null (invalid).</summary>
+            <param name="obj">The object.</param>
+            <param name="checkChildren">Specifies whether to also recursively check children.</param>
+            <returns>The result.</returns>
+        </member>
+        <member name="T:Namotion.Reflection.CachingXDocument">
+            <summary>
+            Caching layer hiding the details of accessing DLL documentation.
+            </summary>
+        </member>
+        <member name="T:Namotion.Reflection.TypeExtensions">
+            <summary>Provides extension methods for reflection.</summary>
+        </member>
+        <member name="M:Namotion.Reflection.TypeExtensions.IsAssignableToTypeName(Namotion.Reflection.CachedType,System.String,Namotion.Reflection.TypeNameStyle)">
+            <summary>Checks whether the given type is assignable to the given type name.</summary>
+            <param name="type">The type.</param>
+            <param name="typeName">Name of the type.</param>
+            <param name="typeNameStyle">The type name style.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Namotion.Reflection.TypeExtensions.IsAssignableToTypeName(System.Type,System.String,Namotion.Reflection.TypeNameStyle)">
+            <summary>Checks whether the given type is assignable to the given type name.</summary>
+            <param name="type">The type.</param>
+            <param name="typeName">Name of the type.</param>
+            <param name="typeNameStyle">The type name style.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Namotion.Reflection.TypeExtensions.InheritsFromTypeName(System.Type,System.String,Namotion.Reflection.TypeNameStyle)">
+            <summary>Checks whether the given type inherits from the given type name.</summary>
+            <param name="type">The type.</param>
+            <param name="typeName">Name of the type.</param>
+            <param name="typeNameStyle">The type name style.</param>
+            <returns>true if the type inherits from typeName.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.TypeExtensions.GetEnumerableItemType(System.Type)">
+            <summary>Gets the type of the array item.</summary>
+        </member>
+        <member name="M:Namotion.Reflection.TypeExtensions.GetGenericTypeArgumentsOfTypeOrBaseTypes(System.Type)">
+            <summary>Gets the generic type arguments of a type or its base type.</summary>
+            <param name="type">The type.</param>
+            <returns>The type arguments.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.TypeExtensions.GetDisplayName(System.Type)">
+            <summary>Gets a human readable type name (e.g. DictionaryOfStringAndObject).</summary>
+            <param name="type">The type.</param>
+            <returns>The type name.</returns>
+        </member>
+        <member name="T:Namotion.Reflection.TypeNameStyle">
+            <summary>The type name style.</summary>
+        </member>
+        <member name="F:Namotion.Reflection.TypeNameStyle.Name">
+            <summary>Only the name of the type.</summary>
+        </member>
+        <member name="F:Namotion.Reflection.TypeNameStyle.FullName">
+            <summary>The full name of the type including the namespace.</summary>
+        </member>
+        <member name="T:Namotion.Reflection.XmlDocs">
+            <summary>Provides extension methods for reading XML comments from reflected members.</summary>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocs.ClearCache">
+            <summary>
+            Clears the cache.
+            </summary>
+        </member>
+        <member name="T:Namotion.Reflection.XmlDocsExtensions">
+            <summary>Provides extension methods for reading XML comments from reflected members.</summary>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsSummary(Namotion.Reflection.CachedType,System.Boolean)">
+            <summary>Returns the contents of the "summary" XML documentation tag for the specified member.</summary>
+            <param name="type">The type.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsRemarks(Namotion.Reflection.CachedType,System.Boolean)">
+            <summary>Returns the contents of the "remarks" XML documentation tag for the specified member.</summary>
+            <param name="type">The type.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsTag(Namotion.Reflection.CachedType,System.String,System.Boolean)">
+            <summary>Returns the contents of an XML documentation tag for the specified member.</summary>
+            <param name="type">The type.</param>
+            <param name="tagName">Name of the tag.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsSummary(Namotion.Reflection.ContextualMemberInfo,System.Boolean)">
+            <summary>Returns the contents of the "summary" XML documentation tag for the specified member.</summary>
+            <param name="member">The reflected member.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsRemarks(Namotion.Reflection.ContextualMemberInfo,System.Boolean)">
+            <summary>Returns the contents of the "remarks" XML documentation tag for the specified member.</summary>
+            <param name="member">The reflected member.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsTag(Namotion.Reflection.ContextualMemberInfo,System.String,System.Boolean)">
+            <summary>Returns the contents of an XML documentation tag for the specified member.</summary>
+            <param name="member">The reflected member.</param>
+            <param name="tagName">Name of the tag.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocs(Namotion.Reflection.ContextualParameterInfo,System.Boolean)">
+            <summary>Returns the contents of the "returns" or "param" XML documentation tag for the specified parameter.</summary>
+            <param name="parameter">The reflected parameter or return info.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "returns" or "param" tag.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsElement(Namotion.Reflection.ContextualMemberInfo,System.Boolean)">
+            <summary>Returns the contents of an XML documentation tag for the specified member.</summary>
+            <param name="member">The reflected member.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsSummary(System.Type,System.Boolean)">
+            <summary>Returns the contents of the "summary" XML documentation tag for the specified member.</summary>
+            <param name="type">The type.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsRemarks(System.Type,System.Boolean)">
+            <summary>Returns the contents of the "remarks" XML documentation tag for the specified member.</summary>
+            <param name="type">The type.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsTag(System.Type,System.String,System.Boolean)">
+            <summary>Returns the contents of an XML documentation tag for the specified member.</summary>
+            <param name="type">The type.</param>
+            <param name="tagName">Name of the tag.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsSummary(System.Reflection.MemberInfo,System.Boolean)">
+            <summary>Returns the contents of the "summary" XML documentation tag for the specified member.</summary>
+            <param name="member">The reflected member.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsRemarks(System.Reflection.MemberInfo,System.Boolean)">
+            <summary>Returns the contents of the "remarks" XML documentation tag for the specified member.</summary>
+            <param name="member">The reflected member.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsElement(System.Type,System.String,System.Boolean)">
+            <summary>Returns the contents of the "summary" XML documentation tag for the specified member.</summary>
+            <param name="type">The type.</param>
+            <param name="pathToXmlFile">The path to the XML documentation file.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsElement(System.Reflection.MemberInfo,System.Boolean)">
+            <summary>Returns the contents of an XML documentation tag for the specified member.</summary>
+            <param name="member">The reflected member.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsElement(System.Reflection.MemberInfo,System.String,System.Boolean)">
+            <summary>Returns the contents of the "summary" XML documentation tag for the specified member.</summary>
+            <param name="member">The reflected member.</param>
+            <param name="pathToXmlFile">The path to the XML documentation file.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsTag(System.Reflection.MemberInfo,System.String,System.Boolean)">
+            <summary>Returns the contents of an XML documentation tag for the specified member.</summary>
+            <param name="member">The reflected member.</param>
+            <param name="tagName">Name of the tag.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "summary" tag for the member.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsRecordPropertySummary(System.Reflection.PropertyInfo,System.Boolean)">
+            <summary>Returns the property summary of a Record type which is read from the param tag on the type.</summary>
+            <param name="member">The reflected member.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "param" tag of the Record property.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocs(System.Reflection.ParameterInfo,System.Boolean)">
+            <summary>Returns the contents of the "returns" or "param" XML documentation tag for the specified parameter.</summary>
+            <param name="parameter">The reflected parameter or return info.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "returns" or "param" tag.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsElement(System.Reflection.ParameterInfo,System.String,System.Boolean)">
+            <summary>Returns the contents of the "returns" or "param" XML documentation tag for the specified parameter.</summary>
+            <param name="parameter">The reflected parameter or return info.</param>
+            <param name="pathToXmlFile">The path to the XML documentation file.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether tho resolve the XML Docs from the NuGet cache or .NET SDK directory.</param>
+            <returns>The contents of the "returns" or "param" tag.</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.ToXmlDocsContent(System.Xml.Linq.XElement)">
+            <summary>Converts the given XML documentation <see cref="T:System.Xml.Linq.XElement"/> to text.</summary>
+            <param name="element">The XML element.</param>
+            <returns>The text</returns>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetMemberElementName(System.Object)">
+            <exception cref="T:System.ArgumentException">Unknown member type.</exception>
+        </member>
+        <member name="M:Namotion.Reflection.XmlDocsExtensions.GetXmlDocsPath(System.Object,System.Boolean)">
+            <summary>
+            Gets the file path to the XML docs for the given assembly.
+            </summary>
+            <param name="assembly">The assembly.</param>
+            <param name="resolveExternalXmlDocs">Specifies whether to resolve external XML docs.</param>
+            <returns>The file path or null if not found.</returns>
+        </member>
+        <member name="T:System.Collections.Concurrent.ConcurrentDictionary`2">
+            <summary>
+            Represents a thread-safe collection of keys and values.
+            </summary>
+            <typeparam name="TKey">The type of the keys in the dictionary.</typeparam>
+            <typeparam name="TValue">The type of the values in the dictionary.</typeparam>
+            <remarks>
+            All public and protected members of <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> are thread-safe and may be used
+            concurrently from multiple threads.
+            </remarks>
+        </member>
+        <member name="T:System.Collections.Concurrent.ConcurrentDictionary`2.Tables">
+             <summary>
+             Tables that hold the internal state of the ConcurrentDictionary
+            
+             Wrapping the three tables in a single object allows us to atomically
+             replace all tables at once.
+             </summary>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.IsValueWriteAtomic">
+            <summary>
+            Determines whether type TValue can be written atomically
+            </summary>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.#ctor">
+            <summary>
+            Initializes a new instance of the <see
+            cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>
+            class that is empty, has the default concurrency level, has the default initial capacity, and
+            uses the default comparer for the key type.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see
+            cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>
+            class that is empty, has the specified concurrency level and capacity, and uses the default
+            comparer for the key type.
+            </summary>
+            <param name="concurrencyLevel">The estimated number of threads that will update the
+            <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> concurrently.</param>
+            <param name="capacity">The initial number of elements that the <see
+            cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>
+            can contain.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="concurrencyLevel"/> is
+            less than 1.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"> <paramref name="capacity"/> is less than
+            0.</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.#ctor(System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{`0,`1}})">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>
+            class that contains elements copied from the specified <see
+            cref="T:System.Collections.IEnumerable{KeyValuePair{TKey,TValue}}"/>, has the default concurrency
+            level, has the default initial capacity, and uses the default comparer for the key type.
+            </summary>
+            <param name="collection">The <see
+            cref="T:System.Collections.IEnumerable{KeyValuePair{TKey,TValue}}"/> whose elements are copied to
+            the new
+            <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="collection"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="collection"/> contains one or more
+            duplicate keys.</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.#ctor(System.Collections.Generic.IEqualityComparer{`0})">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>
+            class that is empty, has the specified concurrency level and capacity, and uses the specified
+            <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>.
+            </summary>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>
+            implementation to use when comparing keys.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="comparer"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.#ctor(System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{`0,`1}},System.Collections.Generic.IEqualityComparer{`0})">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>
+            class that contains elements copied from the specified <see
+            cref="T:System.Collections.IEnumerable"/>, has the default concurrency level, has the default
+            initial capacity, and uses the specified
+            <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>.
+            </summary>
+            <param name="collection">The <see
+            cref="T:System.Collections.IEnumerable{KeyValuePair{TKey,TValue}}"/> whose elements are copied to
+            the new
+            <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.</param>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>
+            implementation to use when comparing keys.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="collection"/> is a null reference
+            (Nothing in Visual Basic). -or-
+            <paramref name="comparer"/> is a null reference (Nothing in Visual Basic).
+            </exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.#ctor(System.Int32,System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{`0,`1}},System.Collections.Generic.IEqualityComparer{`0})">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> 
+            class that contains elements copied from the specified <see cref="T:System.Collections.IEnumerable"/>, 
+            has the specified concurrency level, has the specified initial capacity, and uses the specified 
+            <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>.
+            </summary>
+            <param name="concurrencyLevel">The estimated number of threads that will update the 
+            <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> concurrently.</param>
+            <param name="collection">The <see cref="T:System.Collections.IEnumerable{KeyValuePair{TKey,TValue}}"/> whose elements are copied to the new 
+            <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.</param>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/> implementation to use 
+            when comparing keys.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="collection"/> is a null reference (Nothing in Visual Basic).
+            -or-
+            <paramref name="comparer"/> is a null reference (Nothing in Visual Basic).
+            </exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="concurrencyLevel"/> is less than 1.
+            </exception>
+            <exception cref="T:System.ArgumentException"><paramref name="collection"/> contains one or more duplicate keys.</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.#ctor(System.Int32,System.Int32,System.Collections.Generic.IEqualityComparer{`0})">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>
+            class that is empty, has the specified concurrency level, has the specified initial capacity, and
+            uses the specified <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>.
+            </summary>
+            <param name="concurrencyLevel">The estimated number of threads that will update the
+            <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> concurrently.</param>
+            <param name="capacity">The initial number of elements that the <see
+            cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>
+            can contain.</param>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IEqualityComparer{TKey}"/>
+            implementation to use when comparing keys.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="concurrencyLevel"/> is less than 1. -or-
+            <paramref name="capacity"/> is less than 0.
+            </exception>
+            <exception cref="T:System.ArgumentNullException"><paramref name="comparer"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.TryAdd(`0,`1)">
+            <summary>
+            Attempts to add the specified key and value to the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.
+            </summary>
+            <param name="key">The key of the element to add.</param>
+            <param name="value">The value of the element to add. The value can be a null reference (Nothing
+            in Visual Basic) for reference types.</param>
+            <returns>true if the key/value pair was added to the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>
+            successfully; otherwise, false.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.OverflowException">The <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>
+            contains too many elements.</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.ContainsKey(`0)">
+            <summary>
+            Determines whether the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> contains the specified
+            key.
+            </summary>
+            <param name="key">The key to locate in the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.</param>
+            <returns>true if the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> contains an element with
+            the specified key; otherwise, false.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.TryRemove(`0,`1@)">
+            <summary>
+            Attempts to remove and return the the value with the specified key from the
+            <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.
+            </summary>
+            <param name="key">The key of the element to remove and return.</param>
+            <param name="value">When this method returns, <paramref name="value"/> contains the object removed from the
+            <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> or the default value of <typeparamref
+            name="TValue"/>
+            if the operation failed.</param>
+            <returns>true if an object was removed successfully; otherwise, false.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.TryRemoveInternal(`0,`1@,System.Boolean,`1)">
+            <summary>
+            Removes the specified key from the dictionary if it exists and returns its associated value.
+            If matchValue flag is set, the key will be removed only if is associated with a particular
+            value.
+            </summary>
+            <param name="key">The key to search for and remove if it exists.</param>
+            <param name="value">The variable into which the removed value, if found, is stored.</param>
+            <param name="matchValue">Whether removal of the key is conditional on its value.</param>
+            <param name="oldValue">The conditional value to compare against if <paramref name="matchValue"/> is true</param>
+            <returns></returns>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.TryGetValue(`0,`1@)">
+            <summary>
+            Attempts to get the value associated with the specified key from the <see
+            cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.
+            </summary>
+            <param name="key">The key of the value to get.</param>
+            <param name="value">When this method returns, <paramref name="value"/> contains the object from
+            the
+            <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> with the specified key or the default value of
+            <typeparamref name="TValue"/>, if the operation failed.</param>
+            <returns>true if the key was found in the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>;
+            otherwise, false.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.TryUpdate(`0,`1,`1)">
+            <summary>
+            Compares the existing value for the specified key with a specified value, and if they're equal,
+            updates the key with a third value.
+            </summary>
+            <param name="key">The key whose value is compared with <paramref name="comparisonValue"/> and
+            possibly replaced.</param>
+            <param name="newValue">The value that replaces the value of the element with <paramref
+            name="key"/> if the comparison results in equality.</param>
+            <param name="comparisonValue">The value that is compared to the value of the element with
+            <paramref name="key"/>.</param>
+            <returns>true if the value with <paramref name="key"/> was equal to <paramref
+            name="comparisonValue"/> and replaced with <paramref name="newValue"/>; otherwise,
+            false.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null
+            reference.</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.Clear">
+            <summary>
+            Removes all keys and values from the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#Generic#ICollection{System#Collections#Generic#KeyValuePair{TKey,TValue}}#CopyTo(System.Collections.Generic.KeyValuePair{`0,`1}[],System.Int32)">
+            <summary>
+            Copies the elements of the <see cref="T:System.Collections.Generic.ICollection"/> to an array of
+            type <see cref="T:System.Collections.Generic.KeyValuePair{TKey,TValue}"/>, starting at the
+            specified array index.
+            </summary>
+            <param name="array">The one-dimensional array of type <see
+            cref="T:System.Collections.Generic.KeyValuePair{TKey,TValue}"/>
+            that is the destination of the <see
+            cref="T:System.Collections.Generic.KeyValuePair{TKey,TValue}"/> elements copied from the <see
+            cref="T:System.Collections.ICollection"/>. The array must have zero-based indexing.</param>
+            <param name="index">The zero-based index in <paramref name="array"/> at which copying
+            begins.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="array"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is less than
+            0.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="index"/> is equal to or greater than
+            the length of the <paramref name="array"/>. -or- The number of elements in the source <see
+            cref="T:System.Collections.ICollection"/>
+            is greater than the available space from <paramref name="index"/> to the end of the destination
+            <paramref name="array"/>.</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.ToArray">
+            <summary>
+            Copies the key and value pairs stored in the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> to a
+            new array.
+            </summary>
+            <returns>A new array containing a snapshot of key and value pairs copied from the <see
+            cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.</returns>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.CopyToPairs(System.Collections.Generic.KeyValuePair{`0,`1}[],System.Int32)">
+            <summary>
+            Copy dictionary contents to an array - shared implementation between ToArray and CopyTo.
+            
+            Important: the caller must hold all locks in m_locks before calling CopyToPairs.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.CopyToEntries(System.Collections.DictionaryEntry[],System.Int32)">
+            <summary>
+            Copy dictionary contents to an array - shared implementation between ToArray and CopyTo.
+            
+            Important: the caller must hold all locks in m_locks before calling CopyToEntries.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.CopyToObjects(System.Object[],System.Int32)">
+            <summary>
+            Copy dictionary contents to an array - shared implementation between ToArray and CopyTo.
+            
+            Important: the caller must hold all locks in m_locks before calling CopyToObjects.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.GetEnumerator">
+            <summary>Returns an enumerator that iterates through the <see
+            cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.</summary>
+            <returns>An enumerator for the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.</returns>
+            <remarks>
+            The enumerator returned from the dictionary is safe to use concurrently with
+            reads and writes to the dictionary, however it does not represent a moment-in-time snapshot
+            of the dictionary.  The contents exposed through the enumerator may contain modifications
+            made to the dictionary after <see cref="M:System.Collections.Concurrent.ConcurrentDictionary`2.GetEnumerator"/> was called.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.TryAddInternal(`0,`1,System.Boolean,System.Boolean,`1@)">
+            <summary>
+            Shared internal implementation for inserts and updates.
+            If key exists, we always return false; and if updateIfExists == true we force update with value;
+            If key doesn't exist, we always add value and return true;
+            </summary>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentDictionary`2.Item(`0)">
+            <summary>
+            Gets or sets the value associated with the specified key.
+            </summary>
+            <param name="key">The key of the value to get or set.</param>
+            <value>The value associated with the specified key. If the specified key is not found, a get
+            operation throws a
+            <see cref="T:Sytem.Collections.Generic.KeyNotFoundException"/>, and a set operation creates a new
+            element with the specified key.</value>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.Collections.Generic.KeyNotFoundException">The property is retrieved and
+            <paramref name="key"/>
+            does not exist in the collection.</exception>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentDictionary`2.Count">
+            <summary>
+            Gets the number of key/value pairs contained in the <see
+            cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.
+            </summary>
+            <exception cref="T:System.OverflowException">The dictionary contains too many
+            elements.</exception>
+            <value>The number of key/value paris contained in the <see
+            cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.</value>
+            <remarks>Count has snapshot semantics and represents the number of items in the <see
+            cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>
+            at the moment when Count was accessed.</remarks>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(`0,System.Func{`0,`1})">
+            <summary>
+            Adds a key/value pair to the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> 
+            if the key does not already exist.
+            </summary>
+            <param name="key">The key of the element to add.</param>
+            <param name="valueFactory">The function used to generate a value for the key</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.ArgumentNullException"><paramref name="valueFactory"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.OverflowException">The dictionary contains too many
+            elements.</exception>
+            <returns>The value for the key.  This will be either the existing value for the key if the
+            key is already in the dictionary, or the new value for the key as returned by valueFactory
+            if the key was not in the dictionary.</returns>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(`0,`1)">
+            <summary>
+            Adds a key/value pair to the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> 
+            if the key does not already exist.
+            </summary>
+            <param name="key">The key of the element to add.</param>
+            <param name="value">the value to be added, if the key does not already exist</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.OverflowException">The dictionary contains too many
+            elements.</exception>
+            <returns>The value for the key.  This will be either the existing value for the key if the 
+            key is already in the dictionary, or the new value if the key was not in the dictionary.</returns>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.AddOrUpdate(`0,System.Func{`0,`1},System.Func{`0,`1,`1})">
+            <summary>
+            Adds a key/value pair to the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> if the key does not already 
+            exist, or updates a key/value pair in the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> if the key 
+            already exists.
+            </summary>
+            <param name="key">The key to be added or whose value should be updated</param>
+            <param name="addValueFactory">The function used to generate a value for an absent key</param>
+            <param name="updateValueFactory">The function used to generate a new value for an existing key
+            based on the key's existing value</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.ArgumentNullException"><paramref name="addValueFactory"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.ArgumentNullException"><paramref name="updateValueFactory"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.OverflowException">The dictionary contains too many
+            elements.</exception>
+            <returns>The new value for the key.  This will be either be the result of addValueFactory (if the key was 
+            absent) or the result of updateValueFactory (if the key was present).</returns>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.AddOrUpdate(`0,`1,System.Func{`0,`1,`1})">
+            <summary>
+            Adds a key/value pair to the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> if the key does not already 
+            exist, or updates a key/value pair in the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> if the key 
+            already exists.
+            </summary>
+            <param name="key">The key to be added or whose value should be updated</param>
+            <param name="addValue">The value to be added for an absent key</param>
+            <param name="updateValueFactory">The function used to generate a new value for an existing key based on 
+            the key's existing value</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.ArgumentNullException"><paramref name="updateValueFactory"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.OverflowException">The dictionary contains too many
+            elements.</exception>
+            <returns>The new value for the key.  This will be either be the result of addValueFactory (if the key was 
+            absent) or the result of updateValueFactory (if the key was present).</returns>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentDictionary`2.IsEmpty">
+            <summary>
+            Gets a value that indicates whether the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> is empty.
+            </summary>
+            <value>true if the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/> is empty; otherwise,
+            false.</value>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#Generic#IDictionary{TKey,TValue}#Add(`0,`1)">
+            <summary>
+            Adds the specified key and value to the <see
+            cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.
+            </summary>
+            <param name="key">The object to use as the key of the element to add.</param>
+            <param name="value">The object to use as the value of the element to add.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.OverflowException">The dictionary contains too many
+            elements.</exception>
+            <exception cref="T:System.ArgumentException">
+            An element with the same key already exists in the <see
+            cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#Generic#IDictionary{TKey,TValue}#Remove(`0)">
+            <summary>
+            Removes the element with the specified key from the <see
+            cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.
+            </summary>
+            <param name="key">The key of the element to remove.</param>
+            <returns>true if the element is successfully remove; otherwise false. This method also returns
+            false if
+            <paramref name="key"/> was not found in the original <see
+            cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.
+            </returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentDictionary`2.Keys">
+            <summary>
+            Gets a collection containing the keys in the <see
+            cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.
+            </summary>
+            <value>An <see cref="T:System.Collections.Generic.ICollection{TKey}"/> containing the keys in the
+            <see cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.</value>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentDictionary`2.Values">
+            <summary>
+            Gets a collection containing the values in the <see
+            cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.
+            </summary>
+            <value>An <see cref="T:System.Collections.Generic.ICollection{TValue}"/> containing the values in
+            the
+            <see cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.</value>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#Generic#ICollection{System#Collections#Generic#KeyValuePair{TKey,TValue}}#Add(System.Collections.Generic.KeyValuePair{`0,`1})">
+            <summary>
+            Adds the specified value to the <see cref="T:System.Collections.Generic.ICollection{TValue}"/>
+            with the specified key.
+            </summary>
+            <param name="keyValuePair">The <see cref="T:System.Collections.Generic.KeyValuePair{TKey,TValue}"/>
+            structure representing the key and value to add to the <see
+            cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.</param>
+            <exception cref="T:System.ArgumentNullException">The <paramref name="keyValuePair"/> of <paramref
+            name="keyValuePair"/> is null.</exception>
+            <exception cref="T:System.OverflowException">The <see
+            cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>
+            contains too many elements.</exception>
+            <exception cref="T:System.ArgumentException">An element with the same key already exists in the
+            <see cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/></exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#Generic#ICollection{System#Collections#Generic#KeyValuePair{TKey,TValue}}#Contains(System.Collections.Generic.KeyValuePair{`0,`1})">
+            <summary>
+            Determines whether the <see cref="T:System.Collections.Generic.ICollection{TKey,TValue}"/>
+            contains a specific key and value.
+            </summary>
+            <param name="keyValuePair">The <see cref="T:System.Collections.Generic.KeyValuePair{TKey,TValue}"/>
+            structure to locate in the <see
+            cref="T:System.Collections.Generic.ICollection{TValue}"/>.</param>
+            <returns>true if the <paramref name="keyValuePair"/> is found in the <see
+            cref="T:System.Collections.Generic.ICollection{TKey,TValue}"/>; otherwise, false.</returns>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#Generic#ICollection{System#Collections#Generic#KeyValuePair{TKey,TValue}}#IsReadOnly">
+            <summary>
+            Gets a value indicating whether the dictionary is read-only.
+            </summary>
+            <value>true if the <see cref="T:System.Collections.Generic.ICollection{TKey,TValue}"/> is
+            read-only; otherwise, false. For <see
+            cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>, this property always returns
+            false.</value>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#Generic#ICollection{System#Collections#Generic#KeyValuePair{TKey,TValue}}#Remove(System.Collections.Generic.KeyValuePair{`0,`1})">
+            <summary>
+            Removes a key and value from the dictionary.
+            </summary>
+            <param name="keyValuePair">The <see
+            cref="T:System.Collections.Generic.KeyValuePair{TKey,TValue}"/>
+            structure representing the key and value to remove from the <see
+            cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.</param>
+            <returns>true if the key and value represented by <paramref name="keyValuePair"/> is successfully
+            found and removed; otherwise, false.</returns>
+            <exception cref="T:System.ArgumentNullException">The Key property of <paramref
+            name="keyValuePair"/> is a null reference (Nothing in Visual Basic).</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#IEnumerable#GetEnumerator">
+            <summary>Returns an enumerator that iterates through the <see
+            cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.</summary>
+            <returns>An enumerator for the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2"/>.</returns>
+            <remarks>
+            The enumerator returned from the dictionary is safe to use concurrently with
+            reads and writes to the dictionary, however it does not represent a moment-in-time snapshot
+            of the dictionary.  The contents exposed through the enumerator may contain modifications
+            made to the dictionary after <see cref="M:System.Collections.Concurrent.ConcurrentDictionary`2.GetEnumerator"/> was called.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#IDictionary#Add(System.Object,System.Object)">
+            <summary>
+            Adds the specified key and value to the dictionary.
+            </summary>
+            <param name="key">The object to use as the key.</param>
+            <param name="value">The object to use as the value.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.OverflowException">The dictionary contains too many
+            elements.</exception>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="key"/> is of a type that is not assignable to the key type <typeparamref
+            name="TKey"/> of the <see cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>. -or-
+            <paramref name="value"/> is of a type that is not assignable to <typeparamref name="TValue"/>,
+            the type of values in the <see cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.
+            -or- A value with the same key already exists in the <see
+            cref="T:System.Collections.Generic.Dictionary{TKey,TValue}"/>.
+            </exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#IDictionary#Contains(System.Object)">
+            <summary>
+            Gets whether the <see cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/> contains an
+            element with the specified key.
+            </summary>
+            <param name="key">The key to locate in the <see
+            cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.</param>
+            <returns>true if the <see cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/> contains
+            an element with the specified key; otherwise, false.</returns>
+            <exception cref="T:System.ArgumentNullException"> <paramref name="key"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#IDictionary#GetEnumerator">
+            <summary>Provides an <see cref="T:System.Collections.Generics.IDictionaryEnumerator"/> for the
+            <see cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.</summary>
+            <returns>An <see cref="T:System.Collections.Generics.IDictionaryEnumerator"/> for the <see
+            cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.</returns>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#IDictionary#IsFixedSize">
+            <summary>
+            Gets a value indicating whether the <see
+            cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/> has a fixed size.
+            </summary>
+            <value>true if the <see cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/> has a
+            fixed size; otherwise, false. For <see
+            cref="T:System.Collections.Generic.ConcurrentDictionary{TKey,TValue}"/>, this property always
+            returns false.</value>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#IDictionary#IsReadOnly">
+            <summary>
+            Gets a value indicating whether the <see
+            cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/> is read-only.
+            </summary>
+            <value>true if the <see cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/> is
+            read-only; otherwise, false. For <see
+            cref="T:System.Collections.Generic.ConcurrentDictionary{TKey,TValue}"/>, this property always
+            returns false.</value>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#IDictionary#Keys">
+            <summary>
+            Gets an <see cref="T:System.Collections.ICollection"/> containing the keys of the <see
+            cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.
+            </summary>
+            <value>An <see cref="T:System.Collections.ICollection"/> containing the keys of the <see
+            cref="T:System.Collections.Generic.IDictionary{TKey,TValue}"/>.</value>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#IDictionary#Remove(System.Object)">
+            <summary>
+            Removes the element with the specified key from the <see
+            cref="T:System.Collections.IDictionary"/>.
+            </summary>
+            <param name="key">The key of the element to remove.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#IDictionary#Values">
+            <summary>
+            Gets an <see cref="T:System.Collections.ICollection"/> containing the values in the <see
+            cref="T:System.Collections.IDictionary"/>.
+            </summary>
+            <value>An <see cref="T:System.Collections.ICollection"/> containing the values in the <see
+            cref="T:System.Collections.IDictionary"/>.</value>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#IDictionary#Item(System.Object)">
+            <summary>
+            Gets or sets the value associated with the specified key.
+            </summary>
+            <param name="key">The key of the value to get or set.</param>
+            <value>The value associated with the specified key, or a null reference (Nothing in Visual Basic)
+            if <paramref name="key"/> is not in the dictionary or <paramref name="key"/> is of a type that is
+            not assignable to the key type <typeparamref name="TKey"/> of the <see
+            cref="T:System.Collections.Generic.ConcurrentDictionary{TKey,TValue}"/>.</value>
+            <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.ArgumentException">
+            A value is being assigned, and <paramref name="key"/> is of a type that is not assignable to the
+            key type <typeparamref name="TKey"/> of the <see
+            cref="T:System.Collections.Generic.ConcurrentDictionary{TKey,TValue}"/>. -or- A value is being
+            assigned, and <paramref name="key"/> is of a type that is not assignable to the value type
+            <typeparamref name="TValue"/> of the <see
+            cref="T:System.Collections.Generic.ConcurrentDictionary{TKey,TValue}"/>
+            </exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#ICollection#CopyTo(System.Array,System.Int32)">
+            <summary>
+            Copies the elements of the <see cref="T:System.Collections.ICollection"/> to an array, starting
+            at the specified array index.
+            </summary>
+            <param name="array">The one-dimensional array that is the destination of the elements copied from
+            the <see cref="T:System.Collections.ICollection"/>. The array must have zero-based
+            indexing.</param>
+            <param name="index">The zero-based index in <paramref name="array"/> at which copying
+            begins.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="array"/> is a null reference
+            (Nothing in Visual Basic).</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is less than
+            0.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="index"/> is equal to or greater than
+            the length of the <paramref name="array"/>. -or- The number of elements in the source <see
+            cref="T:System.Collections.ICollection"/>
+            is greater than the available space from <paramref name="index"/> to the end of the destination
+            <paramref name="array"/>.</exception>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#ICollection#IsSynchronized">
+            <summary>
+            Gets a value indicating whether access to the <see cref="T:System.Collections.ICollection"/> is
+            synchronized with the SyncRoot.
+            </summary>
+            <value>true if access to the <see cref="T:System.Collections.ICollection"/> is synchronized
+            (thread safe); otherwise, false. For <see
+            cref="T:System.Collections.Concurrent.ConcurrentDictionary{TKey,TValue}"/>, this property always
+            returns false.</value>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentDictionary`2.System#Collections#ICollection#SyncRoot">
+            <summary>
+            Gets an object that can be used to synchronize access to the <see
+            cref="T:System.Collections.ICollection"/>. This property is not supported.
+            </summary>
+            <exception cref="T:System.NotSupportedException">The SyncRoot property is not supported.</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.GrowTable(System.Collections.Concurrent.ConcurrentDictionary{`0,`1}.Tables,System.Collections.Generic.IEqualityComparer{`0},System.Boolean,System.Int32)">
+            <summary>
+            Replaces the bucket table with a larger one. To prevent multiple threads from resizing the
+            table as a result of a race condition, the Tables instance that holds the table of buckets deemed too
+            small is passed in as an argument to GrowTable(). GrowTable() obtains a lock, and then checks
+            the Tables instance has been replaced in the meantime or not. 
+            The <paramref name="rehashCount"/> will be used to ensure that we don't do two subsequent resizes
+            because of a collision
+            </summary>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.GetBucketAndLockNo(System.Int32,System.Int32@,System.Int32@,System.Int32,System.Int32)">
+            <summary>
+            Computes the bucket and lock number for a particular key. 
+            </summary>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentDictionary`2.DefaultConcurrencyLevel">
+            <summary>
+            The number of concurrent writes for which to optimize by default.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.AcquireAllLocks(System.Int32@)">
+            <summary>
+            Acquires all locks for this hash table, and increments locksAcquired by the number
+            of locks that were successfully acquired. The locks are acquired in an increasing
+            order.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.AcquireLocks(System.Int32,System.Int32,System.Int32@)">
+            <summary>
+            Acquires a contiguous range of locks for this hash table, and increments locksAcquired
+            by the number of locks that were successfully acquired. The locks are acquired in an
+            increasing order.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.ReleaseLocks(System.Int32,System.Int32)">
+            <summary>
+            Releases a contiguous range of locks.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.GetKeys">
+            <summary>
+            Gets a collection containing the keys in the dictionary.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.GetValues">
+            <summary>
+            Gets a collection containing the values in the dictionary.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.Assert(System.Boolean)">
+            <summary>
+            A helper method for asserts.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Concurrent.ConcurrentDictionary`2.Node">
+            <summary>
+            A node in a singly-linked list representing a particular hash table bucket.
+            </summary>
+        </member>
+        <member name="T:System.Collections.Concurrent.ConcurrentDictionary`2.DictionaryEnumerator">
+            <summary>
+            A private class to represent enumeration over the dictionary that implements the 
+            IDictionaryEnumerator interface.
+            </summary>
+        </member>
+    </members>
+</doc>

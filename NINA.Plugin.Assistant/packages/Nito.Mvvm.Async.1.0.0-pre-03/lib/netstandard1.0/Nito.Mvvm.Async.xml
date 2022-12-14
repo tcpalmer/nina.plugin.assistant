@@ -1,0 +1,461 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Nito.Mvvm.Async</name>
+    </assembly>
+    <members>
+        <member name="T:Nito.Mvvm.AsyncCommand">
+            <summary>
+            A basic asynchronous command, which (by default) is disabled while the command is executing.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.AsyncCommand._executeAsync">
+            <summary>
+            The implementation of <see cref="M:Nito.Mvvm.IAsyncCommand.ExecuteAsync(System.Object)"/>.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.AsyncCommand.#ctor(System.Func{System.Object,System.Threading.Tasks.Task},System.Func{System.Object,Nito.Mvvm.ICanExecuteChanged})">
+            <summary>
+            Creates a new asynchronous command, with the specified asynchronous delegate as its implementation.
+            </summary>
+            <param name="executeAsync">The implementation of <see cref="M:Nito.Mvvm.IAsyncCommand.ExecuteAsync(System.Object)"/>.</param>
+            <param name="canExecuteChangedFactory">The factory for the implementation of <see cref="E:System.Windows.Input.ICommand.CanExecuteChanged"/>.</param>
+        </member>
+        <member name="M:Nito.Mvvm.AsyncCommand.#ctor(System.Func{System.Object,System.Threading.Tasks.Task})">
+            <summary>
+            Creates a new asynchronous command, with the specified asynchronous delegate as its implementation.
+            </summary>
+            <param name="executeAsync">The implementation of <see cref="M:Nito.Mvvm.IAsyncCommand.ExecuteAsync(System.Object)"/>.</param>
+        </member>
+        <member name="M:Nito.Mvvm.AsyncCommand.#ctor(System.Func{System.Threading.Tasks.Task},System.Func{System.Object,Nito.Mvvm.ICanExecuteChanged})">
+            <summary>
+            Creates a new asynchronous command, with the specified asynchronous delegate as its implementation.
+            </summary>
+            <param name="executeAsync">The implementation of <see cref="M:Nito.Mvvm.IAsyncCommand.ExecuteAsync(System.Object)"/>.</param>
+            <param name="canExecuteChangedFactory">The factory for the implementation of <see cref="E:System.Windows.Input.ICommand.CanExecuteChanged"/>.</param>
+        </member>
+        <member name="M:Nito.Mvvm.AsyncCommand.#ctor(System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            Creates a new asynchronous command, with the specified asynchronous delegate as its implementation.
+            </summary>
+            <param name="executeAsync">The implementation of <see cref="M:Nito.Mvvm.IAsyncCommand.ExecuteAsync(System.Object)"/>.</param>
+        </member>
+        <member name="P:Nito.Mvvm.AsyncCommand.Execution">
+            <summary>
+            Represents the most recent execution of the asynchronous command. Returns <c>null</c> until the first execution of this command.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.AsyncCommand.IsExecuting">
+            <summary>
+            Whether the asynchronous command is currently executing.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.AsyncCommand.ExecuteAsync(System.Object)">
+            <summary>
+            Executes the asynchronous command.
+            </summary>
+            <param name="parameter">The parameter for the command.</param>
+        </member>
+        <member name="E:Nito.Mvvm.AsyncCommand.PropertyChanged">
+            <summary>
+            Raised when any properties on this instance have changed.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.AsyncCommand.CanExecute(System.Object)">
+            <summary>
+            The implementation of <see cref="M:System.Windows.Input.ICommand.CanExecute(System.Object)"/>. Returns <c>false</c> whenever the async command is in progress.
+            </summary>
+            <param name="parameter">The parameter for the command.</param>
+        </member>
+        <member name="T:Nito.Mvvm.AsyncCommandBase">
+            <summary>
+            An async command that implements <see cref="T:System.Windows.Input.ICommand"/>, forwarding <see cref="M:System.Windows.Input.ICommand.Execute(System.Object)"/> to <see cref="M:Nito.Mvvm.IAsyncCommand.ExecuteAsync(System.Object)"/>.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.AsyncCommandBase._canExecuteChanged">
+            <summary>
+            The local implementation of <see cref="E:System.Windows.Input.ICommand.CanExecuteChanged"/>.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.AsyncCommandBase.#ctor(System.Func{System.Object,Nito.Mvvm.ICanExecuteChanged})">
+            <summary>
+            Creates an instance with its own implementation of <see cref="E:System.Windows.Input.ICommand.CanExecuteChanged"/>.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.AsyncCommandBase.ExecuteAsync(System.Object)">
+            <summary>
+            Executes the command asynchronously.
+            </summary>
+            <param name="parameter">The parameter for the command.</param>
+        </member>
+        <member name="M:Nito.Mvvm.AsyncCommandBase.CanExecute(System.Object)">
+            <summary>
+            The implementation of <see cref="M:System.Windows.Input.ICommand.CanExecute(System.Object)"/>.
+            </summary>
+            <param name="parameter">The parameter for the command.</param>
+        </member>
+        <member name="M:Nito.Mvvm.AsyncCommandBase.OnCanExecuteChanged">
+            <summary>
+            Raises <see cref="E:System.Windows.Input.ICommand.CanExecuteChanged"/>.
+            </summary>
+        </member>
+        <member name="T:Nito.Mvvm.CancelCommand">
+            <summary>
+            A command that cancels a <see cref="T:System.Threading.CancellationToken"/> when it is executed. "Operations" may be started for this command. This command is canceled whenever there are no operations.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.CancelCommand._canExecuteChanged">
+            <summary>
+            The implementation of <see cref="E:System.Windows.Input.ICommand.CanExecuteChanged"/>.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.CancelCommand._context">
+            <summary>
+            The cancellation token source currently controlled by this command. This is <c>null</c> when the current context has been cancelled.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.CancelCommand.#ctor(System.Func{System.Object,Nito.Mvvm.ICanExecuteChanged})">
+            <summary>
+            Creates a new cancel command.
+            </summary>
+            <param name="canExecuteChangedFactory">The factory for the implementation of <see cref="E:System.Windows.Input.ICommand.CanExecuteChanged"/>.</param>
+        </member>
+        <member name="M:Nito.Mvvm.CancelCommand.#ctor">
+            <summary>
+            Creates a new cancel command.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.CancelCommand.Notify(Nito.Mvvm.CancelCommand.RefCountedCancellationTokenSource)">
+            <summary>
+            Called when the context has been cancelled.
+            </summary>
+            <param name="context">The context.</param>
+        </member>
+        <member name="M:Nito.Mvvm.CancelCommand.Cancel">
+            <summary>
+            Cancels any current context.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.CancelCommand.WrapCancel(System.Func{System.Object,System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <summary>
+            Wraps a delegate so it cancels this cancel command and then registers with it. The delegate is passed the <see cref="T:System.Threading.CancellationToken"/> of this cancel command. Any <see cref="T:System.OperationCanceledException"/> exceptions raised by the delegate are silently ignored.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.CancelCommand.WrapCancel(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <summary>
+            Wraps a delegate so it cancels this cancel command and then registers with it. The delegate is passed the <see cref="T:System.Threading.CancellationToken"/> of this cancel command. Any <see cref="T:System.OperationCanceledException"/> exceptions raised by the delegate are silently ignored.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.CancelCommand.Wrap(System.Func{System.Object,System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <summary>
+            Wraps a delegate so that it registers with this cancel command. The delegate is passed the <see cref="T:System.Threading.CancellationToken"/> of this cancel command. Any <see cref="T:System.OperationCanceledException"/> exceptions raised by the delegate are silently ignored.
+            </summary>
+            <param name="executeAsync">The cancelable delegate.</param>
+        </member>
+        <member name="M:Nito.Mvvm.CancelCommand.Wrap(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task})">
+            <summary>
+            Wraps a delegate so that it registers with this cancel command. The delegate is passed the <see cref="T:System.Threading.CancellationToken"/> of this cancel command. Any <see cref="T:System.OperationCanceledException"/> exceptions raised by the delegate are silently ignored.
+            </summary>
+            <param name="executeAsync">The cancelable delegate.</param>
+        </member>
+        <member name="F:Nito.Mvvm.CancelCommand.RefCountedCancellationTokenSource._parent">
+            <summary>
+            The parent <see cref="T:Nito.Mvvm.CancelCommand"/>.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.CancelCommand.RefCountedCancellationTokenSource._cts">
+            <summary>
+            The cancellation token source.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.CancelCommand.RefCountedCancellationTokenSource._count">
+            <summary>
+            The number of current operations. If this is <c>0</c>, then the cts is canceled.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.CancelCommand.RefCountedCancellationTokenSource.Signal">
+            <summary>
+            Decrements the count, and cancels the command if the new count is <c>0</c>.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.CancelCommand.RefCountedCancellationTokenSource.StartOperation">
+            <summary>
+            Associates an operation with the cts. The operation is disassociated when disposed.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.CancelCommand.RefCountedCancellationTokenSource.Cancel">
+            <summary>
+            Cancels the command immediately.
+            </summary>
+        </member>
+        <member name="T:Nito.Mvvm.CustomAsyncCommand">
+            <summary>
+            An asynchronous command where the user determines when it can execute.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.CustomAsyncCommand._executeAsync">
+            <summary>
+            The implementation of <see cref="M:Nito.Mvvm.IAsyncCommand.ExecuteAsync(System.Object)"/>.
+            </summary>
+        </member>
+        <member name="F:Nito.Mvvm.CustomAsyncCommand._canExecute">
+            <summary>
+            The implementation of <see cref="M:System.Windows.Input.ICommand.CanExecute(System.Object)"/>.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.CustomAsyncCommand.#ctor(System.Func{System.Object,System.Threading.Tasks.Task},System.Func{System.Object,System.Boolean},System.Func{System.Object,Nito.Mvvm.ICanExecuteChanged})">
+            <summary>
+            Creates a new asynchronous command, with the specified asynchronous delegate as its implementation.
+            </summary>
+            <param name="executeAsync">The implementation of <see cref="M:Nito.Mvvm.IAsyncCommand.ExecuteAsync(System.Object)"/>.</param>
+            <param name="canExecute">The implementation of <see cref="M:System.Windows.Input.ICommand.CanExecute(System.Object)"/>.</param>
+            <param name="canExecuteChangedFactory">The factory for the implementation of <see cref="E:System.Windows.Input.ICommand.CanExecuteChanged"/>.</param>
+        </member>
+        <member name="M:Nito.Mvvm.CustomAsyncCommand.#ctor(System.Func{System.Object,System.Threading.Tasks.Task},System.Func{System.Object,System.Boolean})">
+            <summary>
+            Creates a new asynchronous command, with the specified asynchronous delegate as its implementation.
+            </summary>
+            <param name="executeAsync">The implementation of <see cref="M:Nito.Mvvm.IAsyncCommand.ExecuteAsync(System.Object)"/>.</param>
+            <param name="canExecute">The implementation of <see cref="M:System.Windows.Input.ICommand.CanExecute(System.Object)"/>.</param>
+        </member>
+        <member name="M:Nito.Mvvm.CustomAsyncCommand.#ctor(System.Func{System.Threading.Tasks.Task},System.Func{System.Boolean},System.Func{System.Object,Nito.Mvvm.ICanExecuteChanged})">
+            <summary>
+            Creates a new asynchronous command, with the specified asynchronous delegate as its implementation.
+            </summary>
+            <param name="executeAsync">The implementation of <see cref="M:Nito.Mvvm.IAsyncCommand.ExecuteAsync(System.Object)"/>.</param>
+            <param name="canExecute">The implementation of <see cref="M:System.Windows.Input.ICommand.CanExecute(System.Object)"/>.</param>
+            <param name="canExecuteChangedFactory">The factory for the implementation of <see cref="E:System.Windows.Input.ICommand.CanExecuteChanged"/>.</param>
+        </member>
+        <member name="M:Nito.Mvvm.CustomAsyncCommand.#ctor(System.Func{System.Threading.Tasks.Task},System.Func{System.Boolean})">
+            <summary>
+            Creates a new asynchronous command, with the specified asynchronous delegate as its implementation.
+            </summary>
+            <param name="executeAsync">The implementation of <see cref="M:Nito.Mvvm.IAsyncCommand.ExecuteAsync(System.Object)"/>.</param>
+            <param name="canExecute">The implementation of <see cref="M:System.Windows.Input.ICommand.CanExecute(System.Object)"/>.</param>
+        </member>
+        <member name="P:Nito.Mvvm.CustomAsyncCommand.Execution">
+            <summary>
+            Represents the most recent execution of the asynchronous command. Returns <c>null</c> until the first execution of this command.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.CustomAsyncCommand.IsExecuting">
+            <summary>
+            Whether the asynchronous command is currently executing.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.CustomAsyncCommand.ExecuteAsync(System.Object)">
+            <summary>
+            Executes the asynchronous command. Any exceptions from the asynchronous delegate are captured and placed on <see cref="P:Nito.Mvvm.CustomAsyncCommand.Execution"/>; they are not propagated to the UI loop.
+            </summary>
+            <param name="parameter">The parameter for the command.</param>
+        </member>
+        <member name="E:Nito.Mvvm.CustomAsyncCommand.PropertyChanged">
+            <summary>
+            Raised when any properties on this instance have changed.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.CustomAsyncCommand.CanExecute(System.Object)">
+            <summary>
+            The implementation of <see cref="M:System.Windows.Input.ICommand.CanExecute(System.Object)"/>. Invokes the <c>canExecute</c> delegate that was passed to the constructor.
+            </summary>
+            <param name="parameter">The parameter for the command.</param>
+        </member>
+        <member name="M:Nito.Mvvm.CustomAsyncCommand.OnCanExecuteChanged">
+            <summary>
+            Raises <see cref="E:System.Windows.Input.ICommand.CanExecuteChanged"/>.
+            </summary>
+        </member>
+        <member name="T:Nito.Mvvm.IAsyncCommand">
+            <summary>
+            An async version of <see cref="T:System.Windows.Input.ICommand"/>.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.IAsyncCommand.ExecuteAsync(System.Object)">
+            <summary>
+            Executes the asynchronous command.
+            </summary>
+            <param name="parameter">The parameter for the command.</param>
+        </member>
+        <member name="T:Nito.Mvvm.NotifyTask">
+            <summary>
+            Watches a task and raises property-changed notifications when the task completes.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.NotifyTask.#ctor(System.Threading.Tasks.Task)">
+            <summary>
+            Initializes a task notifier watching the specified task.
+            </summary>
+            <param name="task">The task to watch.</param>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask.Task">
+            <summary>
+            Gets the task being watched. This property never changes and is never <c>null</c>.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask.TaskCompleted">
+            <summary>
+            Gets a task that completes successfully when <see cref="P:Nito.Mvvm.NotifyTask.Task"/> completes (successfully, faulted, or canceled). This property never changes and is never <c>null</c>.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask.Status">
+            <summary>
+            Gets the current task status. This property raises a notification when the task completes.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask.IsCompleted">
+            <summary>
+            Gets whether the task has completed. This property raises a notification when the value changes to <c>true</c>.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask.IsNotCompleted">
+            <summary>
+            Gets whether the task is busy (not completed). This property raises a notification when the value changes to <c>false</c>.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask.IsSuccessfullyCompleted">
+            <summary>
+            Gets whether the task has completed successfully. This property raises a notification when the value changes to <c>true</c>.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask.IsCanceled">
+            <summary>
+            Gets whether the task has been canceled. This property raises a notification only if the task is canceled (i.e., if the value changes to <c>true</c>).
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask.IsFaulted">
+            <summary>
+            Gets whether the task has faulted. This property raises a notification only if the task faults (i.e., if the value changes to <c>true</c>).
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask.Exception">
+            <summary>
+            Gets the wrapped faulting exception for the task. Returns <c>null</c> if the task is not faulted. This property raises a notification only if the task faults (i.e., if the value changes to non-<c>null</c>).
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask.InnerException">
+            <summary>
+            Gets the original faulting exception for the task. Returns <c>null</c> if the task is not faulted. This property raises a notification only if the task faults (i.e., if the value changes to non-<c>null</c>).
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask.ErrorMessage">
+            <summary>
+            Gets the error message for the original faulting exception for the task. Returns <c>null</c> if the task is not faulted. This property raises a notification only if the task faults (i.e., if the value changes to non-<c>null</c>).
+            </summary>
+        </member>
+        <member name="E:Nito.Mvvm.NotifyTask.PropertyChanged">
+            <summary>
+            Event that notifies listeners of property value changes.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.NotifyTask.Create(System.Threading.Tasks.Task)">
+            <summary>
+            Creates a new task notifier watching the specified task.
+            </summary>
+            <param name="task">The task to watch.</param>
+        </member>
+        <member name="M:Nito.Mvvm.NotifyTask.Create``1(System.Threading.Tasks.Task{``0},``0)">
+            <summary>
+            Creates a new task notifier watching the specified task.
+            </summary>
+            <typeparam name="TResult">The type of the task result.</typeparam>
+            <param name="task">The task to watch.</param>
+            <param name="defaultResult">The default "result" value for the task while it is not yet complete.</param>
+        </member>
+        <member name="M:Nito.Mvvm.NotifyTask.Create(System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            Executes the specified asynchronous code and creates a new task notifier watching the returned task.
+            </summary>
+            <param name="asyncAction">The asynchronous code to execute.</param>
+        </member>
+        <member name="M:Nito.Mvvm.NotifyTask.Create``1(System.Func{System.Threading.Tasks.Task{``0}},``0)">
+            <summary>
+            Executes the specified asynchronous code and creates a new task notifier watching the returned task.
+            </summary>
+            <param name="asyncAction">The asynchronous code to execute.</param>
+            <param name="defaultResult">The default "result" value for the task while it is not yet complete.</param>
+        </member>
+        <member name="T:Nito.Mvvm.NotifyTask`1">
+            <summary>
+            Watches a task and raises property-changed notifications when the task completes.
+            </summary>
+            <typeparam name="TResult">The type of the task result.</typeparam>
+        </member>
+        <member name="F:Nito.Mvvm.NotifyTask`1._defaultResult">
+            <summary>
+            The "result" of the task when it has not yet completed.
+            </summary>
+        </member>
+        <member name="M:Nito.Mvvm.NotifyTask`1.#ctor(System.Threading.Tasks.Task{`0},`0)">
+            <summary>
+            Initializes a task notifier watching the specified task.
+            </summary>
+            <param name="task">The task to watch.</param>
+            <param name="defaultResult">The value to return from <see cref="P:Nito.Mvvm.NotifyTask`1.Result"/> while the task is not yet complete.</param>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask`1.Task">
+            <summary>
+            Gets the task being watched. This property never changes and is never <c>null</c>.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask`1.TaskCompleted">
+            <summary>
+            Gets a task that completes successfully when <see cref="P:Nito.Mvvm.NotifyTask`1.Task"/> completes (successfully, faulted, or canceled). This property never changes and is never <c>null</c>.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask`1.Result">
+            <summary>
+            Gets the result of the task. Returns the "default result" value specified in the constructor if the task has not yet completed successfully. This property raises a notification when the task completes successfully.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask`1.Status">
+            <summary>
+            Gets the current task status. This property raises a notification when the task completes.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask`1.IsCompleted">
+            <summary>
+            Gets whether the task has completed. This property raises a notification when the value changes to <c>true</c>.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask`1.IsNotCompleted">
+            <summary>
+            Gets whether the task is busy (not completed). This property raises a notification when the value changes to <c>false</c>.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask`1.IsSuccessfullyCompleted">
+            <summary>
+            Gets whether the task has completed successfully. This property raises a notification when the value changes to <c>true</c>.
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask`1.IsCanceled">
+            <summary>
+            Gets whether the task has been canceled. This property raises a notification only if the task is canceled (i.e., if the value changes to <c>true</c>).
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask`1.IsFaulted">
+            <summary>
+            Gets whether the task has faulted. This property raises a notification only if the task faults (i.e., if the value changes to <c>true</c>).
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask`1.Exception">
+            <summary>
+            Gets the wrapped faulting exception for the task. Returns <c>null</c> if the task is not faulted. This property raises a notification only if the task faults (i.e., if the value changes to non-<c>null</c>).
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask`1.InnerException">
+            <summary>
+            Gets the original faulting exception for the task. Returns <c>null</c> if the task is not faulted. This property raises a notification only if the task faults (i.e., if the value changes to non-<c>null</c>).
+            </summary>
+        </member>
+        <member name="P:Nito.Mvvm.NotifyTask`1.ErrorMessage">
+            <summary>
+            Gets the error message for the original faulting exception for the task. Returns <c>null</c> if the task is not faulted. This property raises a notification only if the task faults (i.e., if the value changes to non-<c>null</c>).
+            </summary>
+        </member>
+        <member name="E:Nito.Mvvm.NotifyTask`1.PropertyChanged">
+            <summary>
+            Event that notifies listeners of property value changes.
+            </summary>
+        </member>
+    </members>
+</doc>
