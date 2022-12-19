@@ -265,6 +265,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assistant.cs" />
+    <Compile Include="Database\AssistantDatabaseInteraction.cs" />
+    <Compile Include="Database\AssistantDbContext.cs" />
+    <Compile Include="Database\Schema\ExposurePlan.cs" />
+    <Compile Include="Database\Schema\Preferences.cs" />
+    <Compile Include="Database\Schema\Project.cs" />
+    <Compile Include="Database\Schema\Target.cs" />
     <Compile Include="Options.xaml.cs">
       <DependentUpon>Options.xaml</DependentUpon>
     </Compile>
@@ -273,6 +279,10 @@
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Sequencer\AssistantInstruction.cs" />
+    <Compile Include="Sequencer\AssistantInstructionTemplate.xaml.cs">
+      <DependentUpon>AssistantInstructionTemplate.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -288,8 +298,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Sequencer\AssistantInstructionTemplate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Database\Initial\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Accord.3.8.0\build\Accord.targets" Condition="Exists('..\packages\Accord.3.8.0\build\Accord.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
