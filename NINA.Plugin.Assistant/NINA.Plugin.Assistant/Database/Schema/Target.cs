@@ -34,16 +34,4 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
     }
 
-    /*
-    internal class TargetConfiguration : EntityTypeConfiguration<Target> {
-
-        public TargetConfiguration() {
-            ToTable("dbo.target");
-            HasKey(x => x.id);
-            Property(x => x.name).HasColumnName("name").IsRequired();
-            Property(x => x.ra).HasColumnName("ra").IsRequired();
-            Property(x => x.dec).HasColumnName("dec").IsRequired();
-        }
-
-    }*/
 }

@@ -33,6 +33,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     Project p = new Project();
                     p.name = "M 42";
                     p.description = "first project";
+                    p.profileId = Guid.NewGuid().ToString();
 
                     Target t = new Target();
                     t.name = "M 42: Frame 1";
@@ -67,11 +68,19 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t.exposureplans.Add(ep2);
 
                     context.ProjectSet.Add(p);
+
+                    AssistantPreferences ap = new AssistantPreferences();
+                    ap.MoonAvoidanceEnabled = true;
+                    ap.MoonAvoidanceSeparation = 55;
+                    ap.MoonAvoidanceWidth = 7;
+                    context.PreferencePlanSet.Add(new Preference(ap));
+
                     context.SaveChanges();
 
                     /*
                      * Needed queries:
                      *    - all projects (no relations) sorted by name, optionally filtering on state
+                     *      - for profileId only?
                      *      - active only
                      *      - all except state=CLOSED
                      *      - ...
@@ -97,6 +106,11 @@ namespace NINA.Plugin.Assistant.Test.Database {
                             }
                         }
                     }
+
+                    //List<Preference> preferences = context.PreferencePlanSet.ToList();
+                    //foreach (Preference preference in preferences) {
+                    //TestContext.WriteLine($"pref: {preference.preferenceType.Name} {preference.valuePersist}");
+                    //}
 
                 }
                 catch (DbEntityValidationException e) {

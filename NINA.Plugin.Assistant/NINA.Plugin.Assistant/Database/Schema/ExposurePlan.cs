@@ -41,16 +41,4 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
     }
 
-    /*
-    internal class ExposurePlanConfiguration : EntityTypeConfiguration<ExposurePlan> {
-
-        public ExposurePlanConfiguration() {
-            ToTable("dbo.exposureplan");
-            HasKey(x => x.id);
-            Property(x => x.filtername).HasColumnName("filtername").IsRequired();
-            Property(x => x.filterpos).HasColumnName("filterpos").IsRequired();
-            Property(x => x.exposure).HasColumnName("exposure").IsRequired();
-        }
-
-    }*/
 }

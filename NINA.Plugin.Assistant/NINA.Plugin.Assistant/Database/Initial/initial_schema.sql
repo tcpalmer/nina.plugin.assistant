@@ -1,6 +1,14 @@
 ﻿/* */
+CREATE TABLE IF NOT EXISTS `preference` (
+    `id`			INTEGER NOT NULL,
+    `profileId`		INTEGER,
+    `filterName`	TEXT,
+    `json`			TEXT NOT NULL,
+    PRIMARY KEY(`id`)
+);
 CREATE TABLE IF NOT EXISTS `project` (
 	`id`			INTEGER NOT NULL,
+	`profileId`		INTEGER,
 	`name`			TEXT NOT NULL,
 	`description`	TEXT,
 	`state`			INTEGER,

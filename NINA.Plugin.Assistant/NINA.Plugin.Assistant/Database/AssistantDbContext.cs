@@ -14,7 +14,7 @@ namespace Assistant.NINAPlugin.Database {
         public DbSet<Project> ProjectSet { get; set; }
         public DbSet<Target> TargetSet { get; set; }
         public DbSet<ExposurePlan> ExposurePlanSet { get; set; }
-        public DbSet<Preferences> PreferencesPlanSet { get; set; }
+        public DbSet<Preference> PreferencePlanSet { get; set; }
 
         public AssistantDbContext(string connectionString) : base(new SQLiteConnection() { ConnectionString = connectionString }, true) {
             Configuration.LazyLoadingEnabled = false;

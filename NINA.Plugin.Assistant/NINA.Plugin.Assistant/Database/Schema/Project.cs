@@ -11,6 +11,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public const int STATE_INACTIVE = 2;
         public const int STATE_CLOSED = 3;
 
+        // TODO: maybe store NINA profile ID active when this was created?
+
         [Key]
         public int id { get; set; }
 
@@ -24,6 +26,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         [Required]
         public int priority { get; set; }
+
+        public string profileId { get; set; }
 
         public long createdate { get; set; }
         public long? activedate { get; set; }
@@ -40,16 +44,4 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
     }
 
-    /*
-    internal class ProjectConfiguration : EntityTypeConfiguration<Project> {
-
-        public ProjectConfiguration() {
-            ToTable("dbo.project");
-            HasKey(x => x.id);
-            Property(x => x.name).HasColumnName("name").IsRequired();
-            Property(x => x.state).HasColumnName("state").IsRequired();
-            Property(x => x.createdate).HasColumnName("createdate").IsRequired();
-        }
-
-    }*/
 }

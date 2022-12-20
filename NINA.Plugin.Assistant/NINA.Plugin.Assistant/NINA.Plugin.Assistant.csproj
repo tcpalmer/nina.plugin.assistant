@@ -267,8 +267,9 @@
     <Compile Include="Assistant.cs" />
     <Compile Include="Database\AssistantDatabaseInteraction.cs" />
     <Compile Include="Database\AssistantDbContext.cs" />
+    <Compile Include="Database\Schema\AssistantPreferences.cs" />
     <Compile Include="Database\Schema\ExposurePlan.cs" />
-    <Compile Include="Database\Schema\Preferences.cs" />
+    <Compile Include="Database\Schema\Preference.cs" />
     <Compile Include="Database\Schema\Project.cs" />
     <Compile Include="Database\Schema\Target.cs" />
     <Compile Include="Options.xaml.cs">
