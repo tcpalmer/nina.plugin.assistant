@@ -73,7 +73,16 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     ap.MoonAvoidanceEnabled = true;
                     ap.MoonAvoidanceSeparation = 55;
                     ap.MoonAvoidanceWidth = 7;
-                    context.PreferencePlanSet.Add(new Preference(ap));
+                    Preference pref = new Preference(Guid.NewGuid().ToString(), ap);
+                    context.PreferencePlanSet.Add(pref);
+
+                    // TODO: this isn't enforcing a unique constraint - should blow up
+
+                    ap = new AssistantPreferences();
+                    ap.MeridianWindowEnabled = true;
+                    ap.MeridianWindowMinutes = 60;
+                    pref = new Preference(Guid.NewGuid().ToString(), ap);
+                    context.PreferencePlanSet.Add(pref);
 
                     context.SaveChanges();
 
@@ -107,10 +116,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
                         }
                     }
 
-                    //List<Preference> preferences = context.PreferencePlanSet.ToList();
-                    //foreach (Preference preference in preferences) {
-                    //TestContext.WriteLine($"pref: {preference.preferenceType.Name} {preference.valuePersist}");
-                    //}
+                    List<Preference> preferences = context.PreferencePlanSet.ToList();
+                    foreach (Preference preference in preferences) {
+                        TestContext.WriteLine($"pref:\n{preference.preferences}");
+                    }
 
                 }
                 catch (DbEntityValidationException e) {

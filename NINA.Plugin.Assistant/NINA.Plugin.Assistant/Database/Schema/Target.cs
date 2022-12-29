@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using NINA.Astrometry;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -31,6 +32,10 @@ namespace Assistant.NINAPlugin.Database.Schema {
             rotation = 0;
             roi = 1;
             exposureplans = new List<ExposurePlan>();
+        }
+
+        public Coordinates GetCoordinates() {
+            return new Coordinates(Angle.ByHours(ra), Angle.ByDegree(dec), Epoch.J2000);
         }
     }
 

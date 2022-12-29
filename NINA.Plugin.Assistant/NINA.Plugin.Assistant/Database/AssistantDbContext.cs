@@ -25,6 +25,8 @@ namespace Assistant.NINAPlugin.Database {
             Logger.Debug("Assistant database: OnModelCreating");
 
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
+            modelBuilder.Configurations.Add(new PreferenceConfiguration());
+
             var sqi = new CreateOrMigrateDatabaseInitializer<AssistantDbContext>();
             System.Data.Entity.Database.SetInitializer(sqi);
         }
