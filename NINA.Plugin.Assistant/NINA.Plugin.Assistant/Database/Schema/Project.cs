@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
@@ -11,10 +12,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public const int STATE_INACTIVE = 2;
         public const int STATE_CLOSED = 3;
 
-        // TODO: maybe store NINA profile ID active when this was created?
+        public const int PRIORITY_LOW = 0;
+        public const int PRIORITY_NORMAL = 1;
+        public const int PRIORITY_HIGH = 2;
 
         [Key]
         public int id { get; set; }
+
+        [Required]
+        public string profileid { get; set; }
 
         [Required]
         public string name { get; set; }
@@ -29,16 +35,59 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public string profileId { get; set; }
 
-        public long createdate { get; set; }
-        public long? activedate { get; set; }
-        public long? inactivedate { get; set; }
+        public long createDate { get; set; }
+        public long? activeDate { get; set; }
+        public long? inactiveDate { get; set; }
+        public long? startDate { get; set; }
+        public long? endDate { get; set; }
+
+        [NotMapped]
+        public DateTime CreateDate {
+            get { return AssistantDbContext.UnixSecondsToDateTime(createDate); }
+            set { createDate = AssistantDbContext.DateTimeToUnixSeconds(value); }
+        }
+
+        [NotMapped]
+        public DateTime? ActiveDate {
+            get { return AssistantDbContext.UnixSecondsToDateTime(activeDate); }
+            set { activeDate = AssistantDbContext.DateTimeToUnixSeconds(value); }
+        }
+
+        [NotMapped]
+        public DateTime? InactiveDate {
+            get { return AssistantDbContext.UnixSecondsToDateTime(inactiveDate); }
+            set { inactiveDate = AssistantDbContext.DateTimeToUnixSeconds(value); }
+        }
+
+        [NotMapped]
+        public DateTime? StartDate {
+            get { return AssistantDbContext.UnixSecondsToDateTime(startDate); }
+            set { startDate = AssistantDbContext.DateTimeToUnixSeconds(value); }
+        }
+
+        [NotMapped]
+        public DateTime? EndDate {
+            get { return AssistantDbContext.UnixSecondsToDateTime(endDate); }
+            set { endDate = AssistantDbContext.DateTimeToUnixSeconds(value); }
+        }
+
+        public ProjectPreference preferences { get; set; }
+
+        [NotMapped]
+        public AssistantProjectPreferences ProjectPreferences {
+            get { return preferences.Preferences; }
+            set { preferences.Preferences = value; }
+        }
 
         public List<Target> targets { get; set; }
 
-        public Project() {
+        public Project() { }
+
+        public Project(string profileId) {
+            profileid = profileId;
             state = STATE_DRAFT;
-            priority = 1;
-            createdate = AssistantDbContext.DateTimeToUnixSeconds(DateTime.Now);
+            priority = PRIORITY_NORMAL;
+            createDate = AssistantDbContext.DateTimeToUnixSeconds(DateTime.Now);
             targets = new List<Target>();
         }
 

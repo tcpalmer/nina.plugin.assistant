@@ -1,46 +1,74 @@
 ﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity.ModelConfiguration;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public class Preference {
+    public class ProjectPreference {
 
-        public const int TYPE_GLOBAL = 0;
-        public const int TYPE_FILTER = 1;
+        [Key]
+        public int id { get; set; }
 
-        public int type { get; set; }
-        public string profileId { get; set; }
-        public string filterName { get; private set; }
         internal string _preferences { get; set; }
 
         [NotMapped]
-        public AssistantPreferences preferences {
-            get { return _preferences == null ? new AssistantPreferences() : JsonConvert.DeserializeObject<AssistantPreferences>(_preferences); }
-            set { _preferences = JsonConvert.SerializeObject(value); }
+        public AssistantProjectPreferences Preferences {
+            get {
+                return JsonConvert.DeserializeObject<AssistantProjectPreferences>(_preferences);
+            }
+            set {
+                _preferences = JsonConvert.SerializeObject(value);
+            }
         }
 
-        public Preference() { }
+        public ProjectPreference() { }
 
-        public Preference(string profileId, AssistantPreferences preferences) {
-            this.type = TYPE_GLOBAL;
-            this.profileId = profileId;
-            this.filterName = "";
-            this.preferences = preferences;
-        }
-
-        public Preference(string profileId, string filterName, AssistantPreferences preferences) {
-            this.type = TYPE_FILTER;
-            this.profileId = profileId;
-            this.filterName = filterName;
-            this.preferences = preferences;
+        public ProjectPreference(AssistantProjectPreferences preferences) {
+            this.Preferences = preferences;
         }
     }
 
-    internal class PreferenceConfiguration : EntityTypeConfiguration<Preference> {
+    public class FilterPreference {
 
-        public PreferenceConfiguration() {
-            HasKey(x => new { x.type, x.profileId, x.filterName });
+        [Key]
+        public int id { get; set; }
+
+        public string profileId { get; set; }
+        public string filterName { get; set; }
+        internal string _preferences { get; set; }
+
+        [NotMapped]
+        public AssistantFilterPreferences Preferences {
+            get {
+                return JsonConvert.DeserializeObject<AssistantFilterPreferences>(_preferences);
+            }
+            set {
+                _preferences = JsonConvert.SerializeObject(value);
+            }
+        }
+
+        public FilterPreference() { }
+
+        public FilterPreference(string profileId, string filterName, AssistantFilterPreferences preferences) {
+            this.profileId = profileId;
+            this.filterName = filterName;
+            this.Preferences = preferences;
+        }
+    }
+
+    internal class ProjectPreferenceConfiguration : EntityTypeConfiguration<ProjectPreference> {
+
+        public ProjectPreferenceConfiguration() {
+            HasKey(x => new { x.id });
+            Property(x => x._preferences).HasColumnName("preferences");
+        }
+    }
+
+    internal class FilterPreferenceConfiguration : EntityTypeConfiguration<FilterPreference> {
+
+        public FilterPreferenceConfiguration() {
+            HasKey(x => new { x.id });
             Property(x => x._preferences).HasColumnName("preferences");
         }
     }

@@ -6,6 +6,7 @@ using NINA.Profile.Interfaces;
 using System;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -13,6 +14,9 @@ namespace Assistant.NINAPlugin {
 
     [Export(typeof(IPluginManifest))]
     public class AssistantPlugin : PluginBase, INotifyPropertyChanged {
+
+        public static string PLUGIN_HOME = Path.Combine(CoreUtil.APPLICATIONTEMPPATH, "AssistantPlugin");
+
         private IPluginOptionsAccessor pluginSettings;
         private IProfileService profileService;
 
@@ -27,6 +31,14 @@ namespace Assistant.NINAPlugin {
             this.pluginSettings = new PluginOptionsAccessor(profileService, Guid.Parse(this.Identifier));
             this.profileService = profileService;
             profileService.ProfileChanged += ProfileService_ProfileChanged;
+
+            InitPluginHome();
+        }
+
+        private void InitPluginHome() {
+            if (!Directory.Exists(PLUGIN_HOME)) {
+                Directory.CreateDirectory(PLUGIN_HOME);
+            }
         }
 
         public override Task Teardown() {

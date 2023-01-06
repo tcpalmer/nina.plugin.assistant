@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using NINA.Core.Utility;
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Data.SQLite;
@@ -13,8 +14,9 @@ namespace Assistant.NINAPlugin.Database {
 
         public DbSet<Project> ProjectSet { get; set; }
         public DbSet<Target> TargetSet { get; set; }
-        public DbSet<ExposurePlan> ExposurePlanSet { get; set; }
-        public DbSet<Preference> PreferencePlanSet { get; set; }
+        public DbSet<FilterPlan> FilterPlanSet { get; set; }
+        public DbSet<ProjectPreference> ProjectPreferencePlanSet { get; set; }
+        public DbSet<FilterPreference> FilterPreferencePlanSet { get; set; }
 
         public AssistantDbContext(string connectionString) : base(new SQLiteConnection() { ConnectionString = connectionString }, true) {
             Configuration.LazyLoadingEnabled = false;
@@ -25,18 +27,38 @@ namespace Assistant.NINAPlugin.Database {
             Logger.Debug("Assistant database: OnModelCreating");
 
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
-            modelBuilder.Configurations.Add(new PreferenceConfiguration());
+            modelBuilder.Configurations.Add(new ProjectPreferenceConfiguration());
+            modelBuilder.Configurations.Add(new FilterPreferenceConfiguration());
 
             var sqi = new CreateOrMigrateDatabaseInitializer<AssistantDbContext>();
             System.Data.Entity.Database.SetInitializer(sqi);
         }
 
-        public static long DateTimeToUnixSeconds(DateTime dateTime) {
-            return CoreUtil.DateTimeToUnixTimeStamp(dateTime);
+        public List<Project> GetAllProjects(string profileId) {
+            var projects = ProjectSet.Where(p => p.profileid.Equals(profileId));
+            return projects.ToList();
         }
 
-        public static DateTime UnixSecondsToDateTime(long seconds) {
-            return CoreUtil.UnixTimeStampToDateTime(seconds);
+        public List<Project> GetActiveProjects(string profileId, DateTime forDateTime) {
+            long secs = DateTimeToUnixSeconds(forDateTime);
+            var projects = ProjectSet.Where(p =>
+                p.profileid.Equals(profileId) &&
+                p.state == Project.STATE_ACTIVE &&
+                p.startDate <= secs && secs <= p.endDate);
+            return projects.ToList();
+        }
+
+        public List<Project> GetProjectPreferences(string profileId) {
+            var projects = ProjectSet.Where(p => p.profileid.Equals(profileId));
+            return projects.ToList();
+        }
+
+        public static long DateTimeToUnixSeconds(DateTime? dateTime) {
+            return dateTime == null ? 0 : CoreUtil.DateTimeToUnixTimeStamp((DateTime)dateTime);
+        }
+
+        public static DateTime UnixSecondsToDateTime(long? seconds) {
+            return CoreUtil.UnixTimeStampToDateTime(seconds == null ? 0 : seconds.Value);
         }
 
         private class CreateOrMigrateDatabaseInitializer<TContext> : CreateDatabaseIfNotExists<TContext>,

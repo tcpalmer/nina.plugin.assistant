@@ -18,5 +18,18 @@ namespace Assistant.NINAPlugin.Plan {
             EndTime = endTime;
             Duration = (long)(endTime - startTime).TotalSeconds;
         }
+
+        public static TimeInterval GetTotalTimeSpan(TimeInterval first, params TimeInterval[] values) {
+            DateTime start = first.StartTime;
+            DateTime end = first.EndTime;
+
+            for (int i = 0; i < values.Length; i++) {
+                TimeInterval val = values[i];
+                if (val.StartTime < start) start = val.StartTime;
+                if (val.EndTime > end) end = val.EndTime;
+            }
+
+            return new TimeInterval(start, end);
+        }
     }
 }

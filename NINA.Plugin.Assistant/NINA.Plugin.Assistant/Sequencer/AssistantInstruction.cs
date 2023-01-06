@@ -63,8 +63,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IPlateSolverFactory plateSolverFactory;
         private readonly IWindowServiceFactory windowServiceFactory;
 
-        private Planner planner = Planner.Instance;
-
         [OnDeserializing]
         public void OnDeserializing(StreamingContext context) {
             this.Items.Clear();
@@ -105,12 +103,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.domeFollower = domeFollower;
             this.plateSolverFactory = plateSolverFactory;
             this.windowServiceFactory = windowServiceFactory;
-
-            /*
-             * TODO: instruction view in sequencer
-             *   - Could be like DSO container and show name/coords/rot plus nighttime chart.  Would have to clear/reload for each
-             *     new target.  Really nice to add start/stop time vertical lines on that chart - with Now.
-             */
 
             // TODO: this can better be set via the ... on the instruction (see Smart Exposure)
             // Interestingly, DSO Container doesn't have ... but this instruction does.
@@ -158,7 +150,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             Logger.Debug("Assistant execute");
 
             while (true) {
-                AssistantPlan plan = planner.GetPlan();
+                AssistantPlan plan = new Planner().GetPlan(DateTime.Now, profileService);
 
                 if (plan == null) {
                     Logger.Info("Assistant: planner returned empty plan, done");
@@ -166,7 +158,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 PlanTarget planTarget = plan.PlanTarget;
-                Logger.Info($"Assistant: starting execution of plan target: {planTarget.Target.name}");
+                Logger.Info($"Assistant: starting execution of plan target: {planTarget.Name}");
 
                 // If interval for this target has passed, we're done (really shouldn't happen)
                 if (DateTime.Now > plan.TimeInterval.EndTime) {
@@ -175,7 +167,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 // Wait for the target start time
-                // TODO: when this is done, the progress bar isn't being cleared ... ?
                 WaitForStart(planTarget, progress, token);
 
                 // TODO: needs to be accessible for binding from xaml

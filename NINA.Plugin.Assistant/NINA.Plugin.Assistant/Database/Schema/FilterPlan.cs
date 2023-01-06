@@ -3,23 +3,21 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public class ExposurePlan {
+    public class FilterPlan {
 
         [Key]
         public int id { get; set; }
 
         [Required]
-        public string filtername { get; set; }
-
-        [Required]
-        public int filterpos { get; set; }
+        public string filterName { get; set; }
 
         [Required]
         public double exposure { get; set; }
 
-        public int gain { get; set; }
-        public int offset { get; set; }
-        public int bin { get; set; }
+        public int? gain { get; set; }
+        public int? offset { get; set; }
+        public int? bin { get; set; }
+        public int? readoutMode { get; set; }
 
         public int desired { get; set; }
         public int acquired { get; set; }
@@ -29,11 +27,12 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public int targetid { get; set; }
         public Target target { get; set; }
 
-        public ExposurePlan() {
+        public FilterPlan() {
             exposure = 60;
             gain = 0;
             offset = 0;
             bin = 1;
+            readoutMode = -1;
             desired = 1;
             acquired = 0;
             accepted = 0;

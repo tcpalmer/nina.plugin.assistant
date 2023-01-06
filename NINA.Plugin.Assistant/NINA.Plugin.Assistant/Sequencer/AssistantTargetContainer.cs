@@ -127,24 +127,24 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void AddSlewAndCenter(PlanTarget planTarget, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Info($"Assistant: adding slew/center target instruction for {planTarget.Target.name}, id={planTarget.Id}");
+            Logger.Info($"Assistant: adding slew/center target instruction for {planTarget.Name}, id={planTarget.Id}");
 
             Center center = null;
-            if (planTarget.Target.rotation == 0) {
+            if (planTarget.Rotation == 0) {
                 center = new Center(profileService, telescopeMediator, imagingMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
                 center.Name = nameof(Center);
             }
             else {
                 center = new CenterAndRotate(profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
                 center.Name = nameof(CenterAndRotate);
-                (center as CenterAndRotate).Rotation = planTarget.Target.rotation;
+                (center as CenterAndRotate).Rotation = planTarget.Rotation;
             }
 
             center.Category = "Assistant";
             center.Description = "";
             center.ErrorBehavior = this.ErrorBehavior;
             center.Attempts = this.Attempts;
-            center.Coordinates = new InputCoordinates(planTarget.Target.GetCoordinates());
+            center.Coordinates = new InputCoordinates(planTarget.Coordinates);
             Add(new WrappedInstruction(monitor, planTarget.Id, center));
         }
 
@@ -154,11 +154,11 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void AddExposures(PlanTarget planTarget) {
-            foreach (PlanExposure planExposure in planTarget.PlanExposures) {
-                AddSwitchFilter(planExposure);
-                Logger.Info($"Assistant: adding exposures: count={planExposure.Exposures}, filter={planExposure.ExposurePlan.filtername}, exposure={planExposure.ExposurePlan.exposure}, id={planExposure.Id}");
+            foreach (PlanFilter planFilter in planTarget.FilterPlans) {
+                AddSwitchFilter(planFilter);
+                Logger.Info($"Assistant: adding exposures: count={planFilter.PlannedExposures}, filter={planFilter.FilterName}, exposure={planFilter.ExposureLength}, id={planFilter.Id}");
 
-                for (int i = 0; i < planExposure.Exposures; i++) {
+                for (int i = 0; i < planFilter.PlannedExposures; i++) {
                     TakeExposure takeExposure = new TakeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM);
                     takeExposure.Name = nameof(TakeExposure);
                     takeExposure.Category = "Assistant";
@@ -167,18 +167,18 @@ namespace Assistant.NINAPlugin.Sequencer {
                     takeExposure.Attempts = this.Attempts;
 
                     //takeExposure.ExposureCount = planExposure.Exposures;
-                    takeExposure.ExposureTime = planExposure.ExposurePlan.exposure;
-                    takeExposure.Gain = planExposure.ExposurePlan.gain;
-                    takeExposure.Offset = planExposure.ExposurePlan.offset;
-                    takeExposure.Binning = GetBinning(planExposure);
+                    takeExposure.ExposureTime = planFilter.ExposureLength;
+                    takeExposure.Gain = GetGain(planFilter.Gain);
+                    takeExposure.Offset = GetOffset(planFilter.Offset);
+                    takeExposure.Binning = planFilter.BinningMode;
 
-                    Add(new WrappedInstruction(monitor, planExposure.Id, takeExposure));
+                    Add(new WrappedInstruction(monitor, planFilter.Id, takeExposure));
                 }
             }
         }
 
-        private void AddSwitchFilter(PlanExposure planExposure) {
-            Logger.Info($"Assistant: adding switch filter: {planExposure.ExposurePlan.filtername}");
+        private void AddSwitchFilter(PlanFilter planFilter) {
+            Logger.Info($"Assistant: adding switch filter: {planFilter.FilterName}");
 
             SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator);
             switchFilter.Name = nameof(SwitchFilter);
@@ -187,8 +187,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             switchFilter.ErrorBehavior = this.ErrorBehavior;
             switchFilter.Attempts = this.Attempts;
 
-            switchFilter.Filter = LookupFilter(planExposure.ExposurePlan.filtername);
-            Add(new WrappedInstruction(monitor, planExposure.Id, switchFilter));
+            switchFilter.Filter = LookupFilter(planFilter.FilterName);
+            Add(new WrappedInstruction(monitor, planFilter.Id, switchFilter));
         }
 
         private FilterInfo LookupFilter(string filtername) {
@@ -201,9 +201,14 @@ namespace Assistant.NINAPlugin.Sequencer {
             throw new SequenceEntityFailedException($"failed to find FilterInfo for filter: {filtername}");
         }
 
-        private BinningMode GetBinning(PlanExposure planExposure) {
-            short bin = (short)planExposure.ExposurePlan.bin;
-            return new BinningMode(bin, bin);
+        private int GetGain(int? gain) {
+            // TODO: if null, pull from camera/filter default
+            return (int)(gain == null ? 0 : gain);
+        }
+
+        private int GetOffset(int? offset) {
+            // TODO: if null, pull from camera/filter default
+            return (int)((int)(offset == null ? 0 : offset));
         }
 
         private void SetTarget() {
@@ -212,8 +217,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 Angle.ByDegree(profileService.ActiveProfile.AstrometrySettings.Longitude),
                 profileService.ActiveProfile.AstrometrySettings.Horizon);
 
-            _target.TargetName = planTarget.Target.name;
-            _target.InputCoordinates = new InputCoordinates(planTarget.Target.GetCoordinates());
+            _target.TargetName = planTarget.Name;
+            _target.InputCoordinates = new InputCoordinates(planTarget.Coordinates);
             _target.Rotation = 0;
         }
 
