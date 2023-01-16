@@ -91,6 +91,25 @@ namespace Assistant.NINAPlugin.Database.Schema {
             targets = new List<Target>();
         }
 
+        public static string State(int state) {
+            switch (state) {
+                case STATE_DRAFT: return "draft";
+                case STATE_ACTIVE: return "active";
+                case STATE_INACTIVE: return "inactive";
+                case STATE_CLOSED: return "closed";
+                default: return "unknown";
+            }
+        }
+
+        public static string Priority(int priority) {
+            switch (priority) {
+                case PRIORITY_LOW: return "low";
+                case PRIORITY_NORMAL: return "normal";
+                case PRIORITY_HIGH: return "high";
+                default: return "unknown";
+            }
+        }
+
     }
 
 }

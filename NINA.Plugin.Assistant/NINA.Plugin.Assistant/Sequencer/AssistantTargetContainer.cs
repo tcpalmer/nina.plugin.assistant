@@ -40,7 +40,9 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IPlateSolverFactory plateSolverFactory;
         private readonly IWindowServiceFactory windowServiceFactory;
 
-        private readonly PlanTarget planTarget;
+        private readonly IPlanTarget previousPlanTarget;
+        private readonly IPlanTarget planTarget;
+        private readonly IProfile activeProfile;
         private AssistantStatusMonitor monitor;
 
         public AssistantTargetContainer(
@@ -58,7 +60,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 IDomeFollower domeFollower,
                 IPlateSolverFactory plateSolverFactory,
                 IWindowServiceFactory windowServiceFactory,
-                PlanTarget planTarget,
+                IPlanTarget previousPlanTarget,
+                IPlanTarget planTarget,
                 AssistantStatusMonitor monitor) : base() {
             Name = nameof(AssistantTargetContainer);
             Description = "";
@@ -80,23 +83,30 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.windowServiceFactory = windowServiceFactory;
 
             this.monitor = monitor;
+            this.previousPlanTarget = previousPlanTarget;
             this.planTarget = planTarget;
+            this.activeProfile = profileService.ActiveProfile;
             SetTarget();
         }
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
             Logger.Trace("AssistantTargetContainer: execute");
+            ImageSaveWatcher imageSaveWatcher = null;
 
             try {
                 // Add a trigger to stop at target hard stop time
                 AddEndTimeTrigger(planTarget);
 
-                // Slew to target and center
-                //SlewAndCenter(planTarget, progress, token);
+                // If target is different from previous, slew/center/rotate
+                if (!planTarget.Equals(previousPlanTarget)) {
+                    // TODO: pain to simulate
+                    //SlewAndCenter(planTarget, progress, token);
+                }
 
                 // Add the planned exposures
                 AddExposures(planTarget);
 
+                imageSaveWatcher = new ImageSaveWatcher(imageSaveMediator, planTarget);
                 base.Execute(progress, token).Wait();
             }
             catch (Exception ex) {
@@ -106,6 +116,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 Logger.Error($"Assistant: exception\n{ex.ToString()}");
             }
             finally {
+                imageSaveWatcher?.Stop();
+
                 foreach (var item in Items) {
                     item.AttachNewParent(null);
                 }
@@ -148,13 +160,30 @@ namespace Assistant.NINAPlugin.Sequencer {
             Add(new WrappedInstruction(monitor, planTarget.Id, center));
         }
 
-        private void AddEndTimeTrigger(PlanTarget planTarget) {
-            Logger.Info($"Assistant: adding target end time trigger, run until: {planTarget.TimeInterval.EndTime}");
-            Add(new AssistantTargetEndTimeTrigger(planTarget.TimeInterval.EndTime));
+        private void AddEndTimeTrigger(IPlanTarget planTarget) {
+            Logger.Info($"Assistant: adding target end time trigger, run until: {planTarget.EndTime}");
+            Add(new AssistantTargetEndTimeTrigger(planTarget.EndTime));
         }
 
-        private void AddExposures(PlanTarget planTarget) {
+        private void AddExposures(IPlanTarget planTarget) {
+
+            /* TODO
+             *   - Even with careful planner planning, we're going to have situations where e.g. a set of WB images will have to be
+             *     interrupted because of a dawn twilight change event.  Maybe each set of exposures for a filter plan goes into a
+             *     separate child container (AssistantFilterPlanContainer)?  Those containers could then have stop triggers.
+             *     An alternative is to only return a single filter plan with the choosen target, and make it go back to the planner
+             *     after that.
+             */
+
+            /* TODO: since our determination of target visibility over the course of a night will not detect the
+             * 'horizon tree gap' problem, we need to mitigate.
+             * - If that was the only potential target, it would still get picked so the sequence container may also have to detect and
+             *   skip exposures, maybe sleeping and rechecking for some period until it appears to be visible.
+             */
+
             foreach (PlanFilter planFilter in planTarget.FilterPlans) {
+                if (planFilter.Rejected) { continue; }
+
                 AddSwitchFilter(planFilter);
                 Logger.Info($"Assistant: adding exposures: count={planFilter.PlannedExposures}, filter={planFilter.FilterName}, exposure={planFilter.ExposureLength}, id={planFilter.Id}");
 
@@ -166,7 +195,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                     takeExposure.ErrorBehavior = this.ErrorBehavior;
                     takeExposure.Attempts = this.Attempts;
 
-                    //takeExposure.ExposureCount = planExposure.Exposures;
                     takeExposure.ExposureTime = planFilter.ExposureLength;
                     takeExposure.Gain = GetGain(planFilter.Gain);
                     takeExposure.Offset = GetOffset(planFilter.Offset);
@@ -191,14 +219,14 @@ namespace Assistant.NINAPlugin.Sequencer {
             Add(new WrappedInstruction(monitor, planFilter.Id, switchFilter));
         }
 
-        private FilterInfo LookupFilter(string filtername) {
-            foreach (FilterInfo filterInfo in profileService.ActiveProfile.FilterWheelSettings.FilterWheelFilters) {
-                if (filterInfo.Name == filtername) {
+        private FilterInfo LookupFilter(string filterName) {
+            foreach (FilterInfo filterInfo in activeProfile.FilterWheelSettings.FilterWheelFilters) {
+                if (filterInfo.Name == filterName) {
                     return filterInfo;
                 }
             }
 
-            throw new SequenceEntityFailedException($"failed to find FilterInfo for filter: {filtername}");
+            throw new SequenceEntityFailedException($"failed to find FilterInfo for filter: {filterName}");
         }
 
         private int GetGain(int? gain) {
@@ -213,9 +241,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private void SetTarget() {
             _target = new InputTarget(
-            Angle.ByDegree(profileService.ActiveProfile.AstrometrySettings.Latitude),
-                Angle.ByDegree(profileService.ActiveProfile.AstrometrySettings.Longitude),
-                profileService.ActiveProfile.AstrometrySettings.Horizon);
+            Angle.ByDegree(activeProfile.AstrometrySettings.Latitude),
+                Angle.ByDegree(activeProfile.AstrometrySettings.Longitude),
+                activeProfile.AstrometrySettings.Horizon);
 
             _target.TargetName = planTarget.Name;
             _target.InputCoordinates = new InputCoordinates(planTarget.Coordinates);
@@ -239,9 +267,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
     public class AssistantStatusMonitor {
 
-        private PlanTarget planTarget;
+        private IPlanTarget planTarget;
 
-        public AssistantStatusMonitor(PlanTarget planTarget) {
+        public AssistantStatusMonitor(IPlanTarget planTarget) {
             this.planTarget = planTarget;
         }
 

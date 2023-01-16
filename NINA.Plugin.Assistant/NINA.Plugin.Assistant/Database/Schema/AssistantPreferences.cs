@@ -46,18 +46,18 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
-            sb.Append("MinimumAltitude: ").Append(MinimumAltitude).AppendLine();
-            sb.Append("UseCustomHorizon: ").Append(UseCustomHorizon).AppendLine();
-            sb.Append("HorizonOffset: ").Append(HorizonOffset).AppendLine();
-            sb.Append("MinimumTime: ").Append(MinimumTime).AppendLine();
-            sb.Append("EnableGrader: ").Append(EnableGrader).AppendLine();
+            sb.AppendLine($"MinimumAltitude: {MinimumAltitude}");
+            sb.AppendLine($"UseCustomHorizon: {UseCustomHorizon}");
+            sb.AppendLine($"HorizonOffset: {HorizonOffset}");
+            sb.AppendLine($"MinimumTime: {MinimumTime}");
+            sb.AppendLine($"EnableGrader: {EnableGrader}");
 
             StringBuilder rw = new StringBuilder();
             foreach (KeyValuePair<string, double> entry in RuleWeights) {
                 rw.Append($"{entry.Key}: {entry.Value}, ");
             }
 
-            sb.Append("RuleWeights: ").Append(rw.ToString()).AppendLine();
+            sb.AppendLine("RuleWeights: ").Append(rw.ToString());
             return sb.ToString();
         }
     }
@@ -101,11 +101,11 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
-            sb.Append("TwilightInclude: ").Append(TwilightInclude).AppendLine();
-            sb.Append("MoonAvoidanceEnabled: ").Append(MoonAvoidanceEnabled).AppendLine();
-            sb.Append("MoonAvoidanceSeparation: ").Append(MoonAvoidanceSeparation).AppendLine();
-            sb.Append("MoonAvoidanceWidth: ").Append(MoonAvoidanceWidth).AppendLine();
-            sb.Append("MaximumHumidity: ").Append(MaximumHumidity).AppendLine();
+            sb.AppendLine($"TwilightInclude: {TwilightInclude}");
+            sb.AppendLine($"MoonAvoidanceEnabled: {MoonAvoidanceEnabled}");
+            sb.AppendLine($"MoonAvoidanceSeparation: {MoonAvoidanceSeparation}");
+            sb.AppendLine($"MoonAvoidanceWidth: {MoonAvoidanceWidth}");
+            sb.AppendLine($"MaximumHumidity: {MaximumHumidity}");
             return sb.ToString();
         }
     }

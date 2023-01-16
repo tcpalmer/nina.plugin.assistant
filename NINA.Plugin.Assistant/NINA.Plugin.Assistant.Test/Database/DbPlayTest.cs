@@ -1,6 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.Plan.ScoringEngine.Rules;
+using Assistant.NINAPlugin.Plan.Scoring.Rules;
 using NINA.Astrometry;
 using NINA.Core.Utility;
 using NUnit.Framework;
@@ -52,9 +52,9 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t1.dec = AstroUtil.DMSToDegrees("-5:23:28");
                     p1.targets.Add(t1);
 
-                    t1.filterplans.Add(new FilterPlan { filterName = "Ha", desired = 5 });
-                    t1.filterplans.Add(new FilterPlan { filterName = "OIII", desired = 5 });
-                    t1.filterplans.Add(new FilterPlan { filterName = "SII", desired = 5 });
+                    t1.filterplans.Add(new FilterPlan { profileId = profileId, filterName = "Ha", desired = 5 });
+                    t1.filterplans.Add(new FilterPlan { profileId = profileId, filterName = "OIII", desired = 5 });
+                    t1.filterplans.Add(new FilterPlan { profileId = profileId, filterName = "SII", desired = 5 });
 
                     context.ProjectSet.Add(p1);
 
@@ -82,9 +82,9 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t2.dec = AstroUtil.DMSToDegrees("28:5:0");
                     p2.targets.Add(t2);
 
-                    t2.filterplans.Add(new FilterPlan { filterName = "R", desired = 5 });
-                    t2.filterplans.Add(new FilterPlan { filterName = "G", desired = 5 });
-                    t2.filterplans.Add(new FilterPlan { filterName = "B", desired = 5 });
+                    t2.filterplans.Add(new FilterPlan { profileId = profileId, filterName = "R", desired = 5 });
+                    t2.filterplans.Add(new FilterPlan { profileId = profileId, filterName = "G", desired = 5 });
+                    t2.filterplans.Add(new FilterPlan { profileId = profileId, filterName = "B", desired = 5 });
 
                     context.ProjectSet.Add(p2);
 

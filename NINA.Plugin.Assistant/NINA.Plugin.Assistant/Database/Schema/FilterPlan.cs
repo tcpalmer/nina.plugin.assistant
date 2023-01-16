@@ -12,6 +12,9 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public string filterName { get; set; }
 
         [Required]
+        public string profileId { get; set; }
+
+        [Required]
         public double exposure { get; set; }
 
         public int? gain { get; set; }
@@ -27,7 +30,10 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public int targetid { get; set; }
         public Target target { get; set; }
 
-        public FilterPlan() {
+        public FilterPlan() { }
+
+        public FilterPlan(string profileId) {
+            this.profileId = profileId;
             exposure = 60;
             gain = 0;
             offset = 0;

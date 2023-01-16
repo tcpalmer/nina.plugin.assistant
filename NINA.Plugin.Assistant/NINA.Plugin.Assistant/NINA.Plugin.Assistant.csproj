@@ -276,8 +276,19 @@
   <ItemGroup>
     <Compile Include="Assistant.cs" />
     <Compile Include="Astrometry\AstrometryUtils.cs" />
+    <Compile Include="Astrometry\NighttimeCircumstances.cs" />
+    <Compile Include="Astrometry\NighttimeCircumstancesOLD.cs" />
+    <Compile Include="Astrometry\Solver\Altitudes.cs" />
+    <Compile Include="Astrometry\Solver\CircumstanceSolver.cs" />
+    <Compile Include="Astrometry\Solver\DSORefiner.cs" />
+    <Compile Include="Astrometry\Solver\IAltitudeRefiner.cs" />
+    <Compile Include="Astrometry\Solver\ImagingDay.cs" />
+    <Compile Include="Astrometry\Solver\Solver.cs" />
+    <Compile Include="Astrometry\Solver\TargetImagingCircumstances.cs" />
+    <Compile Include="Astrometry\TargetCircumstances.cs" />
+    <Compile Include="Astrometry\DSORiseAndSet.cs" />
     <Compile Include="Astrometry\HorizonDefinition.cs" />
-    <Compile Include="Astrometry\TwilightTimeCache.cs" />
+    <Compile Include="Astrometry\HorizontalCoordinate.cs" />
     <Compile Include="Database\AssistantDatabaseInteraction.cs" />
     <Compile Include="Database\AssistantDbContext.cs" />
     <Compile Include="Database\Schema\AssistantPreferences.cs" />
@@ -290,9 +301,11 @@
     </Compile>
     <Compile Include="Plan\AssistantPlan.cs" />
     <Compile Include="Plan\Planner.cs" />
-    <Compile Include="Plan\ScoringEngine\Rules\ProjectPriorityRule.cs" />
-    <Compile Include="Plan\ScoringEngine\Rules\ScoringRule.cs" />
-    <Compile Include="Plan\ScoringEngine\ScoringEngine.cs" />
+    <Compile Include="Plan\Scoring\Rules\PercentCompleteRule.cs" />
+    <Compile Include="Plan\Scoring\Rules\ProjectPriorityRule.cs" />
+    <Compile Include="Plan\Scoring\Rules\ScoringRule.cs" />
+    <Compile Include="Plan\Scoring\Rules\TargetSwitchPenaltyRule.cs" />
+    <Compile Include="Plan\Scoring\ScoringEngine.cs" />
     <Compile Include="Plan\TimeInterval.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -306,6 +319,10 @@
     </Compile>
     <Compile Include="Sequencer\AssistantTargetContainer.cs" />
     <Compile Include="Sequencer\AssistantTargetEndTimeTrigger.cs" />
+    <Compile Include="Sequencer\ImageGrader.cs" />
+    <Compile Include="Sequencer\ImageSaveWatcher.cs" />
+    <Compile Include="Utils\Utils.cs" />
+    <Compile Include="Utils\Assert.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

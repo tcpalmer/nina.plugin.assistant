@@ -53,6 +53,11 @@ namespace Assistant.NINAPlugin.Database {
             return projects.ToList();
         }
 
+        public List<FilterPreference> GetFilterPreferences(string profileId) {
+            var foo = FilterPreferencePlanSet.Where(p => p.profileId == profileId);
+            return foo.ToList();
+        }
+
         public static long DateTimeToUnixSeconds(DateTime? dateTime) {
             return dateTime == null ? 0 : CoreUtil.DateTimeToUnixTimeStamp((DateTime)dateTime);
         }

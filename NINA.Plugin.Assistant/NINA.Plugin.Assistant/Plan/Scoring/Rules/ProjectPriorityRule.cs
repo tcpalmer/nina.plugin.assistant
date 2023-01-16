@@ -1,7 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
-using System;
 
-namespace Assistant.NINAPlugin.Plan.ScoringEngine.Rules {
+namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
 
     public class ProjectPriorityRule : ScoringRule {
 
@@ -11,8 +10,14 @@ namespace Assistant.NINAPlugin.Plan.ScoringEngine.Rules {
         public override string Name { get { return RULE_NAME; } }
         public override double DefaultWeight { get { return DEFAULT_WEIGHT; } }
 
-        public override double Score(DateTime atTime, PlanTarget potentialTarget) {
-            PlanProject project = potentialTarget.Project;
+        /// <summary>
+        /// Score the potential target based on assigned priority.
+        /// </summary>
+        /// <param name="scoringEngine"></param>
+        /// <param name="potentialTarget"></param>
+        /// <returns></returns>
+        public override double Score(IScoringEngine scoringEngine, IPlanTarget potentialTarget) {
+            IPlanProject project = potentialTarget.Project;
 
             switch (project.Priority) {
                 case Project.PRIORITY_LOW:

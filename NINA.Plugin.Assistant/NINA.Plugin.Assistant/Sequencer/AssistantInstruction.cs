@@ -148,21 +148,22 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
             Logger.Debug("Assistant execute");
+            IPlanTarget previousPlanTarget = null;
 
             while (true) {
-                AssistantPlan plan = new Planner().GetPlan(DateTime.Now, profileService);
-
+                AssistantPlan plan = new Planner(DateTime.Now, profileService).GetPlan(previousPlanTarget);
                 if (plan == null) {
                     Logger.Info("Assistant: planner returned empty plan, done");
                     break;
                 }
 
-                PlanTarget planTarget = plan.PlanTarget;
+                IPlanTarget planTarget = plan.PlanTarget;
+
                 Logger.Info($"Assistant: starting execution of plan target: {planTarget.Name}");
 
                 // If interval for this target has passed, we're done (really shouldn't happen)
                 if (DateTime.Now > plan.TimeInterval.EndTime) {
-                    Logger.Warning($"Assistant: time interval for the target has passed, end time: {planTarget.TimeInterval.EndTime}");
+                    Logger.Warning($"Assistant: time interval for the target has passed, end time: {planTarget.EndTime}");
                     return Task.CompletedTask;
                 }
 
@@ -174,10 +175,12 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 // Create a container for this target, add the instructions, and execute
                 try {
-                    AssistantTargetContainer targetContainer = GetTargetContainer(planTarget, monitor);
+                    AssistantTargetContainer targetContainer = GetTargetContainer(previousPlanTarget, planTarget, monitor);
                     Logger.Debug("Assistant: executing target container instructions");
                     targetContainer.Execute(progress, token).Wait();
                     Logger.Debug("Assistant: done executing target container instructions");
+
+                    previousPlanTarget = planTarget;
                 }
                 catch (Exception ex) {
                     Logger.Error($"Assistant: exception\n{ex.ToString()}");
@@ -187,21 +190,21 @@ namespace Assistant.NINAPlugin.Sequencer {
             return Task.CompletedTask;
         }
 
-        private void WaitForStart(PlanTarget planTarget, IProgress<ApplicationStatus> progress, CancellationToken token) {
+        private void WaitForStart(IPlanTarget planTarget, IProgress<ApplicationStatus> progress, CancellationToken token) {
             DateTime now = DateTime.Now;
-            if (planTarget.TimeInterval.StartTime > now) {
-                TimeSpan duration = planTarget.TimeInterval.StartTime - now;
-                Logger.Debug($"Assistant: waiting for target start time: {planTarget.TimeInterval.StartTime}");
+            if (planTarget.StartTime > now) {
+                TimeSpan duration = planTarget.StartTime - now;
+                Logger.Debug($"Assistant: waiting for target start time: {planTarget.StartTime}");
                 CoreUtil.Wait(duration, token, progress).Wait(token);
                 Logger.Debug("Assistant: done waiting for target start time");
             }
         }
 
-        private AssistantTargetContainer GetTargetContainer(PlanTarget planTarget, AssistantStatusMonitor monitor) {
+        private AssistantTargetContainer GetTargetContainer(IPlanTarget previousPlanTarget, IPlanTarget planTarget, AssistantStatusMonitor monitor) {
             AssistantTargetContainer targetContainer = new AssistantTargetContainer(profileService, dateTimeProviders, telescopeMediator,
                 rotatorMediator, guiderMediator, cameraMediator, imagingMediator, imageSaveMediator,
                 imageHistoryVM, filterWheelMediator, domeMediator, domeFollower,
-                plateSolverFactory, windowServiceFactory, planTarget, monitor);
+                plateSolverFactory, windowServiceFactory, previousPlanTarget, planTarget, monitor);
             targetContainer.AttachNewParent(this);
             return targetContainer;
         }

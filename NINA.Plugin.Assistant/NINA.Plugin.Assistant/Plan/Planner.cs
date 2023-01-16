@@ -1,6 +1,9 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
 using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan.Scoring;
+using Assistant.NINAPlugin.Util;
+using NINA.Astrometry;
 using NINA.Core.Utility;
 using NINA.Profile.Interfaces;
 using System;
@@ -12,105 +15,326 @@ namespace Assistant.NINAPlugin.Plan {
 
         private DateTime forDateTime;
         private IProfile activeProfile;
+        private IPlanTarget previousPlanTarget;
+        private ObserverInfo observerInfo;
 
-        public AssistantPlan GetPlan(DateTime forDateTime, IProfileService profileService) {
+        public Planner(DateTime forDateTime, IProfileService profileService) {
             this.forDateTime = forDateTime;
-            activeProfile = profileService.ActiveProfile;
+            this.activeProfile = profileService.ActiveProfile;
+            this.observerInfo = new ObserverInfo {
+                Latitude = activeProfile.AstrometrySettings.Latitude,
+                Longitude = activeProfile.AstrometrySettings.Longitude,
+                Elevation = activeProfile.AstrometrySettings.Elevation,
+            };
 
-            List<PlanProject> projects = GetActiveProjects(forDateTime, activeProfile.Id.ToString());
-
-            projects = FilterPass1(projects);
-            projects = FilterPass2(projects);
-            PlanTarget planTarget = FilterPass3(projects);
-            planTarget = FilterPass4(planTarget);
-
-
-            return planTarget != null ? new AssistantPlan(planTarget, null) : null;
+            if (AstrometryUtils.IsAbovePolarCircle(observerInfo)) {
+                throw new Exception("Assistant: observer location is above a polar circle - not supported");
+            }
         }
 
-        private List<PlanProject> FilterPass1(List<PlanProject> projects) {
-            if (projects?.Count == 0) {
-                return null;
-            }
+        public AssistantPlan GetPlan(IPlanTarget previousPlanTarget) {
+            this.previousPlanTarget = previousPlanTarget;
 
-            List<PlanProject> filtered = new List<PlanProject>();
-            foreach (PlanProject planProject in projects) {
-                foreach (PlanTarget planTarget in planProject.Targets) {
-                    int twilightInclude = GetOverallTwilight(planTarget);
+            using (MyStopWatch.Measure("Assistant Plan Generation")) {
 
-                    Tuple<DateTime, DateTime> tuple = AstrometryUtils.GetImagingWindow(forDateTime, planTarget, activeProfile, planProject.HorizonDefinition, twilightInclude);
+                List<IPlanProject> projects = GetProjects(forDateTime, activeProfile.Id.ToString());
+
+                projects = FilterForReady(projects);
+                Logger.Trace($"Assistant: GetPlan after FilterForReady:\n{PlanProject.ListToString(projects)}");
+
+                projects = FilterForVisibility(projects);
+                Logger.Trace($"Assistant: GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
+
+                projects = FilterForMoonAvoidance(projects);
+                Logger.Trace($"Assistant: GetPlan after FilterForMoonAvoidance:\n{PlanProject.ListToString(projects)}");
+
+                ScoringEngine scoringEngine = new ScoringEngine(activeProfile, forDateTime, previousPlanTarget);
+                IPlanTarget planTarget = SelectTargetByScore(projects, scoringEngine);
+                if (planTarget != null) {
+                    Logger.Trace($"Assistant: GetPlan highest scoring target:\n{planTarget}");
+                }
+                else {
+                    Logger.Trace("Assistant: GetPlan no target selected by score");
                 }
 
-                /*
+                planTarget = PlanExposures(planTarget);
 
-        For each active project:
-            For each incomplete target, based on date and location:
-                Find most inclusive twilight over all incomplete exposure plans.
-                Is it visible (above horizon) for that begin/end twilight period?
-                Is the time-on-target > minimum imaging time?
-                If yes to all, add to potential target list
-
-                 */
+                return planTarget != null ? new AssistantPlan(planTarget, GetTargetTimeInterval(planTarget)) : null;
             }
-
-            return filtered;
         }
 
-        private List<PlanProject> FilterPass2(List<PlanProject> projects) {
-            if (projects?.Count == 0) {
+        /// <summary>
+        /// Review the project list and reject those projects that are not active, are outside their start/end dates,
+        /// or are already complete.
+        /// </summary>
+        /// <param name="projects"></param>
+        /// <returns></returns>
+        public List<IPlanProject> FilterForReady(List<IPlanProject> projects) {
+            if (projects == null || projects.Count == 0) {
                 return null;
             }
 
-            /*
-    Pass 2 applies the Moon Avoidance formula for each filter of each potential target, removing those filter plans that fail the check.
+            foreach (IPlanProject planProject in projects) {
 
-    For each potential target:
-        For each incomplete filter plan:
-            If enabled, determine moon avoidance - acceptable? Moon position can be calculated based on the midpoint of start/end times for this target.
-            If yes, add to list of filter plans for this target
+                if (planProject.State != Project.STATE_ACTIVE) {
+                    SetRejected(planProject, Reasons.ProjectNotActive);
+                    continue;
+                }
 
-    If all filter plans for a target were culled, remove it from the potential targets list. Revise the hard start/stop times based on the final set of
-    filter plans since it may shift with different twilight preferences per remaining filters.             */
-            throw new NotImplementedException();
+                if (forDateTime < planProject.StartDate || forDateTime > planProject.EndDate) {
+                    SetRejected(planProject, Reasons.ProjectDates);
+                    continue;
+                }
+
+                if (!ProjectIsInComplete(planProject)) {
+                    SetRejected(planProject, Reasons.ProjectComplete);
+                }
+            }
+
+            return PropagateRejections(projects);
         }
 
-        private PlanTarget FilterPass3(List<PlanProject> projects) {
-            if (projects?.Count == 0) {
+        /// <summary>
+        /// Review each project and the list of associated targets: reject those targets that are not visible.  If all targets
+        /// for the project are rejected, mark the project rejected too.  A target is visible if it is above the horizon
+        /// within the time window set by the most inclusive twilight over all incomplete exposure plans for that target AND that
+        /// visible time is greater than the minimum imaging time preference for the project.
+        /// </summary>
+        /// <param name="projects"></param>
+        /// <returns></returns>
+        public List<IPlanProject> FilterForVisibility(List<IPlanProject> projects) {
+            if (projects == null || projects.Count == 0) {
                 return null;
             }
 
-            /*
-             * Apply the scoring engine ...
-             * Also have to set the hard stop time here or maybe in pass 4
-             */
+            foreach (IPlanProject planProject in projects) {
 
-            throw new NotImplementedException();
+                foreach (IPlanTarget planTarget in planProject.Targets) {
+
+                    if (!AstrometryUtils.RisesAtLocation(observerInfo, planTarget.Coordinates)) {
+                        Logger.Warning($"Assistant: target {planProject.Name}/{planTarget.Name} never rises at location - skipping");
+                        SetRejected(planTarget, Reasons.TargetNeverRises);
+                        continue;
+                    }
+
+                    // Get the most inclusive twilight over all incomplete exposure plans
+                    NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, forDateTime);
+                    Tuple<DateTime, DateTime> twilightSpan = nighttimeCircumstances.GetTwilightSpan(GetOverallTwilight(planTarget));
+
+                    // Determine the potential imaging time span
+                    TargetCircumstances targetCircumstances = new TargetCircumstances(planTarget.Coordinates, observerInfo, planProject.HorizonDefinition, twilightSpan);
+
+                    // If the target is visible for at least the minimum time, then accept it
+                    if (targetCircumstances.IsVisible && (targetCircumstances.TimeOnTargetSeconds >= planProject.Preferences.MinimumTime * 60)) {
+                        planTarget.SetCircumstances(targetCircumstances);
+                    }
+                    else {
+                        SetRejected(planTarget, Reasons.TargetNotVisible);
+                    }
+                }
+            }
+
+            return PropagateRejections(projects);
         }
 
-        private PlanTarget FilterPass4(PlanTarget planTarget) {
+        /// <summary>
+        /// Review each project and the list of associated targets.  For each filter plan where moon avoidance is enabled,
+        /// determine the moon avoidance separation to the target at the midpoint of the imaging window for that target.
+        /// If the separation is less than the preference minimum, reject the filter plan.
+        /// </summary>
+        /// <param name="projects"></param>
+        /// <returns></returns>
+        public List<IPlanProject> FilterForMoonAvoidance(List<IPlanProject> projects) {
+            if (projects == null || projects.Count == 0) {
+                return null;
+            }
+
+            foreach (IPlanProject planProject in projects) {
+                if (planProject.Rejected) { continue; }
+
+                foreach (IPlanTarget planTarget in planProject.Targets) {
+                    if (planTarget.Rejected) { continue; }
+
+                    foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
+                        if (planFilter.IsIncomplete() && planFilter.Preferences.MoonAvoidanceEnabled) {
+                            if (RejectForMoonAvoidance(planTarget, planFilter)) {
+                                SetRejected(planFilter, Reasons.FilterMoonAvoidance);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return PropagateRejections(projects);
+        }
+
+        public IPlanTarget SelectTargetByScore(List<IPlanProject> projects, IScoringEngine scoringEngine) {
+            if (projects == null || projects.Count == 0) {
+                return null;
+            }
+
+            IPlanTarget highScoreTarget = null;
+            double highScore = 0;
+
+            foreach (IPlanProject planProject in projects) {
+                if (planProject.Rejected) { continue; }
+                scoringEngine.RuleWeights = planProject.Preferences.RuleWeights;
+
+                foreach (IPlanTarget planTarget in planProject.Targets) {
+                    if (planTarget.Rejected) { continue; }
+
+                    Logger.Debug($"Assistant: running scoring engine for project/target {planProject.Name}/{planTarget.Name}");
+                    double score = scoringEngine.ScoreTarget(planTarget);
+                    if (score > highScore) {
+                        highScoreTarget = planTarget;
+                        highScore = score;
+                    }
+                }
+            }
+
+            return highScoreTarget;
+        }
+
+        public IPlanTarget PlanExposures(IPlanTarget planTarget) {
             if (planTarget == null) {
                 return null;
             }
 
-            /*
-    Pass 4 refines the order of filters/exposures for the selected target:
-
-    - If the time span on the target includes twilight, order so that exposures with more restrictive twilight are not
-      scheduled during those periods. For example a NB filter set to image at astro twilight could be imaged during that time
-      at dusk and dawn, but a WB filter could not and would require nighttime darkness before imaging.
-    - Consideration may also be given to prioritizing filters with lower percent complete so that overall acquisition on a target is balanced.
-
-      We also have to set the # of PlannedExposures on each PlanFilter based on what we can get done
+            /* TODO: for now:
+             * - don't worry about twilight/filter interference
+             * - just let each filter get max it can until window is filled
              */
 
-            throw new NotImplementedException();
+            DateTime actualStartTime = planTarget.StartTime < DateTime.Now ? DateTime.Now : planTarget.StartTime;
+            int timeAvailable = (int)(planTarget.EndTime - actualStartTime).TotalSeconds;
+            int timeUsed = 0;
+
+            foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
+                if (planFilter.Rejected) { continue; }
+
+                int maxPossibleExposures = (int)((timeAvailable - timeUsed) / planFilter.ExposureLength);
+                planFilter.PlannedExposures = Math.Min(planFilter.NeededExposures, maxPossibleExposures);
+                timeUsed += planFilter.PlannedExposures * (int)planFilter.ExposureLength;
+
+                if (timeUsed >= timeAvailable) {
+                    break;
+                }
+            }
+
+            // Reject any that don't have exposures planned
+            foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
+                if (planFilter.Rejected) { continue; }
+
+                if (planFilter.PlannedExposures == 0) {
+                    planFilter.Rejected = true;
+                    planFilter.RejectedReason = Reasons.FilterNoExposuresPlanned;
+                }
+            }
+
+            /*  TODO: Pass 4 refines the order of filters/exposures for the selected target:
+                - If the time span on the target includes twilight, order so that exposures with more restrictive twilight are not
+                  scheduled during those periods. For example a NB filter set to image at astro twilight could be imaged during that time
+                  at dusk and dawn, but a WB filter could not and would require nighttime darkness before imaging.
+                - Consideration may also be given to prioritizing filters with lower percent complete so that overall acquisition on a target is balanced.
+             */
+
+            return planTarget;
         }
 
-        private int GetOverallTwilight(PlanTarget planTarget) {
-            int twilightInclude = 0;
+        private void SetRejected(IPlanProject planProject, string reason) {
+            planProject.Rejected = true;
+            planProject.RejectedReason = reason;
+        }
+
+        private void SetRejected(IPlanTarget planTarget, string reason) {
+            planTarget.Rejected = true;
+            planTarget.RejectedReason = reason;
+        }
+
+        private void SetRejected(IPlanFilter planFilter, string reason) {
+            planFilter.Rejected = true;
+            planFilter.RejectedReason = reason;
+        }
+
+        private List<IPlanProject> PropagateRejections(List<IPlanProject> projects) {
+            if (projects == null || projects.Count == 0) {
+                return null;
+            }
+
+            foreach (IPlanProject planProject in projects) {
+                if (planProject.Rejected) { continue; }
+                bool projectRejected = true;
+
+                foreach (IPlanTarget planTarget in planProject.Targets) {
+                    if (planTarget.Rejected) { continue; }
+                    bool targetRejected = true;
+
+                    foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
+                        if (!planFilter.Rejected) {
+                            targetRejected = false;
+                            break;
+                        }
+                    }
+
+                    if (targetRejected) {
+                        SetRejected(planTarget, Reasons.TargetAllFilterPlans);
+                    }
+
+                    if (!planTarget.Rejected) {
+                        projectRejected = false;
+                        break;
+                    }
+                }
+
+                if (projectRejected) {
+                    SetRejected(planProject, Reasons.ProjectAllTargets);
+                }
+            }
+
+            return projects;
+        }
+
+        private bool ProjectIsInComplete(IPlanProject planProject) {
+            bool incomplete = false;
+            foreach (IPlanTarget target in planProject.Targets) {
+                foreach (IPlanFilter planFilter in target.FilterPlans) {
+                    if (planFilter.IsIncomplete()) {
+                        incomplete = true;
+                    }
+                    else {
+                        SetRejected(planFilter, Reasons.FilterComplete);
+                    }
+                }
+            }
+
+            return incomplete;
+        }
+
+        private TimeInterval GetTargetTimeInterval(IPlanTarget planTarget) {
+            // TODO: last step is to set the hard start/stop for this target
+            // set start/end to overall start/end of all FilterPlans
+            // but then be sure to clip end by a hard (twilight or horizon) stop
+
+            // hard stop time is critical since that's the time we set to come back and run the planner again
+
+            NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, forDateTime);
+            DateTime hardStartTime = planTarget.StartTime < DateTime.Now ? DateTime.Now : planTarget.StartTime;
+            DateTime hardStopTime = planTarget.EndTime;
+
+            /* TODO: also update times based on twilight
             foreach (PlanFilter planFilter in planTarget.FilterPlans) {
-                // find most permissive (brightest) twilight over all plans
-                if (planFilter.Preferences.TwilightInclude > twilightInclude) {
+                if (planFilter.Rejected) { continue; }
+
+            }*/
+
+            return new TimeInterval(hardStartTime, hardStopTime);
+        }
+
+        private int GetOverallTwilight(IPlanTarget planTarget) {
+            int twilightInclude = AssistantFilterPreferences.TWILIGHT_INCLUDE_NONE;
+            foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
+                // find most permissive (brightest) twilight over all incomplete plans
+                if (planFilter.IsIncomplete() && planFilter.Preferences.TwilightInclude > twilightInclude) {
                     twilightInclude = planFilter.Preferences.TwilightInclude;
                 }
             }
@@ -118,124 +342,59 @@ namespace Assistant.NINAPlugin.Plan {
             return twilightInclude;
         }
 
-        private List<PlanProject> GetActiveProjects(DateTime forDateTime, string profileId) {
-            List<PlanProject> planProjects = new List<PlanProject>();
+        private bool RejectForMoonAvoidance(IPlanTarget planTarget, IPlanFilter planFilter) {
+            DateTime midPointTime = Utils.GetMidpointTime(planTarget.StartTime, planTarget.EndTime);
+            double moonAge = AstrometryUtils.GetMoonAge(midPointTime);
+            double moonSeparation = AstrometryUtils.GetMoonSeparationAngle(observerInfo, midPointTime, planTarget.Coordinates);
+            double moonAvoidanceSeparation = AstrometryUtils.GetMoonAvoidanceLorentzianSeparation(moonAge,
+                planFilter.Preferences.MoonAvoidanceSeparation, planFilter.Preferences.MoonAvoidanceWidth);
+            Logger.Trace($"Assistant: moon avoidance {planTarget.Name}/{planFilter.FilterName} midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
+
+            return moonSeparation < moonAvoidanceSeparation;
+        }
+
+        private List<IPlanProject> GetProjects(DateTime forDateTime, string profileId) {
             List<Project> projects = null;
+            List<FilterPreference> filterPrefs = null;
 
             AssistantDatabaseInteraction database = new AssistantDatabaseInteraction();
             using (var context = database.GetContext()) {
                 try {
                     projects = context.GetActiveProjects(profileId, forDateTime);
+                    filterPrefs = context.GetFilterPreferences(profileId);
                 }
                 catch (Exception ex) {
-                    Logger.Error($"exception accessing Assistant database: {ex}");
+                    Logger.Error($"Assistant: exception accessing Assistant: {ex}");
                     // TODO: need to throw so instruction can react properly
-                    // maybe: new SequenceEntityFailedException("");
+                    // maybe: new SequenceEntityFailedException("") ?
+                    // or a general exception and let the instruction decide what to throw
                 }
             }
 
-            if (projects?.Count == 0) {
+            if (projects == null || projects.Count == 0) {
                 return null;
             }
 
+            List<IPlanProject> planProjects = new List<IPlanProject>();
+            Dictionary<string, AssistantFilterPreferences> filterPrefsDictionary = GetFilterPrefDictionary(filterPrefs);
+
             foreach (Project project in projects) {
-                // TODO:
-                // create plan counterpart DTOs and add to planProjects
-                //   BUT cull exposure plans if complete, and whole target/project if all are complete
+                PlanProject planProject = new PlanProject(activeProfile, project, filterPrefsDictionary);
+                planProjects.Add(planProject);
             }
 
             return planProjects;
         }
 
-        /*
-        private bool ProjectIsComplete(PlanProject planProject) {
-            foreach (PlanTarget target in planProject.Targets) {
-                foreach (PlanExposure planExposure in target.FilterPlans) {
-                    if (planExposure.Accepted < planExposure.Desired) {
-                        return false;
-                    }
-                }
+        private Dictionary<string, AssistantFilterPreferences> GetFilterPrefDictionary(List<FilterPreference> filterPrefs) {
+            Dictionary<string, AssistantFilterPreferences> dict = new Dictionary<string, AssistantFilterPreferences>();
+
+            foreach (FilterPreference filterPref in filterPrefs) {
+                dict.Add(filterPref.filterName, filterPref.Preferences);
             }
 
-            return true;
+            return dict;
         }
-         */
-
-        /*
-        private AssistantPlan GetPlanOne() {
-            DateTime start = DateTime.Now.AddSeconds(5);
-            DateTime end = start.AddMinutes(10);
-
-            AssistantPlan plan = new AssistantPlan(start, end);
-
-            Target target = new Target();
-            target.name = "Antares";
-            target.ra = 16.5;
-            target.dec = -26.45;
-            target.rotation = 0;
-
-            PlanTarget planTarget = new PlanTarget(start, end, target);
-
-            ExposurePlan exposurePlan = new ExposurePlan();
-            exposurePlan.filterName = "Ha";
-            exposurePlan.exposure = 6;
-            exposurePlan.gain = 100;
-            PlanExposureOLD planExposure = new PlanExposureOLD(start, end, 3, exposurePlan);
-            planTarget.AddExposurePlan(planExposure);
-
-            exposurePlan = new ExposurePlan();
-            exposurePlan.filterName = "OIII";
-            exposurePlan.exposure = 6;
-            exposurePlan.gain = 100;
-            planExposure = new PlanExposureOLD(start, end, 3, exposurePlan);
-            planTarget.AddExposurePlan(planExposure);
-
-            plan.SetTarget(planTarget);
-
-            return plan;
-
-        }
-
-        private AssistantPlanOLD GetPlanTwo() {
-            DateTime start = DateTime.Now.AddSeconds(5);
-            DateTime end = start.AddMinutes(10);
-
-            AssistantPlanOLD plan = new AssistantPlanOLD(start, end);
-
-            Target target = new Target();
-            target.name = "M 42";
-            target.ra = 5.5;
-            target.dec = -15.0;
-            target.rotation = 0;
-
-            PlanTargetOLD planTarget = new PlanTargetOLD(start, end, target);
-
-            ExposurePlan exposurePlan = new ExposurePlan();
-            exposurePlan.filterName = "R";
-            exposurePlan.exposure = 4;
-            exposurePlan.gain = 100;
-            PlanExposureOLD planExposure = new PlanExposureOLD(start, end, 3, exposurePlan);
-            planTarget.AddExposurePlan(planExposure);
-
-            exposurePlan = new ExposurePlan();
-            exposurePlan.filterName = "G";
-            exposurePlan.exposure = 4;
-            exposurePlan.gain = 100;
-            planExposure = new PlanExposureOLD(start, end, 3, exposurePlan);
-            planTarget.AddExposurePlan(planExposure);
-
-            exposurePlan = new ExposurePlan();
-            exposurePlan.filterName = "B";
-            exposurePlan.exposure = 4;
-            exposurePlan.gain = 100;
-            planExposure = new PlanExposureOLD(start, end, 3, exposurePlan);
-            planTarget.AddExposurePlan(planExposure);
-
-            plan.SetTarget(planTarget);
-
-            return plan;
-
-        }*/
 
     }
 
