@@ -48,11 +48,6 @@ namespace Assistant.NINAPlugin.Database {
             return projects.ToList();
         }
 
-        public List<Project> GetProjectPreferences(string profileId) {
-            var projects = ProjectSet.Where(p => p.profileid.Equals(profileId));
-            return projects.ToList();
-        }
-
         public List<FilterPreference> GetFilterPreferences(string profileId) {
             var foo = FilterPreferencePlanSet.Where(p => p.profileId == profileId);
             return foo.ToList();

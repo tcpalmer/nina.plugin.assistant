@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS `target` (
 CREATE TABLE IF NOT EXISTS `filterplan` (
 	`id`			INTEGER NOT NULL,
 	`filtername`	TEXT NOT NULL,
+	`profileId`		TEXT NOT NULL,
 	`exposure`		REAL NOT NULL,
 	`gain`			INTEGER,
 	`offset`		INTEGER,

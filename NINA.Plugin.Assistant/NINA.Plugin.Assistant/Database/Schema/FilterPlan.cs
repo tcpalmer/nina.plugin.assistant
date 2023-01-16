@@ -32,8 +32,9 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public FilterPlan() { }
 
-        public FilterPlan(string profileId) {
+        public FilterPlan(string profileId, string filterName) {
             this.profileId = profileId;
+            this.filterName = filterName;
             exposure = 60;
             gain = 0;
             offset = 0;

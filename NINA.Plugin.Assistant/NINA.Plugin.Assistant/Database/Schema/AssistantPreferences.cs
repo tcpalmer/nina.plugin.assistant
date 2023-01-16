@@ -28,7 +28,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             UseCustomHorizon = false;
             HorizonOffset = 0;
             MinimumTime = 30;
-            EnableGrader = true;
+            EnableGrader = false;
             RuleWeights = new Dictionary<string, double>();
         }
 
@@ -64,7 +64,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
     public class AssistantFilterPreferences : AssistantPreferences {
 
-        // some logic depends on this integer order - so don't change
         public const int TWILIGHT_INCLUDE_NONE = 0;
         public const int TWILIGHT_INCLUDE_ASTRO = 1;
         public const int TWILIGHT_INCLUDE_NAUTICAL = 2;

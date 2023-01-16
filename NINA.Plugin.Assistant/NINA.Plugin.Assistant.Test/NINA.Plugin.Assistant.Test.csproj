@@ -321,6 +321,8 @@
     <Compile Include="Astrometry\TargetCircumstancesTest.cs" />
     <Compile Include="Astrometry\TestUtil.cs" />
     <Compile Include="Database\DbPlayTest.cs" />
+    <Compile Include="Database\GenerateTestDatabase.cs" />
+    <Compile Include="Database\Schema\AssistantPreferencesTest.cs" />
     <Compile Include="Plan\PlanMocks.cs" />
     <Compile Include="Plan\PlannerTest.cs" />
     <Compile Include="Plan\Scoring\Rules\PercentCompleteRuleTest.cs" />
@@ -366,9 +368,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Database\Schema\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Accord.3.8.0\build\Accord.targets" Condition="Exists('..\packages\Accord.3.8.0\build\Accord.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

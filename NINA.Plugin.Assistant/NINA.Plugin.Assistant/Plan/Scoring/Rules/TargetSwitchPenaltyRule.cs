@@ -2,7 +2,7 @@
 
     public class TargetSwitchPenaltyRule : ScoringRule {
 
-        public const string RULE_NAME = " Target Switch Penalty";
+        public const string RULE_NAME = "Target Switch Penalty";
         public const double DEFAULT_WEIGHT = 0.67;
 
         public override string Name { get { return RULE_NAME; } }
