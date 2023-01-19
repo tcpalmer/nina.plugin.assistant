@@ -14,20 +14,21 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
     public class AssistantProjectPreferences : AssistantPreferences {
 
+        public int MinimumTime { get; set; }
         public double MinimumAltitude { get; set; }
         public bool UseCustomHorizon { get; set; }
         public double HorizonOffset { get; set; }
-
-        public int MinimumTime { get; set; }
+        public int DitherEvery { get; set; }
         public bool EnableGrader { get; set; }
 
         public Dictionary<string, double> RuleWeights { get; set; }
 
         public override void SetDefaults() {
+            MinimumTime = 30;
             MinimumAltitude = 0;
             UseCustomHorizon = false;
             HorizonOffset = 0;
-            MinimumTime = 30;
+            DitherEvery = 0;
             EnableGrader = false;
             RuleWeights = new Dictionary<string, double>();
         }
@@ -46,10 +47,11 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"MinimumTime: {MinimumTime}");
             sb.AppendLine($"MinimumAltitude: {MinimumAltitude}");
             sb.AppendLine($"UseCustomHorizon: {UseCustomHorizon}");
             sb.AppendLine($"HorizonOffset: {HorizonOffset}");
-            sb.AppendLine($"MinimumTime: {MinimumTime}");
+            sb.AppendLine($"DitherEvery: {DitherEvery}");
             sb.AppendLine($"EnableGrader: {EnableGrader}");
 
             StringBuilder rw = new StringBuilder();

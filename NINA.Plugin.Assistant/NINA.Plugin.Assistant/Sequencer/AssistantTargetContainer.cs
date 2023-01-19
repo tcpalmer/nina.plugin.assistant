@@ -13,6 +13,7 @@ using NINA.Sequencer.SequenceItem;
 using NINA.Sequencer.SequenceItem.FilterWheel;
 using NINA.Sequencer.SequenceItem.Imaging;
 using NINA.Sequencer.SequenceItem.Platesolving;
+using NINA.Sequencer.Trigger.Guider;
 using NINA.Sequencer.Utility.DateTimeProvider;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
@@ -94,8 +95,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             ImageSaveWatcher imageSaveWatcher = null;
 
             try {
-                // Add a trigger to stop at target hard stop time
                 AddEndTimeTrigger(planTarget);
+                AddDitherTrigger(planTarget);
 
                 // If target is different from previous, slew/center/rotate
                 if (!planTarget.Equals(previousPlanTarget)) {
@@ -139,7 +140,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void AddSlewAndCenter(PlanTarget planTarget, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Info($"Assistant: adding slew/center target instruction for {planTarget.Name}, id={planTarget.Id}");
+            Logger.Info($"Assistant: adding slew/center target instruction for {planTarget.Name}, id={planTarget.PlanId}");
 
             Center center = null;
             if (planTarget.Rotation == 0) {
@@ -157,12 +158,21 @@ namespace Assistant.NINAPlugin.Sequencer {
             center.ErrorBehavior = this.ErrorBehavior;
             center.Attempts = this.Attempts;
             center.Coordinates = new InputCoordinates(planTarget.Coordinates);
-            Add(new WrappedInstruction(monitor, planTarget.Id, center));
+            Add(new WrappedInstruction(monitor, planTarget.PlanId, center));
         }
 
         private void AddEndTimeTrigger(IPlanTarget planTarget) {
             Logger.Info($"Assistant: adding target end time trigger, run until: {planTarget.EndTime}");
             Add(new AssistantTargetEndTimeTrigger(planTarget.EndTime));
+        }
+
+        private void AddDitherTrigger(IPlanTarget planTarget) {
+            int ditherEvery = planTarget.Project.Preferences.DitherEvery;
+            if (ditherEvery > 0) {
+                DitherAfterExposures ditherTrigger = new DitherAfterExposures(guiderMediator, imageHistoryVM, profileService);
+                ditherTrigger.AfterExposures = ditherEvery;
+                Add(ditherTrigger);
+            }
         }
 
         private void AddExposures(IPlanTarget planTarget) {
@@ -172,7 +182,7 @@ namespace Assistant.NINAPlugin.Sequencer {
              *     interrupted because of a dawn twilight change event.  Maybe each set of exposures for a filter plan goes into a
              *     separate child container (AssistantFilterPlanContainer)?  Those containers could then have stop triggers.
              *     An alternative is to only return a single filter plan with the choosen target, and make it go back to the planner
-             *     after that.
+             *     after that.  BUT what if you want to do LRGB<dither>LRGB<dither>?  Separate containers is just thrashing.
              */
 
             /* TODO: since our determination of target visibility over the course of a night will not detect the
@@ -185,7 +195,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 if (planFilter.Rejected) { continue; }
 
                 AddSwitchFilter(planFilter);
-                Logger.Info($"Assistant: adding exposures: count={planFilter.PlannedExposures}, filter={planFilter.FilterName}, exposure={planFilter.ExposureLength}, id={planFilter.Id}");
+                Logger.Info($"Assistant: adding exposures: count={planFilter.PlannedExposures}, filter={planFilter.FilterName}, exposure={planFilter.ExposureLength}, id={planFilter.PlanId}");
 
                 for (int i = 0; i < planFilter.PlannedExposures; i++) {
                     TakeExposure takeExposure = new TakeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM);
@@ -200,7 +210,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     takeExposure.Offset = GetOffset(planFilter.Offset);
                     takeExposure.Binning = planFilter.BinningMode;
 
-                    Add(new WrappedInstruction(monitor, planFilter.Id, takeExposure));
+                    Add(new WrappedInstruction(monitor, planFilter.PlanId, takeExposure));
                 }
             }
         }
@@ -216,7 +226,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             switchFilter.Attempts = this.Attempts;
 
             switchFilter.Filter = LookupFilter(planFilter.FilterName);
-            Add(new WrappedInstruction(monitor, planFilter.Id, switchFilter));
+            Add(new WrappedInstruction(monitor, planFilter.PlanId, switchFilter));
         }
 
         private FilterInfo LookupFilter(string filterName) {

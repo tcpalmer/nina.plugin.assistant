@@ -20,6 +20,9 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         public DateTime TransitTime { get; private set; }
         public DateTime SetBelowMinimumTime { get; private set; }
 
+        public DateTime RiseAboveMinimumTimeClipped { get => RiseAboveMinimumTime == DateTime.MinValue ? startTime : RiseAboveMinimumTime; }
+        public DateTime SetBelowMinimumTimeClipped { get => SetBelowMinimumTime == DateTime.MinValue ? endTime : SetBelowMinimumTime; }
+
         public TargetImagingCircumstances(ObserverInfo location, Coordinates target, DateTime startTime, DateTime endTime, HorizonDefinition horizonDefinition) {
 
             Assert.notNull(location, "location cannot be null");

@@ -4,7 +4,11 @@ using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Plan.Scoring;
 using Moq;
 using NINA.Astrometry;
+using NINA.Core.Model;
+using NINA.Image.ImageData;
+using NINA.Image.Interfaces;
 using NINA.Profile.Interfaces;
+using NINA.WPF.Base.Interfaces.Mediator;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,5 +88,47 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             return mse;
         }
 
+        public static ImageSavedEventArgs GetImageSavedEventArgs(DateTime onDateTime, string filterName) {
+            ImageMetaData metadata = new ImageMetaData();
+            metadata.Image.ExposureStart = onDateTime;
+            metadata.Image.Binning = "1x1";
+
+            RMS rms = new RMS();
+            rms.Total = 200;
+            //rms.Scale = 1.5;
+            rms.RA = 201;
+            rms.Dec = 202;
+            metadata.Image.RecordedRMS = rms;
+
+            metadata.Focuser.Position = 300;
+            metadata.Focuser.Temperature = 301;
+            metadata.Rotator.Position = 302;
+            metadata.Telescope.SideOfPier = NINA.Core.Enum.PierSide.pierWest;
+            metadata.Telescope.Airmass = 303;
+            metadata.Camera.Temperature = 304;
+            metadata.Camera.SetPoint = 305;
+            metadata.Camera.Gain = 306;
+            metadata.Camera.Offset = 307;
+
+            ImageSavedEventArgs msg = new ImageSavedEventArgs();
+            msg.MetaData = metadata;
+            msg.PathToImage = new Uri("file://path/to/image.fits");
+            msg.Duration = 60;
+            msg.Filter = filterName;
+
+            Mock<IImageStatistics> isMock = new Mock<IImageStatistics>();
+            isMock.SetupAllProperties();
+
+            Mock<IStarDetectionAnalysis> sdaMock = new Mock<IStarDetectionAnalysis>();
+            sdaMock.SetupAllProperties();
+            sdaMock.SetupProperty(m => m.DetectedStars, 100);
+            sdaMock.SetupProperty(m => m.HFR, 101);
+            sdaMock.SetupProperty(m => m.HFRStDev, 102);
+
+            msg.Statistics = isMock.Object;
+            msg.StarDetectionAnalysis = sdaMock.Object;
+
+            return msg;
+        }
     }
 }

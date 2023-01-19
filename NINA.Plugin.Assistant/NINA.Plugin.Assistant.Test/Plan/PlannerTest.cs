@@ -14,51 +14,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
     [TestFixture]
     public class PlannerTest {
 
-
-        [Test]
-        public void testFilterForReadyInactive() {
-            Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
-
-            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", Project.STATE_ACTIVE);
-            Mock<IPlanProject> pp2 = PlanMocks.GetMockPlanProject("pp2", Project.STATE_INACTIVE);
-            Mock<IPlanProject> pp3 = PlanMocks.GetMockPlanProject("pp3", Project.STATE_DRAFT);
-            Mock<IPlanProject> pp4 = PlanMocks.GetMockPlanProject("pp4", Project.STATE_CLOSED);
-
-            Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
-            Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("Ha", 10, 0);
-            PlanMocks.AddMockPlanFilter(pt, pf);
-            PlanMocks.AddMockPlanTarget(pp1, pt);
-
-            List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object, pp2.Object, pp3.Object, pp4.Object);
-
-            projects = new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object).FilterForReady(projects);
-            Assert.IsNotNull(projects);
-            projects.Count.Should().Be(4);
-
-            IPlanProject pp = projects[0];
-            pp.Name.Should().Be("pp1");
-            pp.Rejected.Should().BeFalse();
-            IPlanTarget pt1 = pp.Targets[0];
-            pt1.Rejected.Should().BeFalse();
-            IPlanFilter pf1 = pt1.FilterPlans[0];
-            pf1.Rejected.Should().BeFalse();
-
-            pp = projects[1];
-            pp.Name.Should().Be("pp2");
-            pp.Rejected.Should().BeTrue();
-            pp.RejectedReason.Should().Be(Reasons.ProjectNotActive);
-
-            pp = projects[2];
-            pp.Name.Should().Be("pp3");
-            pp.Rejected.Should().BeTrue();
-            pp.RejectedReason.Should().Be(Reasons.ProjectNotActive);
-
-            pp = projects[3];
-            pp.Name.Should().Be("pp4");
-            pp.Rejected.Should().BeTrue();
-            pp.RejectedReason.Should().Be(Reasons.ProjectNotActive);
-        }
-
         [Test]
         public void testFilterForReadyComplete() {
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
@@ -79,7 +34,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object, pp2.Object);
 
-            projects = new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object).FilterForReady(projects);
+            projects = new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object).FilterForIncomplete(projects);
             Assert.IsNotNull(projects);
             projects.Count.Should().Be(2);
 
@@ -102,44 +57,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pf1 = pt1.FilterPlans[1];
             pf1.Rejected.Should().BeTrue();
             pf1.RejectedReason.Should().Be(Reasons.FilterComplete);
-        }
-
-        [Test]
-        public void testFilterForReadyDates() {
-            Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
-
-            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", Project.STATE_ACTIVE);
-            Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
-            Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("Ha", 10, 0);
-            PlanMocks.AddMockPlanFilter(pt, pf);
-            PlanMocks.AddMockPlanTarget(pp1, pt);
-
-            Mock<IPlanProject> pp2 = PlanMocks.GetMockPlanProject("pp2", Project.STATE_ACTIVE);
-            pp2.SetupProperty(m => m.StartDate, new DateTime(2024, 1, 1));
-            pp2.SetupProperty(m => m.EndDate, new DateTime(2025, 1, 1));
-            pt = PlanMocks.GetMockPlanTarget("M31", TestUtil.M31);
-            pf = PlanMocks.GetMockPlanFilter("OIII", 10, 0);
-            PlanMocks.AddMockPlanFilter(pt, pf);
-            PlanMocks.AddMockPlanTarget(pp2, pt);
-
-            List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object, pp2.Object);
-
-            projects = new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object).FilterForReady(projects);
-            Assert.IsNotNull(projects);
-            projects.Count.Should().Be(2);
-
-            IPlanProject pp = projects[0];
-            pp.Name.Should().Be("pp1");
-            pp.Rejected.Should().BeFalse();
-            IPlanTarget pt1 = pp.Targets[0];
-            pt1.Rejected.Should().BeFalse();
-            IPlanFilter pf1 = pt1.FilterPlans[0];
-            pf1.Rejected.Should().BeFalse();
-
-            pp = projects[1];
-            pp.Name.Should().Be("pp2");
-            pp.Rejected.Should().BeTrue();
-            pp.RejectedReason.Should().Be(Reasons.ProjectDates);
         }
 
         [Test]

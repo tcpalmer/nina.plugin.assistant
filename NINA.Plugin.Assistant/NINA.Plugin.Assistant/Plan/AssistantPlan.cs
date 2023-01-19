@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
 using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Model.Equipment;
 using NINA.Profile.Interfaces;
@@ -10,19 +11,20 @@ using System.Text;
 namespace Assistant.NINAPlugin.Plan {
 
     public class AssistantPlan {
-
-        public string Id { get; private set; }
+        public string PlanId { get; private set; }
         public TimeInterval TimeInterval { get; private set; }
         public IPlanTarget PlanTarget { get; private set; }
 
         public AssistantPlan(IPlanTarget planTarget, TimeInterval timeInterval) {
-            this.Id = Guid.NewGuid().ToString();
+            this.PlanId = Guid.NewGuid().ToString();
             this.PlanTarget = planTarget;
             this.TimeInterval = timeInterval;
         }
     }
 
     public interface IPlanProject {
+        string PlanId { get; set; }
+        int DatabaseId { get; set; }
         string Name { get; set; }
         string Description { get; set; }
         int State { get; set; }
@@ -43,6 +45,8 @@ namespace Assistant.NINAPlugin.Plan {
 
     public class PlanProject : IPlanProject {
 
+        public string PlanId { get; set; }
+        public int DatabaseId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public int State { get; set; }
@@ -59,6 +63,8 @@ namespace Assistant.NINAPlugin.Plan {
         public string RejectedReason { get; set; }
 
         public PlanProject(IProfile profile, Project project, Dictionary<string, AssistantFilterPreferences> filterPreferences) {
+            this.PlanId = Guid.NewGuid().ToString();
+            this.DatabaseId = project.id;
             this.Name = project.name;
             this.Description = project.description;
             this.State = project.state;
@@ -85,8 +91,8 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"Description: {Description}");
             sb.AppendLine($"State: {Project.State(State)}");
             sb.AppendLine($"Priority: {Project.Priority(Priority)}");
-            sb.AppendLine($"StartDate: {StartDate}");
-            sb.AppendLine($"EndDate: {EndDate}");
+            sb.AppendLine($"StartDate: {Utils.FormatDateTimeFull(StartDate)}");
+            sb.AppendLine($"EndDate: {Utils.FormatDateTimeFull(EndDate)}");
             sb.AppendLine($"Horizon: {HorizonDefinition}");
             sb.AppendLine($"Rejected: {Rejected}");
             sb.AppendLine($"RejectedReason: {RejectedReason}");
@@ -123,7 +129,8 @@ namespace Assistant.NINAPlugin.Plan {
     }
 
     public interface IPlanTarget {
-        string Id { get; set; }
+        string PlanId { get; set; }
+        int DatabaseId { get; set; }
         string Name { get; set; }
         Coordinates Coordinates { get; set; }
         Epoch Epoch { get; set; }
@@ -143,7 +150,8 @@ namespace Assistant.NINAPlugin.Plan {
 
     public class PlanTarget : IPlanTarget {
 
-        public string Id { get; set; }
+        public string PlanId { get; set; }
+        public int DatabaseId { get; set; }
         public string Name { get; set; }
         public Coordinates Coordinates { get; set; }
         public Epoch Epoch { get; set; }
@@ -159,7 +167,8 @@ namespace Assistant.NINAPlugin.Plan {
         public DateTime CulminationTime { get; set; }
 
         public PlanTarget(IPlanProject planProject, Target target, Dictionary<string, AssistantFilterPreferences> filterPreferences) {
-            this.Id = Guid.NewGuid().ToString();
+            this.PlanId = Guid.NewGuid().ToString();
+            this.DatabaseId = target.id;
             this.Name = target.name;
             this.Coordinates = new Coordinates(Angle.ByHours(target.ra), Angle.ByDegree(target.dec), target.Epoch);
             this.Epoch = target.Epoch;
@@ -190,14 +199,14 @@ namespace Assistant.NINAPlugin.Plan {
 
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"Id: {Id}");
+            sb.AppendLine($"Id: {PlanId}");
             sb.AppendLine($"Name: {Name}");
             sb.AppendLine($"Coords: {Coordinates.RAString} {Coordinates.DecString} {Epoch}");
             sb.AppendLine($"Rotation: {Rotation}");
             sb.AppendLine($"ROI: {ROI}");
-            sb.AppendLine($"StartTime: {StartTime}");
-            sb.AppendLine($"EndTime: {EndTime}");
-            sb.AppendLine($"CulminationTime: {CulminationTime}");
+            sb.AppendLine($"StartTime: {Utils.FormatDateTimeFull(StartTime)}");
+            sb.AppendLine($"EndTime: {Utils.FormatDateTimeFull(EndTime)}");
+            sb.AppendLine($"CulminationTime: {Utils.FormatDateTimeFull(CulminationTime)}");
             sb.AppendLine($"Rejected: {Rejected}");
             sb.AppendLine($"RejectedReason: {RejectedReason}");
 
@@ -230,7 +239,8 @@ namespace Assistant.NINAPlugin.Plan {
     }
 
     public interface IPlanFilter {
-        string Id { get; set; }
+        string PlanId { get; set; }
+        int DatabaseId { get; set; }
         string FilterName { get; set; }
         double ExposureLength { get; set; }
         int? Gain { get; set; }
@@ -253,7 +263,8 @@ namespace Assistant.NINAPlugin.Plan {
 
     public class PlanFilter : IPlanFilter {
 
-        public string Id { get; set; }
+        public string PlanId { get; set; }
+        public int DatabaseId { get; set; }
         public string FilterName { get; set; }
         public double ExposureLength { get; set; }
         public int? Gain { get; set; }
@@ -272,7 +283,8 @@ namespace Assistant.NINAPlugin.Plan {
         public int PlannedExposures { get; set; }
 
         public PlanFilter(PlanTarget planTarget, FilterPlan filterPlan, AssistantFilterPreferences preferences) {
-            this.Id = Guid.NewGuid().ToString();
+            this.PlanId = Guid.NewGuid().ToString();
+            this.DatabaseId = filterPlan.id;
             this.FilterName = filterPlan.filterName;
             this.ExposureLength = filterPlan.exposure;
             this.Gain = filterPlan.gain;
@@ -292,7 +304,7 @@ namespace Assistant.NINAPlugin.Plan {
 
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"Id: {Id}");
+            sb.AppendLine($"Id: {PlanId}");
             sb.AppendLine($"FilterName: {FilterName}");
             sb.AppendLine($"ExposureLength: {ExposureLength}");
             sb.AppendLine($"Gain: {Gain}");
@@ -313,8 +325,6 @@ namespace Assistant.NINAPlugin.Plan {
 
     public class Reasons {
 
-        public const string ProjectNotActive = "not active";
-        public const string ProjectDates = "not within start/stop dates";
         public const string ProjectComplete = "complete";
         public const string ProjectNoVisibleTargets = "no visible targets";
         public const string ProjectMoonAvoidance = "moon avoidance";

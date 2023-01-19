@@ -11,10 +11,11 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
         public void TestProjectPreferencesSetDefaults() {
             var sut = new AssistantProjectPreferences();
             sut.SetDefaults();
+            sut.MinimumTime.Should().Be(30);
             sut.MinimumAltitude.Should().BeApproximately(0, 0.0001);
             sut.UseCustomHorizon.Should().BeFalse();
             sut.HorizonOffset.Should().BeApproximately(0, 0.0001);
-            sut.MinimumTime.Should().Be(30);
+            sut.DitherEvery.Should().Be(0);
             sut.EnableGrader.Should().BeFalse();
             sut.RuleWeights.Should().NotBeNull();
         }

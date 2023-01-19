@@ -58,3 +58,12 @@ CREATE TABLE IF NOT EXISTS `filterplan` (
 	PRIMARY KEY(`id`),
 	FOREIGN KEY(`targetid`) REFERENCES `target`(`id`)
 );
+
+CREATE TABLE IF NOT EXISTS `acquiredimage` (
+	`id`			INTEGER NOT NULL,
+	`targetId`		INTEGER NOT NULL,
+	`acquireddate`	INTEGER,
+	`filtername`	TEXT NOT NULL,
+    `metadata`		TEXT NOT NULL,
+	PRIMARY KEY(`id`)
+);

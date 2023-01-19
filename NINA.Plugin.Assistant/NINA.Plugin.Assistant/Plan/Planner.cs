@@ -13,13 +13,13 @@ namespace Assistant.NINAPlugin.Plan {
 
     public class Planner {
 
-        private DateTime forDateTime;
+        private DateTime atTime;
         private IProfile activeProfile;
         private IPlanTarget previousPlanTarget;
         private ObserverInfo observerInfo;
 
-        public Planner(DateTime forDateTime, IProfileService profileService) {
-            this.forDateTime = forDateTime;
+        public Planner(DateTime atTime, IProfileService profileService) {
+            this.atTime = atTime;
             this.activeProfile = profileService.ActiveProfile;
             this.observerInfo = new ObserverInfo {
                 Latitude = activeProfile.AstrometrySettings.Latitude,
@@ -34,21 +34,22 @@ namespace Assistant.NINAPlugin.Plan {
 
         public AssistantPlan GetPlan(IPlanTarget previousPlanTarget) {
             this.previousPlanTarget = previousPlanTarget;
+            Logger.Debug($"Assistant: getting current plan for {atTime}");
 
             using (MyStopWatch.Measure("Assistant Plan Generation")) {
 
-                List<IPlanProject> projects = GetProjects(forDateTime, activeProfile.Id.ToString());
+                List<IPlanProject> projects = GetProjects(atTime, activeProfile.Id.ToString());
 
-                projects = FilterForReady(projects);
-                Logger.Trace($"Assistant: GetPlan after FilterForReady:\n{PlanProject.ListToString(projects)}");
+                projects = FilterForIncomplete(projects);
+                //Logger.Trace($"Assistant: GetPlan after FilterForIncomplete:\n{PlanProject.ListToString(projects)}");
 
                 projects = FilterForVisibility(projects);
-                Logger.Trace($"Assistant: GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
+                //Logger.Trace($"Assistant: GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
 
                 projects = FilterForMoonAvoidance(projects);
                 Logger.Trace($"Assistant: GetPlan after FilterForMoonAvoidance:\n{PlanProject.ListToString(projects)}");
 
-                ScoringEngine scoringEngine = new ScoringEngine(activeProfile, forDateTime, previousPlanTarget);
+                ScoringEngine scoringEngine = new ScoringEngine(activeProfile, atTime, previousPlanTarget);
                 IPlanTarget planTarget = SelectTargetByScore(projects, scoringEngine);
                 if (planTarget != null) {
                     Logger.Trace($"Assistant: GetPlan highest scoring target:\n{planTarget}");
@@ -59,33 +60,21 @@ namespace Assistant.NINAPlugin.Plan {
 
                 planTarget = PlanExposures(planTarget);
 
-                return planTarget != null ? new AssistantPlan(planTarget, GetTargetTimeInterval(planTarget)) : null;
+                return planTarget != null ? new AssistantPlan(planTarget, GetTargetTimeInterval(atTime, planTarget)) : null;
             }
         }
 
         /// <summary>
-        /// Review the project list and reject those projects that are not active, are outside their start/end dates,
-        /// or are already complete.
+        /// Review the project list and reject those projects that are already complete.
         /// </summary>
         /// <param name="projects"></param>
         /// <returns></returns>
-        public List<IPlanProject> FilterForReady(List<IPlanProject> projects) {
+        public List<IPlanProject> FilterForIncomplete(List<IPlanProject> projects) {
             if (projects == null || projects.Count == 0) {
                 return null;
             }
 
             foreach (IPlanProject planProject in projects) {
-
-                if (planProject.State != Project.STATE_ACTIVE) {
-                    SetRejected(planProject, Reasons.ProjectNotActive);
-                    continue;
-                }
-
-                if (forDateTime < planProject.StartDate || forDateTime > planProject.EndDate) {
-                    SetRejected(planProject, Reasons.ProjectDates);
-                    continue;
-                }
-
                 if (!ProjectIsInComplete(planProject)) {
                     SetRejected(planProject, Reasons.ProjectComplete);
                 }
@@ -118,14 +107,19 @@ namespace Assistant.NINAPlugin.Plan {
                     }
 
                     // Get the most inclusive twilight over all incomplete exposure plans
-                    NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, forDateTime);
+                    NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, atTime);
                     Tuple<DateTime, DateTime> twilightSpan = nighttimeCircumstances.GetTwilightSpan(GetOverallTwilight(planTarget));
+                    Logger.Trace($"*** Twilight span {twilightSpan.Item1} - {twilightSpan.Item2}");
 
                     // Determine the potential imaging time span
                     TargetCircumstances targetCircumstances = new TargetCircumstances(planTarget.Coordinates, observerInfo, planProject.HorizonDefinition, twilightSpan);
 
+                    DateTime actualStart = atTime > targetCircumstances.RiseAboveHorizonTime ? atTime : targetCircumstances.RiseAboveHorizonTime;
+                    int TimeOnTargetSeconds = (int)(targetCircumstances.SetBelowHorizonTime - actualStart).TotalSeconds;
+                    Logger.Trace($"Assistant: TargetCircumstances:\n{targetCircumstances}, timeOnTarget={TimeOnTargetSeconds}");
+
                     // If the target is visible for at least the minimum time, then accept it
-                    if (targetCircumstances.IsVisible && (targetCircumstances.TimeOnTargetSeconds >= planProject.Preferences.MinimumTime * 60)) {
+                    if (targetCircumstances.IsVisible && (TimeOnTargetSeconds >= planProject.Preferences.MinimumTime * 60)) {
                         planTarget.SetCircumstances(targetCircumstances);
                     }
                     else {
@@ -310,15 +304,15 @@ namespace Assistant.NINAPlugin.Plan {
             return incomplete;
         }
 
-        private TimeInterval GetTargetTimeInterval(IPlanTarget planTarget) {
+        private TimeInterval GetTargetTimeInterval(DateTime atTime, IPlanTarget planTarget) {
             // TODO: last step is to set the hard start/stop for this target
             // set start/end to overall start/end of all FilterPlans
             // but then be sure to clip end by a hard (twilight or horizon) stop
 
             // hard stop time is critical since that's the time we set to come back and run the planner again
 
-            NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, forDateTime);
-            DateTime hardStartTime = planTarget.StartTime < DateTime.Now ? DateTime.Now : planTarget.StartTime;
+            NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, atTime);
+            DateTime hardStartTime = planTarget.StartTime < atTime ? atTime : planTarget.StartTime;
             DateTime hardStopTime = planTarget.EndTime;
 
             /* TODO: also update times based on twilight
@@ -353,18 +347,18 @@ namespace Assistant.NINAPlugin.Plan {
             return moonSeparation < moonAvoidanceSeparation;
         }
 
-        private List<IPlanProject> GetProjects(DateTime forDateTime, string profileId) {
+        private List<IPlanProject> GetProjects(DateTime atTime, string profileId) {
             List<Project> projects = null;
             List<FilterPreference> filterPrefs = null;
 
             AssistantDatabaseInteraction database = new AssistantDatabaseInteraction();
             using (var context = database.GetContext()) {
                 try {
-                    projects = context.GetActiveProjects(profileId, forDateTime);
+                    projects = context.GetActiveProjects(profileId, atTime);
                     filterPrefs = context.GetFilterPreferences(profileId);
                 }
                 catch (Exception ex) {
-                    Logger.Error($"Assistant: exception accessing Assistant: {ex}");
+                    Logger.Error($"Assistant: exception reading database: {ex}");
                     // TODO: need to throw so instruction can react properly
                     // maybe: new SequenceEntityFailedException("") ?
                     // or a general exception and let the instruction decide what to throw
@@ -372,6 +366,7 @@ namespace Assistant.NINAPlugin.Plan {
             }
 
             if (projects == null || projects.Count == 0) {
+                Logger.Warning("Assistant: no projects are active and within start/end dates at planning time");
                 return null;
             }
 

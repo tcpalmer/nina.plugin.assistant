@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
 using NINA.Core.Model;
 using NINA.Core.Utility;
@@ -29,6 +30,7 @@ namespace Assistant.NINAPlugin.Sequencer {
     [ExportMetadata("Icon", "Assistant.AssistantSVG")]
     [ExportMetadata("Category", "Sequencer Assistant")]
     [Export(typeof(ISequenceItem))]
+    [Export(typeof(ISequenceContainer))]
     [JsonObject(MemberSerialization.OptIn)]
     public class AssistantInstruction : SequentialContainer, IValidatable {
 
@@ -151,24 +153,34 @@ namespace Assistant.NINAPlugin.Sequencer {
             IPlanTarget previousPlanTarget = null;
 
             while (true) {
-                AssistantPlan plan = new Planner(DateTime.Now, profileService).GetPlan(previousPlanTarget);
+                //DateTime atTime = DateTime.Now;
+                // TODO: hack time!
+                DateTime HACK_TIME = new DateTime(2023, 1, 19, 23, 30, 0);
+                DateTime atTime = HACK_TIME;
+                Logger.Warning($"Assistant: using hacked time {Utils.FormatDateTimeFull(HACK_TIME)}");
+
+                AssistantPlan plan = new Planner(atTime, profileService).GetPlan(previousPlanTarget);
                 if (plan == null) {
+
+                    // TODO: not correct!  We could have a gap where no target is visible but waiting hh:mm:ss let's another get in range
+                    // plan could return a wait time and a null planTarget
+
                     Logger.Info("Assistant: planner returned empty plan, done");
-                    break;
+                    return Task.CompletedTask;
                 }
 
                 IPlanTarget planTarget = plan.PlanTarget;
 
                 Logger.Info($"Assistant: starting execution of plan target: {planTarget.Name}");
 
-                // If interval for this target has passed, we're done (really shouldn't happen)
+                // If interval for this target has passed, we're done (shouldn't happen in real usage)
                 if (DateTime.Now > plan.TimeInterval.EndTime) {
-                    Logger.Warning($"Assistant: time interval for the target has passed, end time: {planTarget.EndTime}");
+                    Logger.Warning($"Assistant: time interval for the target has passed, end time: {Utils.FormatDateTimeFull(planTarget.EndTime)}");
                     return Task.CompletedTask;
                 }
 
                 // Wait for the target start time
-                WaitForStart(planTarget, progress, token);
+                WaitForStart(atTime, planTarget, progress, token);
 
                 // TODO: needs to be accessible for binding from xaml
                 AssistantStatusMonitor monitor = new AssistantStatusMonitor(planTarget);
@@ -190,11 +202,10 @@ namespace Assistant.NINAPlugin.Sequencer {
             return Task.CompletedTask;
         }
 
-        private void WaitForStart(IPlanTarget planTarget, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            DateTime now = DateTime.Now;
-            if (planTarget.StartTime > now) {
-                TimeSpan duration = planTarget.StartTime - now;
-                Logger.Debug($"Assistant: waiting for target start time: {planTarget.StartTime}");
+        private void WaitForStart(DateTime atTime, IPlanTarget planTarget, IProgress<ApplicationStatus> progress, CancellationToken token) {
+            if (planTarget.StartTime > atTime) {
+                TimeSpan duration = planTarget.StartTime - atTime;
+                Logger.Debug($"Assistant: waiting for target start time: {Utils.FormatDateTimeFull(planTarget.StartTime)}");
                 CoreUtil.Wait(duration, token, progress).Wait(token);
                 Logger.Debug("Assistant: done waiting for target start time");
             }

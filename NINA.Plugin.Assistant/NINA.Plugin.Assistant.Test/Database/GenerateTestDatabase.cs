@@ -26,7 +26,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
         }
 
         [Test]
-        //[Ignore("tbd")]
+        [Ignore("tbd")]
         public void TomTest1() {
             string profileId = "3c160865-776f-4f72-8a05-5964225ca0fa";
             using (var context = db.GetContext()) {
@@ -52,13 +52,22 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p1.targets.Add(t1);
 
                     FilterPlan fp = new FilterPlan(profileId, "Ha");
-                    fp.desired = 5;
+                    fp.desired = 3;
+                    fp.exposure = 20;
+                    fp.gain = 100;
+                    fp.offset = 10;
                     t1.filterplans.Add(fp);
                     fp = new FilterPlan(profileId, "OIII");
-                    fp.desired = 5;
+                    fp.desired = 3;
+                    fp.exposure = 20;
+                    fp.gain = 100;
+                    fp.offset = 10;
                     t1.filterplans.Add(fp);
                     fp = new FilterPlan(profileId, "SII");
-                    fp.desired = 5;
+                    fp.desired = 3;
+                    fp.exposure = 20;
+                    fp.gain = 100;
+                    fp.offset = 10;
                     t1.filterplans.Add(fp);
 
                     context.ProjectSet.Add(p1);
@@ -84,13 +93,22 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p2.targets.Add(t2);
 
                     fp = new FilterPlan(profileId, "Ha");
-                    fp.desired = 10;
+                    fp.desired = 5;
+                    fp.exposure = 20;
+                    fp.gain = 100;
+                    fp.offset = 10;
                     t2.filterplans.Add(fp);
                     fp = new FilterPlan(profileId, "OIII");
-                    fp.desired = 10;
+                    fp.desired = 5;
+                    fp.exposure = 20;
+                    fp.gain = 100;
+                    fp.offset = 10;
                     t2.filterplans.Add(fp);
                     fp = new FilterPlan(profileId, "SII");
-                    fp.desired = 10;
+                    fp.desired = 5;
+                    fp.exposure = 20;
+                    fp.gain = 100;
+                    fp.offset = 10;
                     t2.filterplans.Add(fp);
 
                     context.ProjectSet.Add(p2);
@@ -100,6 +118,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Ha", afp));
                     context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "OIII", afp));
                     context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "SII", afp));
+
+                    //ImageMetadata imd = new ImageMetadata(PlanMocks.GetImageSavedEventArgs(DateTime.Now, "Ha"));
+                    //AcquiredImage ai = new AcquiredImage(1, DateTime.Now, "Ha", imd);
+                    //context.AcquiredImageSet.Add(ai);
 
                     context.SaveChanges();
 
@@ -137,7 +159,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
             }
         }
 
-        private List<IPlanProject> ReadAndDump(string profileId, DateTime forDateTime) {
+        private List<IPlanProject> ReadAndDump(string profileId, DateTime atTime) {
 
             List<Project> projects = null;
             List<FilterPreference> filterPrefs = null;
@@ -145,7 +167,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
             AssistantDatabaseInteraction database = GetDatabase();
             using (var context = database.GetContext()) {
                 try {
-                    projects = context.GetActiveProjects(profileId, forDateTime);
+                    projects = context.GetActiveProjects(profileId, atTime);
                     filterPrefs = context.GetFilterPreferences(profileId);
                 }
                 catch (Exception ex) {

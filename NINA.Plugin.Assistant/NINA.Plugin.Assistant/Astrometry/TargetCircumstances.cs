@@ -13,7 +13,6 @@ namespace Assistant.NINAPlugin.Astrometry {
         public DateTime RiseAboveHorizonTime { get; private set; }
         public DateTime SetBelowHorizonTime { get; private set; }
         public DateTime CulminationTime { get; private set; }
-        public int TimeOnTargetSeconds { get; private set; }
         public bool IsVisible { get; private set; }
 
         private readonly Coordinates coordinates;
@@ -30,7 +29,7 @@ namespace Assistant.NINAPlugin.Astrometry {
             this.endTime = twilightSpan.Item2;
 
             string cacheKey = GetCacheKey();
-            Logger.Info($"TargetCircumstances cache key: {cacheKey}");
+            Logger.Trace($"TargetCircumstances cache key: {cacheKey}");
 
             TargetCircumstances targetCircumstances = TargetCircumstancesCache.GetTargetCircumstances(cacheKey);
             if (targetCircumstances == null) {
@@ -41,7 +40,6 @@ namespace Assistant.NINAPlugin.Astrometry {
                 this.RiseAboveHorizonTime = targetCircumstances.RiseAboveHorizonTime;
                 this.SetBelowHorizonTime = targetCircumstances.SetBelowHorizonTime;
                 this.CulminationTime = targetCircumstances.CulminationTime;
-                this.TimeOnTargetSeconds = targetCircumstances.TimeOnTargetSeconds;
                 this.IsVisible = targetCircumstances.IsVisible;
             }
         }
@@ -53,24 +51,18 @@ namespace Assistant.NINAPlugin.Astrometry {
             this.IsVisible = status == TargetImagingCircumstances.STATUS_POTENTIALLY_VISIBLE;
 
             if (IsVisible) {
-                this.RiseAboveHorizonTime = tc.RiseAboveMinimumTime;
-                this.SetBelowHorizonTime = tc.SetBelowMinimumTime;
+                this.RiseAboveHorizonTime = tc.RiseAboveMinimumTimeClipped;
+                this.SetBelowHorizonTime = tc.SetBelowMinimumTimeClipped;
                 this.CulminationTime = tc.TransitTime;
-
-                DateTime actualStart = DateTime.Now > RiseAboveHorizonTime ? DateTime.Now : RiseAboveHorizonTime;
-                this.TimeOnTargetSeconds = (int)(SetBelowHorizonTime - actualStart).TotalSeconds;
-            }
-            else {
-                this.TimeOnTargetSeconds = 0;
             }
         }
 
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"IsVisible:            {IsVisible}");
             sb.AppendLine($"RiseAboveHorizonTime: {RiseAboveHorizonTime}");
             sb.AppendLine($"SetAboveHorizonTime:  {SetBelowHorizonTime}");
             sb.AppendLine($"CulminationTime:      {CulminationTime}");
-            sb.AppendLine($"IsVisible:            {IsVisible}");
             return sb.ToString();
         }
 

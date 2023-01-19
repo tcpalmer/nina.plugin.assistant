@@ -1,22 +1,16 @@
-﻿using NINA.Astrometry;
+﻿using Assistant.NINAPlugin.Astrometry;
 using NUnit.Framework;
+using System;
 
 namespace NINA.Plugin.Assistant.Test.Astrometry {
 
     [TestFixture]
     public class TargetCircumstancesTest {
 
-        //[Test]
+        [Test]
         public void TargetCircumstances() {
-            ObserverInfo location = new ObserverInfo { Latitude = 35.852934, Longitude = -79.163632 };
-
-            double ra = AstroUtil.HMSToDegrees("5:35:18.57");
-            double dec = AstroUtil.DMSToDegrees("-5:23:31.5");
-            Coordinates coordinates = new Coordinates(ra, dec, Epoch.J2000, Coordinates.RAType.Degrees);
-            TestContext.WriteLine($"Coords: {coordinates}");
-
-            //var sut = new TargetCircumstances(coordinates, location, DateTime.Now, DateTime.Now);
-            //TestContext.WriteLine($"TC:\n{sut}");
+            Tuple<DateTime, DateTime> twilightSpan = new Tuple<DateTime, DateTime>(new DateTime(2023, 1, 16, 18, 50, 0), new DateTime(2023, 1, 17, 5, 50, 0));
+            var sut = new TargetCircumstances(TestUtil.M42, TestUtil.TEST_LOCATION_4, new HorizonDefinition(10), twilightSpan);
         }
 
     }

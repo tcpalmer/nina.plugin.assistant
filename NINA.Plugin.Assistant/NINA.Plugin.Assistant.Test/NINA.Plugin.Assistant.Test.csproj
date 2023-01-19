@@ -320,9 +320,11 @@
     <Compile Include="Astrometry\Solver\TestAltitudeRefiner.cs" />
     <Compile Include="Astrometry\TargetCircumstancesTest.cs" />
     <Compile Include="Astrometry\TestUtil.cs" />
+    <Compile Include="Database\AssistantDatabaseTest.cs" />
     <Compile Include="Database\DbPlayTest.cs" />
     <Compile Include="Database\GenerateTestDatabase.cs" />
     <Compile Include="Database\Schema\AssistantPreferencesTest.cs" />
+    <Compile Include="Database\Schema\ImageMetadataTest.cs" />
     <Compile Include="Plan\PlanMocks.cs" />
     <Compile Include="Plan\PlannerTest.cs" />
     <Compile Include="Plan\Scoring\Rules\PercentCompleteRuleTest.cs" />

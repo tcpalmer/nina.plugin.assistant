@@ -39,6 +39,8 @@ namespace Assistant.NINAPlugin {
             if (!Directory.Exists(PLUGIN_HOME)) {
                 Directory.CreateDirectory(PLUGIN_HOME);
             }
+
+            // TODO: backup database at the start of each NINA run, only keep 10 copies
         }
 
         public override Task Teardown() {

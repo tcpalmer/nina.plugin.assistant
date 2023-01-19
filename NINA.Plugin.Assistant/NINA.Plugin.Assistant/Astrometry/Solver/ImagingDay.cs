@@ -84,32 +84,6 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
             return setBelowMinimum != null ? setBelowMinimum.AtTime : DateTime.MinValue;
         }
 
-        /*
-        private Altitudes GetInitialSamplePositions() {
-            List<AltitudeAtTime> alts = new List<AltitudeAtTime>(2);
-
-            HorizontalCoordinate hz = AstrometryUtils.GetHorizontalCoordinates(Location, Target, StartDate);
-            alts.Add(new AltitudeAtTime(hz.Altitude, hz.Azimuth, StartDate));
-
-            hz = AstrometryUtils.GetHorizontalCoordinates(Location, Target, EndDate);
-            alts.Add(new AltitudeAtTime(hz.Altitude, hz.Azimuth, EndDate));
-
-            // Sample every 5 minutes
-            int numPoints = (int)(EndDate.Subtract(StartDate).TotalMinutes / 5);
-            return refiner.Refine(new Altitudes(alts), numPoints);
-        }
-
-        private Altitudes GetInitialTransitSpan() {
-            List<AltitudeAtTime> alts = new List<AltitudeAtTime>(3);
-            int size = SamplePositions.AltitudeList.Count;
-
-            alts.Add(SamplePositions.AltitudeList[0]);
-            alts.Add(SamplePositions.AltitudeList[size / 2]);
-            alts.Add(SamplePositions.AltitudeList[size - 1]);
-
-            return new Altitudes(alts);
-        }*/
-
         private Altitudes GetInitialSamplePositions() {
             return GetSamplePositions(StartDate, EndDate);
         }

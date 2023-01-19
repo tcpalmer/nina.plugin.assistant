@@ -35,6 +35,29 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
         }
 
         [Test]
+        public void TestClipped() {
+            DateTime start = new DateTime(2023, 1, 17, 18, 58, 0);
+            DateTime end = new DateTime(2023, 1, 18, 5, 55, 0);
+
+            TargetImagingCircumstances tic = new TargetImagingCircumstances(TestUtil.TEST_LOCATION_1, TestUtil.BETELGEUSE, start, end, TestUtil.getHD(0));
+            tic.Analyze();
+
+            tic.RiseAboveMinimumTime.Should().Be(DateTime.MinValue);
+            TestUtil.AssertTime(start, tic.RiseAboveMinimumTimeClipped, start.Hour, start.Minute, start.Second);
+            TestUtil.AssertTime(end, tic.SetBelowMinimumTime, 4, 41, 53);
+
+            start = new DateTime(2022, 11, 22, 18, 35, 0);
+            end = new DateTime(2022, 11, 23, 5, 30, 0);
+
+            tic = new TargetImagingCircumstances(TestUtil.TEST_LOCATION_1, TestUtil.BETELGEUSE, start, end, TestUtil.getHD(0));
+            tic.Analyze();
+
+            TestUtil.AssertTime(start, tic.RiseAboveMinimumTime, 19, 42, 22);
+            tic.SetBelowMinimumTime.Should().Be(DateTime.MinValue);
+            TestUtil.AssertTime(end, tic.SetBelowMinimumTimeClipped, end.Hour, end.Minute, end.Second);
+        }
+
+        [Test]
         public void TestBad() {
             DateTime dt = DateTime.Now;
 

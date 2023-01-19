@@ -10,8 +10,8 @@ namespace Assistant.NINAPlugin.Util {
             return $"{hours}h {min}m";
         }
 
-        public static string FormatDateTimeFull(DateTime dateTime) {
-            return String.Format("{0:MM/dd/yyyy HH:mm:ss zzzz}", dateTime);
+        public static string FormatDateTimeFull(DateTime? dateTime) {
+            return dateTime == null ? "n/a" : String.Format("{0:MM/dd/yyyy HH:mm:ss zzzz}", dateTime);
         }
 
         public static DateTime GetMidpointTime(DateTime startTime, DateTime endTime) {
