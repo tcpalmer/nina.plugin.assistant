@@ -161,45 +161,62 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 AssistantPlan plan = new Planner(atTime, profileService).GetPlan(previousPlanTarget);
                 if (plan == null) {
-
-                    // TODO: not correct!  We could have a gap where no target is visible but waiting hh:mm:ss let's another get in range
-                    // plan could return a wait time and a null planTarget
-
                     Logger.Info("Assistant: planner returned empty plan, done");
                     return Task.CompletedTask;
                 }
 
                 IPlanTarget planTarget = plan.PlanTarget;
 
-                Logger.Info($"Assistant: starting execution of plan target: {planTarget.Name}");
-
-                // If interval for this target has passed, we're done (shouldn't happen in real usage)
-                if (DateTime.Now > plan.TimeInterval.EndTime) {
-                    Logger.Warning($"Assistant: time interval for the target has passed, end time: {Utils.FormatDateTimeFull(planTarget.EndTime)}");
-                    return Task.CompletedTask;
+                if (planTarget == null) {
+                    Logger.Info("Assistant: planner waiting for next target to become available");
+                    WaitForNextTarget(atTime, plan.WaitForNextTargetTime, token);
                 }
+                else {
+                    Logger.Info($"Assistant: starting execution of plan target: {planTarget.Name}");
 
-                // Wait for the target start time
-                WaitForStart(atTime, planTarget, progress, token);
+                    // If interval for this target has passed, we're done (shouldn't happen in real usage)
+                    if (DateTime.Now > plan.TimeInterval.EndTime) {
+                        Logger.Warning($"Assistant: time interval for the target has passed, end time: {Utils.FormatDateTimeFull(planTarget.EndTime)}");
+                        return Task.CompletedTask;
+                    }
 
-                // TODO: needs to be accessible for binding from xaml
-                AssistantStatusMonitor monitor = new AssistantStatusMonitor(planTarget);
+                    // Wait for the target start time
+                    // TODO: need to figure out if this is the first time we're waiting?  Or do we need to stop tracking/guiding/etc?
+                    WaitForStart(atTime, planTarget, progress, token);
 
-                // Create a container for this target, add the instructions, and execute
-                try {
-                    AssistantTargetContainer targetContainer = GetTargetContainer(previousPlanTarget, planTarget, monitor);
-                    Logger.Debug("Assistant: executing target container instructions");
-                    targetContainer.Execute(progress, token).Wait();
-                    Logger.Debug("Assistant: done executing target container instructions");
+                    // TODO: needs to be accessible for binding from xaml
+                    AssistantStatusMonitor monitor = new AssistantStatusMonitor(planTarget);
 
-                    previousPlanTarget = planTarget;
-                }
-                catch (Exception ex) {
-                    Logger.Error($"Assistant: exception\n{ex.ToString()}");
+                    // Create a container for this target, add the instructions, and execute
+                    try {
+                        AssistantTargetContainer targetContainer = GetTargetContainer(previousPlanTarget, planTarget, monitor);
+                        Logger.Debug("Assistant: executing target container instructions");
+                        targetContainer.Execute(progress, token).Wait();
+                        Logger.Debug("Assistant: done executing target container instructions");
+
+                        previousPlanTarget = planTarget;
+                    }
+                    catch (Exception ex) {
+                        Logger.Error($"Assistant: exception\n{ex.ToString()}");
+                    }
                 }
             }
+        }
 
-            return Task.CompletedTask;
+        private void WaitForNextTarget(DateTime atTime, DateTime waitForNextTargetTime, CancellationToken token) {
+
+            Logger.Info("Assistant: stopping guiding and tracking, then waiting for next target to be available");
+            SequenceCommands.StopGuiding(guiderMediator, token);
+            SequenceCommands.SetTelescopeTracking(telescopeMediator, TrackingMode.Stopped, token);
+
+            FIX
+            /*
+            if (planTarget.StartTime > atTime) {
+                TimeSpan duration = planTarget.StartTime - atTime;
+                Logger.Debug($"Assistant: waiting for target start time: {Utils.FormatDateTimeFull(planTarget.StartTime)}");
+                CoreUtil.Wait(duration, token, progress).Wait(token);
+                Logger.Debug("Assistant: done waiting for target start time");
+            }*/
         }
 
         private void WaitForStart(DateTime atTime, IPlanTarget planTarget, IProgress<ApplicationStatus> progress, CancellationToken token) {

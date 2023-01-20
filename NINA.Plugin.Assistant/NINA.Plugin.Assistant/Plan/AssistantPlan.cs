@@ -14,11 +14,19 @@ namespace Assistant.NINAPlugin.Plan {
         public string PlanId { get; private set; }
         public TimeInterval TimeInterval { get; private set; }
         public IPlanTarget PlanTarget { get; private set; }
+        public List<IPlanInstruction> PlanInstructions { get; private set; }
+        public DateTime WaitForNextTargetTime { get; private set; }
 
-        public AssistantPlan(IPlanTarget planTarget, TimeInterval timeInterval) {
+        public AssistantPlan(IPlanTarget planTarget, TimeInterval timeInterval, List<IPlanInstruction> planInstructions) {
             this.PlanId = Guid.NewGuid().ToString();
             this.PlanTarget = planTarget;
             this.TimeInterval = timeInterval;
+            this.PlanInstructions = planInstructions;
+        }
+
+        public AssistantPlan(DateTime waitForNextTargetTime) {
+            this.PlanId = Guid.NewGuid().ToString();
+            this.WaitForNextTargetTime = waitForNextTargetTime;
         }
     }
 

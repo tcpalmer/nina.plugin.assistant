@@ -18,6 +18,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public double MinimumAltitude { get; set; }
         public bool UseCustomHorizon { get; set; }
         public double HorizonOffset { get; set; }
+        public int FilterSwitchFrequency { get; set; }
         public int DitherEvery { get; set; }
         public bool EnableGrader { get; set; }
 
@@ -28,6 +29,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             MinimumAltitude = 0;
             UseCustomHorizon = false;
             HorizonOffset = 0;
+            FilterSwitchFrequency = 0;
             DitherEvery = 0;
             EnableGrader = false;
             RuleWeights = new Dictionary<string, double>();
@@ -51,6 +53,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"MinimumAltitude: {MinimumAltitude}");
             sb.AppendLine($"UseCustomHorizon: {UseCustomHorizon}");
             sb.AppendLine($"HorizonOffset: {HorizonOffset}");
+            sb.AppendLine($"FilterSwitchFrequency: {FilterSwitchFrequency}");
             sb.AppendLine($"DitherEvery: {DitherEvery}");
             sb.AppendLine($"EnableGrader: {EnableGrader}");
 

@@ -12,8 +12,8 @@ using System.Text;
 namespace Assistant.NINAPlugin.Astrometry {
 
     /// <summary>
-    /// Determine the nightly twilight circumstances for the provided date.  The dusk times will be on the provided date
-    /// while the dawn times will be on the following day (in general) - determining the potential imaging time span for
+    /// Determine the nightly twilight circumstances for the provided date.  The dusk (start) times will be on the provided date
+    /// while the dawn (end) times will be on the following day (in general) - determining the potential imaging time span for
     /// a single 'night'.
     /// </summary>
     public class NighttimeCircumstances {
@@ -173,6 +173,21 @@ namespace Assistant.NINAPlugin.Astrometry {
         }
 
         public Tuple<DateTime, DateTime> GetTwilightSpan(int twilightInclude) {
+            switch (twilightInclude) {
+                case AssistantFilterPreferences.TWILIGHT_INCLUDE_NONE:
+                    return NighttimeStart == null ? null : new Tuple<DateTime, DateTime>((DateTime)NighttimeStart, (DateTime)NighttimeEnd);
+                case AssistantFilterPreferences.TWILIGHT_INCLUDE_ASTRO:
+                    return AstronomicalTwilightStart == null ? null : new Tuple<DateTime, DateTime>((DateTime)AstronomicalTwilightStart, (DateTime)AstronomicalTwilightEnd);
+                case AssistantFilterPreferences.TWILIGHT_INCLUDE_NAUTICAL:
+                    return NauticalTwilightStart == null ? null : new Tuple<DateTime, DateTime>((DateTime)NauticalTwilightStart, (DateTime)NauticalTwilightEnd);
+                case AssistantFilterPreferences.TWILIGHT_INCLUDE_CIVIL:
+                    return CivilTwilightStart == null ? null : new Tuple<DateTime, DateTime>((DateTime)CivilTwilightStart, (DateTime)CivilTwilightEnd);
+                default:
+                    throw new ArgumentException($"unknown twilight include code: {twilightInclude}");
+            }
+        }
+
+        public Tuple<DateTime, DateTime> GetTwilightSpan(int twilightInclude, bool duskDawn) {
             switch (twilightInclude) {
                 case AssistantFilterPreferences.TWILIGHT_INCLUDE_NONE:
                     return NighttimeStart == null ? null : new Tuple<DateTime, DateTime>((DateTime)NighttimeStart, (DateTime)NighttimeEnd);

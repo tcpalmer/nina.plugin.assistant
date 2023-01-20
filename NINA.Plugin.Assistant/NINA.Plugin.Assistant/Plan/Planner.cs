@@ -15,7 +15,6 @@ namespace Assistant.NINAPlugin.Plan {
 
         private DateTime atTime;
         private IProfile activeProfile;
-        private IPlanTarget previousPlanTarget;
         private ObserverInfo observerInfo;
 
         public Planner(DateTime atTime, IProfileService profileService) {
@@ -33,7 +32,6 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         public AssistantPlan GetPlan(IPlanTarget previousPlanTarget) {
-            this.previousPlanTarget = previousPlanTarget;
             Logger.Debug($"Assistant: getting current plan for {atTime}");
 
             using (MyStopWatch.Measure("Assistant Plan Generation")) {
@@ -45,6 +43,8 @@ namespace Assistant.NINAPlugin.Plan {
 
                 projects = FilterForVisibility(projects);
                 //Logger.Trace($"Assistant: GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
+
+                // TODO: detect the case where nothing is visible now but will be later: return AssistantPlan with waitForNextTargetTime
 
                 projects = FilterForMoonAvoidance(projects);
                 Logger.Trace($"Assistant: GetPlan after FilterForMoonAvoidance:\n{PlanProject.ListToString(projects)}");
@@ -58,9 +58,10 @@ namespace Assistant.NINAPlugin.Plan {
                     Logger.Trace("Assistant: GetPlan no target selected by score");
                 }
 
-                planTarget = PlanExposures(planTarget);
+                //planTarget = PlanExposures(planTarget);
+                List<IPlanInstruction> planInstructions = PlanExposures(planTarget);
 
-                return planTarget != null ? new AssistantPlan(planTarget, GetTargetTimeInterval(atTime, planTarget)) : null;
+                return planTarget != null ? new AssistantPlan(planTarget, GetTargetTimeInterval(atTime, planTarget), planInstructions) : null;
             }
         }
 
@@ -189,50 +190,13 @@ namespace Assistant.NINAPlugin.Plan {
             return highScoreTarget;
         }
 
-        public IPlanTarget PlanExposures(IPlanTarget planTarget) {
+        public List<IPlanInstruction> PlanExposures(IPlanTarget planTarget) {
             if (planTarget == null) {
                 return null;
             }
 
-            /* TODO: for now:
-             * - don't worry about twilight/filter interference
-             * - just let each filter get max it can until window is filled
-             */
-
-            DateTime actualStartTime = planTarget.StartTime < DateTime.Now ? DateTime.Now : planTarget.StartTime;
-            int timeAvailable = (int)(planTarget.EndTime - actualStartTime).TotalSeconds;
-            int timeUsed = 0;
-
-            foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
-                if (planFilter.Rejected) { continue; }
-
-                int maxPossibleExposures = (int)((timeAvailable - timeUsed) / planFilter.ExposureLength);
-                planFilter.PlannedExposures = Math.Min(planFilter.NeededExposures, maxPossibleExposures);
-                timeUsed += planFilter.PlannedExposures * (int)planFilter.ExposureLength;
-
-                if (timeUsed >= timeAvailable) {
-                    break;
-                }
-            }
-
-            // Reject any that don't have exposures planned
-            foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
-                if (planFilter.Rejected) { continue; }
-
-                if (planFilter.PlannedExposures == 0) {
-                    planFilter.Rejected = true;
-                    planFilter.RejectedReason = Reasons.FilterNoExposuresPlanned;
-                }
-            }
-
-            /*  TODO: Pass 4 refines the order of filters/exposures for the selected target:
-                - If the time span on the target includes twilight, order so that exposures with more restrictive twilight are not
-                  scheduled during those periods. For example a NB filter set to image at astro twilight could be imaged during that time
-                  at dusk and dawn, but a WB filter could not and would require nighttime darkness before imaging.
-                - Consideration may also be given to prioritizing filters with lower percent complete so that overall acquisition on a target is balanced.
-             */
-
-            return planTarget;
+            NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, atTime);
+            return new ExposurePlanner(atTime, nighttimeCircumstances, planTarget).Plan();
         }
 
         private void SetRejected(IPlanProject planProject, string reason) {

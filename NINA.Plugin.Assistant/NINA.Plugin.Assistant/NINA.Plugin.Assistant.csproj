@@ -322,8 +322,10 @@
     </Compile>
     <Compile Include="Sequencer\AssistantTargetContainer.cs" />
     <Compile Include="Sequencer\AssistantTargetEndTimeTrigger.cs" />
+    <Compile Include="Plan\Scoring\ExposurePlanner.cs" />
     <Compile Include="Sequencer\ImageGrader.cs" />
     <Compile Include="Sequencer\ImageSaveWatcher.cs" />
+    <Compile Include="Sequencer\SequenceCommands.cs" />
     <Compile Include="Utils\Utils.cs" />
     <Compile Include="Utils\Assert.cs" />
   </ItemGroup>

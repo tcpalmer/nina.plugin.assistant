@@ -169,6 +169,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private void AddDitherTrigger(IPlanTarget planTarget) {
             int ditherEvery = planTarget.Project.Preferences.DitherEvery;
             if (ditherEvery > 0) {
+                Logger.Info($"Assistant: adding dither trigger: every {ditherEvery} exposures");
                 DitherAfterExposures ditherTrigger = new DitherAfterExposures(guiderMediator, imageHistoryVM, profileService);
                 ditherTrigger.AfterExposures = ditherEvery;
                 Add(ditherTrigger);
@@ -176,14 +177,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void AddExposures(IPlanTarget planTarget) {
-
-            /* TODO
-             *   - Even with careful planner planning, we're going to have situations where e.g. a set of WB images will have to be
-             *     interrupted because of a dawn twilight change event.  Maybe each set of exposures for a filter plan goes into a
-             *     separate child container (AssistantFilterPlanContainer)?  Those containers could then have stop triggers.
-             *     An alternative is to only return a single filter plan with the choosen target, and make it go back to the planner
-             *     after that.  BUT what if you want to do LRGB<dither>LRGB<dither>?  Separate containers is just thrashing.
-             */
 
             /* TODO: since our determination of target visibility over the course of a night will not detect the
              * 'horizon tree gap' problem, we need to mitigate.
