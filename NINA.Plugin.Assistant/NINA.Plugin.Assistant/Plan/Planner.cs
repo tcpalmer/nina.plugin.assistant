@@ -58,7 +58,6 @@ namespace Assistant.NINAPlugin.Plan {
                     Logger.Trace("Assistant: GetPlan no target selected by score");
                 }
 
-                //planTarget = PlanExposures(planTarget);
                 List<IPlanInstruction> planInstructions = PlanExposures(planTarget);
 
                 return planTarget != null ? new AssistantPlan(planTarget, GetTargetTimeInterval(atTime, planTarget), planInstructions) : null;
@@ -109,8 +108,8 @@ namespace Assistant.NINAPlugin.Plan {
 
                     // Get the most inclusive twilight over all incomplete exposure plans
                     NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, atTime);
-                    Tuple<DateTime, DateTime> twilightSpan = nighttimeCircumstances.GetTwilightSpan(GetOverallTwilight(planTarget));
-                    Logger.Trace($"*** Twilight span {twilightSpan.Item1} - {twilightSpan.Item2}");
+                    TimeInterval twilightSpan = nighttimeCircumstances.GetTwilightSpan(GetOverallTwilight(planTarget));
+                    Logger.Trace($"*** Twilight span {twilightSpan.StartTime} - {twilightSpan.EndTime}");
 
                     // Determine the potential imaging time span
                     TargetCircumstances targetCircumstances = new TargetCircumstances(planTarget.Coordinates, observerInfo, planProject.HorizonDefinition, twilightSpan);
@@ -195,8 +194,11 @@ namespace Assistant.NINAPlugin.Plan {
                 return null;
             }
 
+            // TODO: finish implementation
+
             NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, atTime);
-            return new ExposurePlanner(atTime, nighttimeCircumstances, planTarget).Plan();
+            // TODO: fix null below
+            return new ExposurePlanner(planTarget, null, nighttimeCircumstances).Plan();
         }
 
         private void SetRejected(IPlanProject planProject, string reason) {
@@ -288,16 +290,16 @@ namespace Assistant.NINAPlugin.Plan {
             return new TimeInterval(hardStartTime, hardStopTime);
         }
 
-        private int GetOverallTwilight(IPlanTarget planTarget) {
-            int twilightInclude = AssistantFilterPreferences.TWILIGHT_INCLUDE_NONE;
+        private TwilightLevel GetOverallTwilight(IPlanTarget planTarget) {
+            TwilightLevel twilightLevel = TwilightLevel.Nighttime;
             foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
                 // find most permissive (brightest) twilight over all incomplete plans
-                if (planFilter.IsIncomplete() && planFilter.Preferences.TwilightInclude > twilightInclude) {
-                    twilightInclude = planFilter.Preferences.TwilightInclude;
+                if (planFilter.IsIncomplete() && planFilter.Preferences.TwilightLevel > twilightLevel) {
+                    twilightLevel = planFilter.Preferences.TwilightLevel;
                 }
             }
 
-            return twilightInclude;
+            return twilightLevel;
         }
 
         private bool RejectForMoonAvoidance(IPlanTarget planTarget, IPlanFilter planFilter) {

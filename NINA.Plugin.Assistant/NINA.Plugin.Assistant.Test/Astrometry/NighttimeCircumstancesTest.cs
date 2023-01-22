@@ -1,5 +1,5 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
-using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan;
 using FluentAssertions;
 using NUnit.Framework;
 using System;
@@ -22,21 +22,26 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
             Assert.That(sut.NauticalTwilightEnd, Is.EqualTo(new DateTime(2023, 1, 12, 6, 58, 38)).Within(1).Seconds);
             Assert.That(sut.CivilTwilightEnd, Is.EqualTo(new DateTime(2023, 1, 12, 7, 26, 35)).Within(1).Seconds);
 
-            Tuple<DateTime, DateTime> span = sut.GetTwilightSpan(AssistantFilterPreferences.TWILIGHT_INCLUDE_CIVIL);
-            Assert.That(span.Item1, Is.EqualTo(new DateTime(2023, 1, 11, 17, 22, 38)).Within(1).Seconds);
-            Assert.That(span.Item2, Is.EqualTo(new DateTime(2023, 1, 12, 7, 26, 35)).Within(1).Seconds);
+            Assert.IsTrue(sut.HasCivilTwilight());
+            Assert.IsTrue(sut.HasNauticalTwilight());
+            Assert.IsTrue(sut.HasAstronomicalTwilight());
+            Assert.IsTrue(sut.HasNighttime());
 
-            span = sut.GetTwilightSpan(AssistantFilterPreferences.TWILIGHT_INCLUDE_NAUTICAL);
-            Assert.That(span.Item1, Is.EqualTo(new DateTime(2023, 1, 11, 17, 50, 38)).Within(1).Seconds);
-            Assert.That(span.Item2, Is.EqualTo(new DateTime(2023, 1, 12, 6, 58, 38)).Within(1).Seconds);
+            TimeInterval span = sut.GetTwilightSpan(TwilightLevel.Civil);
+            Assert.That(span.StartTime, Is.EqualTo(new DateTime(2023, 1, 11, 17, 22, 38)).Within(1).Seconds);
+            Assert.That(span.EndTime, Is.EqualTo(new DateTime(2023, 1, 12, 7, 26, 35)).Within(1).Seconds);
 
-            span = sut.GetTwilightSpan(AssistantFilterPreferences.TWILIGHT_INCLUDE_ASTRO);
-            Assert.That(span.Item1, Is.EqualTo(new DateTime(2023, 1, 11, 18, 22, 11)).Within(1).Seconds);
-            Assert.That(span.Item2, Is.EqualTo(new DateTime(2023, 1, 12, 6, 27, 7)).Within(1).Seconds);
+            span = sut.GetTwilightSpan(TwilightLevel.Nautical);
+            Assert.That(span.StartTime, Is.EqualTo(new DateTime(2023, 1, 11, 17, 50, 38)).Within(1).Seconds);
+            Assert.That(span.EndTime, Is.EqualTo(new DateTime(2023, 1, 12, 6, 58, 38)).Within(1).Seconds);
 
-            span = sut.GetTwilightSpan(AssistantFilterPreferences.TWILIGHT_INCLUDE_NONE);
-            Assert.That(span.Item1, Is.EqualTo(new DateTime(2023, 1, 11, 18, 53, 0)).Within(1).Seconds);
-            Assert.That(span.Item2, Is.EqualTo(new DateTime(2023, 1, 12, 5, 56, 21)).Within(1).Seconds);
+            span = sut.GetTwilightSpan(TwilightLevel.Astronomical);
+            Assert.That(span.StartTime, Is.EqualTo(new DateTime(2023, 1, 11, 18, 22, 11)).Within(1).Seconds);
+            Assert.That(span.EndTime, Is.EqualTo(new DateTime(2023, 1, 12, 6, 27, 7)).Within(1).Seconds);
+
+            span = sut.GetTwilightSpan(TwilightLevel.Nighttime);
+            Assert.That(span.StartTime, Is.EqualTo(new DateTime(2023, 1, 11, 18, 53, 0)).Within(1).Seconds);
+            Assert.That(span.EndTime, Is.EqualTo(new DateTime(2023, 1, 12, 5, 56, 21)).Within(1).Seconds);
         }
 
         [Test]
@@ -56,6 +61,11 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
             TestUtil.AssertTime(dt, sut.NauticalTwilightEnd, 7, 37, 16);
             TestUtil.AssertTime(dt, sut.CivilTwilightEnd, 8, 16, 8);
 
+            Assert.IsTrue(sut.HasCivilTwilight());
+            Assert.IsTrue(sut.HasNauticalTwilight());
+            Assert.IsTrue(sut.HasAstronomicalTwilight());
+            Assert.IsTrue(sut.HasNighttime());
+
             // TEST_LOCATION_6 is Sanikiluaq, Nunavut at lat=56.54.  See https://www.timeanddate.com/sun/canada/sanikiluaq
 
             dt = new DateTime(2023, 5, 1);
@@ -66,6 +76,11 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
             TestUtil.AssertTime(dt, sut.NighttimeEnd, 1, 36, 12);
             TestUtil.AssertTime(dt, sut.AstronomicalTwilightEnd, 3, 39, 8);
 
+            Assert.IsTrue(sut.HasCivilTwilight());
+            Assert.IsTrue(sut.HasNauticalTwilight());
+            Assert.IsTrue(sut.HasAstronomicalTwilight());
+            Assert.IsTrue(sut.HasNighttime());
+
             // Nighttime is lost here ...
             dt = new DateTime(2023, 5, 2);
             sut = new NighttimeCircumstances(TestUtil.TEST_LOCATION_6, dt);
@@ -73,7 +88,7 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
             dt = dt.AddDays(1);
             sut.NighttimeStart.Should().BeNull();
             sut.NighttimeEnd.Should().BeNull();
-            sut.GetTwilightSpan(AssistantFilterPreferences.TWILIGHT_INCLUDE_NONE).Should().BeNull();
+            sut.GetTwilightSpan(TwilightLevel.Nighttime).Should().BeNull();
             TestUtil.AssertTime(dt, sut.AstronomicalTwilightEnd, 3, 35, 30);
 
             dt = new DateTime(2023, 5, 27);
@@ -82,8 +97,13 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
             TestUtil.AssertTime(dt, sut.AstronomicalTwilightStart, 1, 2, 30);
             sut.NighttimeStart.Should().BeNull();
             sut.NighttimeEnd.Should().BeNull();
-            sut.GetTwilightSpan(AssistantFilterPreferences.TWILIGHT_INCLUDE_NONE).Should().BeNull();
+            sut.GetTwilightSpan(TwilightLevel.Nighttime).Should().BeNull();
             TestUtil.AssertTime(dt, sut.AstronomicalTwilightEnd, 1, 25, 25);
+
+            Assert.IsTrue(sut.HasCivilTwilight());
+            Assert.IsTrue(sut.HasNauticalTwilight());
+            Assert.IsTrue(sut.HasAstronomicalTwilight());
+            Assert.IsFalse(sut.HasNighttime());
 
             // ... and astro is lost here
             dt = new DateTime(2023, 5, 28);
@@ -93,10 +113,103 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
             sut.NighttimeStart.Should().BeNull();
             sut.NighttimeEnd.Should().BeNull();
             sut.AstronomicalTwilightEnd.Should().BeNull();
-            sut.GetTwilightSpan(AssistantFilterPreferences.TWILIGHT_INCLUDE_NONE).Should().BeNull();
-            sut.GetTwilightSpan(AssistantFilterPreferences.TWILIGHT_INCLUDE_ASTRO).Should().BeNull();
+            sut.GetTwilightSpan(TwilightLevel.Nighttime).Should().BeNull();
+            sut.GetTwilightSpan(TwilightLevel.Astronomical).Should().BeNull();
             dt = dt.AddDays(1);
             TestUtil.AssertTime(dt, sut.NauticalTwilightEnd, 3, 40, 35);
+
+            Assert.IsTrue(sut.HasCivilTwilight());
+            Assert.IsTrue(sut.HasNauticalTwilight());
+            Assert.IsFalse(sut.HasAstronomicalTwilight());
+            Assert.IsFalse(sut.HasNighttime());
+        }
+
+        [Test]
+        public void testGetTwilightWindow() {
+            var sut = new NighttimeCircumstances(TestUtil.TEST_LOCATION_4, new DateTime(2023, 1, 11, 1, 2, 3));
+
+            TimeInterval span = sut.GetTwilightWindow(TwilightLevel.Civil, TwilightStage.Dusk);
+            Assert.That(span.StartTime, Is.EqualTo(sut.CivilTwilightStart).Within(1).Seconds);
+            Assert.That(span.EndTime, Is.EqualTo(sut.NauticalTwilightStart).Within(1).Seconds);
+
+            span = sut.GetTwilightWindow(TwilightLevel.Nautical, TwilightStage.Dusk);
+            Assert.That(span.StartTime, Is.EqualTo(sut.NauticalTwilightStart).Within(1).Seconds);
+            Assert.That(span.EndTime, Is.EqualTo(sut.AstronomicalTwilightStart).Within(1).Seconds);
+
+            span = sut.GetTwilightWindow(TwilightLevel.Astronomical, TwilightStage.Dusk);
+            Assert.That(span.StartTime, Is.EqualTo(sut.AstronomicalTwilightStart).Within(1).Seconds);
+            Assert.That(span.EndTime, Is.EqualTo(sut.NighttimeStart).Within(1).Seconds);
+
+            span = sut.GetTwilightWindow(TwilightLevel.Nighttime, TwilightStage.Dusk);
+            Assert.That(span.StartTime, Is.EqualTo(sut.NighttimeStart).Within(1).Seconds);
+            Assert.That(span.EndTime, Is.EqualTo(sut.NighttimeEnd).Within(1).Seconds);
+
+            span = sut.GetTwilightWindow(TwilightLevel.Astronomical, TwilightStage.Dawn);
+            Assert.That(span.StartTime, Is.EqualTo(sut.NighttimeEnd).Within(1).Seconds);
+            Assert.That(span.EndTime, Is.EqualTo(sut.AstronomicalTwilightEnd).Within(1).Seconds);
+
+            span = sut.GetTwilightWindow(TwilightLevel.Nautical, TwilightStage.Dawn);
+            Assert.That(span.StartTime, Is.EqualTo(sut.AstronomicalTwilightEnd).Within(1).Seconds);
+            Assert.That(span.EndTime, Is.EqualTo(sut.NauticalTwilightEnd).Within(1).Seconds);
+
+            span = sut.GetTwilightWindow(TwilightLevel.Civil, TwilightStage.Dawn);
+            Assert.That(span.StartTime, Is.EqualTo(sut.NauticalTwilightEnd).Within(1).Seconds);
+            Assert.That(span.EndTime, Is.EqualTo(sut.CivilTwilightEnd).Within(1).Seconds);
+
+            Assert.IsTrue(sut.HasCivilTwilight());
+            Assert.IsTrue(sut.HasNauticalTwilight());
+            Assert.IsTrue(sut.HasAstronomicalTwilight());
+            Assert.IsTrue(sut.HasNighttime());
+        }
+
+        [Test]
+        public void testGetTwilightWindowHighLatitude() {
+
+            // TEST_LOCATION_6 is Sanikiluaq, Nunavut at lat=56.54.  See https://www.timeanddate.com/sun/canada/sanikiluaq
+
+            DateTime dt = new DateTime(2023, 5, 1);
+            NighttimeCircumstances sut = new NighttimeCircumstances(TestUtil.TEST_LOCATION_6, dt);
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Civil, TwilightStage.Dusk));
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Nautical, TwilightStage.Dusk));
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Astronomical, TwilightStage.Dusk));
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Nighttime, TwilightStage.Dusk));
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Astronomical, TwilightStage.Dawn));
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Nautical, TwilightStage.Dawn));
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Civil, TwilightStage.Dawn));
+            Assert.IsTrue(sut.HasCivilTwilight());
+            Assert.IsTrue(sut.HasNauticalTwilight());
+            Assert.IsTrue(sut.HasAstronomicalTwilight());
+            Assert.IsTrue(sut.HasNighttime());
+
+            // Nighttime is lost here ...
+            dt = new DateTime(2023, 5, 2);
+            sut = new NighttimeCircumstances(TestUtil.TEST_LOCATION_6, dt);
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Civil, TwilightStage.Dusk));
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Nautical, TwilightStage.Dusk));
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Astronomical, TwilightStage.Dusk));
+            Assert.Null(sut.GetTwilightWindow(TwilightLevel.Nighttime, TwilightStage.Dusk));
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Astronomical, TwilightStage.Dawn));
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Nautical, TwilightStage.Dawn));
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Civil, TwilightStage.Dawn));
+            Assert.IsTrue(sut.HasCivilTwilight());
+            Assert.IsTrue(sut.HasNauticalTwilight());
+            Assert.IsTrue(sut.HasAstronomicalTwilight());
+            Assert.IsFalse(sut.HasNighttime());
+
+            // ... and astro is lost here
+            dt = new DateTime(2023, 5, 28);
+            sut = new NighttimeCircumstances(TestUtil.TEST_LOCATION_6, dt);
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Civil, TwilightStage.Dusk));
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Nautical, TwilightStage.Dusk));
+            Assert.Null(sut.GetTwilightWindow(TwilightLevel.Astronomical, TwilightStage.Dusk));
+            Assert.Null(sut.GetTwilightWindow(TwilightLevel.Nighttime, TwilightStage.Dusk));
+            Assert.Null(sut.GetTwilightWindow(TwilightLevel.Astronomical, TwilightStage.Dawn));
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Nautical, TwilightStage.Dawn));
+            Assert.NotNull(sut.GetTwilightWindow(TwilightLevel.Civil, TwilightStage.Dawn));
+            Assert.IsTrue(sut.HasCivilTwilight());
+            Assert.IsTrue(sut.HasNauticalTwilight());
+            Assert.IsFalse(sut.HasAstronomicalTwilight());
+            Assert.IsFalse(sut.HasNighttime());
         }
 
         [Test]

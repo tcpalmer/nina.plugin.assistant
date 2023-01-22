@@ -262,9 +262,9 @@ namespace Assistant.NINAPlugin.Plan {
         AssistantFilterPreferences Preferences { get; set; }
         bool Rejected { get; set; }
         string RejectedReason { get; set; }
-        int NeededExposures { get; }
         int PlannedExposures { get; set; }
 
+        int NeededExposures();
         bool IsIncomplete();
         string ToString();
     }
@@ -287,7 +287,6 @@ namespace Assistant.NINAPlugin.Plan {
         public bool Rejected { get; set; }
         public string RejectedReason { get; set; }
 
-        public int NeededExposures { get => Accepted > Desired ? 0 : Desired - Accepted; }
         public int PlannedExposures { get; set; }
 
         public PlanFilter(PlanTarget planTarget, FilterPlan filterPlan, AssistantFilterPreferences preferences) {
@@ -308,6 +307,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.PlannedExposures = 0;
         }
 
+        public int NeededExposures() { return Accepted > Desired ? 0 : Desired - Accepted; }
         public bool IsIncomplete() { return Accepted < Desired; }
 
         public override string ToString() {
@@ -328,7 +328,6 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"Preferences:\n{Preferences}");
             return sb.ToString();
         }
-
     }
 
     public class Reasons {

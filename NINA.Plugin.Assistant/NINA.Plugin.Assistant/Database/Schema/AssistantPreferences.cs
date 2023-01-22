@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Assistant.NINAPlugin.Astrometry;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Assistant.NINAPlugin.Database.Schema {
@@ -69,43 +70,38 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
     public class AssistantFilterPreferences : AssistantPreferences {
 
-        public const int TWILIGHT_INCLUDE_NONE = 0;
-        public const int TWILIGHT_INCLUDE_ASTRO = 1;
-        public const int TWILIGHT_INCLUDE_NAUTICAL = 2;
-        public const int TWILIGHT_INCLUDE_CIVIL = 3;
-
-        public int TwilightInclude { get; set; }
+        public TwilightLevel TwilightLevel { get; set; }
         public bool MoonAvoidanceEnabled { get; set; }
         public double MoonAvoidanceSeparation { get; set; }
         public int MoonAvoidanceWidth { get; set; }
         public double MaximumHumidity { get; set; }
 
         public override void SetDefaults() {
-            TwilightInclude = TWILIGHT_INCLUDE_NONE;
+            TwilightLevel = TwilightLevel.Nighttime;
             MoonAvoidanceEnabled = false;
             MoonAvoidanceSeparation = 0;
             MoonAvoidanceWidth = 0;
             MaximumHumidity = 0;
         }
         public bool IsTwilightNightOnly() {
-            return TwilightInclude == TWILIGHT_INCLUDE_NONE;
+            return TwilightLevel == TwilightLevel.Nighttime;
         }
 
         public bool IsTwilightAstronomical() {
-            return TwilightInclude == TWILIGHT_INCLUDE_ASTRO;
+            return TwilightLevel == TwilightLevel.Astronomical;
         }
 
         public bool IsTwilightNautical() {
-            return TwilightInclude == TWILIGHT_INCLUDE_NAUTICAL;
+            return TwilightLevel == TwilightLevel.Nautical;
         }
 
         public bool IsTwilightCivil() {
-            return TwilightInclude == TWILIGHT_INCLUDE_CIVIL;
+            return TwilightLevel == TwilightLevel.Civil;
         }
 
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"TwilightInclude: {TwilightInclude}");
+            sb.AppendLine($"TwilightLevel: {TwilightLevel}");
             sb.AppendLine($"MoonAvoidanceEnabled: {MoonAvoidanceEnabled}");
             sb.AppendLine($"MoonAvoidanceSeparation: {MoonAvoidanceSeparation}");
             sb.AppendLine($"MoonAvoidanceWidth: {MoonAvoidanceWidth}");

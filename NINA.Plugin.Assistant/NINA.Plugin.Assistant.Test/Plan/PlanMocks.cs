@@ -56,17 +56,22 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         }
 
         public static Mock<IPlanFilter> GetMockPlanFilter(string filterName, int desired, int accepted) {
+            return GetMockPlanFilter(filterName, desired, accepted, 30);
+        }
+
+        public static Mock<IPlanFilter> GetMockPlanFilter(string filterName, int desired, int accepted, int exposureLength) {
             AssistantFilterPreferences afp = new AssistantFilterPreferences();
             afp.SetDefaults();
 
             Mock<IPlanFilter> pf = new Mock<IPlanFilter>();
             pf.SetupAllProperties();
             pf.SetupProperty(m => m.FilterName, filterName);
-            pf.SetupProperty(m => m.ExposureLength, 30);
+            pf.SetupProperty(m => m.ExposureLength, exposureLength);
             pf.SetupProperty(m => m.Desired, desired);
             pf.SetupProperty(m => m.Acquired, 0);
             pf.SetupProperty(m => m.Accepted, accepted);
             pf.SetupProperty(m => m.Preferences, afp);
+            pf.Setup(m => m.NeededExposures()).Returns(accepted > desired ? 0 : desired - accepted);
             pf.Setup(m => m.IsIncomplete()).Returns(accepted < desired);
             return pf;
         }

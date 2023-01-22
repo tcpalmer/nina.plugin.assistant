@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assistant.NINAPlugin.Util;
+using System;
 
 namespace Assistant.NINAPlugin.Plan {
 
@@ -17,6 +18,38 @@ namespace Assistant.NINAPlugin.Plan {
             StartTime = startTime;
             EndTime = endTime;
             Duration = (long)(endTime - startTime).TotalSeconds;
+        }
+
+        public TimeInterval Overlap(TimeInterval ti2) {
+            if (StartTime > ti2.EndTime) {
+                return null;
+            }
+
+            if (EndTime < ti2.StartTime) {
+                return null;
+            }
+
+            if (ti2.StartTime < StartTime && ti2.EndTime <= EndTime) {
+                return new TimeInterval(StartTime, ti2.EndTime);
+            }
+
+            if (StartTime < ti2.StartTime && EndTime <= ti2.EndTime) {
+                return new TimeInterval(ti2.StartTime, EndTime);
+            }
+
+            if (StartTime < ti2.StartTime && ti2.EndTime <= EndTime) {
+                return new TimeInterval(ti2.StartTime, ti2.EndTime);
+            }
+
+            if (ti2.StartTime < StartTime && EndTime <= ti2.EndTime) {
+                return new TimeInterval(StartTime, EndTime);
+            }
+
+            return new TimeInterval(StartTime, EndTime);
+        }
+
+        public override string ToString() {
+            return $"{Utils.FormatDateTimeFull(StartTime)} - {Utils.FormatDateTimeFull(EndTime)}";
         }
 
         public static TimeInterval GetTotalTimeSpan(TimeInterval first, params TimeInterval[] values) {

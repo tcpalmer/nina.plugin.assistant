@@ -1,5 +1,5 @@
 ﻿using Assistant.NINAPlugin.Astrometry.Solver;
-using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan;
 using NINA.Astrometry;
 using NINA.Astrometry.Body;
 using NINA.Core.Utility;
@@ -11,6 +11,14 @@ using System.Text;
 
 namespace Assistant.NINAPlugin.Astrometry {
 
+    public enum TwilightLevel {
+        Nighttime, Astronomical, Nautical, Civil
+    };
+
+    public enum TwilightStage {
+        Dusk, Dawn
+    };
+
     /// <summary>
     /// Determine the nightly twilight circumstances for the provided date.  The dusk (start) times will be on the provided date
     /// while the dawn (end) times will be on the following day (in general) - determining the potential imaging time span for
@@ -18,14 +26,14 @@ namespace Assistant.NINAPlugin.Astrometry {
     /// </summary>
     public class NighttimeCircumstances {
 
-        public DateTime CivilTwilightStart { get; private set; }
-        public DateTime CivilTwilightEnd { get; private set; }
-        public DateTime? NauticalTwilightStart { get; private set; }
-        public DateTime? NauticalTwilightEnd { get; private set; }
-        public DateTime? AstronomicalTwilightStart { get; private set; }
-        public DateTime? AstronomicalTwilightEnd { get; private set; }
-        public DateTime? NighttimeStart { get; private set; }
-        public DateTime? NighttimeEnd { get; private set; }
+        public DateTime CivilTwilightStart { get; protected set; }
+        public DateTime CivilTwilightEnd { get; protected set; }
+        public DateTime? NauticalTwilightStart { get; protected set; }
+        public DateTime? NauticalTwilightEnd { get; protected set; }
+        public DateTime? AstronomicalTwilightStart { get; protected set; }
+        public DateTime? AstronomicalTwilightEnd { get; protected set; }
+        public DateTime? NighttimeStart { get; protected set; }
+        public DateTime? NighttimeEnd { get; protected set; }
 
         public DateTime Sunset { get => CivilTwilightStart; }
         public DateTime Sunrise { get => CivilTwilightEnd; }
@@ -37,6 +45,8 @@ namespace Assistant.NINAPlugin.Astrometry {
 
         private readonly ObserverInfo observerInfo;
         private readonly DateTime onDate;
+
+        public NighttimeCircumstances() { /* support testing */ }
 
         public NighttimeCircumstances(ObserverInfo observerInfo, DateTime onDate) {
             this.observerInfo = observerInfo;
@@ -64,6 +74,89 @@ namespace Assistant.NINAPlugin.Astrometry {
                 this.NighttimeStart = cached.NighttimeStart;
                 this.NighttimeEnd = cached.NighttimeEnd;
             }
+        }
+
+        public bool HasNighttime() { return NighttimeStart != null; }
+        public bool HasAstronomicalTwilight() { return AstronomicalTwilightStart != null; }
+        public bool HasNauticalTwilight() { return NauticalTwilightStart != null; }
+        public bool HasCivilTwilight() { return CivilTwilightStart != null; }
+
+        public TimeInterval GetTwilightSpan(TwilightLevel twilightLevel) {
+            switch (twilightLevel) {
+                case TwilightLevel.Nighttime: return SafeTwilightSpan(NighttimeStart, NighttimeEnd);
+                case TwilightLevel.Astronomical: return SafeTwilightSpan(AstronomicalTwilightStart, AstronomicalTwilightEnd);
+                case TwilightLevel.Nautical: return SafeTwilightSpan(NauticalTwilightStart, NauticalTwilightEnd);
+                case TwilightLevel.Civil: return SafeTwilightSpan(CivilTwilightStart, CivilTwilightEnd);
+                default:
+                    throw new ArgumentException($"unknown twilight level: {twilightLevel}");
+            }
+        }
+
+        public TimeInterval GetTwilightWindow(TwilightLevel twilightLevel, TwilightStage twilightStage) {
+
+            if (twilightLevel == TwilightLevel.Nighttime) {
+                return HasNighttime() ? SafeTwilightSpan(NighttimeStart, NighttimeEnd) : null;
+            }
+
+            if (twilightStage == TwilightStage.Dusk) {
+
+                if (twilightLevel == TwilightLevel.Astronomical) {
+                    if (HasAstronomicalTwilight()) {
+                        return HasNighttime() ? SafeTwilightSpan(AstronomicalTwilightStart, NighttimeStart) : SafeTwilightSpan(AstronomicalTwilightStart, AstronomicalTwilightEnd);
+                    }
+                    else {
+                        return null;
+                    }
+                }
+
+                if (twilightLevel == TwilightLevel.Nautical) {
+                    if (HasNauticalTwilight()) {
+                        return HasAstronomicalTwilight() ? SafeTwilightSpan(NauticalTwilightStart, AstronomicalTwilightStart) : SafeTwilightSpan(NauticalTwilightStart, NauticalTwilightEnd);
+                    }
+                    else {
+                        return null;
+                    }
+                }
+
+                if (twilightLevel == TwilightLevel.Civil) {
+                    if (HasCivilTwilight()) {
+                        return HasNauticalTwilight() ? SafeTwilightSpan(CivilTwilightStart, NauticalTwilightStart) : SafeTwilightSpan(CivilTwilightStart, CivilTwilightEnd);
+                    }
+                    else {
+                        return null;
+                    }
+                }
+            }
+            else {
+                if (twilightLevel == TwilightLevel.Astronomical) {
+                    if (HasAstronomicalTwilight()) {
+                        return HasNighttime() ? SafeTwilightSpan(NighttimeEnd, AstronomicalTwilightEnd) : SafeTwilightSpan(AstronomicalTwilightStart, AstronomicalTwilightEnd);
+                    }
+                    else {
+                        return null;
+                    }
+                }
+
+                if (twilightLevel == TwilightLevel.Nautical) {
+                    if (HasNauticalTwilight()) {
+                        return HasAstronomicalTwilight() ? SafeTwilightSpan(AstronomicalTwilightEnd, NauticalTwilightEnd) : SafeTwilightSpan(NauticalTwilightStart, NauticalTwilightEnd);
+                    }
+                    else {
+                        return null;
+                    }
+                }
+
+                if (twilightLevel == TwilightLevel.Civil) {
+                    if (HasCivilTwilight()) {
+                        return HasNauticalTwilight() ? SafeTwilightSpan(NauticalTwilightEnd, CivilTwilightEnd) : SafeTwilightSpan(CivilTwilightStart, CivilTwilightEnd);
+                    }
+                    else {
+                        return null;
+                    }
+                }
+            }
+
+            return null;
         }
 
         private void Calculate() {
@@ -172,34 +265,12 @@ namespace Assistant.NINAPlugin.Astrometry {
             return new Altitudes(alts);
         }
 
-        public Tuple<DateTime, DateTime> GetTwilightSpan(int twilightInclude) {
-            switch (twilightInclude) {
-                case AssistantFilterPreferences.TWILIGHT_INCLUDE_NONE:
-                    return NighttimeStart == null ? null : new Tuple<DateTime, DateTime>((DateTime)NighttimeStart, (DateTime)NighttimeEnd);
-                case AssistantFilterPreferences.TWILIGHT_INCLUDE_ASTRO:
-                    return AstronomicalTwilightStart == null ? null : new Tuple<DateTime, DateTime>((DateTime)AstronomicalTwilightStart, (DateTime)AstronomicalTwilightEnd);
-                case AssistantFilterPreferences.TWILIGHT_INCLUDE_NAUTICAL:
-                    return NauticalTwilightStart == null ? null : new Tuple<DateTime, DateTime>((DateTime)NauticalTwilightStart, (DateTime)NauticalTwilightEnd);
-                case AssistantFilterPreferences.TWILIGHT_INCLUDE_CIVIL:
-                    return CivilTwilightStart == null ? null : new Tuple<DateTime, DateTime>((DateTime)CivilTwilightStart, (DateTime)CivilTwilightEnd);
-                default:
-                    throw new ArgumentException($"unknown twilight include code: {twilightInclude}");
+        private TimeInterval SafeTwilightSpan(DateTime? t1, DateTime? t2) {
+            if (t1 == null || t2 == null) {
+                return null;
             }
-        }
 
-        public Tuple<DateTime, DateTime> GetTwilightSpan(int twilightInclude, bool duskDawn) {
-            switch (twilightInclude) {
-                case AssistantFilterPreferences.TWILIGHT_INCLUDE_NONE:
-                    return NighttimeStart == null ? null : new Tuple<DateTime, DateTime>((DateTime)NighttimeStart, (DateTime)NighttimeEnd);
-                case AssistantFilterPreferences.TWILIGHT_INCLUDE_ASTRO:
-                    return AstronomicalTwilightStart == null ? null : new Tuple<DateTime, DateTime>((DateTime)AstronomicalTwilightStart, (DateTime)AstronomicalTwilightEnd);
-                case AssistantFilterPreferences.TWILIGHT_INCLUDE_NAUTICAL:
-                    return NauticalTwilightStart == null ? null : new Tuple<DateTime, DateTime>((DateTime)NauticalTwilightStart, (DateTime)NauticalTwilightEnd);
-                case AssistantFilterPreferences.TWILIGHT_INCLUDE_CIVIL:
-                    return CivilTwilightStart == null ? null : new Tuple<DateTime, DateTime>((DateTime)CivilTwilightStart, (DateTime)CivilTwilightEnd);
-                default:
-                    throw new ArgumentException($"unknown twilight include code: {twilightInclude}");
-            }
+            return new TimeInterval((DateTime)t1, (DateTime)t2);
         }
 
         public override string ToString() {

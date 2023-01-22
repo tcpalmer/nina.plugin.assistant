@@ -209,7 +209,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             SequenceCommands.StopGuiding(guiderMediator, token);
             SequenceCommands.SetTelescopeTracking(telescopeMediator, TrackingMode.Stopped, token);
 
-            FIX
+            // TODO:FIX
             /*
             if (planTarget.StartTime > atTime) {
                 TimeSpan duration = planTarget.StartTime - atTime;

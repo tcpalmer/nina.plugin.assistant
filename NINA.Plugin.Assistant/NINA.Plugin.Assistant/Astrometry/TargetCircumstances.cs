@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Astrometry.Solver;
+using Assistant.NINAPlugin.Plan;
 using NINA.Astrometry;
 using NINA.Core.Utility;
 using System;
@@ -21,12 +22,12 @@ namespace Assistant.NINAPlugin.Astrometry {
         private readonly DateTime startTime;
         private readonly DateTime endTime;
 
-        public TargetCircumstances(Coordinates coordinates, ObserverInfo observerInfo, HorizonDefinition horizonDefinition, Tuple<DateTime, DateTime> twilightSpan) {
+        public TargetCircumstances(Coordinates coordinates, ObserverInfo observerInfo, HorizonDefinition horizonDefinition, TimeInterval twilightSpan) {
             this.coordinates = coordinates;
             this.observerInfo = observerInfo;
             this.horizonDefinition = horizonDefinition;
-            this.startTime = twilightSpan.Item1;
-            this.endTime = twilightSpan.Item2;
+            this.startTime = twilightSpan.StartTime;
+            this.endTime = twilightSpan.EndTime;
 
             string cacheKey = GetCacheKey();
             Logger.Trace($"TargetCircumstances cache key: {cacheKey}");
