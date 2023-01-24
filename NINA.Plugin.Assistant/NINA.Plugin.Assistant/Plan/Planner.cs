@@ -44,10 +44,13 @@ namespace Assistant.NINAPlugin.Plan {
                 projects = FilterForVisibility(projects);
                 //Logger.Trace($"Assistant: GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
 
-                // TODO: detect the case where nothing is visible now but will be later: return AssistantPlan with waitForNextTargetTime
-
                 projects = FilterForMoonAvoidance(projects);
                 Logger.Trace($"Assistant: GetPlan after FilterForMoonAvoidance:\n{PlanProject.ListToString(projects)}");
+
+                DateTime? waitForVisibleNow = CheckForVisibleNow(projects);
+                if (waitForVisibleNow != null) {
+                    return new AssistantPlan((DateTime)waitForVisibleNow);
+                }
 
                 ScoringEngine scoringEngine = new ScoringEngine(activeProfile, atTime, previousPlanTarget);
                 IPlanTarget planTarget = SelectTargetByScore(projects, scoringEngine);
@@ -58,9 +61,10 @@ namespace Assistant.NINAPlugin.Plan {
                     Logger.Trace("Assistant: GetPlan no target selected by score");
                 }
 
-                List<IPlanInstruction> planInstructions = PlanExposures(planTarget);
+                TimeInterval targetWindow = GetTargetTimeWindow(atTime, planTarget);
+                List<IPlanInstruction> planInstructions = PlanExposures(planTarget, targetWindow);
 
-                return planTarget != null ? new AssistantPlan(planTarget, GetTargetTimeInterval(atTime, planTarget), planInstructions) : null;
+                return planTarget != null ? new AssistantPlan(planTarget, targetWindow, planInstructions) : null;
             }
         }
 
@@ -70,7 +74,7 @@ namespace Assistant.NINAPlugin.Plan {
         /// <param name="projects"></param>
         /// <returns></returns>
         public List<IPlanProject> FilterForIncomplete(List<IPlanProject> projects) {
-            if (projects == null || projects.Count == 0) {
+            if (projects?.Count == 0) {
                 return null;
             }
 
@@ -92,7 +96,7 @@ namespace Assistant.NINAPlugin.Plan {
         /// <param name="projects"></param>
         /// <returns></returns>
         public List<IPlanProject> FilterForVisibility(List<IPlanProject> projects) {
-            if (projects == null || projects.Count == 0) {
+            if (projects?.Count == 0) {
                 return null;
             }
 
@@ -118,8 +122,12 @@ namespace Assistant.NINAPlugin.Plan {
                     int TimeOnTargetSeconds = (int)(targetCircumstances.SetBelowHorizonTime - actualStart).TotalSeconds;
                     Logger.Trace($"Assistant: TargetCircumstances:\n{targetCircumstances}, timeOnTarget={TimeOnTargetSeconds}");
 
+                    // If the start time is in the future, reject for now
+                    if (actualStart > atTime) {
+                        SetRejected(planTarget, Reasons.TargetNotYetVisible);
+                    }
                     // If the target is visible for at least the minimum time, then accept it
-                    if (targetCircumstances.IsVisible && (TimeOnTargetSeconds >= planProject.Preferences.MinimumTime * 60)) {
+                    else if (targetCircumstances.IsVisible && (TimeOnTargetSeconds >= planProject.Preferences.MinimumTime * 60)) {
                         planTarget.SetCircumstances(targetCircumstances);
                     }
                     else {
@@ -139,7 +147,7 @@ namespace Assistant.NINAPlugin.Plan {
         /// <param name="projects"></param>
         /// <returns></returns>
         public List<IPlanProject> FilterForMoonAvoidance(List<IPlanProject> projects) {
-            if (projects == null || projects.Count == 0) {
+            if (projects?.Count == 0) {
                 return null;
             }
 
@@ -162,8 +170,42 @@ namespace Assistant.NINAPlugin.Plan {
             return PropagateRejections(projects);
         }
 
+        /// <summary>
+        /// If all targets were rejected but some due to not yet visible, then find the earliest of those start times - will
+        /// have to wait until then.
+        /// </summary>
+        /// <param name="projects"></param>
+        /// <returns></returns>
+        public DateTime? CheckForVisibleNow(List<IPlanProject> projects) {
+            if (projects?.Count == 0) {
+                return null;
+            }
+
+            DateTime? nextAvailableTime = DateTime.MaxValue;
+
+            foreach (IPlanProject project in projects) {
+                foreach (IPlanTarget planTarget in project.Targets) {
+                    if (!planTarget.Rejected) {
+                        return null;
+                    }
+
+                    if (planTarget.RejectedReason == Reasons.TargetNotYetVisible) {
+                        nextAvailableTime = planTarget.StartTime < nextAvailableTime ? planTarget.StartTime : nextAvailableTime;
+                    }
+                }
+            }
+
+            return (nextAvailableTime < DateTime.MaxValue) ? nextAvailableTime : null;
+        }
+
+        /// <summary>
+        /// Run the scoring engine, applying the weighted rules to determine the target with the highest score.
+        /// </summary>
+        /// <param name="projects"></param>
+        /// <param name="scoringEngine"></param>
+        /// <returns></returns>
         public IPlanTarget SelectTargetByScore(List<IPlanProject> projects, IScoringEngine scoringEngine) {
-            if (projects == null || projects.Count == 0) {
+            if (projects?.Count == 0) {
                 return null;
             }
 
@@ -189,16 +231,44 @@ namespace Assistant.NINAPlugin.Plan {
             return highScoreTarget;
         }
 
-        public List<IPlanInstruction> PlanExposures(IPlanTarget planTarget) {
+        /// <summary>
+        /// Determine the time window for the selected target.  The start time as basically ASAP but the end time
+        /// needs to be chosen carefully since that's the point at which the planner will be called again to
+        /// select the next (same or different) target.
+        /// </summary>
+        /// <param name="atTime"></param>
+        /// <param name="planTarget"></param>
+        /// <returns></returns>
+        public TimeInterval GetTargetTimeWindow(DateTime atTime, IPlanTarget planTarget) {
+            DateTime hardStartTime = planTarget.StartTime < atTime ? atTime : planTarget.StartTime;
+
+            // Set the stop time to the earliest of the target's hard stop time and the time when the
+            // minimum time-on-target is achieved.  Rather than do a deeper analysis of which target
+            // might be better to image next, we just let the planner run again and decide at that point.
+
+            int minimumTimeOnTarget = planTarget.Project.Preferences.MinimumTime;
+            DateTime hardStopTime = hardStartTime.AddMinutes(minimumTimeOnTarget);
+            if (hardStartTime > planTarget.EndTime) {
+                hardStartTime = planTarget.EndTime;
+            }
+
+            return new TimeInterval(hardStartTime, hardStopTime);
+        }
+
+        /// <summary>
+        /// Plan the sequence of instructions needed to take the desired exposures of the target during the
+        /// target window.
+        /// </summary>
+        /// <param name="planTarget"></param>
+        /// <param name="targetWindow"></param>
+        /// <returns>instructions</returns>
+        public List<IPlanInstruction> PlanExposures(IPlanTarget planTarget, TimeInterval targetWindow) {
             if (planTarget == null) {
                 return null;
             }
 
-            // TODO: finish implementation
-
             NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, atTime);
-            // TODO: fix null below
-            return new ExposurePlanner(planTarget, null, nighttimeCircumstances).Plan();
+            return new ExposurePlanner(planTarget, targetWindow, nighttimeCircumstances).Plan();
         }
 
         private void SetRejected(IPlanProject planProject, string reason) {
@@ -217,7 +287,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         private List<IPlanProject> PropagateRejections(List<IPlanProject> projects) {
-            if (projects == null || projects.Count == 0) {
+            if (projects?.Count == 0) {
                 return null;
             }
 
@@ -268,26 +338,6 @@ namespace Assistant.NINAPlugin.Plan {
             }
 
             return incomplete;
-        }
-
-        private TimeInterval GetTargetTimeInterval(DateTime atTime, IPlanTarget planTarget) {
-            // TODO: last step is to set the hard start/stop for this target
-            // set start/end to overall start/end of all FilterPlans
-            // but then be sure to clip end by a hard (twilight or horizon) stop
-
-            // hard stop time is critical since that's the time we set to come back and run the planner again
-
-            NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, atTime);
-            DateTime hardStartTime = planTarget.StartTime < atTime ? atTime : planTarget.StartTime;
-            DateTime hardStopTime = planTarget.EndTime;
-
-            /* TODO: also update times based on twilight
-            foreach (PlanFilter planFilter in planTarget.FilterPlans) {
-                if (planFilter.Rejected) { continue; }
-
-            }*/
-
-            return new TimeInterval(hardStartTime, hardStopTime);
         }
 
         private TwilightLevel GetOverallTwilight(IPlanTarget planTarget) {

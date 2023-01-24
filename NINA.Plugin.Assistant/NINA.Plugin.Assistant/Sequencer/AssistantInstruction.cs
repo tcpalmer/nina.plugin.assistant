@@ -153,43 +153,27 @@ namespace Assistant.NINAPlugin.Sequencer {
             IPlanTarget previousPlanTarget = null;
 
             while (true) {
-                //DateTime atTime = DateTime.Now;
-                // TODO: hack time!
-                DateTime HACK_TIME = new DateTime(2023, 1, 19, 23, 30, 0);
-                DateTime atTime = HACK_TIME;
-                Logger.Warning($"Assistant: using hacked time {Utils.FormatDateTimeFull(HACK_TIME)}");
+                AssistantPlan plan = new Planner(DateTime.Now, profileService).GetPlan(previousPlanTarget);
 
-                AssistantPlan plan = new Planner(atTime, profileService).GetPlan(previousPlanTarget);
                 if (plan == null) {
                     Logger.Info("Assistant: planner returned empty plan, done");
                     return Task.CompletedTask;
                 }
 
-                IPlanTarget planTarget = plan.PlanTarget;
-
-                if (planTarget == null) {
+                if (plan.WaitForNextTargetTime != null) {
                     Logger.Info("Assistant: planner waiting for next target to become available");
-                    WaitForNextTarget(atTime, plan.WaitForNextTargetTime, token);
+                    WaitForNextTarget(plan.WaitForNextTargetTime, progress, token);
                 }
                 else {
+                    IPlanTarget planTarget = plan.PlanTarget;
                     Logger.Info($"Assistant: starting execution of plan target: {planTarget.Name}");
-
-                    // If interval for this target has passed, we're done (shouldn't happen in real usage)
-                    if (DateTime.Now > plan.TimeInterval.EndTime) {
-                        Logger.Warning($"Assistant: time interval for the target has passed, end time: {Utils.FormatDateTimeFull(planTarget.EndTime)}");
-                        return Task.CompletedTask;
-                    }
-
-                    // Wait for the target start time
-                    // TODO: need to figure out if this is the first time we're waiting?  Or do we need to stop tracking/guiding/etc?
-                    WaitForStart(atTime, planTarget, progress, token);
 
                     // TODO: needs to be accessible for binding from xaml
                     AssistantStatusMonitor monitor = new AssistantStatusMonitor(planTarget);
 
                     // Create a container for this target, add the instructions, and execute
                     try {
-                        AssistantTargetContainer targetContainer = GetTargetContainer(previousPlanTarget, planTarget, monitor);
+                        AssistantTargetContainer targetContainer = GetTargetContainer(previousPlanTarget, plan, monitor);
                         Logger.Debug("Assistant: executing target container instructions");
                         targetContainer.Execute(progress, token).Wait();
                         Logger.Debug("Assistant: done executing target container instructions");
@@ -203,36 +187,21 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        private void WaitForNextTarget(DateTime atTime, DateTime waitForNextTargetTime, CancellationToken token) {
-
-            Logger.Info("Assistant: stopping guiding and tracking, then waiting for next target to be available");
+        private void WaitForNextTarget(DateTime? waitForNextTargetTime, IProgress<ApplicationStatus> progress, CancellationToken token) {
+            Logger.Info($"Assistant: stopping guiding/tracking, then waiting for next target to be available at {Utils.FormatDateTimeFull(waitForNextTargetTime)}");
             SequenceCommands.StopGuiding(guiderMediator, token);
             SequenceCommands.SetTelescopeTracking(telescopeMediator, TrackingMode.Stopped, token);
 
-            // TODO:FIX
-            /*
-            if (planTarget.StartTime > atTime) {
-                TimeSpan duration = planTarget.StartTime - atTime;
-                Logger.Debug($"Assistant: waiting for target start time: {Utils.FormatDateTimeFull(planTarget.StartTime)}");
-                CoreUtil.Wait(duration, token, progress).Wait(token);
-                Logger.Debug("Assistant: done waiting for target start time");
-            }*/
+            TimeSpan duration = ((DateTime)waitForNextTargetTime) - DateTime.Now;
+            CoreUtil.Wait(duration, token, progress).Wait(token);
+            Logger.Debug("Assistant: done waiting for next target");
         }
 
-        private void WaitForStart(DateTime atTime, IPlanTarget planTarget, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            if (planTarget.StartTime > atTime) {
-                TimeSpan duration = planTarget.StartTime - atTime;
-                Logger.Debug($"Assistant: waiting for target start time: {Utils.FormatDateTimeFull(planTarget.StartTime)}");
-                CoreUtil.Wait(duration, token, progress).Wait(token);
-                Logger.Debug("Assistant: done waiting for target start time");
-            }
-        }
-
-        private AssistantTargetContainer GetTargetContainer(IPlanTarget previousPlanTarget, IPlanTarget planTarget, AssistantStatusMonitor monitor) {
+        private AssistantTargetContainer GetTargetContainer(IPlanTarget previousPlanTarget, AssistantPlan plan, AssistantStatusMonitor monitor) {
             AssistantTargetContainer targetContainer = new AssistantTargetContainer(profileService, dateTimeProviders, telescopeMediator,
                 rotatorMediator, guiderMediator, cameraMediator, imagingMediator, imageSaveMediator,
                 imageHistoryVM, filterWheelMediator, domeMediator, domeFollower,
-                plateSolverFactory, windowServiceFactory, previousPlanTarget, planTarget, monitor);
+                plateSolverFactory, windowServiceFactory, previousPlanTarget, plan, monitor);
             targetContainer.AttachNewParent(this);
             return targetContainer;
         }

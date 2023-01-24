@@ -15,13 +15,14 @@ namespace Assistant.NINAPlugin.Plan {
         public TimeInterval TimeInterval { get; private set; }
         public IPlanTarget PlanTarget { get; private set; }
         public List<IPlanInstruction> PlanInstructions { get; private set; }
-        public DateTime WaitForNextTargetTime { get; private set; }
+        public DateTime? WaitForNextTargetTime { get; private set; }
 
         public AssistantPlan(IPlanTarget planTarget, TimeInterval timeInterval, List<IPlanInstruction> planInstructions) {
             this.PlanId = Guid.NewGuid().ToString();
             this.PlanTarget = planTarget;
             this.TimeInterval = timeInterval;
             this.PlanInstructions = planInstructions;
+            this.WaitForNextTargetTime = null;
         }
 
         public AssistantPlan(DateTime waitForNextTargetTime) {
@@ -340,6 +341,7 @@ namespace Assistant.NINAPlugin.Plan {
         public const string TargetComplete = "complete";
         public const string TargetNeverRises = "never rises at location";
         public const string TargetNotVisible = "not visible at this time";
+        public const string TargetNotYetVisible = "not yet visible at this time";
         public const string TargetMoonAvoidance = "moon avoidance";
         public const string TargetAllFilterPlans = "all filter plans rejected";
 

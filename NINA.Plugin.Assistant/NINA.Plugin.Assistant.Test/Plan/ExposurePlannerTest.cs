@@ -217,11 +217,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
                     continue;
                 }
 
-                if (expected is PlanStopTrigger) {
-                    Assert.AreEqual(((PlanStopTrigger)expected).stopTime, ((PlanStopTrigger)actual).stopTime);
-                    continue;
-                }
-
                 throw new AssertionException($"unknown actual instruction type: {actual.GetType().FullName}");
             }
         }
@@ -242,7 +237,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
             AddActualExposures(actual, Ha.Object, 19);
             actual.Add(new PlanWait((DateTime)ntc.NighttimeStart));
-            actual.Add(new PlanStopTrigger((DateTime)ntc.NighttimeStart));
 
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, L.Object, 10);
@@ -252,12 +246,10 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             AddActualExposures(actual, Ha.Object, 31);
             AddActualExposures(actual, OIII.Object, 50);
             AddActualExposures(actual, SII.Object, 32);
-            actual.Add(new PlanStopTrigger((DateTime)ntc.NighttimeEnd));
 
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, SII.Object, 18);
             actual.Add(new PlanWait((DateTime)ntc.AstronomicalTwilightEnd));
-            actual.Add(new PlanStopTrigger((DateTime)ntc.AstronomicalTwilightEnd));
 
             return actual;
         }
@@ -284,7 +276,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
             AddActualExposures(actual, Ha.Object, 1);
             actual.Add(new PlanWait((DateTime)ntc.NighttimeStart));
-            actual.Add(new PlanStopTrigger((DateTime)ntc.NighttimeStart));
 
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, L.Object, 2);
@@ -301,7 +292,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             AddActualExposures(actual, B.Object, 2);
             AddActualExposures(actual, Ha.Object, 2);
             AddActualExposures(actual, OIII.Object, 1);
-            actual.Add(new PlanStopTrigger(((DateTime)ntc.NighttimeStart).AddMinutes(60)));
 
             return actual;
         }
@@ -323,14 +313,12 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             AddActualExposures(actual, OIII.Object, 5);
             AddActualExposures(actual, SII.Object, 5);
             actual.Add(new PlanWait((DateTime)ntc.NighttimeStart));
-            actual.Add(new PlanStopTrigger((DateTime)ntc.NighttimeStart));
 
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, L.Object, 10);
             AddActualExposures(actual, R.Object, 10);
             AddActualExposures(actual, G.Object, 9);
             actual.Add(new PlanWait(((DateTime)ntc.NighttimeStart).AddMinutes(60)));
-            actual.Add(new PlanStopTrigger(((DateTime)ntc.NighttimeStart).AddMinutes(60)));
 
             return actual;
         }
@@ -346,20 +334,17 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, Civil.Object, 19);
             actual.Add(new PlanWait((DateTime)ntc.NauticalTwilightStart));
-            actual.Add(new PlanStopTrigger((DateTime)ntc.NauticalTwilightStart));
 
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, Civil.Object, 1);
             AddActualExposures(actual, Nautical.Object, 18);
             actual.Add(new PlanWait((DateTime)ntc.AstronomicalTwilightStart));
-            actual.Add(new PlanStopTrigger((DateTime)ntc.AstronomicalTwilightStart));
 
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, Nautical.Object, 2);
             AddActualExposures(actual, Astro.Object, 20);
             DateTime end = ((DateTime)ntc.AstronomicalTwilightStart).AddHours(2);
             actual.Add(new PlanWait(end));
-            actual.Add(new PlanStopTrigger(end));
 
             return actual;
         }
@@ -374,17 +359,14 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, Civil.Object, 19);
             actual.Add(new PlanWait((DateTime)ntc.AstronomicalTwilightEnd));
-            actual.Add(new PlanStopTrigger((DateTime)ntc.AstronomicalTwilightEnd));
 
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, Civil.Object, 1);
             AddActualExposures(actual, Nautical.Object, 18);
             actual.Add(new PlanWait((DateTime)ntc.NauticalTwilightEnd));
-            actual.Add(new PlanStopTrigger((DateTime)ntc.NauticalTwilightEnd));
 
             actual.Add(new PlanMessage(""));
             actual.Add(new PlanWait(ntc.CivilTwilightEnd));
-            actual.Add(new PlanStopTrigger(ntc.CivilTwilightEnd));
 
             return actual;
         }

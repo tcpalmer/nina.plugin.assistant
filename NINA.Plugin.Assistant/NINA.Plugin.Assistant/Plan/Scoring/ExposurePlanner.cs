@@ -15,9 +15,9 @@ namespace Assistant.NINAPlugin.Plan {
     /// Although it may cover periods of twilight, we're guaranteed that the window is appropriate for
     /// some planFilter in the planTarget.
     /// 
-    /// Even if the interval included some dusk twilight period, we may elect to skip it (with a wait) if
-    /// the period isn't long enough to take at least X exposures of an appropriate filter.
-    /// </summary>
+    /// At high latitudes near the summer solstice, you can lose true nighttime, astronomical twilight,
+    /// and perhaps even nautical twilight.  We handle all cases for locations below the polar circle -
+    /// even allowing imaging during civil twilight on the solstice.
     public class ExposurePlanner {
 
         private IPlanTarget planTarget;
@@ -87,7 +87,6 @@ namespace Assistant.NINAPlugin.Plan {
                     List<IPlanInstruction> added = GetPlanInstructions(planFilters, overlap);
 
                     if (HasActionableInstructions(added)) {
-                        added.Add(new PlanStopTrigger(overlap.EndTime));
                         instructions.AddRange(added);
                     }
                 }
@@ -239,18 +238,6 @@ namespace Assistant.NINAPlugin.Plan {
 
         public override string ToString() {
             return $"Wait: {Utils.FormatDateTimeFull(waitForTime)}";
-        }
-    }
-
-    public class PlanStopTrigger : PlanInstruction {
-        public DateTime stopTime { get; set; }
-
-        public PlanStopTrigger(DateTime stopTime) : base(null) {
-            this.stopTime = stopTime;
-        }
-
-        public override string ToString() {
-            return $"StopTrigger: {Utils.FormatDateTimeFull(stopTime)}";
         }
     }
 

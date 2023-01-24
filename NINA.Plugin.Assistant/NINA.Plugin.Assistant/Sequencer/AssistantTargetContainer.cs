@@ -42,7 +42,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IWindowServiceFactory windowServiceFactory;
 
         private readonly IPlanTarget previousPlanTarget;
-        private readonly IPlanTarget planTarget;
+        private readonly AssistantPlan plan;
         private readonly IProfile activeProfile;
         private AssistantStatusMonitor monitor;
 
@@ -62,7 +62,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 IPlateSolverFactory plateSolverFactory,
                 IWindowServiceFactory windowServiceFactory,
                 IPlanTarget previousPlanTarget,
-                IPlanTarget planTarget,
+                AssistantPlan plan,
                 AssistantStatusMonitor monitor) : base() {
             Name = nameof(AssistantTargetContainer);
             Description = "";
@@ -85,7 +85,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             this.monitor = monitor;
             this.previousPlanTarget = previousPlanTarget;
-            this.planTarget = planTarget;
+            this.plan = plan;
             this.activeProfile = profileService.ActiveProfile;
             SetTarget();
         }
@@ -95,19 +95,19 @@ namespace Assistant.NINAPlugin.Sequencer {
             ImageSaveWatcher imageSaveWatcher = null;
 
             try {
-                AddEndTimeTrigger(planTarget);
-                AddDitherTrigger(planTarget);
+                AddEndTimeTrigger(plan.PlanTarget);
+                AddDitherTrigger(plan.PlanTarget);
 
                 // If target is different from previous, slew/center/rotate
-                if (!planTarget.Equals(previousPlanTarget)) {
+                if (!plan.PlanTarget.Equals(previousPlanTarget)) {
                     // TODO: pain to simulate
                     //SlewAndCenter(planTarget, progress, token);
                 }
 
                 // Add the planned exposures
-                AddExposures(planTarget);
+                AddExposures(plan);
 
-                imageSaveWatcher = new ImageSaveWatcher(imageSaveMediator, planTarget);
+                imageSaveWatcher = new ImageSaveWatcher(imageSaveMediator, plan.PlanTarget);
                 base.Execute(progress, token).Wait();
             }
             catch (Exception ex) {
@@ -176,7 +176,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        private void AddExposures(IPlanTarget planTarget) {
+        private void AddExposures(AssistantPlan plan) {
 
             /* TODO: since our determination of target visibility over the course of a night will not detect the
              * 'horizon tree gap' problem, we need to mitigate.
@@ -184,31 +184,33 @@ namespace Assistant.NINAPlugin.Sequencer {
              *   skip exposures, maybe sleeping and rechecking for some period until it appears to be visible.
              */
 
-            foreach (PlanFilter planFilter in planTarget.FilterPlans) {
-                if (planFilter.Rejected) { continue; }
+            foreach (IPlanInstruction instruction in plan.PlanInstructions) {
 
-                AddSwitchFilter(planFilter);
-                Logger.Info($"Assistant: adding exposures: count={planFilter.PlannedExposures}, filter={planFilter.FilterName}, exposure={planFilter.ExposureLength}, id={planFilter.PlanId}");
-
-                for (int i = 0; i < planFilter.PlannedExposures; i++) {
-                    TakeExposure takeExposure = new TakeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM);
-                    takeExposure.Name = nameof(TakeExposure);
-                    takeExposure.Category = "Assistant";
-                    takeExposure.Description = "";
-                    takeExposure.ErrorBehavior = this.ErrorBehavior;
-                    takeExposure.Attempts = this.Attempts;
-
-                    takeExposure.ExposureTime = planFilter.ExposureLength;
-                    takeExposure.Gain = GetGain(planFilter.Gain);
-                    takeExposure.Offset = GetOffset(planFilter.Offset);
-                    takeExposure.Binning = planFilter.BinningMode;
-
-                    Add(new WrappedInstruction(monitor, planFilter.PlanId, takeExposure));
+                if (instruction is PlanMessage) {
+                    Logger.Debug($"exp plan msg: {((PlanMessage)instruction).msg}");
+                    continue;
                 }
+
+                if (instruction is PlanSwitchFilter) {
+                    AddSwitchFilter(instruction.planFilter);
+                    continue;
+                }
+
+                if (instruction is PlanTakeExposure) {
+                    AddTakeExposure(instruction.planFilter);
+                    continue;
+                }
+
+                if (instruction is PlanWait) {
+                    AddWait(((PlanWait)instruction).waitForTime, plan.PlanTarget);
+                    continue;
+                }
+
+                throw new Exception($"unknown instruction type: {instruction.GetType().FullName}");
             }
         }
 
-        private void AddSwitchFilter(PlanFilter planFilter) {
+        private void AddSwitchFilter(IPlanFilter planFilter) {
             Logger.Info($"Assistant: adding switch filter: {planFilter.FilterName}");
 
             SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator);
@@ -220,6 +222,28 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             switchFilter.Filter = LookupFilter(planFilter.FilterName);
             Add(new WrappedInstruction(monitor, planFilter.PlanId, switchFilter));
+        }
+
+        private void AddTakeExposure(IPlanFilter planFilter) {
+            Logger.Info($"Assistant: adding take exposure: {planFilter.FilterName}");
+
+            TakeExposure takeExposure = new TakeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM);
+            takeExposure.Name = nameof(TakeExposure);
+            takeExposure.Category = "Assistant";
+            takeExposure.Description = "";
+            takeExposure.ErrorBehavior = this.ErrorBehavior;
+            takeExposure.Attempts = this.Attempts;
+
+            takeExposure.ExposureTime = planFilter.ExposureLength;
+            takeExposure.Gain = GetGain(planFilter.Gain);
+            takeExposure.Offset = GetOffset(planFilter.Offset);
+            takeExposure.Binning = planFilter.BinningMode;
+
+            Add(new WrappedInstruction(monitor, planFilter.PlanId, takeExposure));
+        }
+
+        private void AddWait(DateTime waitForTime, IPlanTarget planTarget) {
+            Add(new WrappedInstruction(monitor, planTarget.PlanId, new AssistantWaitInstruction(guiderMediator, telescopeMediator, waitForTime)));
         }
 
         private FilterInfo LookupFilter(string filterName) {
@@ -248,8 +272,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 Angle.ByDegree(activeProfile.AstrometrySettings.Longitude),
                 activeProfile.AstrometrySettings.Horizon);
 
-            _target.TargetName = planTarget.Name;
-            _target.InputCoordinates = new InputCoordinates(planTarget.Coordinates);
+            _target.TargetName = plan.PlanTarget.Name;
+            _target.InputCoordinates = new InputCoordinates(plan.PlanTarget.Coordinates);
             _target.Rotation = 0;
         }
 
