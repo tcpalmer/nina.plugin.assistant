@@ -29,6 +29,36 @@ namespace Assistant.NINAPlugin.Plan {
             this.PlanId = Guid.NewGuid().ToString();
             this.WaitForNextTargetTime = waitForNextTargetTime;
         }
+
+        public string PlanSummary() {
+            StringBuilder sb = new StringBuilder();
+            if (WaitForNextTargetTime != null) {
+                sb.AppendLine($"Waiting until {Utils.FormatDateTimeFull(WaitForNextTargetTime)}");
+            }
+            else {
+                sb.AppendLine($"Target:         {PlanTarget.Name} at {PlanTarget.Coordinates.RAString} {PlanTarget.Coordinates.DecString}");
+                sb.AppendLine($"Imaging window: {TimeInterval}");
+                sb.Append($"Instructions:   {PlanInstruction.InstructionsSummary(PlanInstructions)}");
+            }
+
+            return sb.ToString();
+        }
+
+        public override string ToString() {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Id: {PlanId}");
+            sb.Append("Target: ").AppendLine(PlanTarget != null ? PlanTarget.Name : null);
+            sb.AppendLine($"Interval: {TimeInterval}");
+            sb.AppendLine($"Wait: {WaitForNextTargetTime}");
+            sb.AppendLine($"Instructions:\n");
+            if (PlanInstructions != null) {
+                foreach (IPlanInstruction instruction in PlanInstructions) {
+                    sb.AppendLine($"{instruction}");
+                }
+            }
+
+            return sb.ToString();
+        }
     }
 
     public interface IPlanProject {
@@ -233,7 +263,8 @@ namespace Assistant.NINAPlugin.Plan {
             }
 
             PlanTarget p = (PlanTarget)obj;
-            return this.Coordinates.RA.Equals(p.Coordinates.RA) &&
+            return this.Name.Equals(p.Name) &&
+                   this.Coordinates.RA.Equals(p.Coordinates.RA) &&
                    this.Coordinates.Dec.Equals(p.Coordinates.Dec) &&
                    this.Rotation.Equals(p.Rotation);
         }

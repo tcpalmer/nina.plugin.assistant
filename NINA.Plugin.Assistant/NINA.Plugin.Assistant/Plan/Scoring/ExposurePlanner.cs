@@ -3,6 +3,7 @@ using Assistant.NINAPlugin.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Assistant.NINAPlugin.Plan {
 
@@ -141,9 +142,12 @@ namespace Assistant.NINAPlugin.Plan {
                 }
             }
 
+            /* TODO: I don't think we want to do this.  If the exposure container finishes early, just let the instruction come back to the planner.
+             * If the planner says wait then, that's fine - it will know the time to wait until.
+             * TODO: and I think we can remove PlanWait instruction if it's not needed here.
             if (timeRemaining >= 0) {
                 instructions.Add(new PlanWait(timeWindow.EndTime));
-            }
+            }*/
 
             return instructions;
         }
@@ -198,6 +202,41 @@ namespace Assistant.NINAPlugin.Plan {
 
         public PlanInstruction(IPlanFilter planFilter) {
             this.planFilter = planFilter;
+        }
+
+        public static string InstructionsSummary(List<IPlanInstruction> instructions) {
+            if (instructions?.Count == 0) {
+                return "";
+            }
+
+            Dictionary<string, int> exposures = new Dictionary<string, int>();
+            StringBuilder order = new StringBuilder();
+            foreach (IPlanInstruction instruction in instructions) {
+                if (instruction is PlanTakeExposure) {
+                    string filterName = instruction.planFilter.FilterName;
+                    order.Append(filterName);
+                    if (exposures.ContainsKey(filterName)) {
+                        exposures[filterName]++;
+                    }
+                    else {
+                        exposures.Add(filterName, 1);
+                    }
+                }
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Order: {order}");
+            foreach (KeyValuePair<string, int> entry in exposures) {
+                sb.AppendLine($"{entry.Key}: {entry.Value}");
+            }
+
+            foreach (IPlanInstruction instruction in instructions) {
+                if (instruction is PlanWait) {
+                    sb.AppendLine($"Wait until {Utils.FormatDateTimeFull(((PlanWait)instruction).waitForTime)}");
+                }
+            }
+
+            return sb.ToString();
         }
     }
 

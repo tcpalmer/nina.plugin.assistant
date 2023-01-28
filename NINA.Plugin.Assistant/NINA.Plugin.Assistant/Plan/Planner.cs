@@ -1,9 +1,9 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
 using Assistant.NINAPlugin.Database;
-using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan.Scoring;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
+using NINA.Core.Model;
 using NINA.Core.Utility;
 using NINA.Profile.Interfaces;
 using System;
@@ -16,10 +16,14 @@ namespace Assistant.NINAPlugin.Plan {
         private DateTime atTime;
         private IProfile activeProfile;
         private ObserverInfo observerInfo;
+        private List<IPlanProject> projects;
 
-        public Planner(DateTime atTime, IProfileService profileService) {
+        public Planner(DateTime atTime, IProfileService profileService) : this(atTime, profileService, null) { }
+
+        public Planner(DateTime atTime, IProfileService profileService, List<IPlanProject> projects) {
             this.atTime = atTime;
             this.activeProfile = profileService.ActiveProfile;
+            this.projects = projects;
             this.observerInfo = new ObserverInfo {
                 Latitude = activeProfile.AstrometrySettings.Latitude,
                 Longitude = activeProfile.AstrometrySettings.Longitude,
@@ -35,37 +39,104 @@ namespace Assistant.NINAPlugin.Plan {
             Logger.Debug($"Assistant: getting current plan for {atTime}");
 
             using (MyStopWatch.Measure("Assistant Plan Generation")) {
+                try {
+                    if (projects == null) {
+                        projects = GetProjects(atTime);
+                    }
 
-                List<IPlanProject> projects = GetProjects(atTime, activeProfile.Id.ToString());
+                    projects = FilterForIncomplete(projects);
+                    //Logger.Trace($"Assistant: GetPlan after FilterForIncomplete:\n{PlanProject.ListToString(projects)}");
 
-                projects = FilterForIncomplete(projects);
-                //Logger.Trace($"Assistant: GetPlan after FilterForIncomplete:\n{PlanProject.ListToString(projects)}");
+                    projects = FilterForVisibility(projects);
+                    //Logger.Trace($"Assistant: GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
 
-                projects = FilterForVisibility(projects);
-                //Logger.Trace($"Assistant: GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
+                    projects = FilterForMoonAvoidance(projects);
+                    //Logger.Trace($"Assistant: GetPlan after FilterForMoonAvoidance:\n{PlanProject.ListToString(projects)}");
 
-                projects = FilterForMoonAvoidance(projects);
-                Logger.Trace($"Assistant: GetPlan after FilterForMoonAvoidance:\n{PlanProject.ListToString(projects)}");
+                    DateTime? waitForVisibleNow = CheckForVisibleNow(projects);
+                    if (waitForVisibleNow != null) {
+                        return new AssistantPlan((DateTime)waitForVisibleNow);
+                    }
 
-                DateTime? waitForVisibleNow = CheckForVisibleNow(projects);
-                if (waitForVisibleNow != null) {
-                    return new AssistantPlan((DateTime)waitForVisibleNow);
+                    ScoringEngine scoringEngine = new ScoringEngine(activeProfile, atTime, previousPlanTarget);
+
+                    IPlanTarget planTarget = SelectTargetByScore(projects, scoringEngine);
+
+                    if (planTarget != null) {
+                        Logger.Trace($"Assistant: GetPlan highest scoring target:\n{planTarget}");
+                        TimeInterval targetWindow = GetTargetTimeWindow(atTime, planTarget);
+                        List<IPlanInstruction> planInstructions = PlanExposures(planTarget, targetWindow);
+                        return new AssistantPlan(planTarget, targetWindow, planInstructions);
+                    }
+                    else {
+                        Logger.Debug("Assistant: GetPlan no target selected");
+                        return null;
+                    }
                 }
+                catch (Exception ex) {
+                    if (ex is SequenceEntityFailedException) {
+                        throw ex;
+                    }
 
-                ScoringEngine scoringEngine = new ScoringEngine(activeProfile, atTime, previousPlanTarget);
-                IPlanTarget planTarget = SelectTargetByScore(projects, scoringEngine);
-                if (planTarget != null) {
-                    Logger.Trace($"Assistant: GetPlan highest scoring target:\n{planTarget}");
+                    Logger.Error($"Assistant: exception generating plan: {ex.StackTrace}");
+                    throw new SequenceEntityFailedException($"Assistant: exception generating plan: {ex.Message}", ex);
                 }
-                else {
-                    Logger.Trace("Assistant: GetPlan no target selected by score");
-                }
-
-                TimeInterval targetWindow = GetTargetTimeWindow(atTime, planTarget);
-                List<IPlanInstruction> planInstructions = PlanExposures(planTarget, targetWindow);
-
-                return planTarget != null ? new AssistantPlan(planTarget, targetWindow, planInstructions) : null;
             }
+        }
+
+        /// <summary>
+        /// To estimate what the planner might do on a given night, a series of plans can be generated by repeatedly
+        /// calling the planner using the end time of the previous run as the next starting point.  This series is 'perfect'
+        /// for two reasons.  One, it assumes that operations that absolutely will take time (like slew/center, switching filters,
+        /// autofocus, meridian flips, etc) take zero time.  So while each individual plan run will end at the proper time, you
+        /// are unlikely to get the number of exposures it schedules.  And two, all images are assumed to be acceptable and will
+        /// increment the accepted count for the target/filter.  The net result is that acceptable images will be acquired
+        /// (and projects completed) significantly faster than in actual usage.
+        /// 
+        /// Nevertheless, a perfect plan provides some idea of what the planner will do on a given night which is useful
+        /// for previewing and troubleshooting.
+        /// </summary>
+        /// <param name="atTime"></param>
+        /// <param name="profileService"></param>
+        /// <param name="projects"></param>
+        /// <returns>list</returns>
+        public static List<AssistantPlan> GetPerfectPlan(DateTime atTime, IProfileService profileService, List<IPlanProject> projects) {
+            List<AssistantPlan> plans = new List<AssistantPlan>();
+
+            DateTime currentTime = atTime;
+            IPlanTarget previousPlanTarget = null;
+
+            AssistantPlan plan;
+            while ((plan = new Planner(currentTime, profileService, projects).GetPlan(previousPlanTarget)) != null) {
+                plans.Add(plan);
+                previousPlanTarget = plan.WaitForNextTargetTime != null ? null : plan.PlanTarget;
+                currentTime = plan.WaitForNextTargetTime != null ? (DateTime)plan.WaitForNextTargetTime : plan.TimeInterval.EndTime;
+                PrepForNextRun(projects, plan);
+            }
+
+            return plans;
+        }
+
+        private static void PrepForNextRun(List<IPlanProject> projects, AssistantPlan plan) {
+
+            foreach (IPlanProject planProject in projects) {
+                planProject.Rejected = false;
+                planProject.RejectedReason = null;
+                foreach (IPlanTarget planTarget in planProject.Targets) {
+                    planTarget.Rejected = false;
+                    planTarget.RejectedReason = null;
+                    foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
+                        planFilter.Accepted += planFilter.PlannedExposures;
+                        planFilter.PlannedExposures = 0;
+                        planFilter.Rejected = false;
+                        planFilter.RejectedReason = null;
+                    }
+                }
+            }
+        }
+
+        public static List<AssistantPlan> GetPerfectPlan(DateTime atTime, IProfileService profileService) {
+            return GetPerfectPlan(atTime, profileService, null);
         }
 
         /// <summary>
@@ -81,6 +152,9 @@ namespace Assistant.NINAPlugin.Plan {
             foreach (IPlanProject planProject in projects) {
                 if (!ProjectIsInComplete(planProject)) {
                     SetRejected(planProject, Reasons.ProjectComplete);
+                    foreach (IPlanTarget planTarget in planProject.Targets) {
+                        SetRejected(planTarget, Reasons.TargetComplete);
+                    }
                 }
             }
 
@@ -101,8 +175,10 @@ namespace Assistant.NINAPlugin.Plan {
             }
 
             foreach (IPlanProject planProject in projects) {
+                if (planProject.Rejected) { continue; }
 
                 foreach (IPlanTarget planTarget in planProject.Targets) {
+                    if (planTarget.Rejected) { continue; }
 
                     if (!AstrometryUtils.RisesAtLocation(observerInfo, planTarget.Coordinates)) {
                         Logger.Warning($"Assistant: target {planProject.Name}/{planTarget.Name} never rises at location - skipping");
@@ -120,10 +196,11 @@ namespace Assistant.NINAPlugin.Plan {
 
                     DateTime actualStart = atTime > targetCircumstances.RiseAboveHorizonTime ? atTime : targetCircumstances.RiseAboveHorizonTime;
                     int TimeOnTargetSeconds = (int)(targetCircumstances.SetBelowHorizonTime - actualStart).TotalSeconds;
-                    Logger.Trace($"Assistant: TargetCircumstances:\n{targetCircumstances}, timeOnTarget={TimeOnTargetSeconds}");
+                    //Logger.Trace($"Assistant: TargetCircumstances:\n{targetCircumstances}, timeOnTarget={TimeOnTargetSeconds}");
 
                     // If the start time is in the future, reject for now
                     if (actualStart > atTime) {
+                        planTarget.StartTime = actualStart;
                         SetRejected(planTarget, Reasons.TargetNotYetVisible);
                     }
                     // If the target is visible for at least the minimum time, then accept it
@@ -232,7 +309,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         /// <summary>
-        /// Determine the time window for the selected target.  The start time as basically ASAP but the end time
+        /// Determine the time window for the selected target.  The start time is basically ASAP but the end time
         /// needs to be chosen carefully since that's the point at which the planner will be called again to
         /// select the next (same or different) target.
         /// </summary>
@@ -245,6 +322,21 @@ namespace Assistant.NINAPlugin.Plan {
             // Set the stop time to the earliest of the target's hard stop time and the time when the
             // minimum time-on-target is achieved.  Rather than do a deeper analysis of which target
             // might be better to image next, we just let the planner run again and decide at that point.
+
+            // TODO: in reality, the above is probably not great.  What if another target would get w/in
+            // its meridian window before the current gets its minimum time?  Might have a hard time imaging
+            // that target if another is always before it.  But the above may work OK if the minimum time
+            // isn't too long.
+            // But, if the min time on target is longish, then you run the risk of deciding that a target
+            // can't be imaged since it can't get it's min time - when in fact it could get say 80% of it
+            // which might otherwise be wasted.
+
+            // TODO: create a set of events, sorted in order of soonest time:
+            // - upcoming hard stop for selected target (automatically = stop time if that's earliest)
+            // - upcoming twilight events
+            // - for all potentially visible other targets (omit selected): visibility begins (which would include meridian window)?
+            //    - can this be done during the visibility calc?
+            // We'll then be in a position to make a decent choice
 
             int minimumTimeOnTarget = planTarget.Project.Preferences.MinimumTime;
             DateTime hardStopTime = hardStartTime.AddMinutes(minimumTimeOnTarget);
@@ -363,48 +455,17 @@ namespace Assistant.NINAPlugin.Plan {
             return moonSeparation < moonAvoidanceSeparation;
         }
 
-        private List<IPlanProject> GetProjects(DateTime atTime, string profileId) {
-            List<Project> projects = null;
-            List<FilterPreference> filterPrefs = null;
+        private List<IPlanProject> GetProjects(DateTime atTime) {
 
-            AssistantDatabaseInteraction database = new AssistantDatabaseInteraction();
-            using (var context = database.GetContext()) {
-                try {
-                    projects = context.GetActiveProjects(profileId, atTime);
-                    filterPrefs = context.GetFilterPreferences(profileId);
-                }
-                catch (Exception ex) {
-                    Logger.Error($"Assistant: exception reading database: {ex}");
-                    // TODO: need to throw so instruction can react properly
-                    // maybe: new SequenceEntityFailedException("") ?
-                    // or a general exception and let the instruction decide what to throw
-                }
+            try {
+                AssistantDatabaseInteraction database = new AssistantDatabaseInteraction();
+                AssistantPlanLoader loader = new AssistantPlanLoader();
+                return loader.LoadActiveProjects(database.GetContext(), activeProfile, atTime);
             }
-
-            if (projects == null || projects.Count == 0) {
-                Logger.Warning("Assistant: no projects are active and within start/end dates at planning time");
-                return null;
+            catch (Exception ex) {
+                Logger.Error($"Assistant: exception reading database: {ex.StackTrace}");
+                throw new SequenceEntityFailedException($"Assistant: exception reading database: {ex.Message}", ex);
             }
-
-            List<IPlanProject> planProjects = new List<IPlanProject>();
-            Dictionary<string, AssistantFilterPreferences> filterPrefsDictionary = GetFilterPrefDictionary(filterPrefs);
-
-            foreach (Project project in projects) {
-                PlanProject planProject = new PlanProject(activeProfile, project, filterPrefsDictionary);
-                planProjects.Add(planProject);
-            }
-
-            return planProjects;
-        }
-
-        private Dictionary<string, AssistantFilterPreferences> GetFilterPrefDictionary(List<FilterPreference> filterPrefs) {
-            Dictionary<string, AssistantFilterPreferences> dict = new Dictionary<string, AssistantFilterPreferences>();
-
-            foreach (FilterPreference filterPref in filterPrefs) {
-                dict.Add(filterPref.filterName, filterPref.Preferences);
-            }
-
-            return dict;
         }
 
     }

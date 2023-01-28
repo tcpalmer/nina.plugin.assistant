@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Plan.Scoring;
+using Assistant.NINAPlugin.Plan.Scoring.Rules;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using Moq;
@@ -304,6 +305,12 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             AssistantProjectPreferences app = new AssistantProjectPreferences();
             app.SetDefaults();
             app.MinimumTime = minimumMinutes;
+
+            Dictionary<string, IScoringRule> allRules = ScoringRule.GetAllScoringRules();
+            foreach (KeyValuePair<string, IScoringRule> item in allRules) {
+                app.RuleWeights[item.Key] = 1;
+            }
+
             return app;
         }
     }

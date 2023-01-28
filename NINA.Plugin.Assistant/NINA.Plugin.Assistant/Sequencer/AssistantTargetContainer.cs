@@ -13,7 +13,9 @@ using NINA.Sequencer.SequenceItem;
 using NINA.Sequencer.SequenceItem.FilterWheel;
 using NINA.Sequencer.SequenceItem.Imaging;
 using NINA.Sequencer.SequenceItem.Platesolving;
+using NINA.Sequencer.SequenceItem.Telescope;
 using NINA.Sequencer.Trigger.Guider;
+using NINA.Sequencer.Utility;
 using NINA.Sequencer.Utility.DateTimeProvider;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
@@ -87,11 +89,14 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.previousPlanTarget = previousPlanTarget;
             this.plan = plan;
             this.activeProfile = profileService.ActiveProfile;
+
             SetTarget();
+            Attempts = 1;
+            ErrorBehavior = InstructionErrorBehavior.SkipInstructionSetOnError;
         }
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Trace("AssistantTargetContainer: execute");
+            Logger.Debug("Assistant: executing target container");
             ImageSaveWatcher imageSaveWatcher = null;
 
             try {
@@ -101,7 +106,9 @@ namespace Assistant.NINAPlugin.Sequencer {
                 // If target is different from previous, slew/center/rotate
                 if (!plan.PlanTarget.Equals(previousPlanTarget)) {
                     // TODO: pain to simulate
-                    //SlewAndCenter(planTarget, progress, token);
+                    //AddSlewAndCenter(plan.PlanTarget, progress, token);
+                    // TODO: just slew for garage testing
+                    AddSlew(plan.PlanTarget, progress, token);
                 }
 
                 // Add the planned exposures
@@ -111,10 +118,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 base.Execute(progress, token).Wait();
             }
             catch (Exception ex) {
-                // TODO: nice to handle TaskCanceledException and OperationCanceledException separately
-                // Really need to since I think we have to bubble this up - at least a TaskCanceledException
-                // which is from hitting the stop button
-                Logger.Error($"Assistant: exception\n{ex.ToString()}");
+                throw ex;
             }
             finally {
                 imageSaveWatcher?.Stop();
@@ -129,6 +133,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 Items.Clear();
                 Triggers.Clear();
+                Logger.Debug("Assistant: done executing target container");
             }
 
             return Task.CompletedTask;
@@ -139,7 +144,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             return base.Interrupt();
         }
 
-        private void AddSlewAndCenter(PlanTarget planTarget, IProgress<ApplicationStatus> progress, CancellationToken token) {
+        private void AddSlewAndCenter(IPlanTarget planTarget, IProgress<ApplicationStatus> progress, CancellationToken token) {
             Logger.Info($"Assistant: adding slew/center target instruction for {planTarget.Name}, id={planTarget.PlanId}");
 
             Center center = null;
@@ -159,6 +164,22 @@ namespace Assistant.NINAPlugin.Sequencer {
             center.Attempts = this.Attempts;
             center.Coordinates = new InputCoordinates(planTarget.Coordinates);
             Add(new WrappedInstruction(monitor, planTarget.PlanId, center));
+        }
+
+        private void AddSlew(IPlanTarget planTarget, IProgress<ApplicationStatus> progress, CancellationToken token) {
+            Logger.Info($"Assistant: adding slew target instruction for {planTarget.Name}, id={planTarget.PlanId}");
+
+            // Really just used for testing when platesolving won't work
+
+            SlewScopeToRaDec slew = null;
+            slew = new SlewScopeToRaDec(telescopeMediator, guiderMediator);
+            slew.Name = nameof(SlewScopeToRaDec);
+            slew.Category = "Assistant";
+            slew.Description = "";
+            slew.ErrorBehavior = this.ErrorBehavior;
+            slew.Attempts = this.Attempts;
+            slew.Coordinates = new InputCoordinates(planTarget.Coordinates);
+            Add(new WrappedInstruction(monitor, planTarget.PlanId, slew));
         }
 
         private void AddEndTimeTrigger(IPlanTarget planTarget) {
@@ -257,13 +278,11 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private int GetGain(int? gain) {
-            // TODO: if null, pull from camera/filter default
-            return (int)(gain == null ? 0 : gain);
+            return (int)(gain == null ? cameraMediator.GetInfo().DefaultGain : gain);
         }
 
         private int GetOffset(int? offset) {
-            // TODO: if null, pull from camera/filter default
-            return (int)((int)(offset == null ? 0 : offset));
+            return (int)((int)(offset == null ? cameraMediator.GetInfo().DefaultOffset : offset));
         }
 
         private void SetTarget() {

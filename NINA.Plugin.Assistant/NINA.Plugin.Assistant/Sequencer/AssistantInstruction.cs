@@ -108,9 +108,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             // TODO: this can better be set via the ... on the instruction (see Smart Exposure)
             // Interestingly, DSO Container doesn't have ... but this instruction does.
-
             // TODO: also need to pay attention to Attempts - can also be set via ...
-            this.ErrorBehavior = InstructionErrorBehavior.AbortOnError;
+            Attempts = 1;
+            ErrorBehavior = InstructionErrorBehavior.SkipInstructionSetOnError;
         }
 
         public AssistantInstruction(AssistantInstruction cloneMe) : this(
@@ -149,7 +149,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Debug("Assistant execute");
+            Logger.Debug("Assistant: execute instruction");
             IPlanTarget previousPlanTarget = null;
 
             while (true) {
@@ -174,14 +174,16 @@ namespace Assistant.NINAPlugin.Sequencer {
                     // Create a container for this target, add the instructions, and execute
                     try {
                         AssistantTargetContainer targetContainer = GetTargetContainer(previousPlanTarget, plan, monitor);
-                        Logger.Debug("Assistant: executing target container instructions");
                         targetContainer.Execute(progress, token).Wait();
-                        Logger.Debug("Assistant: done executing target container instructions");
-
                         previousPlanTarget = planTarget;
                     }
                     catch (Exception ex) {
-                        Logger.Error($"Assistant: exception\n{ex.ToString()}");
+                        if (ex is SequenceEntityFailedException) {
+                            throw ex;
+                        }
+
+                        Logger.Error($"Assistant: exception executing plan: {ex.StackTrace}");
+                        throw new SequenceEntityFailedException($"Assistant: exception executing plan: {ex.Message}", ex);
                     }
                 }
             }

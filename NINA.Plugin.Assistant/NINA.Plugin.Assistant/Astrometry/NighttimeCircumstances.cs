@@ -165,7 +165,7 @@ namespace Assistant.NINAPlugin.Astrometry {
 
             Altitudes altitudes = GetSamples(start, end, 24).ClipAscendingStart();
 
-            // Since we're above a polar circle, we're guaranteed to have sun set/rise
+            // Since we're below a polar circle, we're guaranteed to have sun set/rise
             CivilTwilightStart = (DateTime)DetectAltitudeEvent(altitudes, SunAltitude, true);
             CivilTwilightEnd = (DateTime)DetectAltitudeEvent(altitudes, SunAltitude, false);
 

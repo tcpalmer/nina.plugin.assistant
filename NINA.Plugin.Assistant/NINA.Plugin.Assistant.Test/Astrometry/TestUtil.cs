@@ -26,6 +26,10 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
 
         public static readonly Coordinates IC1805 = new Coordinates(AstroUtil.HMSToDegrees("2:32:42"), AstroUtil.DMSToDegrees("61:27:0"), Epoch.J2000, Coordinates.RAType.Degrees);
 
+        public static readonly Coordinates C00 = new Coordinates(AstroUtil.HMSToDegrees("0:0:0"), AstroUtil.DMSToDegrees("0:0:0"), Epoch.J2000, Coordinates.RAType.Degrees);
+
+        public static readonly Coordinates C90 = new Coordinates(AstroUtil.HMSToDegrees("9:0:0"), AstroUtil.DMSToDegrees("0:0:0"), Epoch.J2000, Coordinates.RAType.Degrees);
+
         static TestUtil() {
 
             // Northern hemisphere

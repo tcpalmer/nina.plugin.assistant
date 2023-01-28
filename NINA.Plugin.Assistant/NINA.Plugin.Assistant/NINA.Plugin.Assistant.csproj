@@ -278,7 +278,6 @@
     <Compile Include="Assistant.cs" />
     <Compile Include="Astrometry\AstrometryUtils.cs" />
     <Compile Include="Astrometry\NighttimeCircumstances.cs" />
-    <Compile Include="Astrometry\NighttimeCircumstancesOLD.cs" />
     <Compile Include="Astrometry\Solver\Altitudes.cs" />
     <Compile Include="Astrometry\Solver\CircumstanceSolver.cs" />
     <Compile Include="Astrometry\Solver\DSORefiner.cs" />
@@ -292,6 +291,7 @@
     <Compile Include="Astrometry\HorizontalCoordinate.cs" />
     <Compile Include="Database\AssistantDatabaseInteraction.cs" />
     <Compile Include="Database\AssistantDbContext.cs" />
+    <Compile Include="Database\AssistantPlanLoader.cs" />
     <Compile Include="Database\Schema\AcquiredImage.cs" />
     <Compile Include="Database\Schema\AssistantPreferences.cs" />
     <Compile Include="Database\Schema\FilterPlan.cs" />

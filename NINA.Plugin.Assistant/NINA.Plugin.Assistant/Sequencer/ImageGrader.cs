@@ -1,5 +1,4 @@
 ﻿using Assistant.NINAPlugin.Plan;
-using NINA.Core.Utility;
 using NINA.WPF.Base.Interfaces.Mediator;
 
 namespace Assistant.NINAPlugin.Sequencer {
@@ -8,7 +7,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public bool GradeImage(IPlanTarget planTarget, ImageSavedEventArgs msg) {
             // TODO: implement
-            Logger.Debug($"Assistant: image grade: DEFAULTING TO ACCEPT, FIX");
+            //Logger.Debug($"Assistant: image grade: DEFAULTING TO ACCEPT, FIX");
             return true;
         }
 

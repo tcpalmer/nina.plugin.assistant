@@ -1,4 +1,5 @@
-﻿using Assistant.NINAPlugin.Database;
+﻿using Assistant.NINAPlugin.Astrometry;
+using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Plan.Scoring.Rules;
@@ -28,7 +29,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
         [Test]
         [Ignore("tbd")]
         public void TomTest1() {
-            string profileId = "3c160865-776f-4f72-8a05-5964225ca0fa";
+            string profileId = "3c160865-776f-4f72-8a05-5964225ca0fa"; // Zim
             using (var context = db.GetContext()) {
                 try {
                     Project p1 = new Project(profileId);
@@ -145,6 +146,91 @@ namespace NINA.Plugin.Assistant.Test.Database {
             }
         }
 
+        [Test]
+        public void RealTest1() {
+
+            using (var context = db.GetContext()) {
+                try {
+                    DateTime atTime = new DateTime(2023, 1, 26);
+                    //string profileId = "3c160865-776f-4f72-8a05-5964225ca0fa"; // Zim
+                    string profileId = "1f78fa60-ab20-41af-9c17-a12016553007"; // Astroimaging Redcat 51 / ASI1600mm
+
+                    Project p1 = new Project(profileId);
+                    p1.name = "Project: C00";
+                    p1.description = "";
+                    p1.state = Project.STATE_ACTIVE;
+                    p1.ActiveDate = atTime.AddDays(-1);
+                    p1.StartDate = atTime;
+                    p1.EndDate = atTime.AddDays(100);
+
+                    AssistantProjectPreferences p1Prefs = new AssistantProjectPreferences();
+                    p1Prefs.SetDefaults();
+                    p1Prefs.FilterSwitchFrequency = 0;
+                    p1Prefs.MinimumAltitude = 0;
+                    p1Prefs.EnableGrader = true;
+                    SetDefaultRuleWeights(p1Prefs);
+                    p1.preferences = new ProjectPreference(p1Prefs);
+
+                    Target t1 = new Target();
+                    t1.name = "C00";
+                    t1.ra = TestUtil.C00.RA;
+                    t1.dec = TestUtil.C00.Dec;
+                    p1.targets.Add(t1);
+
+                    t1.filterplans.Add(GetFilterPlan(profileId, "Lum", 5, 0, 60));
+                    t1.filterplans.Add(GetFilterPlan(profileId, "Red", 5, 0, 60));
+                    t1.filterplans.Add(GetFilterPlan(profileId, "Green", 5, 0, 60));
+                    t1.filterplans.Add(GetFilterPlan(profileId, "Blue", 5, 0, 60));
+
+                    Project p2 = new Project(profileId);
+                    p2.name = "Project: C90";
+                    p2.description = "";
+                    p2.state = Project.STATE_ACTIVE;
+                    p2.ActiveDate = atTime.AddDays(-1);
+                    p2.StartDate = atTime;
+                    p2.EndDate = atTime.AddDays(100);
+
+                    AssistantProjectPreferences p2Prefs = new AssistantProjectPreferences();
+                    p2Prefs.SetDefaults();
+                    p2Prefs.FilterSwitchFrequency = 0;
+                    p2Prefs.MinimumAltitude = 0;
+                    p2Prefs.EnableGrader = true;
+                    SetDefaultRuleWeights(p2Prefs);
+                    p2.preferences = new ProjectPreference(p2Prefs);
+
+                    Target t2 = new Target();
+                    t2.name = "C90";
+                    t2.ra = TestUtil.C90.RA;
+                    t2.dec = TestUtil.C90.Dec;
+                    p2.targets.Add(t2);
+
+                    t2.filterplans.Add(GetFilterPlan(profileId, "Ha", 5, 0, 90));
+                    t2.filterplans.Add(GetFilterPlan(profileId, "OIII", 5, 0, 90));
+                    t2.filterplans.Add(GetFilterPlan(profileId, "SII", 5, 0, 90));
+
+                    context.ProjectSet.Add(p1);
+                    context.ProjectSet.Add(p2);
+
+                    var afp = new AssistantFilterPreferences();
+                    afp.SetDefaults();
+                    afp.TwilightLevel = TwilightLevel.Nautical;
+                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Lum", afp));
+                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Red", afp));
+                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Green", afp));
+                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Blue", afp));
+                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Ha", afp));
+                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "OIII", afp));
+                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "SII", afp));
+
+                    context.SaveChanges();
+                }
+                catch (Exception e) {
+                    TestContext.Error.WriteLine($"failed to create test database: {e.Message}\n{e.ToString()}");
+                    throw e;
+                }
+            }
+        }
+
         private AssistantDatabaseInteraction GetDatabase() {
             var testDbPath = Path.Combine(TestContext.CurrentContext.TestDirectory, @"assistantdb.sqlite");
             TestContext.WriteLine($"DB PATH: {testDbPath}");
@@ -157,6 +243,16 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 var rule = entry.Value;
                 prefs.AddRuleWeight(rule.Name, rule.DefaultWeight);
             }
+        }
+
+        private FilterPlan GetFilterPlan(string profileId, string filterName, int desired, int accepted, int exposure) {
+            FilterPlan fp = new FilterPlan(profileId, filterName);
+            fp.desired = desired;
+            fp.accepted = accepted;
+            fp.exposure = exposure;
+            fp.gain = 100;
+            fp.offset = 10;
+            return fp;
         }
 
         private List<IPlanProject> ReadAndDump(string profileId, DateTime atTime) {
