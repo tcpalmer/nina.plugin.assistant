@@ -321,7 +321,7 @@ namespace Assistant.NINAPlugin.Plan {
 
         public int PlannedExposures { get; set; }
 
-        public PlanFilter(PlanTarget planTarget, FilterPlan filterPlan, AssistantFilterPreferences preferences) {
+        public PlanFilter(IPlanTarget planTarget, FilterPlan filterPlan, AssistantFilterPreferences preferences) {
             this.PlanId = Guid.NewGuid().ToString();
             this.DatabaseId = filterPlan.id;
             this.FilterName = filterPlan.filterName;

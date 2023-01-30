@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NINA.Astrometry;
+using System;
 
 namespace Assistant.NINAPlugin.Util {
 
@@ -12,6 +13,10 @@ namespace Assistant.NINAPlugin.Util {
 
         public static string FormatDateTimeFull(DateTime? dateTime) {
             return dateTime == null ? "n/a" : String.Format("{0:MM/dd/yyyy HH:mm:ss zzzz}", dateTime);
+        }
+
+        public static string FormatCoordinates(Coordinates coordinates) {
+            return coordinates == null ? "n/a" : $"{coordinates.RAString} {coordinates.DecString}";
         }
 
         public static DateTime GetMidpointTime(DateTime startTime, DateTime endTime) {

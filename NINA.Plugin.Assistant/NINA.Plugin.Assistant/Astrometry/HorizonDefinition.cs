@@ -2,6 +2,7 @@
 using Assistant.NINAPlugin.Util;
 using NINA.Core.Model;
 using System;
+using System.IO;
 
 namespace Assistant.NINAPlugin.Astrometry {
 
@@ -75,6 +76,19 @@ namespace Assistant.NINAPlugin.Astrometry {
         public override string ToString() {
             return minimumAltitude != HORIZON_VALUE ? $"min alt: {minimumAltitude.ToString()}" : "custom";
         }
+
+        public static CustomHorizon GetConstantHorizon(double altitude) {
+            string alt = String.Format("{0:F0}", altitude);
+            string horizonDefinition = $"0 {alt}" + Environment.NewLine
+            + $"90 {alt}" + Environment.NewLine
+            + $"180 {alt}" + Environment.NewLine
+            + $"270 {alt}";
+
+            using (var sr = new StringReader(horizonDefinition)) {
+                return CustomHorizon.FromReader_Standard(sr);
+            }
+        }
+
     }
 
 }

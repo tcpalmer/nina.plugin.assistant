@@ -40,7 +40,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             // HACK
             accepted = true;
-            Update(planTarget, msg.Filter, accepted, msg);
+            //Update(planTarget, msg.Filter, accepted, msg);  NEED A WAY TO NOT DO THIS FOR EMULATOR
         }
 
         private void Update(IPlanTarget planTarget, string filterName, bool accepted, ImageSavedEventArgs msg) {

@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Model;
 using NINA.Core.Model.Equipment;
@@ -90,7 +91,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.plan = plan;
             this.activeProfile = profileService.ActiveProfile;
 
-            SetTarget();
+            //SetTarget();
             Attempts = 1;
             ErrorBehavior = InstructionErrorBehavior.SkipInstructionSetOnError;
         }
@@ -108,11 +109,11 @@ namespace Assistant.NINAPlugin.Sequencer {
                     // TODO: pain to simulate
                     //AddSlewAndCenter(plan.PlanTarget, progress, token);
                     // TODO: just slew for garage testing
-                    AddSlew(plan.PlanTarget, progress, token);
+                    //AddSlew(plan.PlanTarget, progress, token);
                 }
 
                 // Add the planned exposures
-                AddExposures(plan);
+                AddInstructions(plan);
 
                 imageSaveWatcher = new ImageSaveWatcher(imageSaveMediator, plan.PlanTarget);
                 base.Execute(progress, token).Wait();
@@ -121,6 +122,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 throw ex;
             }
             finally {
+                // TODO: we also need to wait for the ImageSaveWatcher to be done with the last image.
+                // This will ensure that the DB is updated with the last grading operation before the planner is called again.
                 imageSaveWatcher?.Stop();
 
                 foreach (var item in Items) {
@@ -144,46 +147,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             return base.Interrupt();
         }
 
-        private void AddSlewAndCenter(IPlanTarget planTarget, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Info($"Assistant: adding slew/center target instruction for {planTarget.Name}, id={planTarget.PlanId}");
-
-            Center center = null;
-            if (planTarget.Rotation == 0) {
-                center = new Center(profileService, telescopeMediator, imagingMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
-                center.Name = nameof(Center);
-            }
-            else {
-                center = new CenterAndRotate(profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
-                center.Name = nameof(CenterAndRotate);
-                (center as CenterAndRotate).Rotation = planTarget.Rotation;
-            }
-
-            center.Category = "Assistant";
-            center.Description = "";
-            center.ErrorBehavior = this.ErrorBehavior;
-            center.Attempts = this.Attempts;
-            center.Coordinates = new InputCoordinates(planTarget.Coordinates);
-            Add(new WrappedInstruction(monitor, planTarget.PlanId, center));
-        }
-
-        private void AddSlew(IPlanTarget planTarget, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Info($"Assistant: adding slew target instruction for {planTarget.Name}, id={planTarget.PlanId}");
-
-            // Really just used for testing when platesolving won't work
-
-            SlewScopeToRaDec slew = null;
-            slew = new SlewScopeToRaDec(telescopeMediator, guiderMediator);
-            slew.Name = nameof(SlewScopeToRaDec);
-            slew.Category = "Assistant";
-            slew.Description = "";
-            slew.ErrorBehavior = this.ErrorBehavior;
-            slew.Attempts = this.Attempts;
-            slew.Coordinates = new InputCoordinates(planTarget.Coordinates);
-            Add(new WrappedInstruction(monitor, planTarget.PlanId, slew));
-        }
-
         private void AddEndTimeTrigger(IPlanTarget planTarget) {
-            Logger.Info($"Assistant: adding target end time trigger, run until: {planTarget.EndTime}");
+            Logger.Info($"Assistant: adding target end time trigger, run until: {Utils.FormatDateTimeFull(planTarget.EndTime)}");
             Add(new AssistantTargetEndTimeTrigger(planTarget.EndTime));
         }
 
@@ -197,18 +162,23 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        private void AddExposures(AssistantPlan plan) {
+        private void AddInstructions(AssistantPlan plan) {
 
             /* TODO: since our determination of target visibility over the course of a night will not detect the
              * 'horizon tree gap' problem, we need to mitigate.
              * - If that was the only potential target, it would still get picked so the sequence container may also have to detect and
-             *   skip exposures, maybe sleeping and rechecking for some period until it appears to be visible.
+             *   skip exposures, maybe a custom trigger that looks for horizon dynamically and takes action?
              */
 
             foreach (IPlanInstruction instruction in plan.PlanInstructions) {
 
                 if (instruction is PlanMessage) {
                     Logger.Debug($"exp plan msg: {((PlanMessage)instruction).msg}");
+                    continue;
+                }
+
+                if (instruction is PlanSlew) {
+                    AddSlew((PlanSlew)instruction, plan.PlanTarget);
                     continue;
                 }
 
@@ -231,6 +201,39 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
+        private void AddSlew(PlanSlew instruction, IPlanTarget planTarget) {
+            string with = instruction.center ? "with" : "without";
+            Logger.Info($"Assistant: slew ({with} center): {Utils.FormatCoordinates(planTarget.Coordinates)}");
+
+            bool isPlateSolve = instruction.center || planTarget.Rotation != 0;
+            SequenceItem slewCenter;
+
+            if (isPlateSolve) {
+                if (planTarget.Rotation == 0) {
+                    slewCenter = new Center(profileService, telescopeMediator, imagingMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
+                    slewCenter.Name = nameof(Center);
+                    (slewCenter as Center).Coordinates = new InputCoordinates(planTarget.Coordinates);
+                }
+                else {
+                    slewCenter = new CenterAndRotate(profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
+                    slewCenter.Name = nameof(CenterAndRotate);
+                    (slewCenter as Center).Coordinates = new InputCoordinates(planTarget.Coordinates);
+                    (slewCenter as CenterAndRotate).Rotation = planTarget.Rotation;
+                }
+            }
+            else {
+                slewCenter = new SlewScopeToRaDec(telescopeMediator, guiderMediator);
+                slewCenter.Name = nameof(SlewScopeToRaDec);
+                (slewCenter as SlewScopeToRaDec).Coordinates = new InputCoordinates(planTarget.Coordinates);
+            }
+
+            slewCenter.Category = "Assistant";
+            slewCenter.Description = "";
+            slewCenter.ErrorBehavior = this.ErrorBehavior;
+            slewCenter.Attempts = this.Attempts;
+            Add(new InstructionWrapper(monitor, planTarget.PlanId, slewCenter));
+        }
+
         private void AddSwitchFilter(IPlanFilter planFilter) {
             Logger.Info($"Assistant: adding switch filter: {planFilter.FilterName}");
 
@@ -242,7 +245,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             switchFilter.Attempts = this.Attempts;
 
             switchFilter.Filter = LookupFilter(planFilter.FilterName);
-            Add(new WrappedInstruction(monitor, planFilter.PlanId, switchFilter));
+            Add(new InstructionWrapper(monitor, planFilter.PlanId, switchFilter));
         }
 
         private void AddTakeExposure(IPlanFilter planFilter) {
@@ -254,17 +257,33 @@ namespace Assistant.NINAPlugin.Sequencer {
             takeExposure.Description = "";
             takeExposure.ErrorBehavior = this.ErrorBehavior;
             takeExposure.Attempts = this.Attempts;
+            takeExposure.ExposureCount = GetExposureCount();
 
             takeExposure.ExposureTime = planFilter.ExposureLength;
             takeExposure.Gain = GetGain(planFilter.Gain);
             takeExposure.Offset = GetOffset(planFilter.Offset);
             takeExposure.Binning = planFilter.BinningMode;
 
-            Add(new WrappedInstruction(monitor, planFilter.PlanId, takeExposure));
+            Add(new InstructionWrapper(monitor, planFilter.PlanId, takeExposure));
         }
 
         private void AddWait(DateTime waitForTime, IPlanTarget planTarget) {
-            Add(new WrappedInstruction(monitor, planTarget.PlanId, new AssistantWaitInstruction(guiderMediator, telescopeMediator, waitForTime)));
+            Add(new InstructionWrapper(monitor, planTarget.PlanId, new AssistantWaitInstruction(guiderMediator, telescopeMediator, waitForTime)));
+        }
+
+        private int GetExposureCount() {
+            AssistantInstruction instruction = GetParentInstruction();
+            instruction.TotalExposureCount++;
+            return instruction.TotalExposureCount;
+        }
+
+        private AssistantInstruction GetParentInstruction() {
+            if (Parent is AssistantInstruction) {
+                return (AssistantInstruction)Parent;
+            }
+            else {
+                throw new SequenceEntityFailedException("parent is not AssistantInstruction as expected");
+            }
         }
 
         private FilterInfo LookupFilter(string filterName) {
@@ -285,29 +304,9 @@ namespace Assistant.NINAPlugin.Sequencer {
             return (int)((int)(offset == null ? cameraMediator.GetInfo().DefaultOffset : offset));
         }
 
-        private void SetTarget() {
-            _target = new InputTarget(
-            Angle.ByDegree(activeProfile.AstrometrySettings.Latitude),
-                Angle.ByDegree(activeProfile.AstrometrySettings.Longitude),
-                activeProfile.AstrometrySettings.Horizon);
-
-            _target.TargetName = plan.PlanTarget.Name;
-            _target.InputCoordinates = new InputCoordinates(plan.PlanTarget.Coordinates);
-            _target.Rotation = 0;
-        }
-
-        // IDeepSkyObjectContainer behavior
-        private InputTarget _target;
-        public InputTarget Target {
-            get => _target;
-            set {
-                _target = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        // IDeepSkyObjectContainer behavior
-        public NighttimeData NighttimeData => null;
+        // IDeepSkyObjectContainer behavior, defer to parent
+        public InputTarget Target { get => ((AssistantInstruction)Parent).Target; set { } }
+        public NighttimeData NighttimeData => ((AssistantInstruction)Parent).NighttimeData;
 
     }
 
@@ -333,36 +332,42 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
     }
 
-    public class WrappedInstruction : SequenceItem {
+    public class InstructionWrapper : SequentialContainer {
 
-        private SequenceItem Instruction;
         private AssistantStatusMonitor Monitor;
         private string PlanItemId;
 
-        public WrappedInstruction(AssistantStatusMonitor monitor, string planItemId, SequenceItem instruction) {
+        public InstructionWrapper(AssistantStatusMonitor monitor, string planItemId, SequenceItem instruction) {
             this.Monitor = monitor;
             this.PlanItemId = planItemId;
-            this.Instruction = instruction;
 
-            this.Name = instruction.Name;
-            this.Category = instruction.Category;
-            this.Description = instruction.Description;
+            this.Name = $"Wrap Container: {instruction.Name}";
+            this.Category = "Assistant";
+            this.Description = "Wrapper";
             this.ErrorBehavior = instruction.ErrorBehavior;
             this.Attempts = instruction.Attempts;
+
+            Add(instruction);
         }
 
-        public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Monitor.ItemStart(PlanItemId, Name);
-            await Instruction.Execute(progress, token);
-            Monitor.ItemFinsh(PlanItemId, Name);
+        public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
+            try {
+                Monitor.ItemStart(PlanItemId, Name);
+                base.Execute(progress, token).Wait();
+                Monitor.ItemFinsh(PlanItemId, Name);
+            }
+            catch (Exception ex) {
+                throw ex;
+            }
+            finally {
+                Items.Clear();
+            }
+
+            return Task.CompletedTask;
         }
 
         public override string ToString() {
-            return Instruction.ToString();
-        }
-
-        public override object Clone() {
-            return Instruction.Clone();
+            return $"Category: {Category}, Item: {nameof(InstructionWrapper)}";
         }
 
     }

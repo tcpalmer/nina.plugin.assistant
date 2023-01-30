@@ -239,7 +239,7 @@
                                     VerticalAlignment="Center"
                                     VerticalContentAlignment="Center"
                                     Foreground="{StaticResource PrimaryBrush}"
-                                    HintText="{ns:Loc LblObjectNameHint}"
+                                    HintText="Set by Assistant Planner ..."
                                     Text="{Binding Target.TargetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             </Grid>
 
@@ -247,111 +247,30 @@
                                 Grid.Row="1"
                                 Grid.Column="0"
                                 Margin="0,5,0,0"
-                                DataContext="{Binding Target.InputCoordinates}"
                                 Orientation="Horizontal">
                                 <TextBlock
-                                    Width="50"
+                                    Width="57"
                                     VerticalAlignment="Center"
                                     Text="{ns:Loc LblRA}" />
-                                <TextBox
-                                    Width="40"
-                                    Margin="5,0,0,0"
+                                <TextBlock
+                                    Width="120"
                                     VerticalAlignment="Center"
-                                    TextAlignment="Right">
-                                    <TextBox.Text>
-                                        <Binding Path="RAHours" UpdateSourceTrigger="LostFocus">
-                                            <Binding.ValidationRules>
-                                                <rules:HoursRule />
-                                            </Binding.ValidationRules>
-                                        </Binding>
-                                    </TextBox.Text>
-                                </TextBox>
-                                <TextBlock VerticalAlignment="Center">h</TextBlock>
-                                <TextBox
-                                    Width="40"
-                                    Margin="5,0,0,0"
-                                    VerticalAlignment="Center"
-                                    TextAlignment="Right">
-                                    <TextBox.Text>
-                                        <Binding Path="RAMinutes" UpdateSourceTrigger="LostFocus">
-                                            <Binding.ValidationRules>
-                                                <rules:MinutesRule />
-                                            </Binding.ValidationRules>
-                                        </Binding>
-                                    </TextBox.Text>
-                                </TextBox>
-                                <TextBlock VerticalAlignment="Center">m</TextBlock>
-                                <TextBox
-                                    Width="40"
-                                    Margin="5,0,0,0"
-                                    VerticalAlignment="Center"
-                                    TextAlignment="Right">
-                                    <TextBox.Text>
-                                        <Binding Path="RASeconds" UpdateSourceTrigger="LostFocus">
-                                            <Binding.ValidationRules>
-                                                <rules:SecondsRule />
-                                            </Binding.ValidationRules>
-                                        </Binding>
-                                    </TextBox.Text>
-                                </TextBox>
-                                <TextBlock VerticalAlignment="Center">s</TextBlock>
+                                    Text="{Binding RADisplay}" />
                             </StackPanel>
                             <StackPanel
                                 Grid.Row="2"
                                 Grid.Column="0"
                                 Margin="0,5,0,0"
                                 VerticalAlignment="Center"
-                                DataContext="{Binding Target.InputCoordinates}"
                                 Orientation="Horizontal">
                                 <TextBlock
-                                    Width="50"
+                                    Width="57"
                                     VerticalAlignment="Center"
                                     Text="{ns:Loc LblDec}" />
-                                <TextBox
-                                    Width="40"
-                                    Margin="5,0,0,0"
+                                <TextBlock
+                                    Width="120"
                                     VerticalAlignment="Center"
-                                    TextAlignment="Right">
-                                    <TextBox.Text>
-                                        <MultiBinding Converter="{StaticResource DecDegreeConverter}" UpdateSourceTrigger="LostFocus">
-                                            <Binding Path="NegativeDec" />
-                                            <Binding Path="DecDegrees">
-                                                <Binding.ValidationRules>
-                                                    <rules:DegreesRule />
-                                                </Binding.ValidationRules>
-                                            </Binding>
-                                        </MultiBinding>
-                                    </TextBox.Text>
-                                </TextBox>
-                                <TextBlock VerticalAlignment="Center">d</TextBlock>
-                                <TextBox
-                                    Width="40"
-                                    Margin="5,0,0,0"
-                                    VerticalAlignment="Center"
-                                    TextAlignment="Right">
-                                    <TextBox.Text>
-                                        <Binding Path="DecMinutes" UpdateSourceTrigger="LostFocus">
-                                            <Binding.ValidationRules>
-                                                <rules:MinutesRule />
-                                            </Binding.ValidationRules>
-                                        </Binding>
-                                    </TextBox.Text>
-                                </TextBox>
-                                <TextBlock VerticalAlignment="Center">m</TextBlock>
-                                <TextBox
-                                    Width="40"
-                                    Margin="5,0,0,0"
-                                    VerticalAlignment="Center"
-                                    TextAlignment="Right">
-                                    <TextBox.Text>
-                                        <Binding Path="DecSeconds" UpdateSourceTrigger="LostFocus">
-                                            <Binding.ValidationRules>
-                                                <rules:SecondsRule />
-                                            </Binding.ValidationRules>
-                                        </Binding>
-                                    </TextBox.Text>
-                                </TextBox>
-                                <TextBlock VerticalAlignment="Center">s</TextBlock>
+                                    Text="{Binding DECDisplay}" />
                             </StackPanel>
                             <StackPanel
                                 Grid.Row="3"
@@ -360,23 +279,13 @@
                                 VerticalAlignment="Center"
                                 Orientation="Horizontal">
                                 <TextBlock
-                                    Width="50"
+                                    Width="57"
                                     VerticalAlignment="Center"
                                     Text="{ns:Loc LblRotation}" />
-                                <TextBox
-                                    Width="40"
-                                    Margin="5,0,0,0"
-                                    DataContext="{Binding Target}"
-                                    TextAlignment="Right">
-                                    <TextBox.Text>
-                                        <Binding Path="Rotation" UpdateSourceTrigger="LostFocus">
-                                            <Binding.ValidationRules>
-                                                <rules:FullCircleDegreesRule />
-                                            </Binding.ValidationRules>
-                                        </Binding>
-                                    </TextBox.Text>
-                                </TextBox>
-                                <TextBlock VerticalAlignment="Center">°</TextBlock>
+                                <TextBlock
+                                    Width="100"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding RotationDisplay}" />
                             </StackPanel>
 
                             <alt:AltitudeChart

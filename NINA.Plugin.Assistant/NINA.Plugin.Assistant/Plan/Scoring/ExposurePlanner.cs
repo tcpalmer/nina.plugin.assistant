@@ -252,6 +252,18 @@ namespace Assistant.NINAPlugin.Plan {
         }
     }
 
+    public class PlanSlew : PlanInstruction {
+        public bool center { get; private set; }
+
+        public PlanSlew(bool center) : base(null) {
+            this.center = center;
+        }
+
+        public override string ToString() {
+            return $"Slew: and center={center}";
+        }
+    }
+
     public class PlanSwitchFilter : PlanInstruction {
         public PlanSwitchFilter(IPlanFilter planFilter) : base(planFilter) { }
 

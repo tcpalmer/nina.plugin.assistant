@@ -38,6 +38,11 @@ namespace Assistant.NINAPlugin.Plan {
         public AssistantPlan GetPlan(IPlanTarget previousPlanTarget) {
             Logger.Debug($"Assistant: getting current plan for {atTime}");
 
+            if (true) {
+                // HACK!
+                return new PlannerEmulator(atTime, activeProfile).GetPlan(previousPlanTarget);
+            }
+
             using (MyStopWatch.Measure("Assistant Plan Generation")) {
                 try {
                     if (projects == null) {
@@ -65,7 +70,7 @@ namespace Assistant.NINAPlugin.Plan {
                     if (planTarget != null) {
                         Logger.Trace($"Assistant: GetPlan highest scoring target:\n{planTarget}");
                         TimeInterval targetWindow = GetTargetTimeWindow(atTime, planTarget);
-                        List<IPlanInstruction> planInstructions = PlanExposures(planTarget, targetWindow);
+                        List<IPlanInstruction> planInstructions = PlanInstructions(planTarget, previousPlanTarget, targetWindow);
                         return new AssistantPlan(planTarget, targetWindow, planInstructions);
                     }
                     else {
@@ -352,15 +357,24 @@ namespace Assistant.NINAPlugin.Plan {
         /// target window.
         /// </summary>
         /// <param name="planTarget"></param>
+        /// <param name="previousPlanTarget"></param>
         /// <param name="targetWindow"></param>
         /// <returns>instructions</returns>
-        public List<IPlanInstruction> PlanExposures(IPlanTarget planTarget, TimeInterval targetWindow) {
+        public List<IPlanInstruction> PlanInstructions(IPlanTarget planTarget, IPlanTarget previousPlanTarget, TimeInterval targetWindow) {
             if (planTarget == null) {
                 return null;
             }
 
+            List<IPlanInstruction> instructions = new List<IPlanInstruction>();
+
+            // If this target is different from the previous, add the slew instruction
+            if (!planTarget.Equals(previousPlanTarget)) {
+                instructions.Add(new PlanSlew(true));
+            }
+
             NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, atTime);
-            return new ExposurePlanner(planTarget, targetWindow, nighttimeCircumstances).Plan();
+            instructions.AddRange(new ExposurePlanner(planTarget, targetWindow, nighttimeCircumstances).Plan());
+            return instructions;
         }
 
         private void SetRejected(IPlanProject planProject, string reason) {

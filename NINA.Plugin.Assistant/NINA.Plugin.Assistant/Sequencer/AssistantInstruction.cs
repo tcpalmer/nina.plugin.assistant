@@ -1,6 +1,10 @@
-﻿using Assistant.NINAPlugin.Plan;
+﻿using Assistant.NINAPlugin.Astrometry;
+using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
+using NINA.Astrometry;
+using NINA.Astrometry.Interfaces;
 using NINA.Core.Model;
 using NINA.Core.Utility;
 using NINA.Core.Utility.WindowService;
@@ -46,7 +50,6 @@ namespace Assistant.NINAPlugin.Sequencer {
          * - execute: when the instruction is started
          * - teardown: when the instruction has completed or canceled
          * 
-         * So initialize is where we can call the Assistant to get the plan.
          * A cancel has to be handled, e.g. remove any instructions added to the sequence under the hood and clear the plan
          */
 
@@ -63,7 +66,10 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IDomeMediator domeMediator;
         private readonly IDomeFollower domeFollower;
         private readonly IPlateSolverFactory plateSolverFactory;
+        private readonly INighttimeCalculator nighttimeCalculator;
         private readonly IWindowServiceFactory windowServiceFactory;
+
+        public int TotalExposureCount { get; set; }
 
         [OnDeserializing]
         public void OnDeserializing(StreamingContext context) {
@@ -87,10 +93,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                 IDomeMediator domeMediator,
                 IDomeFollower domeFollower,
                 IPlateSolverFactory plateSolverFactory,
+                INighttimeCalculator nighttimeCalculator,
                 IWindowServiceFactory windowServiceFactory
             ) {
 
-            Logger.Trace("Assistant ctor");
             this.profileService = profileService;
             this.dateTimeProviders = dateTimeProviders;
             this.telescopeMediator = telescopeMediator;
@@ -104,6 +110,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.domeMediator = domeMediator;
             this.domeFollower = domeFollower;
             this.plateSolverFactory = plateSolverFactory;
+            this.nighttimeCalculator = nighttimeCalculator;
             this.windowServiceFactory = windowServiceFactory;
 
             // TODO: this can better be set via the ... on the instruction (see Smart Exposure)
@@ -111,6 +118,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             // TODO: also need to pay attention to Attempts - can also be set via ...
             Attempts = 1;
             ErrorBehavior = InstructionErrorBehavior.SkipInstructionSetOnError;
+
+            TotalExposureCount = -1;
         }
 
         public AssistantInstruction(AssistantInstruction cloneMe) : this(
@@ -127,6 +136,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 cloneMe.domeMediator,
                 cloneMe.domeFollower,
                 cloneMe.plateSolverFactory,
+                cloneMe.nighttimeCalculator,
                 cloneMe.windowServiceFactory
             ) {
             CopyMetaData(cloneMe);
@@ -153,7 +163,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             IPlanTarget previousPlanTarget = null;
 
             while (true) {
-                AssistantPlan plan = new Planner(DateTime.Now, profileService).GetPlan(previousPlanTarget);
+                DateTime atTime = DateTime.Now;
+                AssistantPlan plan = new Planner(atTime, profileService).GetPlan(previousPlanTarget);
 
                 if (plan == null) {
                     Logger.Info("Assistant: planner returned empty plan, done");
@@ -167,8 +178,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                 else {
                     IPlanTarget planTarget = plan.PlanTarget;
                     Logger.Info($"Assistant: starting execution of plan target: {planTarget.Name}");
+                    SetTarget(atTime, planTarget);
 
                     // TODO: needs to be accessible for binding from xaml
+                    // Note: will be needed for WaitForNextTarget above too
                     AssistantStatusMonitor monitor = new AssistantStatusMonitor(planTarget);
 
                     // Create a container for this target, add the instructions, and execute
@@ -184,6 +197,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                         Logger.Error($"Assistant: exception executing plan: {ex.StackTrace}");
                         throw new SequenceEntityFailedException($"Assistant: exception executing plan: {ex.Message}", ex);
+                    }
+                    finally {
+                        ClearTarget();
                     }
                 }
             }
@@ -218,6 +234,68 @@ namespace Assistant.NINAPlugin.Sequencer {
             Issues = i;
             return i.Count == 0;
         }
+
+        private void SetTarget(DateTime atTime, IPlanTarget planTarget) {
+            IProfile activeProfile = profileService.ActiveProfile;
+            DateTime referenceDate = NighttimeCalculator.GetReferenceDate(atTime);
+            CustomHorizon customHorizon = GetCustomHorizon(activeProfile, planTarget.Project.Preferences);
+
+            InputTarget inputTarget = new InputTarget(
+                Angle.ByDegree(activeProfile.AstrometrySettings.Latitude),
+                Angle.ByDegree(activeProfile.AstrometrySettings.Longitude),
+                customHorizon);
+
+            inputTarget.DeepSkyObject = GetDeepSkyObject(referenceDate, activeProfile, planTarget, customHorizon);
+            inputTarget.TargetName = planTarget.Name;
+            inputTarget.InputCoordinates = new InputCoordinates(planTarget.Coordinates);
+            inputTarget.Rotation = planTarget.Rotation;
+            Target = inputTarget;
+
+            RADisplay = $"{inputTarget.InputCoordinates.RAHours} h  {inputTarget.InputCoordinates.RAMinutes} m  {inputTarget.InputCoordinates.RASeconds} s";
+            DECDisplay = $"{inputTarget.InputCoordinates.DecDegrees} d  {inputTarget.InputCoordinates.DecMinutes} m  {inputTarget.InputCoordinates.DecSeconds} s";
+            RotationDisplay = $"{planTarget.Rotation}°";
+
+            Task.Run(() => NighttimeData = nighttimeCalculator.Calculate(referenceDate)).Wait();
+
+            RaisePropertyChanged(nameof(RADisplay));
+            RaisePropertyChanged(nameof(DECDisplay));
+            RaisePropertyChanged(nameof(RotationDisplay));
+            RaisePropertyChanged(nameof(NighttimeData));
+            RaisePropertyChanged(nameof(Target));
+        }
+
+        private void ClearTarget() {
+            Target = null;
+            RADisplay = "";
+            DECDisplay = "";
+            RotationDisplay = "";
+
+            RaisePropertyChanged(nameof(RADisplay));
+            RaisePropertyChanged(nameof(DECDisplay));
+            RaisePropertyChanged(nameof(RotationDisplay));
+            RaisePropertyChanged(nameof(NighttimeData));
+            RaisePropertyChanged(nameof(Target));
+        }
+
+        private DeepSkyObject GetDeepSkyObject(DateTime referenceDate, IProfile activeProfile, IPlanTarget planTarget, CustomHorizon customHorizon) {
+            DeepSkyObject dso = new DeepSkyObject(string.Empty, planTarget.Coordinates, null, customHorizon);
+            dso.SetDateAndPosition(referenceDate, activeProfile.AstrometrySettings.Latitude, activeProfile.AstrometrySettings.Longitude);
+            dso.Refresh();
+            return dso;
+        }
+
+        private CustomHorizon GetCustomHorizon(IProfile activeProfile, AssistantProjectPreferences preferences) {
+            CustomHorizon customHorizon = preferences.UseCustomHorizon && activeProfile.AstrometrySettings.Horizon != null ?
+                activeProfile.AstrometrySettings.Horizon :
+                HorizonDefinition.GetConstantHorizon(preferences.MinimumAltitude);
+            return customHorizon;
+        }
+
+        public InputTarget Target { get; private set; }
+        public NighttimeData NighttimeData { get; private set; }
+        public string RADisplay { get; private set; }
+        public string DECDisplay { get; private set; }
+        public string RotationDisplay { get; private set; }
 
     }
 }
