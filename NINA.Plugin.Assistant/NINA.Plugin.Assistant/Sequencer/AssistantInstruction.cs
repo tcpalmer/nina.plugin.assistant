@@ -12,9 +12,7 @@ using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.PlateSolving.Interfaces;
 using NINA.Profile.Interfaces;
-using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
-using NINA.Sequencer.Utility;
 using NINA.Sequencer.Utility.DateTimeProvider;
 using NINA.Sequencer.Validations;
 using NINA.WPF.Base.Interfaces.Mediator;
@@ -22,6 +20,7 @@ using NINA.WPF.Base.Interfaces.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -34,9 +33,8 @@ namespace Assistant.NINAPlugin.Sequencer {
     [ExportMetadata("Icon", "Assistant.AssistantSVG")]
     [ExportMetadata("Category", "Sequencer Assistant")]
     [Export(typeof(ISequenceItem))]
-    [Export(typeof(ISequenceContainer))]
     [JsonObject(MemberSerialization.OptIn)]
-    public class AssistantInstruction : SequentialContainer, IValidatable {
+    public class AssistantInstruction : SequenceItem, IValidatable {
 
         /*
          * Check out some methods on the parent:
@@ -73,9 +71,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         [OnDeserializing]
         public void OnDeserializing(StreamingContext context) {
-            this.Items.Clear();
-            this.Conditions.Clear();
-            this.Triggers.Clear();
+            //this.Items.Clear();
+            //this.Conditions.Clear();
+            //this.Triggers.Clear();
         }
 
         [ImportingConstructor]
@@ -116,10 +114,11 @@ namespace Assistant.NINAPlugin.Sequencer {
             // TODO: this can better be set via the ... on the instruction (see Smart Exposure)
             // Interestingly, DSO Container doesn't have ... but this instruction does.
             // TODO: also need to pay attention to Attempts - can also be set via ...
-            Attempts = 1;
-            ErrorBehavior = InstructionErrorBehavior.SkipInstructionSetOnError;
+            //Attempts = 1;
+            //ErrorBehavior = InstructionErrorBehavior.SkipInstructionSetOnError;
 
             TotalExposureCount = -1;
+            ClearTarget();
         }
 
         public AssistantInstruction(AssistantInstruction cloneMe) : this(
@@ -176,16 +175,15 @@ namespace Assistant.NINAPlugin.Sequencer {
                     WaitForNextTarget(plan.WaitForNextTargetTime, progress, token);
                 }
                 else {
-                    IPlanTarget planTarget = plan.PlanTarget;
-                    Logger.Info($"Assistant: starting execution of plan target: {planTarget.Name}");
-                    SetTarget(atTime, planTarget);
-
-                    // TODO: needs to be accessible for binding from xaml
-                    // Note: will be needed for WaitForNextTarget above too
-                    AssistantStatusMonitor monitor = new AssistantStatusMonitor(planTarget);
-
-                    // Create a container for this target, add the instructions, and execute
                     try {
+                        IPlanTarget planTarget = plan.PlanTarget;
+                        Logger.Info($"Assistant: starting execution of plan target: {planTarget.Name}");
+                        SetTarget(atTime, planTarget);
+
+                        AssistantStatusMonitor monitor = new AssistantStatusMonitor(planTarget);
+                        monitor.PropertyChanged += Monitor_PropertyChanged;
+
+                        // Create a container for this target, add the instructions, and execute
                         AssistantTargetContainer targetContainer = GetTargetContainer(previousPlanTarget, plan, monitor);
                         targetContainer.Execute(progress, token).Wait();
                         previousPlanTarget = planTarget;
@@ -216,15 +214,17 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private AssistantTargetContainer GetTargetContainer(IPlanTarget previousPlanTarget, AssistantPlan plan, AssistantStatusMonitor monitor) {
-            AssistantTargetContainer targetContainer = new AssistantTargetContainer(profileService, dateTimeProviders, telescopeMediator,
+            AssistantTargetContainer targetContainer = new AssistantTargetContainer(this, profileService, dateTimeProviders, telescopeMediator,
                 rotatorMediator, guiderMediator, cameraMediator, imagingMediator, imageSaveMediator,
                 imageHistoryVM, filterWheelMediator, domeMediator, domeFollower,
                 plateSolverFactory, windowServiceFactory, previousPlanTarget, plan, monitor);
-            targetContainer.AttachNewParent(this);
             return targetContainer;
         }
 
-        public override bool Validate() {
+        private IList<string> issues = new List<string>();
+        public IList<string> Issues { get => issues; set { issues = value; RaisePropertyChanged(); } }
+
+        public bool Validate() {
             var i = new ObservableCollection<string>();
 
             // TODO: see RoboCopyStart for howto
@@ -251,30 +251,34 @@ namespace Assistant.NINAPlugin.Sequencer {
             inputTarget.Rotation = planTarget.Rotation;
             Target = inputTarget;
 
-            RADisplay = $"{inputTarget.InputCoordinates.RAHours} h  {inputTarget.InputCoordinates.RAMinutes} m  {inputTarget.InputCoordinates.RASeconds} s";
-            DECDisplay = $"{inputTarget.InputCoordinates.DecDegrees} d  {inputTarget.InputCoordinates.DecMinutes} m  {inputTarget.InputCoordinates.DecSeconds} s";
-            RotationDisplay = $"{planTarget.Rotation}°";
+            ProjectTargetDisplay = $"{planTarget.Project.Name} / {planTarget.Name}";
+            CoordinatesDisplay = $"{inputTarget.InputCoordinates.RAHours}h  {inputTarget.InputCoordinates.RAMinutes}m  {inputTarget.InputCoordinates.RASeconds}s   " +
+                                $"{inputTarget.InputCoordinates.DecDegrees}°  {inputTarget.InputCoordinates.DecMinutes}'  {inputTarget.InputCoordinates.DecSeconds}\",   " +
+                                $"Rotation {planTarget.Rotation}°";
+            StopAtDisplay = $"{planTarget.EndTime:HH:mm:ss}";
 
             Task.Run(() => NighttimeData = nighttimeCalculator.Calculate(referenceDate)).Wait();
 
-            RaisePropertyChanged(nameof(RADisplay));
-            RaisePropertyChanged(nameof(DECDisplay));
-            RaisePropertyChanged(nameof(RotationDisplay));
+            RaisePropertyChanged(nameof(ProjectTargetDisplay));
+            RaisePropertyChanged(nameof(CoordinatesDisplay));
+            RaisePropertyChanged(nameof(StopAtDisplay));
             RaisePropertyChanged(nameof(NighttimeData));
             RaisePropertyChanged(nameof(Target));
         }
 
         private void ClearTarget() {
             Target = null;
-            RADisplay = "";
-            DECDisplay = "";
-            RotationDisplay = "";
+            ProjectTargetDisplay = "";
+            CoordinatesDisplay = "";
+            StopAtDisplay = "";
+            MonitorContent = "";
 
-            RaisePropertyChanged(nameof(RADisplay));
-            RaisePropertyChanged(nameof(DECDisplay));
-            RaisePropertyChanged(nameof(RotationDisplay));
+            RaisePropertyChanged(nameof(ProjectTargetDisplay));
+            RaisePropertyChanged(nameof(CoordinatesDisplay));
+            RaisePropertyChanged(nameof(StopAtDisplay));
             RaisePropertyChanged(nameof(NighttimeData));
             RaisePropertyChanged(nameof(Target));
+            RaisePropertyChanged(nameof(MonitorContent));
         }
 
         private DeepSkyObject GetDeepSkyObject(DateTime referenceDate, IProfile activeProfile, IPlanTarget planTarget, CustomHorizon customHorizon) {
@@ -291,11 +295,16 @@ namespace Assistant.NINAPlugin.Sequencer {
             return customHorizon;
         }
 
+        private void Monitor_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+            MonitorContent = ((AssistantStatusMonitor)sender).History;
+            RaisePropertyChanged(nameof(MonitorContent));
+        }
+
         public InputTarget Target { get; private set; }
         public NighttimeData NighttimeData { get; private set; }
-        public string RADisplay { get; private set; }
-        public string DECDisplay { get; private set; }
-        public string RotationDisplay { get; private set; }
-
+        public string ProjectTargetDisplay { get; private set; }
+        public string CoordinatesDisplay { get; private set; }
+        public string StopAtDisplay { get; private set; }
+        public string MonitorContent { get; private set; }
     }
 }

@@ -30,7 +30,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override bool ShouldTrigger(ISequenceItem previousItem, ISequenceItem nextItem) {
-            Logger.Trace("AssistantTargetEndTimeTrigger: trigger check");
             double nextDuration = nextItem?.GetEstimatedDuration().TotalSeconds ?? 0;
             return DateTime.Now.AddSeconds(nextDuration) > EndTime;
         }

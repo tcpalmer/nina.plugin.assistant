@@ -29,6 +29,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
     public class AssistantTargetContainer : SequentialContainer, IDeepSkyObjectContainer {
 
+        private readonly AssistantInstruction parentInstruction;
         private readonly IProfileService profileService;
         private readonly IList<IDateTimeProvider> dateTimeProviders;
         private readonly ITelescopeMediator telescopeMediator;
@@ -50,6 +51,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private AssistantStatusMonitor monitor;
 
         public AssistantTargetContainer(
+                AssistantInstruction parentInstruction,
                 IProfileService profileService,
                 IList<IDateTimeProvider> dateTimeProviders,
                 ITelescopeMediator telescopeMediator,
@@ -71,6 +73,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             Description = "";
             Category = "Assistant";
 
+            this.parentInstruction = parentInstruction;
             this.profileService = profileService;
             this.dateTimeProviders = dateTimeProviders;
             this.telescopeMediator = telescopeMediator;
@@ -272,18 +275,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private int GetExposureCount() {
-            AssistantInstruction instruction = GetParentInstruction();
-            instruction.TotalExposureCount++;
-            return instruction.TotalExposureCount;
-        }
-
-        private AssistantInstruction GetParentInstruction() {
-            if (Parent is AssistantInstruction) {
-                return (AssistantInstruction)Parent;
-            }
-            else {
-                throw new SequenceEntityFailedException("parent is not AssistantInstruction as expected");
-            }
+            parentInstruction.TotalExposureCount++;
+            return parentInstruction.TotalExposureCount;
         }
 
         private FilterInfo LookupFilter(string filterName) {
@@ -305,62 +298,37 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         // IDeepSkyObjectContainer behavior, defer to parent
-        public InputTarget Target { get => ((AssistantInstruction)Parent).Target; set { } }
-        public NighttimeData NighttimeData => ((AssistantInstruction)Parent).NighttimeData;
+        public InputTarget Target { get => parentInstruction.Target; set { } }
+        public NighttimeData NighttimeData => parentInstruction.NighttimeData;
 
     }
 
-    public class AssistantStatusMonitor {
-
-        private IPlanTarget planTarget;
-
-        public AssistantStatusMonitor(IPlanTarget planTarget) {
-            this.planTarget = planTarget;
-        }
-
-        public void ItemStart(string itemId, string sequenceItemName) {
-
-            //if (sequenceItemName == nameof(SwitchFilter)) {
-            // then we know it's the filter switch associated with the planExposure with ID=itemId
-            //}
-
-            Logger.Debug($"WRAP item start: {itemId} {sequenceItemName}");
-        }
-
-        public void ItemFinsh(string itemId, string sequenceItemName) {
-            Logger.Debug($"WRAP item finish: {itemId} {sequenceItemName}");
-        }
-    }
-
-    public class InstructionWrapper : SequentialContainer {
+    public class InstructionWrapper : SequenceItem {
 
         private AssistantStatusMonitor Monitor;
         private string PlanItemId;
+        private SequenceItem Instruction;
 
         public InstructionWrapper(AssistantStatusMonitor monitor, string planItemId, SequenceItem instruction) {
             this.Monitor = monitor;
             this.PlanItemId = planItemId;
+            this.Instruction = instruction;
 
-            this.Name = $"Wrap Container: {instruction.Name}";
+            this.Name = $"{instruction.Name}";
             this.Category = "Assistant";
             this.Description = "Wrapper";
             this.ErrorBehavior = instruction.ErrorBehavior;
             this.Attempts = instruction.Attempts;
-
-            Add(instruction);
         }
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
             try {
                 Monitor.ItemStart(PlanItemId, Name);
-                base.Execute(progress, token).Wait();
+                Instruction.Execute(progress, token).Wait();
                 Monitor.ItemFinsh(PlanItemId, Name);
             }
             catch (Exception ex) {
                 throw ex;
-            }
-            finally {
-                Items.Clear();
             }
 
             return Task.CompletedTask;
@@ -370,6 +338,9 @@ namespace Assistant.NINAPlugin.Sequencer {
             return $"Category: {Category}, Item: {nameof(InstructionWrapper)}";
         }
 
+        public override object Clone() {
+            throw new NotImplementedException();
+        }
     }
 
 }

@@ -19,11 +19,11 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.enableGrader = planTarget.Project.Preferences.EnableGrader;
 
             imageSaveMediator.ImageSaved += ImageSaved;
-            Logger.Trace($"Assistant: start watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
+            Logger.Debug($"Assistant: start watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
         }
 
         public void Stop() {
-            Logger.Trace($"Assistant: stop watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
+            Logger.Debug($"Assistant: stop watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
             imageSaveMediator.ImageSaved -= ImageSaved;
         }
 
@@ -36,7 +36,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             // https://markheath.net/post/starting-threads-in-dotnet
 
             bool accepted = enableGrader ? new ImageGrader().GradeImage(planTarget, msg) : false;
-            Logger.Trace($"Assistant: image save for {planTarget.Project.Name}/{planTarget.Name}, filter={msg.Filter}, grader enabled={enableGrader}, accepted={accepted}");
+            Logger.Debug($"Assistant: image save for {planTarget.Project.Name}/{planTarget.Name}, filter={msg.Filter}, grader enabled={enableGrader}, accepted={accepted}");
 
             // HACK
             accepted = true;

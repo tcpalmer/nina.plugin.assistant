@@ -38,6 +38,7 @@ namespace Assistant.NINAPlugin.Plan {
         public AssistantPlan GetPlan(IPlanTarget previousPlanTarget) {
             Logger.Debug($"Assistant: getting current plan for {atTime}");
 
+            // TODO: be nice to come up with a better way to 
             if (true) {
                 // HACK!
                 return new PlannerEmulator(atTime, activeProfile).GetPlan(previousPlanTarget);
@@ -68,7 +69,7 @@ namespace Assistant.NINAPlugin.Plan {
                     IPlanTarget planTarget = SelectTargetByScore(projects, scoringEngine);
 
                     if (planTarget != null) {
-                        Logger.Trace($"Assistant: GetPlan highest scoring target:\n{planTarget}");
+                        Logger.Debug($"Assistant: GetPlan highest scoring target:\n{planTarget}");
                         TimeInterval targetWindow = GetTargetTimeWindow(atTime, planTarget);
                         List<IPlanInstruction> planInstructions = PlanInstructions(planTarget, previousPlanTarget, targetWindow);
                         return new AssistantPlan(planTarget, targetWindow, planInstructions);
@@ -194,14 +195,12 @@ namespace Assistant.NINAPlugin.Plan {
                     // Get the most inclusive twilight over all incomplete exposure plans
                     NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, atTime);
                     TimeInterval twilightSpan = nighttimeCircumstances.GetTwilightSpan(GetOverallTwilight(planTarget));
-                    Logger.Trace($"*** Twilight span {twilightSpan.StartTime} - {twilightSpan.EndTime}");
 
                     // Determine the potential imaging time span
                     TargetCircumstances targetCircumstances = new TargetCircumstances(planTarget.Coordinates, observerInfo, planProject.HorizonDefinition, twilightSpan);
 
                     DateTime actualStart = atTime > targetCircumstances.RiseAboveHorizonTime ? atTime : targetCircumstances.RiseAboveHorizonTime;
                     int TimeOnTargetSeconds = (int)(targetCircumstances.SetBelowHorizonTime - actualStart).TotalSeconds;
-                    //Logger.Trace($"Assistant: TargetCircumstances:\n{targetCircumstances}, timeOnTarget={TimeOnTargetSeconds}");
 
                     // If the start time is in the future, reject for now
                     if (actualStart > atTime) {
@@ -464,7 +463,7 @@ namespace Assistant.NINAPlugin.Plan {
             double moonSeparation = AstrometryUtils.GetMoonSeparationAngle(observerInfo, midPointTime, planTarget.Coordinates);
             double moonAvoidanceSeparation = AstrometryUtils.GetMoonAvoidanceLorentzianSeparation(moonAge,
                 planFilter.Preferences.MoonAvoidanceSeparation, planFilter.Preferences.MoonAvoidanceWidth);
-            Logger.Trace($"Assistant: moon avoidance {planTarget.Name}/{planFilter.FilterName} midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
+            Logger.Debug($"Assistant: moon avoidance {planTarget.Name}/{planFilter.FilterName} midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
 
             return moonSeparation < moonAvoidanceSeparation;
         }

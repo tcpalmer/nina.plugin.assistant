@@ -321,6 +321,7 @@
     <Compile Include="Sequencer\AssistantInstructionTemplate.xaml.cs">
       <DependentUpon>AssistantInstructionTemplate.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Sequencer\AssistantStatusMonitor.cs" />
     <Compile Include="Sequencer\AssistantTargetContainer.cs" />
     <Compile Include="Sequencer\AssistantTargetEndTimeTrigger.cs" />
     <Compile Include="Plan\Scoring\ExposurePlanner.cs" />
