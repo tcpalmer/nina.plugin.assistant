@@ -34,6 +34,7 @@ namespace Assistant.NINAPlugin {
             this.profileService = profileService;
             profileService.ProfileChanged += ProfileService_ProfileChanged;
 
+            AssistantHelper.Init(profileService);
             InitPluginHome();
             //StartDatabaseManagementApp();
         }
@@ -104,7 +105,27 @@ namespace Assistant.NINAPlugin {
                 profileService.ActiveProfile.AstrometrySettings.PropertyChanged += ProfileService_ProfileChanged;
             }
         }
-
     }
 
+    public class AssistantHelper {
+
+        private static AssistantHelper instance = null;
+        public IProfileService profileService { get; private set; }
+
+        public static void Init(IProfileService profileService) {
+            instance = new AssistantHelper();
+            instance.profileService = profileService;
+        }
+
+        public static IProfileService GetProfileService() {
+            if (instance == null) {
+                throw new Exception("Assistant failed to initialize AssistantHelper");
+            }
+
+            return instance.profileService;
+        }
+
+        private AssistantHelper() {
+        }
+    }
 }
