@@ -5,11 +5,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Assistant.NINAPlugin.Controls.Manager"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="450"
+    d:DesignHeight="600"
     d:DesignWidth="800"
     mc:Ignorable="d">
     <UserControl.DataContext>
-        <local:ManagerVM/>
+        <local:ManagerVM />
     </UserControl.DataContext>
     <Grid>
         <Grid.Resources>
@@ -30,8 +30,12 @@
             HorizontalAlignment="Left"
             ItemsSource="{Binding Profiles}">
             <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate DataType="{x:Type local:ITreeDataItem}" ItemsSource="{Binding Items}">
-                    <TextBlock Text="{Binding Path=Name}" />
+                <HierarchicalDataTemplate DataType="{x:Type local:TreeDataItem}" ItemsSource="{Binding Items}">
+                    <TextBlock Text="{Binding DisplayName}">
+                        <TextBlock.InputBindings>
+                            <MouseBinding Command="{Binding TreeItemMouseClick}" MouseAction="RightClick" />
+                        </TextBlock.InputBindings>
+                    </TextBlock>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
@@ -42,6 +46,19 @@
                 Background="#FF7D2222"
                 Content="Test Label"
                 Foreground="#FFE5D7D7" />
+            <TextBox
+                Width="195"
+                Height="50"
+                Text="TextBox"
+                TextWrapping="Wrap">
+                <TextBox.ContextMenu>
+                    <ContextMenu StaysOpen="True">
+                        <MenuItem Header="Foo" />
+                        <MenuItem Header="Bar" />
+                    </ContextMenu>
+                </TextBox.ContextMenu>
+
+            </TextBox>
         </StackPanel>
 
     </Grid>

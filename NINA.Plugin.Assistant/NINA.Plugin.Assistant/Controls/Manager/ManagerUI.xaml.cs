@@ -6,6 +6,7 @@ using NINA.Profile.Interfaces;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Assistant.NINAPlugin.Controls.Manager {
 
@@ -31,34 +32,64 @@ namespace Assistant.NINAPlugin.Controls.Manager {
             this.profileService = AssistantHelper.GetProfileService();
             this.activeProfile = profileService.ActiveProfile;
 
-            List<ITreeDataItem> profiles = LoadProjectTree();
+            ProjectTreeView.SelectedItemChanged += ProjectTreeView_SelectedItemChanged;
+            ProjectTreeView.MouseRightButtonDown += ProjectTreeView_MouseRightButtonDown;
+
+            List<TreeDataItem> profiles = LoadProjectTree();
             ((ManagerVM)DataContext).Profiles = profiles;
         }
 
-        private List<ITreeDataItem> LoadProjectTree() {
+        // TODO: how to handle item context menus?
+        private void ProjectTreeView_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
+            //e.OriginalSource
+            Logger.Info($"MRD: sender={sender.GetType().ToString()}");
+            Logger.Info($"MRD:  eosrc={e.OriginalSource.GetType().ToString()}");
+
+            TextBlock textBlock = e.OriginalSource as TextBlock;
+            var tbp = textBlock.Parent;
+            if (tbp != null) {
+                Logger.Info($"MRD: TBP: {tbp?.GetType().ToString()}");
+            }
+            else {
+                Logger.Info("TBP: null");
+            }
+
+            //var item = ProjectTreeView.SelectedItem;
+            //Logger.Info($"MRD: SIT: {item?.GetType().ToString()}");
+        }
+
+        // TODO: works great to get and act on the selected item (e.g. load details into main view)
+        private void ProjectTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
+            TreeDataItem item = e.NewValue as TreeDataItem;
+            if (item != null) {
+                Logger.Info($"SIC: {item.Type} {item.DisplayName}");
+            }
+        }
+
+        private List<TreeDataItem> LoadProjectTree() {
             ProjectTreeView.Items.Clear();
 
-            List<ITreeDataItem> profiles = new List<ITreeDataItem>();
-            ITreeDataItem profilesFolder = new TreeDataItem(TreeDataType.Folder, "Profiles");
+            List<TreeDataItem> profiles = new List<TreeDataItem>();
+            TreeDataItem profilesFolder = new TreeDataItem(TreeDataType.Folder, "Profiles");
             profiles.Add(profilesFolder);
 
             using (var context = database.GetContext()) {
                 foreach (ProfileMeta profile in profileService.Profiles) {
-                    ITreeDataItem profileItem = new TreeDataItem(TreeDataType.Profile, profile.Name, profile);
-                    profilesFolder.Add(profileItem);
+                    TreeDataItem profileItem = new TreeDataItem(TreeDataType.Profile, profile.Name, profile);
+                    profilesFolder.Items.Add(profileItem);
 
                     List<Project> projects = context.GetAllProjects(profile.Id.ToString());
                     foreach (Project project in projects) {
-                        ITreeDataItem projectItem = new TreeDataItem(TreeDataType.Project, project.name, project);
-                        profileItem.Add(projectItem);
+                        TreeDataItem projectItem = new TreeDataItem(TreeDataType.Project, project.name, project);
+                        profileItem.Items.Add(projectItem);
 
                         foreach (Target target in project.targets) {
-                            ITreeDataItem targetItem = new TreeDataItem(TreeDataType.Target, target.name, target);
-                            projectItem.Add(targetItem);
+                            TreeDataItem targetItem = new TreeDataItem(TreeDataType.Target, target.name, target);
+                            projectItem.Items.Add(targetItem);
 
                             foreach (FilterPlan filterPlan in target.filterplans) {
-                                ITreeDataItem filterPlanItem = new TreeDataItem(TreeDataType.FilterPlan, filterPlan.filterName, filterPlan);
-                                targetItem.Add(filterPlanItem);
+                                TreeDataItem filterPlanItem = new TreeDataItem(TreeDataType.FilterPlan, filterPlan.filterName, filterPlan);
+                                targetItem.Items.Add(filterPlanItem);
                             }
                         }
                     }
@@ -142,43 +173,48 @@ namespace Assistant.NINAPlugin.Controls.Manager {
                 Logger.Debug($"target selected: {item.Header}");
             }
         }
-
     }
 
     public enum TreeDataType {
         Folder, Profile, Project, Target, FilterPlan
     }
 
-    public interface ITreeDataItem {
-        TreeDataType Type { get; }
-        string Name { get; }
-        object Data { get; }
-        List<ITreeDataItem> Items { get; }
-        void Add(ITreeDataItem item);
-    }
-
-    public class TreeDataItem : ITreeDataItem {
+    public class TreeDataItem {
 
         public TreeDataType Type { get; }
-        public string Name { get; }
+        public string DisplayName { get; }
         public object Data { get; }
-        public List<ITreeDataItem> Items { get; }
+        public List<TreeDataItem> Items { get; }
 
         public TreeDataItem(TreeDataType type, string name) : this(type, name, null) { }
 
         public TreeDataItem(TreeDataType type, string name, object data) {
             Type = type;
-            Name = name;
+            DisplayName = name;
             Data = data;
-            Items = new List<ITreeDataItem>();
-        }
-
-        public void Add(ITreeDataItem item) {
-            Items.Add(item);
+            Items = new List<TreeDataItem>();
         }
 
         public override string ToString() {
-            return Name;
+            return DisplayName;
+        }
+
+        // This mouse click code (with associated xaml) WILL detect right mouse down on
+        // one of the tree nodes.  But how would you get the TreeViewItem to add the context menu?
+        private RelayCommand treeItemMouseClick;
+
+        public ICommand TreeItemMouseClick {
+            get {
+                if (treeItemMouseClick == null) {
+                    treeItemMouseClick = new RelayCommand(PerformTreeItemMouseClick);
+                }
+
+                return treeItemMouseClick;
+            }
+        }
+
+        private void PerformTreeItemMouseClick(object commandParameter) {
+            Logger.Info($"PTIMC: {Type} {DisplayName}");
         }
     }
 }
