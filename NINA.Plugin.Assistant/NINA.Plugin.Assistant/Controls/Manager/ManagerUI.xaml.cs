@@ -33,13 +33,14 @@ namespace Assistant.NINAPlugin.Controls.Manager {
             this.activeProfile = profileService.ActiveProfile;
 
             ProjectTreeView.SelectedItemChanged += ProjectTreeView_SelectedItemChanged;
-            ProjectTreeView.MouseRightButtonDown += ProjectTreeView_MouseRightButtonDown;
+            //ProjectTreeView.MouseRightButtonDown += ProjectTreeView_MouseRightButtonDown;
 
             List<TreeDataItem> profiles = LoadProjectTree();
             ((ManagerVM)DataContext).Profiles = profiles;
         }
 
         // TODO: how to handle item context menus?
+        /*
         private void ProjectTreeView_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
             //e.OriginalSource
             Logger.Info($"MRD: sender={sender.GetType().ToString()}");
@@ -56,13 +57,13 @@ namespace Assistant.NINAPlugin.Controls.Manager {
 
             //var item = ProjectTreeView.SelectedItem;
             //Logger.Info($"MRD: SIT: {item?.GetType().ToString()}");
-        }
+        }*/
 
         // TODO: works great to get and act on the selected item (e.g. load details into main view)
         private void ProjectTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
             TreeDataItem item = e.NewValue as TreeDataItem;
             if (item != null) {
-                Logger.Info($"SIC: {item.Type} {item.DisplayName}");
+                Logger.Info($"SIC: {item.Type} {item.Header.ToString()}");
             }
         }
 
@@ -99,67 +100,6 @@ namespace Assistant.NINAPlugin.Controls.Manager {
             return profiles;
         }
 
-        private void LoadProjectTreeManual() {
-            //ProjectTreeView.Items.Clear();
-
-            /* TODO:
-             * - How to bind a dropdown menu when certain items are clicked?
-             */
-
-            /*
-             * TODO: Have to figure out how to use TreeViewItem.ItemsSource to bind the list of items under a node
-             * Maybe have a simple interface for the bound data item that encapsulates the db object
-             * plus a label to use.  Could also bind labels only for the folder nodes.  Has a Children list.
-             * 
-             * We could create a hierarchical list of these and just bind it to the root.  When items are clicked,
-             * we can get the associated database object (if present) and act on that.
-             */
-
-            using (var context = database.GetContext()) {
-
-                TreeViewItem profilesFolder = new TreeViewItem();
-                profilesFolder.Header = "Profiles";
-                //ProjectTreeView.Items.Add(profilesFolder);
-
-                foreach (ProfileMeta profile in profileService.Profiles) {
-                    TreeViewItem profileItem = new TreeViewItem();
-                    profileItem.Header = profile.Name;
-                    profilesFolder.Items.Add(profileItem);
-
-                    List<Project> projects = context.GetAllProjects(profile.Id.ToString());
-                    Logger.Debug($"loaded {projects.Count} projects for id {profile.Id.ToString()}");
-
-                    TreeViewItem projectsFolder = new TreeViewItem();
-                    if (projects.Count > 0) {
-                        projectsFolder.Header = "Projects";
-                        profileItem.Items.Add(projectsFolder);
-                    }
-
-                    foreach (Project project in projects) {
-                        TreeViewItem projectItem = new TreeViewItem();
-                        projectItem.Header = project.name;
-                        projectItem.Selected += Project_Selected;
-                        System.Collections.IEnumerable foo = null;
-                        projectItem.ItemsSource = foo;
-                        projectsFolder.Items.Add(projectItem);
-
-                        TreeViewItem targetsFolder = new TreeViewItem();
-                        if (project.targets.Count > 0) {
-                            targetsFolder.Header = "Targets";
-                            projectItem.Items.Add(targetsFolder);
-                        }
-
-                        foreach (Target target in project.targets) {
-                            TreeViewItem targetItem = new TreeViewItem();
-                            targetItem.Header = target.name;
-                            targetItem.Selected += Target_Selected;
-                            targetsFolder.Items.Add(targetItem);
-                        }
-                    }
-                }
-            }
-        }
-
         private void Project_Selected(object sender, RoutedEventArgs e) {
             TreeViewItem item = sender as TreeViewItem;
             if (item != null) {
@@ -175,46 +115,66 @@ namespace Assistant.NINAPlugin.Controls.Manager {
         }
     }
 
+    // TODO:
+    // Can we move following into VM?
+    // Check out some NINA M, V, and VM instances for partitioning and responsibilities
+    //
+
     public enum TreeDataType {
         Folder, Profile, Project, Target, FilterPlan
     }
 
-    public class TreeDataItem {
+    public class TreeDataItem : TreeViewItem {
 
         public TreeDataType Type { get; }
-        public string DisplayName { get; }
         public object Data { get; }
-        public List<TreeDataItem> Items { get; }
 
         public TreeDataItem(TreeDataType type, string name) : this(type, name, null) { }
 
         public TreeDataItem(TreeDataType type, string name, object data) {
             Type = type;
-            DisplayName = name;
             Data = data;
-            Items = new List<TreeDataItem>();
-        }
+            Header = name;
 
-        public override string ToString() {
-            return DisplayName;
-        }
-
-        // This mouse click code (with associated xaml) WILL detect right mouse down on
-        // one of the tree nodes.  But how would you get the TreeViewItem to add the context menu?
-        private RelayCommand treeItemMouseClick;
-
-        public ICommand TreeItemMouseClick {
-            get {
-                if (treeItemMouseClick == null) {
-                    treeItemMouseClick = new RelayCommand(PerformTreeItemMouseClick);
-                }
-
-                return treeItemMouseClick;
+            if (Type != TreeDataType.Folder) {
+                MouseRightButtonDown += TreeDataItem_MouseRightButtonDown;
             }
         }
 
-        private void PerformTreeItemMouseClick(object commandParameter) {
-            Logger.Info($"PTIMC: {Type} {DisplayName}");
+        // This works to add the context menus
+        private void TreeDataItem_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
+            Logger.Info($"TDI RMD: {Type} {Header}");
+
+            ContextMenu = GetContextMenu();
+            e.Handled = true;
+        }
+
+        private ContextMenu GetContextMenu() {
+            ContextMenu contextMenu = new ContextMenu();
+            contextMenu.Items.Add(GetContextMenuItem(Type.ToString()));
+            contextMenu.Items.Add(GetContextMenuItem("foo"));
+            contextMenu.Items.Add(GetContextMenuItem("bar"));
+            return contextMenu;
+        }
+
+        private MenuItem GetContextMenuItem(string header) {
+            MenuItem menuItem = new MenuItem();
+            menuItem.Header = header;
+            menuItem.Click += MenuItem_Click;
+            return menuItem;
+        }
+
+        // This works to get the context menu item clicked and getting the header tells you
+        // which MI was clicked so can compare that string and take action
+        private void MenuItem_Click(object sender, RoutedEventArgs e) {
+            Logger.Info($"MI MC: {e.OriginalSource.GetType()} {Type} {Header}");
+            MenuItem menuItem = e.OriginalSource as MenuItem;
+            Logger.Info($"  MIH: {menuItem.Header}");
+            e.Handled = true;
+        }
+
+        public override string ToString() {
+            return Header.ToString();
         }
     }
 }

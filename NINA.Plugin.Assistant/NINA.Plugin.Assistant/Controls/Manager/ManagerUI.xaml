@@ -28,17 +28,7 @@
             Width="200"
             MinHeight="600"
             HorizontalAlignment="Left"
-            ItemsSource="{Binding Profiles}">
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate DataType="{x:Type local:TreeDataItem}" ItemsSource="{Binding Items}">
-                    <TextBlock Text="{Binding DisplayName}">
-                        <TextBlock.InputBindings>
-                            <MouseBinding Command="{Binding TreeItemMouseClick}" MouseAction="RightClick" />
-                        </TextBlock.InputBindings>
-                    </TextBlock>
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
+            ItemsSource="{Binding Profiles}" />
 
         <StackPanel x:Name="TestStackPanel" Margin="200,0,0,0">
             <Label

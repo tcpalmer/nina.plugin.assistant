@@ -127,6 +127,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             finally {
                 // TODO: we also need to wait for the ImageSaveWatcher to be done with the last image.
                 // This will ensure that the DB is updated with the last grading operation before the planner is called again.
+                // Pete on Discord was dealing with something similar (2/5/23) - ask him what he ended up doing.
                 imageSaveWatcher?.Stop();
 
                 foreach (var item in Items) {
