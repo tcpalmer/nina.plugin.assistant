@@ -8,13 +8,16 @@
     xmlns:ns="clr-namespace:NINA.Core.Locale;assembly=NINA.Core"
     xmlns:oxy="http://oxyplot.org/wpf"
     xmlns:rules="clr-namespace:NINA.Core.Utility.ValidationRules;assembly=NINA.Core"
-    xmlns:uc="clr-namespace:Assistant.NINAPlugin.Controls.Manager"
+    xmlns:uc="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     xmlns:util="clr-namespace:NINA.Core.Utility;assembly=NINA.Core">
 
     <DataTemplate x:Key="Sequence Assistant_Options">
         <StackPanel DataContext="{Binding}" Orientation="Vertical">
-            <TextBlock VerticalAlignment="Center" Margin="0,0,0,10" Text="Manage the Assistant database" />
-            <uc:ManagerUI />
+            <TextBlock
+                Margin="0,0,0,10"
+                VerticalAlignment="Center"
+                Text="Manage the Assistant database" />
+            <uc:AssistantManagerView DataContext="{Binding AssistantManagerVM}" />
         </StackPanel>
     </DataTemplate>
 </ResourceDictionary>

@@ -5,16 +5,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
+    public enum ProjectState {
+        Draft, Active, Inactive, Closed
+    }
+
+    public enum ProjectPriority {
+        Low, Normal, High
+    }
+
     public class Project {
-
-        public const int STATE_DRAFT = 0;
-        public const int STATE_ACTIVE = 1;
-        public const int STATE_INACTIVE = 2;
-        public const int STATE_CLOSED = 3;
-
-        public const int PRIORITY_LOW = 0;
-        public const int PRIORITY_NORMAL = 1;
-        public const int PRIORITY_HIGH = 2;
 
         [Key]
         public int id { get; set; }
@@ -40,6 +39,22 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public long? inactiveDate { get; set; }
         public long? startDate { get; set; }
         public long? endDate { get; set; }
+
+        [NotMapped]
+        public ProjectState State {
+            get { return (ProjectState)state; }
+            set {
+                state = (int)value;
+            }
+        }
+
+        [NotMapped]
+        public ProjectPriority Priority {
+            get { return (ProjectPriority)priority; }
+            set {
+                state = (int)value;
+            }
+        }
 
         [NotMapped]
         public DateTime CreateDate {
@@ -85,27 +100,27 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public Project(string profileId) {
             profileid = profileId;
-            state = STATE_DRAFT;
-            priority = PRIORITY_NORMAL;
+            state = (int)ProjectState.Draft;
+            priority = (int)ProjectPriority.Normal;
             createDate = AssistantDbContext.DateTimeToUnixSeconds(DateTime.Now);
             targets = new List<Target>();
         }
 
-        public static string State(int state) {
+        public static string StateToString(ProjectState state) {
             switch (state) {
-                case STATE_DRAFT: return "draft";
-                case STATE_ACTIVE: return "active";
-                case STATE_INACTIVE: return "inactive";
-                case STATE_CLOSED: return "closed";
+                case ProjectState.Draft: return "draft";
+                case ProjectState.Active: return "active";
+                case ProjectState.Inactive: return "inactive";
+                case ProjectState.Closed: return "closed";
                 default: return "unknown";
             }
         }
 
-        public static string Priority(int priority) {
+        public static string PriorityToString(ProjectPriority priority) {
             switch (priority) {
-                case PRIORITY_LOW: return "low";
-                case PRIORITY_NORMAL: return "normal";
-                case PRIORITY_HIGH: return "high";
+                case ProjectPriority.Low: return "low";
+                case ProjectPriority.Normal: return "normal";
+                case ProjectPriority.High: return "high";
                 default: return "unknown";
             }
         }

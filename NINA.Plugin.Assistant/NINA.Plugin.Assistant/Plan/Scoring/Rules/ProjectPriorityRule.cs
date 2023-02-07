@@ -20,11 +20,11 @@ namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
             IPlanProject project = potentialTarget.Project;
 
             switch (project.Priority) {
-                case Project.PRIORITY_LOW:
+                case ProjectPriority.Low:
                     return 0;
-                case Project.PRIORITY_NORMAL:
+                case ProjectPriority.Normal:
                     return 0.5;
-                case Project.PRIORITY_HIGH:
+                case ProjectPriority.High:
                     return 1.0;
                 default: return 0;
             }

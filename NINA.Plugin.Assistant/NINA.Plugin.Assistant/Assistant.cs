@@ -1,4 +1,5 @@
-﻿using NINA.Core.Utility;
+﻿using Assistant.NINAPlugin.Controls.AssistantManager;
+using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
 using NINA.Plugin;
 using NINA.Plugin.Interfaces;
@@ -34,8 +35,9 @@ namespace Assistant.NINAPlugin {
             this.profileService = profileService;
             profileService.ProfileChanged += ProfileService_ProfileChanged;
 
-            AssistantHelper.Init(profileService);
             InitPluginHome();
+
+            AssistantManagerVM = new AssistantManagerVM(profileService);
             //StartDatabaseManagementApp();
         }
 
@@ -80,6 +82,9 @@ namespace Assistant.NINAPlugin {
             }
         }
 
+        private AssistantManagerVM assistantManagerVM;
+        public AssistantManagerVM AssistantManagerVM { get => assistantManagerVM; set => assistantManagerVM = value; }
+
         private void ProcessExited(object sender, System.EventArgs e) {
             Logger.Warning($"process exited");
         }
@@ -107,25 +112,4 @@ namespace Assistant.NINAPlugin {
         }
     }
 
-    public class AssistantHelper {
-
-        private static AssistantHelper instance = null;
-        public IProfileService profileService { get; private set; }
-
-        public static void Init(IProfileService profileService) {
-            instance = new AssistantHelper();
-            instance.profileService = profileService;
-        }
-
-        public static IProfileService GetProfileService() {
-            if (instance == null) {
-                throw new Exception("Assistant failed to initialize AssistantHelper");
-            }
-
-            return instance.profileService;
-        }
-
-        private AssistantHelper() {
-        }
-    }
 }

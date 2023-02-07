@@ -35,7 +35,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     Project p1 = new Project(profileId);
                     p1.name = "Project: M42";
                     p1.description = "";
-                    p1.state = Project.STATE_ACTIVE;
+                    p1.state = (int)ProjectState.Active;
                     p1.ActiveDate = new DateTime(2022, 12, 1);
                     p1.StartDate = p1.ActiveDate;
                     p1.EndDate = new DateTime(2023, 2, 1);
@@ -76,7 +76,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     Project p2 = new Project(profileId);
                     p2.name = "Project: IC1805";
                     p2.description = "";
-                    p2.state = Project.STATE_ACTIVE;
+                    p2.state = (int)ProjectState.Active;
                     p2.ActiveDate = new DateTime(2022, 12, 1);
                     p2.StartDate = p2.ActiveDate;
                     p2.EndDate = new DateTime(2023, 2, 1);
@@ -159,7 +159,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     Project p1 = new Project(profileId);
                     p1.name = "Project: C00";
                     p1.description = "";
-                    p1.state = Project.STATE_ACTIVE;
+                    p1.state = (int)ProjectState.Active;
                     p1.ActiveDate = atTime.AddDays(-1);
                     p1.StartDate = atTime;
                     p1.EndDate = atTime.AddDays(100);
@@ -186,7 +186,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     Project p2 = new Project(profileId);
                     p2.name = "Project: C90";
                     p2.description = "";
-                    p2.state = Project.STATE_ACTIVE;
+                    p2.state = (int)ProjectState.Active;
                     p2.ActiveDate = atTime.AddDays(-1);
                     p2.StartDate = atTime;
                     p2.EndDate = atTime.AddDays(100);
@@ -244,7 +244,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     Project p1 = new Project(profileId);
                     p1.name = "Project: C00";
                     p1.description = "";
-                    p1.state = Project.STATE_ACTIVE;
+                    p1.state = (int)ProjectState.Active;
                     p1.ActiveDate = atTime.AddDays(-1);
                     p1.StartDate = atTime;
                     p1.EndDate = atTime.AddDays(100);

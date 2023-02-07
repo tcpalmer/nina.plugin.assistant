@@ -293,10 +293,14 @@
     <Compile Include="Astrometry\DSORiseAndSet.cs" />
     <Compile Include="Astrometry\HorizonDefinition.cs" />
     <Compile Include="Astrometry\HorizontalCoordinate.cs" />
-    <Compile Include="Controls\Manager\ManagerUI.xaml.cs">
-      <DependentUpon>ManagerUI.xaml</DependentUpon>
+    <Compile Include="Controls\AssistantManager\AssistantManagerView.xaml.cs">
+      <DependentUpon>AssistantManagerView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Manager\ManagerVM.cs" />
+    <Compile Include="Controls\AssistantManager\AssistantManagerVM.cs" />
+    <Compile Include="Controls\AssistantManager\ProjectView.xaml.cs">
+      <DependentUpon>ProjectView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AssistantManager\ProjectViewVM.cs" />
     <Compile Include="Database\AssistantDatabaseInteraction.cs" />
     <Compile Include="Database\AssistantDbContext.cs" />
     <Compile Include="Database\AssistantPlanLoader.cs" />
@@ -349,7 +353,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Controls\Manager\ManagerUI.xaml">
+    <Page Include="Controls\AssistantManager\AssistantManagerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\AssistantManager\ProjectView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

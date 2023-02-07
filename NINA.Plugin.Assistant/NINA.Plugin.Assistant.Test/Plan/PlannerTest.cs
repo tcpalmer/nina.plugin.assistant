@@ -20,13 +20,13 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         public void testFilterForReadyComplete() {
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
 
-            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", Project.STATE_ACTIVE);
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
             Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("Ha", 10, 0);
             PlanMocks.AddMockPlanFilter(pt, pf);
             PlanMocks.AddMockPlanTarget(pp1, pt);
 
-            Mock<IPlanProject> pp2 = PlanMocks.GetMockPlanProject("pp2", Project.STATE_ACTIVE);
+            Mock<IPlanProject> pp2 = PlanMocks.GetMockPlanProject("pp2", ProjectState.Active);
             pt = PlanMocks.GetMockPlanTarget("M31", TestUtil.M31);
             pf = PlanMocks.GetMockPlanFilter("OIII", 10, 10);
             PlanMocks.AddMockPlanFilter(pt, pf);
@@ -67,7 +67,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             // Southern hemisphere location and IC1805
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_2);
 
-            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", Project.STATE_ACTIVE);
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("IC1805", TestUtil.IC1805);
             PlanMocks.AddMockPlanTarget(pp1, pt);
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
@@ -89,7 +89,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         public void testFilterForVisibilityNotNow() {
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
 
-            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", Project.STATE_ACTIVE);
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
             Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("Ha", 10, 0);
             PlanMocks.AddMockPlanFilter(pt, pf);
@@ -113,7 +113,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         public void testFilterForVisibilityVisible() {
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
 
-            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", Project.STATE_ACTIVE);
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
             Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("Ha", 10, 0);
             PlanMocks.AddMockPlanFilter(pt, pf);
@@ -135,7 +135,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         public void testFilterForVisibilityNotYetVisible() {
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
 
-            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", Project.STATE_ACTIVE);
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
             Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("Ha", 10, 0);
             PlanMocks.AddMockPlanFilter(pt, pf);
@@ -159,7 +159,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         public void testFilterForMoonAvoidance() {
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
 
-            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", Project.STATE_ACTIVE);
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
             pt.SetupProperty(m => m.StartTime, new DateTime(2023, 12, 25, 18, 9, 0));
             pt.SetupProperty(m => m.EndTime, new DateTime(2023, 12, 26, 5, 17, 0));
@@ -204,7 +204,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
             DateTime atTime = new DateTime(2023, 1, 23, 18, 0, 0);
 
-            Mock<IPlanProject> pp = PlanMocks.GetMockPlanProject("pp1", Project.STATE_ACTIVE);
+            Mock<IPlanProject> pp = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             Mock<IPlanTarget> pt1 = PlanMocks.GetMockPlanTarget("T1", TestUtil.M42);
             pt1.SetupProperty(t => t.StartTime, atTime.AddMinutes(-10));
             pt1.SetupProperty(t => t.EndTime, atTime.AddMinutes(120));
@@ -225,7 +225,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
             DateTime atTime = new DateTime(2023, 1, 23, 18, 0, 0);
 
-            Mock<IPlanProject> pp = PlanMocks.GetMockPlanProject("pp1", Project.STATE_ACTIVE);
+            Mock<IPlanProject> pp = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             Mock<IPlanTarget> pt1 = PlanMocks.GetMockPlanTarget("T1", TestUtil.M42);
             pt1.SetupProperty(t => t.StartTime, atTime.AddMinutes(10)); // <- should find this
             pt1.SetupProperty(t => t.EndTime, atTime.AddMinutes(120));
@@ -255,11 +255,11 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         public void testSelectTargetByScore() {
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
 
-            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", Project.STATE_ACTIVE);
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
             PlanMocks.AddMockPlanTarget(pp1, pt);
 
-            Mock<IPlanProject> pp2 = PlanMocks.GetMockPlanProject("pp2", Project.STATE_ACTIVE);
+            Mock<IPlanProject> pp2 = PlanMocks.GetMockPlanProject("pp2", ProjectState.Active);
             pt = PlanMocks.GetMockPlanTarget("IC1805", TestUtil.IC1805);
             PlanMocks.AddMockPlanTarget(pp2, pt);
 
@@ -277,7 +277,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         public void testGetTargetTimeWindow() {
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
 
-            Mock<IPlanProject> pp = PlanMocks.GetMockPlanProject("pp1", Project.STATE_ACTIVE);
+            Mock<IPlanProject> pp = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             int minimumMinutes = 30;
             pp.Object.Preferences = GetProjectPreferences(minimumMinutes);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);

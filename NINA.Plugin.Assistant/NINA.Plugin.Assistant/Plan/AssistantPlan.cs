@@ -66,8 +66,8 @@ namespace Assistant.NINAPlugin.Plan {
         int DatabaseId { get; set; }
         string Name { get; set; }
         string Description { get; set; }
-        int State { get; set; }
-        int Priority { get; set; }
+        ProjectState State { get; set; }
+        ProjectPriority Priority { get; set; }
         DateTime CreateDate { get; set; }
         DateTime? ActiveDate { get; set; }
         DateTime? InactiveDate { get; set; }
@@ -88,8 +88,8 @@ namespace Assistant.NINAPlugin.Plan {
         public int DatabaseId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public int State { get; set; }
-        public int Priority { get; set; }
+        public ProjectState State { get; set; }
+        public ProjectPriority Priority { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime? ActiveDate { get; set; }
         public DateTime? InactiveDate { get; set; }
@@ -106,8 +106,8 @@ namespace Assistant.NINAPlugin.Plan {
             this.DatabaseId = project.id;
             this.Name = project.name;
             this.Description = project.description;
-            this.State = project.state;
-            this.Priority = project.priority;
+            this.State = project.State;
+            this.Priority = project.Priority;
             this.CreateDate = project.CreateDate;
             this.ActiveDate = project.ActiveDate;
             this.InactiveDate = project.InactiveDate;
@@ -128,8 +128,8 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine("-- Project:");
             sb.AppendLine($"Name: {Name}");
             sb.AppendLine($"Description: {Description}");
-            sb.AppendLine($"State: {Project.State(State)}");
-            sb.AppendLine($"Priority: {Project.Priority(Priority)}");
+            sb.AppendLine($"State: {Project.StateToString(State)}");
+            sb.AppendLine($"Priority: {Project.PriorityToString(Priority)}");
             sb.AppendLine($"StartDate: {Utils.FormatDateTimeFull(StartDate)}");
             sb.AppendLine($"EndDate: {Utils.FormatDateTimeFull(EndDate)}");
             sb.AppendLine($"Horizon: {HorizonDefinition}");

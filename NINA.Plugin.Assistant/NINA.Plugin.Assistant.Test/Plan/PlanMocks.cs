@@ -30,7 +30,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             return profileMock;
         }
 
-        public static Mock<IPlanProject> GetMockPlanProject(string name, int state) {
+        public static Mock<IPlanProject> GetMockPlanProject(string name, ProjectState state) {
             AssistantProjectPreferences app = new AssistantProjectPreferences();
             app.SetDefaults();
 

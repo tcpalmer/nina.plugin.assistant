@@ -33,7 +33,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     Project p1 = new Project(profileId);
                     p1.name = "M 42";
                     p1.description = "test project 1";
-                    p1.state = Project.STATE_ACTIVE;
+                    p1.state = (int)ProjectState.Active;
                     p1.ActiveDate = DateTime.Now;
                     p1.StartDate = DateTime.Now;
                     p1.EndDate = DateTime.Now.AddDays(100);
@@ -63,7 +63,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     Project p2 = new Project(profileId);
                     p2.name = "Sh2 240";
                     p2.description = "test project 2";
-                    p2.state = Project.STATE_ACTIVE;
+                    p2.state = (int)ProjectState.Active;
                     p2.ActiveDate = DateTime.Now;
                     p2.StartDate = DateTime.Now;
                     p2.EndDate = DateTime.Now.AddDays(100);
@@ -127,7 +127,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     Project p = new Project(profileId1);
                     p.name = "M 42";
                     p.description = "first project";
-                    p.state = Project.STATE_ACTIVE;
+                    p.state = (int)ProjectState.Active;
                     p.ActiveDate = DateTime.Now.AddDays(1);
                     p.InactiveDate = DateTime.Now.AddDays(2);
                     p.StartDate = DateTime.Now.AddDays(3);

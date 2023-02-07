@@ -114,8 +114,8 @@ namespace Assistant.NINAPlugin.Plan {
 
         public int DatabaseId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string Description { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public int State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public int Priority { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public ProjectState State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public ProjectPriority Priority { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DateTime CreateDate { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DateTime? ActiveDate { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DateTime? InactiveDate { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }

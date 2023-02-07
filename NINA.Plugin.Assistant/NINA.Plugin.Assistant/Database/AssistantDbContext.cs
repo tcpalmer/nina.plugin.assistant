@@ -45,7 +45,7 @@ namespace Assistant.NINAPlugin.Database {
             long secs = DateTimeToUnixSeconds(atTime);
             var projects = ProjectSet.Include("targets.filterplans").Include("preferences").Where(p =>
                 p.profileid.Equals(profileId) &&
-                p.state == Project.STATE_ACTIVE &&
+                p.state == (int)ProjectState.Active &&
                 p.startDate <= secs && secs <= p.endDate);
             return projects.ToList();
         }

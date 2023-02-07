@@ -179,7 +179,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     Project p1 = new Project(profileId);
                     p1.name = "Project: M42";
                     p1.description = "";
-                    p1.state = Project.STATE_ACTIVE;
+                    p1.state = (int)ProjectState.Active;
                     p1.ActiveDate = markDate;
                     p1.StartDate = markDate;
                     p1.EndDate = markDate.AddDays(10);
@@ -220,7 +220,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     Project p2 = new Project(profileId);
                     p2.name = "Project: IC1805";
                     p2.description = "";
-                    p2.state = Project.STATE_ACTIVE;
+                    p2.state = (int)ProjectState.Active;
                     p2.ActiveDate = markDate;
                     p2.StartDate = markDate.AddDays(10);
                     p2.EndDate = markDate.AddDays(20);

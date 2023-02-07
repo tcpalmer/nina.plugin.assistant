@@ -135,7 +135,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         private Mock<IPlanProject> GetTestProject(DateTime dateTime, int filterSwitchFrequency, int nbExposures, int nbExposureLength, int wbExposures, int wbExposureLength) {
             TestNighttimeCircumstances ntc = TestNighttimeCircumstances.GetNormal(dateTime);
 
-            Mock<IPlanProject> pp = PlanMocks.GetMockPlanProject("pp1", Project.STATE_ACTIVE);
+            Mock<IPlanProject> pp = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             pp.Object.Preferences = GetProjectPreferences(filterSwitchFrequency);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
             PlanMocks.AddMockPlanTarget(pp, pt);
@@ -168,7 +168,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         private Mock<IPlanProject> GetHighLatitudeTestProject(DateTime dateTime, int filterSwitchFrequency, int exposures, int exposureLength) {
             TestNighttimeCircumstances ntc = TestNighttimeCircumstances.GetNormal(dateTime);
 
-            Mock<IPlanProject> pp = PlanMocks.GetMockPlanProject("pp1", Project.STATE_ACTIVE);
+            Mock<IPlanProject> pp = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             pp.Object.Preferences = GetProjectPreferences(filterSwitchFrequency);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
             PlanMocks.AddMockPlanTarget(pp, pt);
