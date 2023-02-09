@@ -16,7 +16,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private AssistantDatabaseInteraction database;
 
         public AssistantManagerVM(IProfileService profileService) : base(profileService) {
-            this.database = new AssistantDatabaseInteraction();
+            database = new AssistantDatabaseInteraction();
 
             SelectedItemChangedCommand = new RelayCommand(SelectedItemChanged);
         }
@@ -45,6 +45,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             if (item != null) {
                 switch (item.Type) {
                     case TreeDataType.Project:
+                        Project p = (Project)item.Data;
+                        Logger.Info($"INIT PP: {p.ProjectPreferences}");
                         ProjectViewVM = new ProjectViewVM((Project)item.Data);
                         ShowProjectView = Visibility.Visible;
                         break;

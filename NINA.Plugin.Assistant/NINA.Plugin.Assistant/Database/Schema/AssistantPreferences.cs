@@ -1,10 +1,12 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
+using NINA.Core.Utility;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public abstract class AssistantPreferences {
+    public abstract class AssistantPreferences : BaseINPC {
 
         public AssistantPreferences() {
             SetDefaults();
@@ -13,7 +15,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public abstract void SetDefaults();
     }
 
-    public class AssistantProjectPreferences : AssistantPreferences {
+    public class AssistantProjectPreferences : AssistantPreferences, ICloneable {
 
         public int MinimumTime { get; set; }
         public double MinimumAltitude { get; set; }
@@ -66,9 +68,13 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine("RuleWeights: ").Append(rw.ToString());
             return sb.ToString();
         }
+
+        public object Clone() {
+            return MemberwiseClone();
+        }
     }
 
-    public class AssistantFilterPreferences : AssistantPreferences {
+    public class AssistantFilterPreferences : AssistantPreferences, ICloneable {
 
         public TwilightLevel TwilightLevel { get; set; }
         public bool MoonAvoidanceEnabled { get; set; }
@@ -107,6 +113,10 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"MoonAvoidanceWidth: {MoonAvoidanceWidth}");
             sb.AppendLine($"MaximumHumidity: {MaximumHumidity}");
             return sb.ToString();
+        }
+
+        public object Clone() {
+            return MemberwiseClone();
         }
     }
 

@@ -1,5 +1,6 @@
 ﻿using NINA.Astrometry;
 using System;
+using System.Text.RegularExpressions;
 
 namespace Assistant.NINAPlugin.Util {
 
@@ -9,6 +10,23 @@ namespace Assistant.NINAPlugin.Util {
             decimal hours = Math.Floor((decimal)minutes / 60);
             int min = minutes % 60;
             return $"{hours}h {min}m";
+        }
+
+        public static int HMtoM(string hm) {
+
+            if (string.IsNullOrEmpty(hm)) {
+                return 0;
+            }
+
+            Regex re = new Regex(@"(\d+)h\s*(\d+)m");
+            Match match = re.Match(hm);
+            if (match.Success) {
+                int hours = int.Parse(match.Groups[1].Value);
+                int minutes = int.Parse(match.Groups[2].Value);
+                return hours * 60 + minutes;
+            }
+
+            return 0;
         }
 
         public static string FormatDateTimeFull(DateTime? dateTime) {

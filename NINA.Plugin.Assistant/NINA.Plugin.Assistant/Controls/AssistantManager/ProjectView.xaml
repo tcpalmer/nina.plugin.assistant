@@ -5,9 +5,15 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:rules="clr-namespace:Assistant.NINAPlugin.Controls.ValidationRules"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Resources/Converters.xaml" />
+    </UserControl.Resources>
+
     <Grid>
         <StackPanel x:Name="ProjectViewPanel" Margin="205,0,0,0">
             <Label
@@ -25,15 +31,24 @@
                 <TextBlock
                     VerticalAlignment="Center"
                     Foreground="White"
-                    Text="Name"
+                    Text="Name*"
                     ToolTip="Name of the Project" />
-                <TextBox MaxHeight="20" Text="{Binding Project.name}" />
+                <TextBox MaxHeight="20">
+                    <TextBox.Text>
+                        <Binding Path="ProjectProxy.Project.name" UpdateSourceTrigger="LostFocus">
+                            <Binding.ValidationRules>
+                                <rules:RequiredFieldValidationRule />
+                            </Binding.ValidationRules>
+                        </Binding>
+
+                    </TextBox.Text>
+                </TextBox>
                 <TextBlock
                     VerticalAlignment="Center"
                     Foreground="White"
                     Text="Description"
                     ToolTip="Description of the Project" />
-                <TextBox MaxHeight="20" Text="" />
+                <TextBox MaxHeight="20" Text="{Binding ProjectProxy.Project.description}" />
                 <TextBlock
                     VerticalAlignment="Center"
                     Foreground="White"
@@ -43,8 +58,8 @@
                     MaxHeight="20"
                     DisplayMemberPath="Value"
                     ItemsSource="{Binding ProjectStateChoices}"
-                    SelectedValue="{Binding State}"
-                    SelectedValuePath="Key"/>
+                    SelectedValue="{Binding ProjectProxy.Project.State}"
+                    SelectedValuePath="Key" />
                 <TextBlock
                     VerticalAlignment="Center"
                     Foreground="White"
@@ -54,20 +69,20 @@
                     MaxHeight="20"
                     DisplayMemberPath="Value"
                     ItemsSource="{Binding ProjectPriorityChoices}"
-                    SelectedValue="{Binding Priority}"
-                    SelectedValuePath="Key"/>
+                    SelectedValue="{Binding ProjectProxy.Project.Priority}"
+                    SelectedValuePath="Key" />
                 <TextBlock
                     VerticalAlignment="Center"
                     Foreground="White"
                     Text="Start Date"
                     ToolTip="Set the start date of the plan" />
-                <DatePicker Margin="0,0,0,0" SelectedDate="{Binding Project.StartDate}" />
+                <DatePicker Margin="0,0,0,0" SelectedDate="{Binding ProjectProxy.Proxy.StartDate}" />
                 <TextBlock
                     VerticalAlignment="Center"
                     Foreground="White"
                     Text="End Date"
                     ToolTip="Set the start date of the plan" />
-                <DatePicker Margin="0,0,0,0" SelectedDate="{Binding Project.EndDate}" />
+                <DatePicker Margin="0,0,0,0" SelectedDate="{Binding ProjectProxy.Project.EndDate}" />
             </UniformGrid>
             <UniformGrid
                 Width="250"
@@ -83,10 +98,8 @@
                     ToolTip="Minimum acquisition time for each project target" />
                 <ComboBox
                     MaxHeight="20"
-                    DisplayMemberPath="Value"
                     ItemsSource="{Binding MinimumTimeChoices}"
-                    SelectedValue="{Binding MinimumTime}"
-                    SelectedValuePath="Key" />
+                    SelectedValue="{Binding ProjectProxy.ProjectPreferences.MinimumTime, Mode=TwoWay, Converter={StaticResource ImagingMinutesConverter}}" />
                 <TextBlock
                     VerticalAlignment="Center"
                     Foreground="White"
@@ -94,10 +107,8 @@
                     ToolTip="Minimum altitude for project targets" />
                 <ComboBox
                     MaxHeight="20"
-                    DisplayMemberPath="Value"
                     ItemsSource="{Binding MinimumAltitudeChoices}"
-                    SelectedValue="{Binding MinimumAltitude}"
-                    SelectedValuePath="Key" />
+                    SelectedValue="{Binding ProjectProxy.ProjectPreferences.MinimumAltitude, Mode=TwoWay, Converter={StaticResource AltitudeChoicesConverter}}" />
                 <TextBlock
                     VerticalAlignment="Center"
                     Foreground="White"
@@ -109,7 +120,7 @@
                     Foreground="White"
                     Text="Horizon Offset"
                     ToolTip="" />
-                <TextBox MaxHeight="20" Text="" />
+                <TextBox MaxHeight="20" Text="{Binding ProjectProxy.ProjectPreferences.HorizonOffset}" />
                 <TextBlock
                     VerticalAlignment="Center"
                     Foreground="White"

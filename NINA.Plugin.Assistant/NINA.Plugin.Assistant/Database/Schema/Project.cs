@@ -13,7 +13,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         Low, Normal, High
     }
 
-    public class Project {
+    public class Project : ICloneable {
 
         [Key]
         public int id { get; set; }
@@ -52,7 +52,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public ProjectPriority Priority {
             get { return (ProjectPriority)priority; }
             set {
-                state = (int)value;
+                priority = (int)value;
             }
         }
 
@@ -125,6 +125,12 @@ namespace Assistant.NINAPlugin.Database.Schema {
             }
         }
 
+        public object Clone() {
+            Project project = (Project)MemberwiseClone();
+            project.ProjectPreferences = (AssistantProjectPreferences)this.ProjectPreferences.Clone();
+            // note: not a deep clone of targets list
+            return project;
+        }
     }
 
 }

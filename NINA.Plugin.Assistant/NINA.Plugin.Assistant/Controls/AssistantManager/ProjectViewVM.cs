@@ -1,6 +1,5 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Util;
-using NINA.Core.Locale;
 using NINA.Core.Utility;
 using System;
 using System.Collections.Generic;
@@ -9,17 +8,19 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class ProjectViewVM : BaseINPC {
 
-        private Project project;
-        public Project Project {
-            get => project;
+        private ProjectProxy projectProxy;
+        public ProjectProxy ProjectProxy {
+            get => projectProxy;
             set {
-                project = value;
-                RaisePropertyChanged(nameof(Project));
+                projectProxy = value;
+                RaisePropertyChanged(nameof(ProjectProxy));
             }
         }
 
         public ProjectViewVM(Project project) {
-            Project = project;
+            project.description = "hello description";
+            ProjectProxy = new ProjectProxy(project);
+
             InitializeCombos();
         }
 
@@ -35,15 +36,14 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 ProjectPriorityChoices.Add(new KeyValuePair<int, string>(i, Enum.GetName(typeof(ProjectPriority), i)));
             }
 
-            MinimumAltitudeChoices = new AsyncObservableCollection<KeyValuePair<double, string>>();
+            MinimumAltitudeChoices = new List<string>();
             for (int i = 0; i <= 60; i += 5) {
-                MinimumAltitudeChoices.Add(new KeyValuePair<double, string>(i, i + "°"));
+                MinimumAltitudeChoices.Add(i + "°");
             }
 
-            MinimumTimeChoices = new AsyncObservableCollection<KeyValuePair<int, string>>();
-            MinimumTimeChoices.Add(new KeyValuePair<int, string>(0, Loc.Instance["LblAny"]));
+            MinimumTimeChoices = new List<string>();
             for (int i = 30; i <= 240; i += 30) {
-                MinimumTimeChoices.Add(new KeyValuePair<int, string>(i, Utils.MtoHM(i)));
+                MinimumTimeChoices.Add(Utils.MtoHM(i));
             }
         }
 
@@ -69,23 +69,23 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        private AsyncObservableCollection<KeyValuePair<int, string>> _minimumTimeChoices;
-        public AsyncObservableCollection<KeyValuePair<int, string>> MinimumTimeChoices {
-            get {
-                return _minimumTimeChoices;
-            }
+        private List<string> _minimumTimeChoices;
+        public List<string> MinimumTimeChoices {
+            get => _minimumTimeChoices;
             set {
                 _minimumTimeChoices = value;
+                RaisePropertyChanged(nameof(MinimumTimeChoices));
             }
         }
 
-        private AsyncObservableCollection<KeyValuePair<double, string>> _minimumAltitudeChoices;
-        public AsyncObservableCollection<KeyValuePair<double, string>> MinimumAltitudeChoices {
+        private List<string> _minimumAltitudeChoices;
+        public List<string> MinimumAltitudeChoices {
             get {
                 return _minimumAltitudeChoices;
             }
             set {
                 _minimumAltitudeChoices = value;
+                RaisePropertyChanged(nameof(MinimumAltitudeChoices));
             }
         }
 

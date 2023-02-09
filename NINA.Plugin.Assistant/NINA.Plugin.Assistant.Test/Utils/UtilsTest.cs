@@ -17,6 +17,17 @@ namespace NINA.Plugin.Assistant.Test.Util {
         }
 
         [Test]
+        [TestCase(null, 0)]
+        [TestCase("", 0)]
+        [TestCase("0h 0m", 0)]
+        [TestCase("0h 32m", 32)]
+        [TestCase("1h 1m", 61)]
+        [TestCase("11h 59m", 719)]
+        public void TestHMtoM(string hm, int expected) {
+            Utils.HMtoM(hm).Should().Be(expected);
+        }
+
+        [Test]
         public void TestMidpoint() {
             DateTime start = DateTime.Now;
             DateTime mid = Utils.GetMidpointTime(start, start.AddHours(1));

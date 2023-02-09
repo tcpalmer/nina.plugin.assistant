@@ -297,10 +297,14 @@
       <DependentUpon>AssistantManagerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\AssistantManager\AssistantManagerVM.cs" />
+    <Compile Include="Controls\AssistantManager\TemporaryProxy.cs" />
     <Compile Include="Controls\AssistantManager\ProjectView.xaml.cs">
       <DependentUpon>ProjectView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\AssistantManager\ProjectViewVM.cs" />
+    <Compile Include="Controls\Converters\AltitudeChoicesConverter.cs" />
+    <Compile Include="Controls\Converters\ImagingMinutesConverter.cs" />
+    <Compile Include="Controls\ValidationRules\RequiredFieldValidationRule.cs" />
     <Compile Include="Database\AssistantDatabaseInteraction.cs" />
     <Compile Include="Database\AssistantDbContext.cs" />
     <Compile Include="Database\AssistantPlanLoader.cs" />
@@ -358,6 +362,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\AssistantManager\ProjectView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Resources\Converters.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

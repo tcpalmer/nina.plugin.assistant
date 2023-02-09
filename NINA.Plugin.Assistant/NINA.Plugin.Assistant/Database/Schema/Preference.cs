@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using NINA.Core.Utility;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity.ModelConfiguration;
@@ -15,9 +16,11 @@ namespace Assistant.NINAPlugin.Database.Schema {
         [NotMapped]
         public AssistantProjectPreferences Preferences {
             get {
+                Logger.Info($"_PP GET: {_preferences}");
                 return JsonConvert.DeserializeObject<AssistantProjectPreferences>(_preferences);
             }
             set {
+                Logger.Info($"_PP SET: {value}");
                 _preferences = JsonConvert.SerializeObject(value);
             }
         }
