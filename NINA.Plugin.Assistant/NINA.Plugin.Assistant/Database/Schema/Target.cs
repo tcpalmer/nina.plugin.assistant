@@ -1,58 +1,65 @@
 ﻿using NINA.Astrometry;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public class Target {
+    public class Target : ICloneable {
 
-        public const int EPOCH_JNOW = 0;
-        public const int EPOCH_J2000 = 1;
-
-        [Key]
-        public int id { get; set; }
+        [Key] public int Id { get; set; }
 
         [Required]
-        public string name { get; set; }
+        [StringLength(255, ErrorMessage = "Target name must be less than 256 characters")]
+        public string Name { get; set; }
 
-        [Required]
-        public double ra { get; set; }
-
-        [Required]
-        public double dec { get; set; }
-
-        [Required]
-        public int epochcode { get; set; }
+        [Required] public double RA { get; set; }
+        [Required] public double Dec { get; set; }
+        [Required] public int epochCode { get; set; }
+        public double Rotation { get; set; }
+        public double ROI { get; set; }
 
         [NotMapped]
-        public Epoch Epoch { get => MapEpoch(epochcode); }
+        public Epoch Epoch {
+            get => (Epoch)epochCode;
+            set {
+                epochCode = (int)value;
+            }
+        }
 
-        public double rotation { get; set; }
-        public double roi { get; set; }
+        public virtual Project Project { get; set; }
 
-        public virtual Project project { get; set; }
-
-        public List<FilterPlan> filterplans { get; set; }
+        public List<FilterPlan> FilterPlans { get; set; }
 
         public Target() {
-            epochcode = EPOCH_J2000;
-            rotation = 0;
-            roi = 1;
-            filterplans = new List<FilterPlan>();
+            epochCode = (int)Epoch.J2000;
+            Rotation = 0;
+            ROI = 1;
+            FilterPlans = new List<FilterPlan>();
+        }
+
+        public object Clone() {
+            return MemberwiseClone();
+            // TODO: filter plans?
+        }
+
+        public override string ToString() {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Name: {Name}");
+            sb.AppendLine($"RA: {RA}");
+            sb.AppendLine($"Dec: {Dec}");
+            sb.AppendLine($"Epoch: {Epoch}");
+            sb.AppendLine($"Rotation: {Rotation}");
+            sb.AppendLine($"ROI: {ROI}");
+
+            return sb.ToString();
         }
 
         public Coordinates GetCoordinates() {
-            return new Coordinates(Angle.ByHours(ra), Angle.ByDegree(dec), Epoch.J2000);
+            return new Coordinates(Angle.ByHours(RA), Angle.ByDegree(Dec), Epoch);
         }
 
-        private Epoch MapEpoch(int epoch) {
-            switch (epoch) {
-                case EPOCH_JNOW: return Epoch.JNOW;
-                case EPOCH_J2000: return Epoch.J2000;
-                default: return Epoch.J2000;
-            }
-        }
     }
-
 }

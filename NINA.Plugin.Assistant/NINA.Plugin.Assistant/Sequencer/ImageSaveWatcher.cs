@@ -16,7 +16,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         public ImageSaveWatcher(IImageSaveMediator imageSaveMediator, IPlanTarget planTarget) {
             this.imageSaveMediator = imageSaveMediator;
             this.planTarget = planTarget;
-            this.enableGrader = planTarget.Project.Preferences.EnableGrader;
+            this.enableGrader = planTarget.Project.EnableGrader;
 
             imageSaveMediator.ImageSaved += ImageSaved;
             Logger.Debug($"Assistant: start watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
@@ -50,10 +50,10 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                     // Update the filter plan record
                     FilterPlan filterPlan = context.GetFilterPlan(planTarget.DatabaseId, filterName);
-                    filterPlan.acquired++;
+                    filterPlan.Acquired++;
 
                     if (accepted) {
-                        filterPlan.accepted++;
+                        filterPlan.Accepted++;
                     }
 
                     // Save the acquired image record

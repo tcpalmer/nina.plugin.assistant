@@ -157,7 +157,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void AddDitherTrigger(IPlanTarget planTarget) {
-            int ditherEvery = planTarget.Project.Preferences.DitherEvery;
+            int ditherEvery = planTarget.Project.DitherEvery;
             if (ditherEvery > 0) {
                 Logger.Info($"Assistant: adding dither trigger: every {ditherEvery} exposures");
                 DitherAfterExposures ditherTrigger = new DitherAfterExposures(guiderMediator, imageHistoryVM, profileService);

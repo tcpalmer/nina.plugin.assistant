@@ -18,7 +18,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public ProjectViewVM(Project project) {
-            project.description = "hello description";
+            project.Description = "hello description";
             ProjectProxy = new ProjectProxy(project);
 
             InitializeCombos();

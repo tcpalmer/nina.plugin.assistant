@@ -45,7 +45,6 @@ namespace Assistant.NINAPlugin.Plan {
 
             IPlanProject planProject = new PlanProjectEmulator();
             planProject.Name = "P01";
-            planProject.Preferences = GetProjectPreferences(true, 0);
             IPlanTarget planTarget = GetBasePlanTarget("T01", planProject, Cp5n5);
             planTarget.EndTime = endTime;
 
@@ -85,15 +84,6 @@ namespace Assistant.NINAPlugin.Plan {
             return planFilter;
         }
 
-        private AssistantProjectPreferences GetProjectPreferences(bool enableGrader, int ditherEvery) {
-            AssistantProjectPreferences pp = new AssistantProjectPreferences();
-            pp.SetDefaults();
-            pp.MinimumAltitude = 10;
-            pp.EnableGrader = enableGrader;
-            pp.DitherEvery = ditherEvery;
-            return pp;
-        }
-
         private IPlanTarget GetBasePlanTarget(string name, IPlanProject planProject, Coordinates coordinates) {
             IPlanTarget planTarget = new PlanTargetEmulator();
             planTarget.Project = planProject;
@@ -110,7 +100,6 @@ namespace Assistant.NINAPlugin.Plan {
 
         public string PlanId { get; set; }
         public string Name { get; set; }
-        public AssistantProjectPreferences Preferences { get; set; }
 
         public int DatabaseId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string Description { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -125,6 +114,22 @@ namespace Assistant.NINAPlugin.Plan {
         public HorizonDefinition HorizonDefinition { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public bool Rejected { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string RejectedReason { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        ProjectState IPlanProject.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        ProjectPriority IPlanProject.Priority { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public int MinimumTime { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public double MinimumAltitude { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool UseCustomHorizon { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public double HorizonOffset { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public int FilterSwitchFrequency { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public int DitherEvery { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool EnableGrader { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Dictionary<string, double> RuleWeights { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        /*
+            pp.SetDefaults();
+            pp.MinimumAltitude = 10;
+            pp.EnableGrader = enableGrader;
+            pp.DitherEvery = ditherEvery;
+         */
 
         public PlanProjectEmulator() {
             this.PlanId = Guid.NewGuid().ToString();
@@ -172,12 +177,16 @@ namespace Assistant.NINAPlugin.Plan {
         public int Acquired { get; set; }
         public int Accepted { get; set; }
         public IPlanTarget PlanTarget { get; set; }
-        public AssistantFilterPreferences Preferences { get; set; }
 
         public int DatabaseId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public bool Rejected { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string RejectedReason { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public int PlannedExposures { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public TwilightLevel TwilightLevel { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool MoonAvoidanceEnabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public double MoonAvoidanceSeparation { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public int MoonAvoidanceWidth { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public double MaximumHumidity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public PlanFilterEmulator() {
             this.PlanId = Guid.NewGuid().ToString();

@@ -309,11 +309,11 @@
     <Compile Include="Database\AssistantDbContext.cs" />
     <Compile Include="Database\AssistantPlanLoader.cs" />
     <Compile Include="Database\Schema\AcquiredImage.cs" />
-    <Compile Include="Database\Schema\AssistantPreferences.cs" />
     <Compile Include="Database\Schema\FilterPlan.cs" />
+    <Compile Include="Database\Schema\FilterPreference.cs" />
     <Compile Include="Database\Schema\ImageMetadata.cs" />
-    <Compile Include="Database\Schema\Preference.cs" />
     <Compile Include="Database\Schema\Project.cs" />
+    <Compile Include="Database\Schema\RuleWeight.cs" />
     <Compile Include="Database\Schema\Target.cs" />
     <Compile Include="Options.xaml.cs">
       <DependentUpon>Options.xaml</DependentUpon>

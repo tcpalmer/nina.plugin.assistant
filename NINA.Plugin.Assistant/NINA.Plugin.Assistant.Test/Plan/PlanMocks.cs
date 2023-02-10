@@ -2,6 +2,7 @@
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Plan.Scoring;
+using Assistant.NINAPlugin.Plan.Scoring.Rules;
 using Moq;
 using NINA.Astrometry;
 using NINA.Core.Model;
@@ -31,16 +32,28 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         }
 
         public static Mock<IPlanProject> GetMockPlanProject(string name, ProjectState state) {
-            AssistantProjectPreferences app = new AssistantProjectPreferences();
-            app.SetDefaults();
-
             Mock<IPlanProject> pp = new Mock<IPlanProject>();
             pp.SetupAllProperties();
             pp.SetupProperty(m => m.Name, name);
             pp.SetupProperty(m => m.State, state);
             pp.SetupProperty(m => m.Rejected, false);
-            pp.SetupProperty(m => m.Preferences, app);
             pp.SetupProperty(m => m.HorizonDefinition, new HorizonDefinition(0));
+
+            pp.SetupProperty(m => m.MinimumTime, 30);
+            pp.SetupProperty(m => m.MinimumAltitude, 0);
+            pp.SetupProperty(m => m.UseCustomHorizon, false);
+            pp.SetupProperty(m => m.HorizonOffset, 0);
+            pp.SetupProperty(m => m.FilterSwitchFrequency, 0);
+            pp.SetupProperty(m => m.DitherEvery, 0);
+            pp.SetupProperty(m => m.EnableGrader, false);
+
+            Dictionary<string, double> rw = new Dictionary<string, double>();
+            Dictionary<string, IScoringRule> allRules = ScoringRule.GetAllScoringRules();
+            foreach (KeyValuePair<string, IScoringRule> item in allRules) {
+                rw[item.Key] = 1;
+            }
+
+            pp.SetupProperty(m => m.RuleWeights, rw);
             pp.SetupProperty(m => m.Targets, new List<IPlanTarget>());
             return pp;
         }
@@ -60,9 +73,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         }
 
         public static Mock<IPlanFilter> GetMockPlanFilter(string filterName, int desired, int accepted, int exposureLength) {
-            AssistantFilterPreferences afp = new AssistantFilterPreferences();
-            afp.SetDefaults();
-
             Mock<IPlanFilter> pf = new Mock<IPlanFilter>();
             pf.SetupAllProperties();
             pf.SetupProperty(m => m.FilterName, filterName);
@@ -70,7 +80,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pf.SetupProperty(m => m.Desired, desired);
             pf.SetupProperty(m => m.Acquired, 0);
             pf.SetupProperty(m => m.Accepted, accepted);
-            pf.SetupProperty(m => m.Preferences, afp);
             pf.Setup(m => m.NeededExposures()).Returns(accepted > desired ? 0 : desired - accepted);
             pf.Setup(m => m.IsIncomplete()).Returns(accepted < desired);
             return pf;

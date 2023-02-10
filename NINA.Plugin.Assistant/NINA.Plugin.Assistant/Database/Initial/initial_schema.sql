@@ -1,22 +1,8 @@
 ﻿/* */
-CREATE TABLE IF NOT EXISTS `projectpreference` (
-	`id`			INTEGER NOT NULL,
-    `preferences`	TEXT NOT NULL,
-	PRIMARY KEY(`id`)
-);
-
-CREATE TABLE IF NOT EXISTS `filterpreference` (
-	`id`			INTEGER NOT NULL,
-    `profileId`		TEXT NOT NULL,
-    `filtername`	TEXT NOT NULL,
-    `preferences`	TEXT NOT NULL,
-	PRIMARY KEY(`id`)
-);
 
 CREATE TABLE IF NOT EXISTS `project` (
-	`id`			INTEGER NOT NULL,
+	`Id`			INTEGER NOT NULL,
 	`profileId`		TEXT NOT NULL,
-	`preferences_id` INTEGER NOT NULL,
 	`name`			TEXT NOT NULL,
 	`description`	TEXT,
 	`state`			INTEGER,
@@ -26,11 +12,18 @@ CREATE TABLE IF NOT EXISTS `project` (
 	`inactivedate`	INTEGER,
 	`startdate`		INTEGER,
 	`enddate`		INTEGER,
+	`minimumtime`	INTEGER,
+	`minimumaltitude`	REAL,
+	`usecustomhorizon`	INTEGER,
+	`horizonoffset`	REAL,
+	`filterswitchfrequency`	INTEGER,
+	`ditherevery`	INTEGER,
+	`enablegrader`	INTEGER,
 	PRIMARY KEY(`id`)
 );
 
 CREATE TABLE IF NOT EXISTS `target` (
-	`id`			INTEGER NOT NULL,
+	`Id`			INTEGER NOT NULL,
 	`name`			TEXT NOT NULL,
 	`ra`			REAL,
 	`dec`			REAL,
@@ -39,11 +32,11 @@ CREATE TABLE IF NOT EXISTS `target` (
 	`roi`			REAL,
 	`project_id`	INTEGER,
 	PRIMARY KEY(`id`),
-	FOREIGN KEY(`project_id`) REFERENCES `project`(`id`)
+	FOREIGN KEY(`project_id`) REFERENCES `project`(`Id`)
 );
 
 CREATE TABLE IF NOT EXISTS `filterplan` (
-	`id`			INTEGER NOT NULL,
+	`Id`			INTEGER NOT NULL,
 	`filtername`	TEXT NOT NULL,
 	`profileId`		TEXT NOT NULL,
 	`exposure`		REAL NOT NULL,
@@ -55,15 +48,36 @@ CREATE TABLE IF NOT EXISTS `filterplan` (
 	`acquired`		INTEGER,
 	`accepted`		INTEGER,
 	`targetid`		INTEGER,
-	PRIMARY KEY(`id`),
-	FOREIGN KEY(`targetid`) REFERENCES `target`(`id`)
+	PRIMARY KEY(`Id`),
+	FOREIGN KEY(`targetId`) REFERENCES `target`(`Id`)
+);
+
+CREATE TABLE IF NOT EXISTS `filterpreference` (
+	`Id`			INTEGER NOT NULL,
+    `profileId`		TEXT NOT NULL,
+    `filtername`	TEXT NOT NULL,
+	`twilightlevel` INTEGER,
+	`moonavoidanceenabled`	INTEGER,
+	`moonavoidanceseparation`	REAL,
+	`moonavoidancewidth`	INTEGER,
+	`maximumhumidity`	REAL,
+	PRIMARY KEY(`Id`)
+);
+
+CREATE TABLE IF NOT EXISTS `ruleweight` (
+	`Id`			INTEGER NOT NULL,
+	`name`			TEXT NOT NULL,
+    `weight`		REAL NOT NULL,
+	`project_id`	INTEGER,
+	FOREIGN KEY(`project_id`) REFERENCES `project`(`Id`)
+	PRIMARY KEY(`Id`)
 );
 
 CREATE TABLE IF NOT EXISTS `acquiredimage` (
-	`id`			INTEGER NOT NULL,
+	`Id`			INTEGER NOT NULL,
 	`targetId`		INTEGER NOT NULL,
 	`acquireddate`	INTEGER,
 	`filtername`	TEXT NOT NULL,
     `metadata`		TEXT NOT NULL,
-	PRIMARY KEY(`id`)
+	PRIMARY KEY(`Id`)
 );

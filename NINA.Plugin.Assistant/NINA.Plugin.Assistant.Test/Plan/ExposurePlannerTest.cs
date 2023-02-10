@@ -136,30 +136,30 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             TestNighttimeCircumstances ntc = TestNighttimeCircumstances.GetNormal(dateTime);
 
             Mock<IPlanProject> pp = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
-            pp.Object.Preferences = GetProjectPreferences(filterSwitchFrequency);
+            pp.Object.FilterSwitchFrequency = filterSwitchFrequency;
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
             PlanMocks.AddMockPlanTarget(pp, pt);
 
             Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("Ha", nbExposures, 0, nbExposureLength);
-            pf.Object.Preferences = GetFilterPreferences(TwilightLevel.Astronomical);
+            pf.Object.TwilightLevel = TwilightLevel.Astronomical;
             PlanMocks.AddMockPlanFilter(pt, pf);
             pf = PlanMocks.GetMockPlanFilter("OIII", nbExposures, 0, nbExposureLength);
-            pf.Object.Preferences = GetFilterPreferences(TwilightLevel.Astronomical);
+            pf.Object.TwilightLevel = TwilightLevel.Astronomical;
             PlanMocks.AddMockPlanFilter(pt, pf);
             pf = PlanMocks.GetMockPlanFilter("SII", nbExposures, 0, nbExposureLength);
-            pf.Object.Preferences = GetFilterPreferences(TwilightLevel.Astronomical);
+            pf.Object.TwilightLevel = TwilightLevel.Astronomical;
             PlanMocks.AddMockPlanFilter(pt, pf);
             pf = PlanMocks.GetMockPlanFilter("L", wbExposures, 0, wbExposureLength);
-            pf.Object.Preferences = GetFilterPreferences(TwilightLevel.Nighttime);
+            pf.Object.TwilightLevel = TwilightLevel.Nighttime;
             PlanMocks.AddMockPlanFilter(pt, pf);
             pf = PlanMocks.GetMockPlanFilter("R", wbExposures, 0, wbExposureLength);
-            pf.Object.Preferences = GetFilterPreferences(TwilightLevel.Nighttime);
+            pf.Object.TwilightLevel = TwilightLevel.Nighttime;
             PlanMocks.AddMockPlanFilter(pt, pf);
             pf = PlanMocks.GetMockPlanFilter("G", wbExposures, 0, wbExposureLength);
-            pf.Object.Preferences = GetFilterPreferences(TwilightLevel.Nighttime);
+            pf.Object.TwilightLevel = TwilightLevel.Nighttime;
             PlanMocks.AddMockPlanFilter(pt, pf);
             pf = PlanMocks.GetMockPlanFilter("B", wbExposures, 0, wbExposureLength);
-            pf.Object.Preferences = GetFilterPreferences(TwilightLevel.Nighttime);
+            pf.Object.TwilightLevel = TwilightLevel.Nighttime;
             PlanMocks.AddMockPlanFilter(pt, pf);
 
             return pp;
@@ -169,32 +169,45 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             TestNighttimeCircumstances ntc = TestNighttimeCircumstances.GetNormal(dateTime);
 
             Mock<IPlanProject> pp = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
-            pp.Object.Preferences = GetProjectPreferences(filterSwitchFrequency);
+            pp.Object.FilterSwitchFrequency = filterSwitchFrequency;
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
             PlanMocks.AddMockPlanTarget(pp, pt);
 
             Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("Civil", exposures, 0, exposureLength);
-            pf.Object.Preferences = GetFilterPreferences(TwilightLevel.Civil);
+            pf.Object.TwilightLevel = TwilightLevel.Civil;
             PlanMocks.AddMockPlanFilter(pt, pf);
             pf = PlanMocks.GetMockPlanFilter("Nautical", exposures, 0, exposureLength);
-            pf.Object.Preferences = GetFilterPreferences(TwilightLevel.Nautical);
+            pf.Object.TwilightLevel = TwilightLevel.Nautical;
             PlanMocks.AddMockPlanFilter(pt, pf);
             pf = PlanMocks.GetMockPlanFilter("Astro", exposures, 0, exposureLength);
-            pf.Object.Preferences = GetFilterPreferences(TwilightLevel.Astronomical);
+            pf.Object.TwilightLevel = TwilightLevel.Astronomical;
             PlanMocks.AddMockPlanFilter(pt, pf);
             pf = PlanMocks.GetMockPlanFilter("Night", exposures, 0, exposureLength);
-            pf.Object.Preferences = GetFilterPreferences(TwilightLevel.Nighttime);
+            pf.Object.TwilightLevel = TwilightLevel.Nighttime;
             PlanMocks.AddMockPlanFilter(pt, pf);
 
             return pp;
         }
 
         private void AssertPlan(List<IPlanInstruction> expectedPlan, List<IPlanInstruction> actualPlan) {
+
+            /*
+            TestContext.WriteLine("EXPECTED:");
+            for (int i = 0; i < expectedPlan.Count; i++) {
+                TestContext.WriteLine($"{expectedPlan[i]}");
+            }
+
+            TestContext.WriteLine("\nACTUAL:");
+            for (int i = 0; i < actualPlan.Count; i++) {
+                TestContext.WriteLine($"{actualPlan[i]}");
+            }*/
+
             Assert.AreEqual(expectedPlan.Count, actualPlan.Count);
 
             for (int i = 0; i < expectedPlan.Count; i++) {
                 IPlanInstruction expected = expectedPlan[i];
                 IPlanInstruction actual = actualPlan[i];
+                //TestContext.Error.WriteLine($"i {i}");
 
                 Assert.IsTrue(expected.GetType() == actual.GetType());
 
@@ -236,7 +249,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             actual.Add(new PlanMessage(""));
 
             AddActualExposures(actual, Ha.Object, 19);
-            actual.Add(new PlanWait((DateTime)ntc.NighttimeStart));
 
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, L.Object, 10);
@@ -249,7 +261,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, SII.Object, 18);
-            actual.Add(new PlanWait((DateTime)ntc.AstronomicalTwilightEnd));
 
             return actual;
         }
@@ -275,7 +286,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             }
 
             AddActualExposures(actual, Ha.Object, 1);
-            actual.Add(new PlanWait((DateTime)ntc.NighttimeStart));
 
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, L.Object, 2);
@@ -312,13 +322,11 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             AddActualExposures(actual, Ha.Object, 5);
             AddActualExposures(actual, OIII.Object, 5);
             AddActualExposures(actual, SII.Object, 5);
-            actual.Add(new PlanWait((DateTime)ntc.NighttimeStart));
 
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, L.Object, 10);
             AddActualExposures(actual, R.Object, 10);
             AddActualExposures(actual, G.Object, 9);
-            actual.Add(new PlanWait(((DateTime)ntc.NighttimeStart).AddMinutes(60)));
 
             return actual;
         }
@@ -333,18 +341,14 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             actual.Add(new PlanMessage(""));
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, Civil.Object, 19);
-            actual.Add(new PlanWait((DateTime)ntc.NauticalTwilightStart));
 
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, Civil.Object, 1);
             AddActualExposures(actual, Nautical.Object, 18);
-            actual.Add(new PlanWait((DateTime)ntc.AstronomicalTwilightStart));
 
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, Nautical.Object, 2);
             AddActualExposures(actual, Astro.Object, 20);
-            DateTime end = ((DateTime)ntc.AstronomicalTwilightStart).AddHours(2);
-            actual.Add(new PlanWait(end));
 
             return actual;
         }
@@ -358,15 +362,10 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             actual.Add(new PlanMessage(""));
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, Civil.Object, 19);
-            actual.Add(new PlanWait((DateTime)ntc.AstronomicalTwilightEnd));
 
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, Civil.Object, 1);
             AddActualExposures(actual, Nautical.Object, 18);
-            actual.Add(new PlanWait((DateTime)ntc.NauticalTwilightEnd));
-
-            actual.Add(new PlanMessage(""));
-            actual.Add(new PlanWait(ntc.CivilTwilightEnd));
 
             return actual;
         }
@@ -384,20 +383,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             }
 
             TestContext.WriteLine();
-        }
-
-        private AssistantProjectPreferences GetProjectPreferences(int filterSwitchFrequency) {
-            var app = new AssistantProjectPreferences();
-            app.SetDefaults();
-            app.FilterSwitchFrequency = filterSwitchFrequency;
-            return app;
-        }
-
-        private AssistantFilterPreferences GetFilterPreferences(TwilightLevel twilightLevel) {
-            var afp = new AssistantFilterPreferences();
-            afp.SetDefaults();
-            afp.TwilightLevel = twilightLevel;
-            return afp;
         }
     }
 

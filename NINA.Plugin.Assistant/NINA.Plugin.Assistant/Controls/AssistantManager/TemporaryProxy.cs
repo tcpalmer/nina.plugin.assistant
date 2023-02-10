@@ -42,11 +42,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class ProjectProxy : TemporaryProxy<Project> {
 
-        private AssistantProjectPreferences projectPreferences;
-
         public ProjectProxy(Project project) : base(project) {
-            ProjectPreferences = project.ProjectPreferences;
-            Logger.Info($"PP HO: {ProjectPreferences.HorizonOffset}");
         }
 
         public Project Project {
@@ -57,12 +53,5 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        public AssistantProjectPreferences ProjectPreferences {
-            get => projectPreferences;
-            set {
-                projectPreferences = value;
-                RaisePropertyChanged(nameof(ProjectPreferences));
-            }
-        }
     }
 }

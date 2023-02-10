@@ -1,7 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Plan.Scoring;
-using Assistant.NINAPlugin.Plan.Scoring.Rules;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using Moq;
@@ -165,17 +164,15 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pt.SetupProperty(m => m.EndTime, new DateTime(2023, 12, 26, 5, 17, 0));
 
             Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("L", 10, 0);
-            AssistantFilterPreferences afp = pf.Object.Preferences;
-            afp.MoonAvoidanceEnabled = true;
-            afp.MoonAvoidanceSeparation = 50;
-            afp.MoonAvoidanceWidth = 7;
+            pf.SetupProperty(f => f.MoonAvoidanceEnabled, true);
+            pf.SetupProperty(f => f.MoonAvoidanceSeparation, 50);
+            pf.SetupProperty(f => f.MoonAvoidanceWidth, 7);
             PlanMocks.AddMockPlanFilter(pt, pf);
 
             pf = PlanMocks.GetMockPlanFilter("Ha", 10, 0);
-            afp = pf.Object.Preferences;
-            afp.MoonAvoidanceEnabled = true;
-            afp.MoonAvoidanceSeparation = 30;
-            afp.MoonAvoidanceWidth = 7;
+            pf.SetupProperty(f => f.MoonAvoidanceEnabled, true);
+            pf.SetupProperty(f => f.MoonAvoidanceSeparation, 30);
+            pf.SetupProperty(f => f.MoonAvoidanceWidth, 7);
             PlanMocks.AddMockPlanFilter(pt, pf);
 
             PlanMocks.AddMockPlanTarget(pp1, pt);
@@ -279,7 +276,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
             Mock<IPlanProject> pp = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             int minimumMinutes = 30;
-            pp.Object.Preferences = GetProjectPreferences(minimumMinutes);
+            pp.SetupProperty(p => p.MinimumTime, minimumMinutes);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
             PlanMocks.AddMockPlanTarget(pp, pt);
 
@@ -292,7 +289,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             window.Duration.Should().Be(minimumMinutes * 60);
 
             minimumMinutes = 60;
-            pp.Object.Preferences = GetProjectPreferences(minimumMinutes);
+            pp.SetupProperty(p => p.MinimumTime, minimumMinutes);
             pt.SetupProperty(t => t.StartTime, atTime.AddMinutes(-10));
             pt.SetupProperty(t => t.EndTime, atTime.AddMinutes(120));
             window = new Planner(atTime, profileMock.Object).GetTargetTimeWindow(atTime, pt.Object);
@@ -300,18 +297,24 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             window.EndTime.Should().BeSameDateAs(23.January(2023).At(19, 0, 0));
             window.Duration.Should().Be(minimumMinutes * 60);
         }
+        [Test]
+        [Ignore("should test in the future")]
+        public void testPerfectPlan() {
 
-        private AssistantProjectPreferences GetProjectPreferences(int minimumMinutes) {
-            AssistantProjectPreferences app = new AssistantProjectPreferences();
-            app.SetDefaults();
-            app.MinimumTime = minimumMinutes;
+            Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
+            DateTime atTime = new DateTime(2023, 1, 26);
 
-            Dictionary<string, IScoringRule> allRules = ScoringRule.GetAllScoringRules();
-            foreach (KeyValuePair<string, IScoringRule> item in allRules) {
-                app.RuleWeights[item.Key] = 1;
+            List<IPlanProject> projects = new List<IPlanProject> {
+                PlanMocks.GetMockPlanProject("pp1", ProjectState.Active).Object,
+                PlanMocks.GetMockPlanProject("pp2", ProjectState.Active).Object
+            };
+
+            List<AssistantPlan> plans = Planner.GetPerfectPlan(atTime, profileMock.Object, projects);
+            foreach (AssistantPlan plan in plans) {
+                TestContext.WriteLine("PLAN -----------------------------------------------------");
+                TestContext.WriteLine(plan.PlanSummary());
             }
 
-            return app;
         }
     }
 

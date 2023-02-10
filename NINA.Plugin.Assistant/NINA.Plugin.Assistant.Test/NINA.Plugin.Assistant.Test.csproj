@@ -326,7 +326,6 @@
     <Compile Include="Database\Schema\AssistantPreferencesTest.cs" />
     <Compile Include="Database\Schema\ImageMetadataTest.cs" />
     <Compile Include="Database\Schema\ProjectTest.cs" />
-    <Compile Include="Plan\PerfectPlanTest.cs" />
     <Compile Include="Plan\PlanMocks.cs" />
     <Compile Include="Plan\PlannerTest.cs" />
     <Compile Include="Plan\Scoring\Rules\PercentCompleteRuleTest.cs" />

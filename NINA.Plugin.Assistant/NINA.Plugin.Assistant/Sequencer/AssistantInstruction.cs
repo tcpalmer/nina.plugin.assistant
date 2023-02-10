@@ -1,5 +1,4 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
-using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
@@ -238,7 +237,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private void SetTarget(DateTime atTime, IPlanTarget planTarget) {
             IProfile activeProfile = profileService.ActiveProfile;
             DateTime referenceDate = NighttimeCalculator.GetReferenceDate(atTime);
-            CustomHorizon customHorizon = GetCustomHorizon(activeProfile, planTarget.Project.Preferences);
+            CustomHorizon customHorizon = GetCustomHorizon(activeProfile, planTarget.Project);
 
             InputTarget inputTarget = new InputTarget(
                 Angle.ByDegree(activeProfile.AstrometrySettings.Latitude),
@@ -288,10 +287,10 @@ namespace Assistant.NINAPlugin.Sequencer {
             return dso;
         }
 
-        private CustomHorizon GetCustomHorizon(IProfile activeProfile, AssistantProjectPreferences preferences) {
-            CustomHorizon customHorizon = preferences.UseCustomHorizon && activeProfile.AstrometrySettings.Horizon != null ?
+        private CustomHorizon GetCustomHorizon(IProfile activeProfile, IPlanProject project) {
+            CustomHorizon customHorizon = project.UseCustomHorizon && activeProfile.AstrometrySettings.Horizon != null ?
                 activeProfile.AstrometrySettings.Horizon :
-                HorizonDefinition.GetConstantHorizon(preferences.MinimumAltitude);
+                HorizonDefinition.GetConstantHorizon(project.MinimumAltitude);
             return customHorizon;
         }
 

@@ -13,9 +13,9 @@ namespace Assistant.NINAPlugin.Database {
     public class AssistantDbContext : DbContext {
 
         public DbSet<Project> ProjectSet { get; set; }
+        public DbSet<RuleWeight> RuleWeightSet { get; set; }
         public DbSet<Target> TargetSet { get; set; }
         public DbSet<FilterPlan> FilterPlanSet { get; set; }
-        public DbSet<ProjectPreference> ProjectPreferencePlanSet { get; set; }
         public DbSet<FilterPreference> FilterPreferencePlanSet { get; set; }
         public DbSet<AcquiredImage> AcquiredImageSet { get; set; }
 
@@ -28,7 +28,7 @@ namespace Assistant.NINAPlugin.Database {
             Logger.Debug("Assistant database: OnModelCreating");
 
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
-            modelBuilder.Configurations.Add(new ProjectPreferenceConfiguration());
+            modelBuilder.Configurations.Add(new ProjectConfiguration());
             modelBuilder.Configurations.Add(new FilterPreferenceConfiguration());
             modelBuilder.Configurations.Add(new AcquiredImageConfiguration());
 
@@ -37,36 +37,36 @@ namespace Assistant.NINAPlugin.Database {
         }
 
         public List<Project> GetAllProjects(string profileId) {
-            var projects = ProjectSet.Include("targets.filterplans").Include("preferences").Where(p => p.profileid.Equals(profileId));
+            var projects = ProjectSet.Include("targets.filterplans").Include("ruleweights").Where(p => p.ProfileId.Equals(profileId));
             return projects.ToList();
         }
 
         public List<Project> GetActiveProjects(string profileId, DateTime atTime) {
             long secs = DateTimeToUnixSeconds(atTime);
-            var projects = ProjectSet.Include("targets.filterplans").Include("preferences").Where(p =>
-                p.profileid.Equals(profileId) &&
-                p.state == (int)ProjectState.Active &&
+            var projects = ProjectSet.Include("targets.filterplans").Include("ruleweights").Where(p =>
+                p.ProfileId.Equals(profileId) &&
+                p.state_col == (int)ProjectState.Active &&
                 p.startDate <= secs && secs <= p.endDate);
             return projects.ToList();
         }
 
         public List<FilterPreference> GetFilterPreferences(string profileId) {
-            var filterPrefs = FilterPreferencePlanSet.Where(p => p.profileId == profileId);
+            var filterPrefs = FilterPreferencePlanSet.Where(p => p.ProfileId == profileId);
             return filterPrefs.ToList();
         }
 
         public Target GetTarget(int projectId, int targetId) {
-            return TargetSet.Include("filterplans").Where(t => t.project.id == projectId && t.id == targetId).First();
+            return TargetSet.Include("filterplans").Where(t => t.Project.Id == projectId && t.Id == targetId).First();
         }
 
         public FilterPlan GetFilterPlan(int targetId, string filterName) {
-            return FilterPlanSet.Where(f => f.targetid == targetId && f.filterName == filterName).First();
+            return FilterPlanSet.Where(f => f.targetId == targetId && f.FilterName == filterName).First();
         }
 
         public List<AcquiredImage> GetAcquiredImages(int targetId, string filterName) {
             var images = AcquiredImageSet.Where(p =>
-                p.targetId == targetId &&
-                p.filterName == filterName)
+                p.TargetId == targetId &&
+                p.FilterName == filterName)
               .OrderByDescending(p => p.acquiredDate);
             return images.ToList();
         }

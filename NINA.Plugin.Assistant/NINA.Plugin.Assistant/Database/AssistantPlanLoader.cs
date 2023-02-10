@@ -30,7 +30,7 @@ namespace Assistant.NINAPlugin.Database {
             }
 
             List<IPlanProject> planProjects = new List<IPlanProject>();
-            Dictionary<string, AssistantFilterPreferences> filterPrefsDictionary = GetFilterPrefDictionary(filterPrefs);
+            Dictionary<string, FilterPreference> filterPrefsDictionary = GetFilterPrefDictionary(filterPrefs);
 
             foreach (Project project in projects) {
                 PlanProject planProject = new PlanProject(activeProfile, project, filterPrefsDictionary);
@@ -41,11 +41,11 @@ namespace Assistant.NINAPlugin.Database {
 
         }
 
-        private Dictionary<string, AssistantFilterPreferences> GetFilterPrefDictionary(List<FilterPreference> filterPrefs) {
-            Dictionary<string, AssistantFilterPreferences> dict = new Dictionary<string, AssistantFilterPreferences>();
+        private Dictionary<string, FilterPreference> GetFilterPrefDictionary(List<FilterPreference> filterPrefs) {
+            Dictionary<string, FilterPreference> dict = new Dictionary<string, FilterPreference>();
 
             foreach (FilterPreference filterPref in filterPrefs) {
-                dict.Add(filterPref.filterName, filterPref.Preferences);
+                dict.Add(filterPref.FilterName, filterPref);
             }
 
             return dict;

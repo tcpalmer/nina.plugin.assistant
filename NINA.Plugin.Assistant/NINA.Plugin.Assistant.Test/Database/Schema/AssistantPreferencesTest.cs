@@ -6,18 +6,17 @@ using NUnit.Framework;
 namespace NINA.Plugin.Assistant.Test.Database.Schema {
 
     [TestFixture]
-    public class AssistantPreferencesTest {
+    public class PreferencesTest {
 
         [Test]
-        public void TestProjectPreferencesSetDefaults() {
-            var sut = new AssistantProjectPreferences();
-            sut.SetDefaults();
+        public void TestProjectPreferencesDefaults() {
+            var sut = new Project("123");
             sut.MinimumTime.Should().Be(30);
             sut.MinimumAltitude.Should().BeApproximately(0, 0.0001);
             sut.UseCustomHorizon.Should().BeFalse();
             sut.HorizonOffset.Should().BeApproximately(0, 0.0001);
             sut.DitherEvery.Should().Be(0);
-            sut.EnableGrader.Should().BeFalse();
+            sut.EnableGrader.Should().BeTrue();
             sut.RuleWeights.Should().NotBeNull();
         }
 
@@ -29,9 +28,8 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
         }
 
         [Test]
-        public void TestFilterPreferencesSetDefaults() {
-            var sut = new AssistantFilterPreferences();
-            sut.SetDefaults();
+        public void TestFilterPreferencesDefaults() {
+            var sut = new FilterPreference("123", "L");
             sut.TwilightLevel.Should().Be(TwilightLevel.Nighttime);
             sut.MoonAvoidanceEnabled.Should().BeFalse();
             sut.MoonAvoidanceSeparation.Should().BeApproximately(0, 0.0001);
@@ -41,7 +39,7 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
 
         [Test]
         public void TestFilterPreferencesTwilightChecks() {
-            var sut = new AssistantFilterPreferences();
+            var sut = new FilterPreference("123", "L");
 
             sut.TwilightLevel = TwilightLevel.Nighttime;
             sut.IsTwilightNightOnly().Should().BeTrue();

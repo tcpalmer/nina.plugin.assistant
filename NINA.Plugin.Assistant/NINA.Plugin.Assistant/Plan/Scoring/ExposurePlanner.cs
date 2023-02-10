@@ -18,7 +18,7 @@ namespace Assistant.NINAPlugin.Plan {
     /// 
     /// At high latitudes near the summer solstice, you can lose true nighttime, astronomical twilight,
     /// and perhaps even nautical twilight.  We handle all cases for locations below the polar circle -
-    /// even allowing imaging during civil twilight on the solstice.
+    /// even allowing imaging during civil twilight on the solstice if that's your thing.
     public class ExposurePlanner {
 
         private IPlanTarget planTarget;
@@ -30,7 +30,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.planTarget = planTarget;
             this.planInterval = planInterval;
             this.nighttimeCircumstances = nighttimeCircumstances;
-            this.filterSwitchFrequency = planTarget.Project.Preferences.FilterSwitchFrequency;
+            this.filterSwitchFrequency = planTarget.Project.FilterSwitchFrequency;
         }
 
         public List<IPlanInstruction> Plan() {
@@ -179,7 +179,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         private List<IPlanFilter> GetPlanFiltersForTwilightLevel(TwilightLevel twilightLevel) {
-            return NightPrioritize(planTarget.FilterPlans.Where(f => f.Preferences.TwilightLevel >= twilightLevel).ToList(), twilightLevel);
+            return NightPrioritize(planTarget.FilterPlans.Where(f => f.TwilightLevel >= twilightLevel).ToList(), twilightLevel);
         }
 
         private List<IPlanFilter> NightPrioritize(List<IPlanFilter> planFilters, TwilightLevel twilightLevel) {
@@ -188,7 +188,7 @@ namespace Assistant.NINAPlugin.Plan {
             // Assuming there are also filters for brighter twilights, the nighttime only should be done first,
             // allowing the others to be done during (presumed future) brighter twilight levels.
             return twilightLevel == TwilightLevel.Nighttime ?
-                planFilters.OrderBy(p => p.Preferences.TwilightLevel).ToList() :
+                planFilters.OrderBy(p => p.TwilightLevel).ToList() :
                 planFilters;
         }
     }

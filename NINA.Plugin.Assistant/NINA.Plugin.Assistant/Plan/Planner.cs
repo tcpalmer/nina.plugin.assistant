@@ -208,7 +208,7 @@ namespace Assistant.NINAPlugin.Plan {
                         SetRejected(planTarget, Reasons.TargetNotYetVisible);
                     }
                     // If the target is visible for at least the minimum time, then accept it
-                    else if (targetCircumstances.IsVisible && (TimeOnTargetSeconds >= planProject.Preferences.MinimumTime * 60)) {
+                    else if (targetCircumstances.IsVisible && (TimeOnTargetSeconds >= planProject.MinimumTime * 60)) {
                         planTarget.SetCircumstances(targetCircumstances);
                     }
                     else {
@@ -239,7 +239,7 @@ namespace Assistant.NINAPlugin.Plan {
                     if (planTarget.Rejected) { continue; }
 
                     foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
-                        if (planFilter.IsIncomplete() && planFilter.Preferences.MoonAvoidanceEnabled) {
+                        if (planFilter.IsIncomplete() && planFilter.MoonAvoidanceEnabled) {
                             if (RejectForMoonAvoidance(planTarget, planFilter)) {
                                 SetRejected(planFilter, Reasons.FilterMoonAvoidance);
                             }
@@ -295,7 +295,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             foreach (IPlanProject planProject in projects) {
                 if (planProject.Rejected) { continue; }
-                scoringEngine.RuleWeights = planProject.Preferences.RuleWeights;
+                scoringEngine.RuleWeights = planProject.RuleWeights;
 
                 foreach (IPlanTarget planTarget in planProject.Targets) {
                     if (planTarget.Rejected) { continue; }
@@ -342,7 +342,7 @@ namespace Assistant.NINAPlugin.Plan {
             //    - can this be done during the visibility calc?
             // We'll then be in a position to make a decent choice
 
-            int minimumTimeOnTarget = planTarget.Project.Preferences.MinimumTime;
+            int minimumTimeOnTarget = planTarget.Project.MinimumTime;
             DateTime hardStopTime = hardStartTime.AddMinutes(minimumTimeOnTarget);
             if (hardStartTime > planTarget.EndTime) {
                 hardStartTime = planTarget.EndTime;
@@ -449,8 +449,8 @@ namespace Assistant.NINAPlugin.Plan {
             TwilightLevel twilightLevel = TwilightLevel.Nighttime;
             foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
                 // find most permissive (brightest) twilight over all incomplete plans
-                if (planFilter.IsIncomplete() && planFilter.Preferences.TwilightLevel > twilightLevel) {
-                    twilightLevel = planFilter.Preferences.TwilightLevel;
+                if (planFilter.IsIncomplete() && planFilter.TwilightLevel > twilightLevel) {
+                    twilightLevel = planFilter.TwilightLevel;
                 }
             }
 
@@ -462,7 +462,7 @@ namespace Assistant.NINAPlugin.Plan {
             double moonAge = AstrometryUtils.GetMoonAge(midPointTime);
             double moonSeparation = AstrometryUtils.GetMoonSeparationAngle(observerInfo, midPointTime, planTarget.Coordinates);
             double moonAvoidanceSeparation = AstrometryUtils.GetMoonAvoidanceLorentzianSeparation(moonAge,
-                planFilter.Preferences.MoonAvoidanceSeparation, planFilter.Preferences.MoonAvoidanceWidth);
+                planFilter.MoonAvoidanceSeparation, planFilter.MoonAvoidanceWidth);
             Logger.Debug($"Assistant: moon avoidance {planTarget.Name}/{planFilter.FilterName} midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
 
             return moonSeparation < moonAvoidanceSeparation;

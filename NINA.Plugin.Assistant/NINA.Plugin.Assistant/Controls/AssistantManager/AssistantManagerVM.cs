@@ -46,7 +46,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 switch (item.Type) {
                     case TreeDataType.Project:
                         Project p = (Project)item.Data;
-                        Logger.Info($"INIT PP: {p.ProjectPreferences}");
                         ProjectViewVM = new ProjectViewVM((Project)item.Data);
                         ShowProjectView = Visibility.Visible;
                         break;
@@ -82,15 +81,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
                     List<Project> projects = context.GetAllProjects(profile.Id.ToString());
                     foreach (Project project in projects) {
-                        TreeDataItem projectItem = new TreeDataItem(TreeDataType.Project, project.name, project);
+                        TreeDataItem projectItem = new TreeDataItem(TreeDataType.Project, project.Name, project);
                         profileItem.Items.Add(projectItem);
 
-                        foreach (Target target in project.targets) {
-                            TreeDataItem targetItem = new TreeDataItem(TreeDataType.Target, target.name, target);
+                        foreach (Target target in project.Targets) {
+                            TreeDataItem targetItem = new TreeDataItem(TreeDataType.Target, target.Name, target);
                             projectItem.Items.Add(targetItem);
 
-                            foreach (FilterPlan filterPlan in target.filterplans) {
-                                TreeDataItem filterPlanItem = new TreeDataItem(TreeDataType.FilterPlan, filterPlan.filterName, filterPlan);
+                            foreach (FilterPlan filterPlan in target.FilterPlans) {
+                                TreeDataItem filterPlanItem = new TreeDataItem(TreeDataType.FilterPlan, filterPlan.FilterName, filterPlan);
                                 targetItem.Items.Add(filterPlanItem);
                             }
                         }
