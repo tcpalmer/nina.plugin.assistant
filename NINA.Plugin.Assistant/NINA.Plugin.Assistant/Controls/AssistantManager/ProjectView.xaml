@@ -1,0 +1,146 @@
+﻿<UserControl
+    x:Class="Assistant.NINAPlugin.Controls.AssistantManager.ProjectView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:rules="clr-namespace:Assistant.NINAPlugin.Controls.ValidationRules"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Resources/Converters.xaml" />
+    </UserControl.Resources>
+
+    <Grid>
+        <StackPanel x:Name="ProjectViewPanel" Margin="205,0,0,0">
+            <Label
+                Margin="0,0,0,16"
+                Content="Project"
+                FontSize="18"
+                Foreground="White" />
+            <UniformGrid
+                Width="250"
+                Height="160"
+                Margin="12,0,0,6"
+                HorizontalAlignment="Left"
+                Columns="2"
+                Rows="6">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="White"
+                    Text="Name*"
+                    ToolTip="Name of the Project" />
+                <TextBox MaxHeight="20">
+                    <TextBox.Text>
+                        <Binding Path="ProjectProxy.Project.name" UpdateSourceTrigger="LostFocus">
+                            <Binding.ValidationRules>
+                                <rules:RequiredFieldValidationRule />
+                            </Binding.ValidationRules>
+                        </Binding>
+
+                    </TextBox.Text>
+                </TextBox>
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="White"
+                    Text="Description"
+                    ToolTip="Description of the Project" />
+                <TextBox MaxHeight="20" Text="{Binding ProjectProxy.Project.description}" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="White"
+                    Text="State"
+                    ToolTip="State of the Project" />
+                <ComboBox
+                    MaxHeight="20"
+                    DisplayMemberPath="Value"
+                    ItemsSource="{Binding ProjectStateChoices}"
+                    SelectedValue="{Binding ProjectProxy.Project.State}"
+                    SelectedValuePath="Key" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="White"
+                    Text="Priority"
+                    ToolTip="Priority of the Project" />
+                <ComboBox
+                    MaxHeight="20"
+                    DisplayMemberPath="Value"
+                    ItemsSource="{Binding ProjectPriorityChoices}"
+                    SelectedValue="{Binding ProjectProxy.Project.Priority}"
+                    SelectedValuePath="Key" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="White"
+                    Text="Start Date"
+                    ToolTip="Set the start date of the plan" />
+                <DatePicker Margin="0,0,0,0" SelectedDate="{Binding ProjectProxy.Proxy.StartDate}" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="White"
+                    Text="End Date"
+                    ToolTip="Set the start date of the plan" />
+                <DatePicker Margin="0,0,0,0" SelectedDate="{Binding ProjectProxy.Project.EndDate}" />
+            </UniformGrid>
+            <UniformGrid
+                Width="250"
+                Height="190"
+                Margin="12,20,0,6"
+                HorizontalAlignment="Left"
+                Columns="2"
+                Rows="7">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="White"
+                    Text="Minimum Time"
+                    ToolTip="Minimum acquisition time for each project target" />
+                <ComboBox
+                    MaxHeight="20"
+                    ItemsSource="{Binding MinimumTimeChoices}"
+                    SelectedValue="{Binding ProjectProxy.ProjectPreferences.MinimumTime, Mode=TwoWay, Converter={StaticResource ImagingMinutesConverter}}" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="White"
+                    Text="Minimum Altitude"
+                    ToolTip="Minimum altitude for project targets" />
+                <ComboBox
+                    MaxHeight="20"
+                    ItemsSource="{Binding MinimumAltitudeChoices}"
+                    SelectedValue="{Binding ProjectProxy.ProjectPreferences.MinimumAltitude, Mode=TwoWay, Converter={StaticResource AltitudeChoicesConverter}}" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="White"
+                    Text="Use Custom Horizon"
+                    ToolTip="" />
+                <CheckBox HorizontalAlignment="Left" VerticalAlignment="Center" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="White"
+                    Text="Horizon Offset"
+                    ToolTip="" />
+                <TextBox MaxHeight="20" Text="{Binding ProjectProxy.ProjectPreferences.HorizonOffset}" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="White"
+                    Text="Filter Switch Frequency"
+                    ToolTip="" />
+                <TextBox MaxHeight="20" Text="" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="White"
+                    Text="Dither Every"
+                    ToolTip="" />
+                <TextBox MaxHeight="20" Text="" />
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="White"
+                    Text="Enable Image Grader"
+                    ToolTip="" />
+                <CheckBox HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+            </UniformGrid>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,49 +1,65 @@
-﻿using System.Collections.Generic;
+﻿using NINA.Astrometry;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public class Target {
+    public class Target : ICloneable {
 
-        [Key]
-        public int id { get; set; }
-
-        [Required]
-        public string name { get; set; }
+        [Key] public int Id { get; set; }
 
         [Required]
-        public double ra { get; set; }
+        [StringLength(255, ErrorMessage = "Target name must be less than 256 characters")]
+        public string Name { get; set; }
 
-        [Required]
-        public double dec { get; set; }
+        [Required] public double RA { get; set; }
+        [Required] public double Dec { get; set; }
+        [Required] public int epochCode { get; set; }
+        public double Rotation { get; set; }
+        public double ROI { get; set; }
 
-        public double rotation { get; set; }
-        public double roi { get; set; }
+        [NotMapped]
+        public Epoch Epoch {
+            get => (Epoch)epochCode;
+            set {
+                epochCode = (int)value;
+            }
+        }
 
-        [ForeignKey("project")]
-        public int projectid { get; set; }
-        public Project project { get; set; }
+        public virtual Project Project { get; set; }
 
-        public List<ExposurePlan> exposureplans { get; set; }
+        public List<FilterPlan> FilterPlans { get; set; }
 
         public Target() {
-            rotation = 0;
-            roi = 1;
-            exposureplans = new List<ExposurePlan>();
+            epochCode = (int)Epoch.J2000;
+            Rotation = 0;
+            ROI = 1;
+            FilterPlans = new List<FilterPlan>();
         }
+
+        public object Clone() {
+            return MemberwiseClone();
+            // TODO: filter plans?
+        }
+
+        public override string ToString() {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Name: {Name}");
+            sb.AppendLine($"RA: {RA}");
+            sb.AppendLine($"Dec: {Dec}");
+            sb.AppendLine($"Epoch: {Epoch}");
+            sb.AppendLine($"Rotation: {Rotation}");
+            sb.AppendLine($"ROI: {ROI}");
+
+            return sb.ToString();
+        }
+
+        public Coordinates GetCoordinates() {
+            return new Coordinates(Angle.ByHours(RA), Angle.ByDegree(Dec), Epoch);
+        }
+
     }
-
-    /*
-    internal class TargetConfiguration : EntityTypeConfiguration<Target> {
-
-        public TargetConfiguration() {
-            ToTable("dbo.target");
-            HasKey(x => x.id);
-            Property(x => x.name).HasColumnName("name").IsRequired();
-            Property(x => x.ra).HasColumnName("ra").IsRequired();
-            Property(x => x.dec).HasColumnName("dec").IsRequired();
-        }
-
-    }*/
 }

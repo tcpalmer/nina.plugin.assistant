@@ -8,16 +8,16 @@
     xmlns:ns="clr-namespace:NINA.Core.Locale;assembly=NINA.Core"
     xmlns:oxy="http://oxyplot.org/wpf"
     xmlns:rules="clr-namespace:NINA.Core.Utility.ValidationRules;assembly=NINA.Core"
+    xmlns:uc="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     xmlns:util="clr-namespace:NINA.Core.Utility;assembly=NINA.Core">
 
-    <!--  This data template will be displayed in N.I.N.A. on the options->plugin tab with the datacontext of the TestPlugin instance  -->
-    <!--  In order for this datatemplate to be picked correctly, the key has to follow the naming convention of <IPlugin.Name>_Options -->
-    <!--  Furthermore the Resource Dictionary has to be exported via code behind export attributes  -->
-
-    <DataTemplate x:Key="Assistant_Options">
+    <DataTemplate x:Key="Sequence Assistant_Options">
         <StackPanel DataContext="{Binding}" Orientation="Vertical">
-			<TextBlock VerticalAlignment="Center" Text="Placeholder" />
+            <TextBlock
+                Margin="0,0,0,10"
+                VerticalAlignment="Center"
+                Text="Manage the Assistant database" />
+            <uc:AssistantManagerView DataContext="{Binding AssistantManagerVM}" />
         </StackPanel>
-
     </DataTemplate>
 </ResourceDictionary>

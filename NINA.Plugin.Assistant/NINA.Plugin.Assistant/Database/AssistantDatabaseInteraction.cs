@@ -13,7 +13,7 @@ namespace Assistant.NINAPlugin.Database {
         private string connectionString;
 
         public AssistantDatabaseInteraction()
-            : this(string.Format(@"Data Source={0};", Environment.ExpandEnvironmentVariables(@"%localappdata%\NINA\AssistantPlugin\assistantdb.sqlite"))) {
+            : this(string.Format(@"Data Source={0};", Environment.ExpandEnvironmentVariables($@"{AssistantPlugin.PLUGIN_HOME}\assistantdb.sqlite"))) {
         }
 
         public AssistantDatabaseInteraction(string connectionString) {
