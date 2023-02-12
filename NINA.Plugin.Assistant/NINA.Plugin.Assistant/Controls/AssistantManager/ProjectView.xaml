@@ -16,14 +16,14 @@
     </UserControl.Resources>
 
     <Grid>
-        <StackPanel Margin="205,0,0,0">
+        <StackPanel Margin="280,0,0,0">
             <Label
                 Margin="0,0,0,16"
                 Content="Project"
                 FontSize="18"
-                Foreground="White" />
+                FontWeight="Bold" />
             <UniformGrid
-                Width="250"
+                Width="280"
                 Height="160"
                 Margin="12,0,0,6"
                 HorizontalAlignment="Left"
@@ -32,8 +32,8 @@
 
                 <TextBlock
                     VerticalAlignment="Center"
-                    Foreground="White"
-                    Text="Name*"
+                    FontWeight="Bold"
+                    Text="Name"
                     ToolTip="Name of the Project" />
                 <TextBox MaxHeight="20" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                     <TextBox.Text>
@@ -42,7 +42,6 @@
                                 <rules:RequiredFieldValidationRule />
                             </Binding.ValidationRules>
                         </Binding>
-
                     </TextBox.Text>
                 </TextBox>
                 <TextBlock
@@ -53,7 +52,7 @@
 
                 <TextBlock
                     VerticalAlignment="Center"
-                    Foreground="White"
+                    FontWeight="Bold"
                     Text="Description"
                     ToolTip="Description of the Project" />
                 <TextBox
@@ -68,7 +67,7 @@
 
                 <TextBlock
                     VerticalAlignment="Center"
-                    Foreground="White"
+                    FontWeight="Bold"
                     Text="State"
                     ToolTip="State of the Project" />
                 <ComboBox
@@ -84,7 +83,7 @@
 
                 <TextBlock
                     VerticalAlignment="Center"
-                    Foreground="White"
+                    FontWeight="Bold"
                     Text="Priority"
                     ToolTip="Priority of the Project" />
                 <ComboBox
@@ -100,13 +99,26 @@
 
                 <TextBlock
                     VerticalAlignment="Center"
-                    Foreground="White"
+                    FontWeight="Bold"
                     Text="Start Date"
-                    ToolTip="Set the start date of the plan" />
-                <DatePicker
-                    Margin="0,0,0,0"
-                    SelectedDate="{Binding ProjectProxy.Project.StartDate}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+                    ToolTip="Set the start date of the project" />
+                <DatePicker Margin="0,0,0,0" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                    <DatePicker.Resources>
+                        <local:BindingHelper x:Key="helper" Data="{Binding}" />
+                    </DatePicker.Resources>
+                    <DatePicker.SelectedDate>
+                        <Binding Path="ProjectProxy.Project.StartDate">
+                            <Binding.ValidationRules>
+                                <rules:DateRangeRule>
+                                    <rules:DateRangeRule.ValidRange>
+                                        <rules:DateCheck CheckBefore="True" CheckDate="{Binding Data.ProjectProxy.Project.EndDate, Source={StaticResource helper}}" />
+                                    </rules:DateRangeRule.ValidRange>
+                                </rules:DateRangeRule>
+
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </DatePicker.SelectedDate>
+                </DatePicker>
                 <TextBlock
                     MaxHeight="20"
                     Margin="3,3,0,0"
@@ -115,13 +127,26 @@
 
                 <TextBlock
                     VerticalAlignment="Center"
-                    Foreground="White"
+                    FontWeight="Bold"
                     Text="End Date"
-                    ToolTip="Set the start date of the plan" />
-                <DatePicker
-                    Margin="0,0,0,0"
-                    SelectedDate="{Binding ProjectProxy.Project.EndDate}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+                    ToolTip="Set the start date of the project" />
+                <DatePicker Margin="0,0,0,0" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                    <DatePicker.Resources>
+                        <local:BindingHelper x:Key="helper" Data="{Binding}" />
+                    </DatePicker.Resources>
+                    <DatePicker.SelectedDate>
+                        <Binding Path="ProjectProxy.Project.EndDate">
+                            <Binding.ValidationRules>
+                                <rules:DateRangeRule>
+                                    <rules:DateRangeRule.ValidRange>
+                                        <rules:DateCheck CheckBefore="False" CheckDate="{Binding Data.ProjectProxy.Project.StartDate, Source={StaticResource helper}}" />
+                                    </rules:DateRangeRule.ValidRange>
+                                </rules:DateRangeRule>
+
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </DatePicker.SelectedDate>
+                </DatePicker>
                 <TextBlock
                     MaxHeight="20"
                     Margin="3,3,0,0"
@@ -130,7 +155,7 @@
 
             </UniformGrid>
             <UniformGrid
-                Width="250"
+                Width="280"
                 Height="190"
                 Margin="12,20,0,6"
                 HorizontalAlignment="Left"
@@ -138,7 +163,7 @@
                 Rows="7">
                 <TextBlock
                     VerticalAlignment="Center"
-                    Foreground="White"
+                    FontWeight="Bold"
                     Text="Minimum Time"
                     ToolTip="Minimum acquisition time for each project target" />
                 <ComboBox
@@ -154,7 +179,7 @@
 
                 <TextBlock
                     VerticalAlignment="Center"
-                    Foreground="White"
+                    FontWeight="Bold"
                     Text="Minimum Altitude"
                     ToolTip="Minimum altitude for project targets" />
                 <ComboBox
@@ -170,7 +195,7 @@
 
                 <TextBlock
                     VerticalAlignment="Center"
-                    Foreground="White"
+                    FontWeight="Bold"
                     Text="Use Custom Horizon"
                     ToolTip="" />
                 <CheckBox
@@ -186,13 +211,23 @@
 
                 <TextBlock
                     VerticalAlignment="Center"
-                    Foreground="White"
+                    FontWeight="Bold"
                     Text="Horizon Offset"
                     ToolTip="" />
-                <TextBox
-                    MaxHeight="20"
-                    Text="{Binding ProjectProxy.Project.HorizonOffset}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+                <TextBox MaxHeight="20" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                    <TextBox.Text>
+                        <Binding Path="ProjectProxy.Project.HorizonOffset" UpdateSourceTrigger="LostFocus">
+                            <Binding.ValidationRules>
+                                <rules:DoubleRangeRule>
+                                    <rules:DoubleRangeRule.ValidRange>
+                                        <rules:DoubleRangeChecker Maximum="90" Minimum="0" />
+                                    </rules:DoubleRangeRule.ValidRange>
+                                </rules:DoubleRangeRule>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+
+                </TextBox>
                 <TextBlock
                     MaxHeight="20"
                     Margin="3,3,0,0"
@@ -201,13 +236,22 @@
 
                 <TextBlock
                     VerticalAlignment="Center"
-                    Foreground="White"
+                    FontWeight="Bold"
                     Text="Filter Switch Frequency"
                     ToolTip="" />
-                <TextBox
-                    MaxHeight="20"
-                    Text="{Binding ProjectProxy.Project.FilterSwitchFrequency}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+                <TextBox MaxHeight="20" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                    <TextBox.Text>
+                        <Binding Path="ProjectProxy.Project.FilterSwitchFrequency" UpdateSourceTrigger="LostFocus">
+                            <Binding.ValidationRules>
+                                <rules:IntRangeRule>
+                                    <rules:IntRangeRule.ValidRange>
+                                        <rules:IntRangeChecker Maximum="999" Minimum="0" />
+                                    </rules:IntRangeRule.ValidRange>
+                                </rules:IntRangeRule>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
                 <TextBlock
                     MaxHeight="20"
                     Margin="3,3,0,0"
@@ -216,13 +260,22 @@
 
                 <TextBlock
                     VerticalAlignment="Center"
-                    Foreground="White"
+                    FontWeight="Bold"
                     Text="Dither Every"
                     ToolTip="" />
-                <TextBox
-                    MaxHeight="20"
-                    Text="{Binding ProjectProxy.Project.DitherEvery}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+                <TextBox MaxHeight="20" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                    <TextBox.Text>
+                        <Binding Path="ProjectProxy.Project.DitherEvery" UpdateSourceTrigger="LostFocus">
+                            <Binding.ValidationRules>
+                                <rules:IntRangeRule>
+                                    <rules:IntRangeRule.ValidRange>
+                                        <rules:IntRangeChecker Maximum="999" Minimum="0" />
+                                    </rules:IntRangeRule.ValidRange>
+                                </rules:IntRangeRule>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
                 <TextBlock
                     MaxHeight="20"
                     Margin="3,3,0,0"
@@ -231,7 +284,7 @@
 
                 <TextBlock
                     VerticalAlignment="Center"
-                    Foreground="White"
+                    FontWeight="Bold"
                     Text="Enable Image Grader"
                     ToolTip="" />
                 <CheckBox
@@ -244,13 +297,15 @@
                     Margin="3,3,0,0"
                     Text="{Binding ProjectProxy.Project.EnableGrader}"
                     Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
             </UniformGrid>
-            <UniformGrid>
+
+            <UniformGrid
+                Width="140"
+                Margin="20,26,0,0"
+                HorizontalAlignment="Left">
                 <Button
                     Width="50"
-                    Height="25"
-                    Margin="0,0,0,0"
+                    Height="34"
                     VerticalAlignment="Center"
                     HorizontalContentAlignment="Right"
                     Command="{Binding EditCommand}"
@@ -259,19 +314,17 @@
                     Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
                 <Button
                     Width="50"
-                    Height="25"
-                    Margin="0,0,0,0"
+                    Height="34"
                     VerticalAlignment="Center"
                     HorizontalContentAlignment="Right"
                     Command="{Binding SaveCommand}"
-                    IsEnabled="{Binding ProjectChanged}"
                     Content="Save"
+                    IsEnabled="{Binding ProjectChanged}"
                     Style="{StaticResource TertiaryBackgroundButton}"
                     Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
                 <Button
-                    Width="50"
-                    Height="25"
-                    Margin="0,0,0,0"
+                    Width="56"
+                    Height="34"
                     VerticalAlignment="Center"
                     HorizontalContentAlignment="Right"
                     Command="{Binding CancelCommand}"

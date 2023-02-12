@@ -297,6 +297,7 @@
       <DependentUpon>AssistantManagerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\AssistantManager\AssistantManagerVM.cs" />
+    <Compile Include="Controls\AssistantManager\BindingHelper.cs" />
     <Compile Include="Controls\AssistantManager\EnumBindingSourceExtension.cs" />
     <Compile Include="Controls\AssistantManager\TemporaryProxy.cs" />
     <Compile Include="Controls\AssistantManager\ProjectView.xaml.cs">
@@ -307,7 +308,7 @@
     <Compile Include="Controls\Converters\DegreesDisplayConverter.cs" />
     <Compile Include="Controls\Converters\ImagingMinutesConverter.cs" />
     <Compile Include="Controls\Converters\MinutesToHMConverter.cs" />
-    <Compile Include="Controls\ValidationRules\RequiredFieldValidationRule.cs" />
+    <Compile Include="Controls\ValidationRules\ValidationRules.cs" />
     <Compile Include="Database\AssistantDatabaseInteraction.cs" />
     <Compile Include="Database\AssistantDbContext.cs" />
     <Compile Include="Database\AssistantPlanLoader.cs" />

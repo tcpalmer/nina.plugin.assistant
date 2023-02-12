@@ -1,8 +1,10 @@
-﻿using System;
+﻿using NINA.Core.Utility;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity.Migrations;
 using System.Data.Entity.ModelConfiguration;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -234,6 +236,23 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public event PropertyChangedEventHandler PropertyChanged;
         protected void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public bool Save() {
+            // TODO: should this really live elsewhere?
+            Logger.Debug($"Assistant: saving Project Id={Id}");
+            using (var context = new AssistantDatabaseInteraction().GetContext()) {
+                try {
+                    // TODO: can this be atomic with rollback?
+                    context.ProjectSet.AddOrUpdate(this);
+                    context.SaveChanges();
+                    return true;
+                }
+                catch (Exception e) {
+                    Logger.Error($"error persisting Project: {e.Message} {e.StackTrace}");
+                    return false;
+                }
+            }
         }
 
         public object Clone() {

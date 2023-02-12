@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using NINA.Core.Utility;
+using NINA.Core.Utility.Notification;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;
@@ -14,6 +15,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
     public class AssistantManagerVM : BaseVM {
 
         private AssistantDatabaseInteraction database;
+        private TreeDataItem activeTreeDataItem;
+        private bool isEditMode = false;
 
         public AssistantManagerVM(IProfileService profileService) : base(profileService) {
             database = new AssistantDatabaseInteraction();
@@ -45,10 +48,12 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             if (item != null) {
                 switch (item.Type) {
                     case TreeDataType.Project:
-                        Project p = (Project)item.Data;
-                        ProjectViewVM = new ProjectViewVM((Project)item.Data);
+                        activeTreeDataItem = item;
+                        Project project = (Project)item.Data;
+                        ProjectViewVM = new ProjectViewVM(this, project);
                         ShowProjectView = Visibility.Visible;
                         break;
+
                     default:
                         ShowProjectView = Visibility.Hidden;
                         break;
@@ -99,6 +104,20 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
             return rootList;
         }
+
+        public void SetEditMode(bool editMode) {
+            isEditMode = editMode;
+        }
+
+        public void SaveProject(Project project) {
+            // TODO: move Save to dbContext
+            if (project.Save()) {
+                activeTreeDataItem.Data = project;
+            }
+            else {
+                Notification.ShowError("Failed to save Assistant Project (see log for details)");
+            }
+        }
     }
 
     public enum TreeDataType {
@@ -108,7 +127,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
     public class TreeDataItem : TreeViewItem {
 
         public TreeDataType Type { get; }
-        public object Data { get; }
+        public object Data { get; set; }
 
         public TreeDataItem(TreeDataType type, string name) : this(type, name, null) { }
 

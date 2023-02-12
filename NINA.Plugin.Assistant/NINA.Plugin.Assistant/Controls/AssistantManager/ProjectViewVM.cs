@@ -9,6 +9,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class ProjectViewVM : BaseINPC {
 
+        private AssistantManagerVM managerVM;
         private ProjectProxy projectProxy;
 
         public ProjectProxy ProjectProxy {
@@ -19,7 +20,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        public ProjectViewVM(Project project) {
+        public ProjectViewVM(AssistantManagerVM managerVM, Project project) {
+            this.managerVM = managerVM;
             ProjectProxy = new ProjectProxy(project);
 
             InitializeCombos();
@@ -89,26 +91,29 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public ICommand EditCommand { get; private set; }
+        public ICommand SaveCommand { get; private set; }
+        public ICommand CancelCommand { get; private set; }
+
         private void Edit(object obj) {
             ProjectProxy.PropertyChanged += ProjectProxy_PropertyChanged;
+            managerVM.SetEditMode(true);
             ShowProjectEditView = true;
             ProjectChanged = false;
         }
 
-        public ICommand SaveCommand { get; private set; }
         private void Save(object obj) {
-            Logger.Info("SAVE ...");
-            // TODO: execute the save, ProjectProxy.Proxy should be the edited version
+            managerVM.SaveProject(ProjectProxy.Proxy);
+            ProjectProxy.OnSave();
             ProjectProxy.PropertyChanged -= ProjectProxy_PropertyChanged;
             ShowProjectEditView = false;
+            managerVM.SetEditMode(false);
         }
 
-        public ICommand CancelCommand { get; private set; }
         private void Cancel(object obj) {
-            Logger.Info("CANCEL ...");
-            ProjectProxy.RestoreOnEditCancel();
+            ProjectProxy.OnCancel();
             ProjectProxy.PropertyChanged -= ProjectProxy_PropertyChanged;
             ShowProjectEditView = false;
+            managerVM.SetEditMode(false);
         }
 
     }

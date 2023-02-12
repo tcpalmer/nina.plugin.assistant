@@ -11,8 +11,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private T proxy;
 
         public TemporaryProxy(T original) {
-            this.original = original;
-            this.Proxy = (T)original.Clone();
+            Original = original;
+            Proxy = (T)original.Clone();
             Proxy.PropertyChanged += ProxyPropertyChanged;
         }
 
@@ -35,18 +35,17 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        public void RestoreOnEditCancel() {
+        public void OnCancel() {
             Proxy.PropertyChanged -= ProxyPropertyChanged;
-            Proxy = (T)original.Clone();
+            Proxy = (T)Original.Clone();
             Proxy.PropertyChanged += ProxyPropertyChanged;
         }
 
-        public T GetOriginalObject() {
-            return original;
-        }
-
-        public T GetEditedObject() {
-            return Proxy;
+        public void OnSave() {
+            Proxy.PropertyChanged -= ProxyPropertyChanged;
+            Original = Proxy;
+            Proxy = (T)Original.Clone();
+            Proxy.PropertyChanged += ProxyPropertyChanged;
         }
     }
 
@@ -59,7 +58,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             get => Proxy;
             set {
                 Proxy = value;
-                //RaisePropertyChanged(nameof(Proxy));
             }
         }
     }
