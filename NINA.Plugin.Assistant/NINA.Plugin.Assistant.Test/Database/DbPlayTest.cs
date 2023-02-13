@@ -43,8 +43,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     Target t1 = new Target();
                     t1.Name = "M 42";
-                    t1.RA = AstroUtil.HMSToDegrees("5:35:17");
-                    t1.Dec = AstroUtil.DMSToDegrees("-5:23:28");
+                    t1.ra = AstroUtil.HMSToDegrees("5:35:17");
+                    t1.dec = AstroUtil.DMSToDegrees("-5:23:28");
                     p1.Targets.Add(t1);
 
                     t1.FilterPlans.Add(new FilterPlan { ProfileId = profileId, FilterName = "Ha", Desired = 5 });
@@ -69,8 +69,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     Target t2 = new Target();
                     t2.Name = "Sh2 240";
-                    t2.RA = AstroUtil.HMSToDegrees("5:41:6");
-                    t2.Dec = AstroUtil.DMSToDegrees("28:5:0");
+                    t2.ra = AstroUtil.HMSToDegrees("5:41:6");
+                    t2.dec = AstroUtil.DMSToDegrees("28:5:0");
                     p2.Targets.Add(t2);
 
                     t2.FilterPlans.Add(new FilterPlan { ProfileId = profileId, FilterName = "R", Desired = 5 });
@@ -126,8 +126,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     Target t = new Target();
                     t.Name = "M 42: Frame 1";
-                    t.RA = 4.56;
-                    t.Dec = -10.23;
+                    t.ra = 4.56;
+                    t.dec = -10.23;
                     p.Targets.Add(t);
 
                     FilterPlan ep1 = new FilterPlan();
@@ -140,8 +140,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     t = new Target();
                     t.Name = "M 42: Frame 2";
-                    t.RA = 4.78;
-                    t.Dec = -10.54;
+                    t.ra = 4.78;
+                    t.dec = -10.54;
                     p.Targets.Add(t);
 
                     ep1 = new FilterPlan();

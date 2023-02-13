@@ -42,6 +42,24 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        private Visibility showTargetView = Visibility.Hidden;
+        public Visibility ShowTargetView {
+            get => showTargetView;
+            set {
+                showTargetView = value;
+                RaisePropertyChanged(nameof(ShowTargetView));
+            }
+        }
+
+        private TargetViewVM targetViewVM;
+        public TargetViewVM TargetViewVM {
+            get => targetViewVM;
+            set {
+                targetViewVM = value;
+                RaisePropertyChanged(nameof(TargetViewVM));
+            }
+        }
+
         public ICommand SelectedItemChangedCommand { get; private set; }
         private void SelectedItemChanged(object obj) {
             TreeDataItem item = obj as TreeDataItem;
@@ -51,11 +69,22 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         activeTreeDataItem = item;
                         Project project = (Project)item.Data;
                         ProjectViewVM = new ProjectViewVM(this, project);
+                        ShowTargetView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Visible;
                         break;
 
+                    case TreeDataType.Target:
+                        activeTreeDataItem = item;
+                        Target target = (Target)item.Data;
+                        TargetViewVM = new TargetViewVM(this, target);
+                        ShowProjectView = Visibility.Collapsed;
+                        ShowTargetView = Visibility.Visible;
+                        break;
+
                     default:
-                        ShowProjectView = Visibility.Hidden;
+                        activeTreeDataItem = null;
+                        ShowProjectView = Visibility.Collapsed;
+                        ShowTargetView = Visibility.Collapsed;
                         break;
                 }
             }
@@ -70,6 +99,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             set {
                 rootProjectsList = value;
                 RaisePropertyChanged(nameof(RootProjectsList));
+            }
+        }
+
+        bool treeViewEabled = true;
+        public bool TreeViewEabled {
+            get => treeViewEabled;
+            set {
+                treeViewEabled = value;
+                RaisePropertyChanged(nameof(TreeViewEabled));
             }
         }
 
@@ -107,15 +145,28 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         public void SetEditMode(bool editMode) {
             isEditMode = editMode;
+            TreeViewEabled = !editMode;
         }
 
         public void SaveProject(Project project) {
             // TODO: move Save to dbContext
             if (project.Save()) {
                 activeTreeDataItem.Data = project;
+                activeTreeDataItem.Header = project.Name;
             }
             else {
                 Notification.ShowError("Failed to save Assistant Project (see log for details)");
+            }
+        }
+
+        public void SaveTarget(Target target) {
+            // TODO: move Save to dbContext
+            if (target.Save()) {
+                activeTreeDataItem.Data = target;
+                activeTreeDataItem.Header = target.Name;
+            }
+            else {
+                Notification.ShowError("Failed to save Assistant Target (see log for details)");
             }
         }
     }

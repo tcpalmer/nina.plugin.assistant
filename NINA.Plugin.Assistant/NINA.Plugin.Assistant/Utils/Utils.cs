@@ -41,6 +41,41 @@ namespace Assistant.NINAPlugin.Util {
             long span = (long)endTime.Subtract(startTime).TotalSeconds;
             return startTime.AddSeconds(span / 2);
         }
+
+        // Cobbled from NINA (NINA private)
+        public static string GetRAString(double raDegrees) {
+            string pattern = "{0:0}h {1:0}m {2:0}s";
+            double hours = AstroUtil.DegreesToHours(raDegrees);
+
+            bool negative = false;
+            if (hours < 0) {
+                negative = true;
+                hours = -hours;
+            }
+            if (negative) {
+                pattern = "-" + pattern;
+            }
+
+            var degree = Math.Floor(hours);
+            var arcmin = Math.Floor(AstroUtil.DegreeToArcmin(hours - degree));
+            var arcminDeg = AstroUtil.ArcminToDegree(arcmin);
+
+            var arcsec = Math.Round(AstroUtil.DegreeToArcsec(hours - degree - arcminDeg), 0);
+            if (arcsec == 60) {
+                /* If arcsec got rounded to 60 add to arcmin instead */
+                arcsec = 0;
+                arcmin += 1;
+
+                if (arcmin == 60) {
+                    /* If arcmin got rounded to 60 add to degree instead */
+                    arcmin = 0;
+                    degree += 1;
+                }
+            }
+
+            return string.Format(pattern, degree, arcmin, arcsec);
+        }
+
     }
 
 }

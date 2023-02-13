@@ -61,4 +61,17 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
     }
+
+    public class TargetProxy : TemporaryProxy<Target> {
+
+        public TargetProxy(Target target) : base(target) {
+        }
+
+        public Target Target {
+            get => Proxy;
+            set {
+                Proxy = value;
+            }
+        }
+    }
 }

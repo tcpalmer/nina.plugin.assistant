@@ -299,6 +299,10 @@
     <Compile Include="Controls\AssistantManager\AssistantManagerVM.cs" />
     <Compile Include="Controls\AssistantManager\BindingHelper.cs" />
     <Compile Include="Controls\AssistantManager\EnumBindingSourceExtension.cs" />
+    <Compile Include="Controls\AssistantManager\TargetView.xaml.cs">
+      <DependentUpon>TargetView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AssistantManager\TargetViewVM.cs" />
     <Compile Include="Controls\AssistantManager\TemporaryProxy.cs" />
     <Compile Include="Controls\AssistantManager\ProjectView.xaml.cs">
       <DependentUpon>ProjectView.xaml</DependentUpon>
@@ -369,6 +373,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\AssistantManager\TargetView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\Resources\Converters.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -376,6 +384,11 @@
     <Page Include="Options.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Properties\DesignTimeResources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+      <ContainsDesignTimeResources>true</ContainsDesignTimeResources>
     </Page>
     <Page Include="Sequencer\AssistantInstructionTemplate.xaml">
       <SubType>Designer</SubType>

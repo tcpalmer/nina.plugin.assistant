@@ -240,7 +240,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public bool Save() {
             // TODO: should this really live elsewhere?
-            Logger.Debug($"Assistant: saving Project Id={Id}");
+            Logger.Debug($"Assistant: saving Project Id={Id} Name={Name}");
             using (var context = new AssistantDatabaseInteraction().GetContext()) {
                 try {
                     // TODO: can this be atomic with rollback?

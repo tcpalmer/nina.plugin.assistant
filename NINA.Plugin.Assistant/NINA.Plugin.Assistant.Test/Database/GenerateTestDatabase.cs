@@ -49,8 +49,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     Target t1 = new Target();
                     t1.Name = "M42";
-                    t1.RA = TestUtil.M42.RADegrees;
-                    t1.Dec = TestUtil.M42.Dec;
+                    t1.ra = TestUtil.M42.RADegrees;
+                    t1.dec = TestUtil.M42.Dec;
                     p1.Targets.Add(t1);
 
                     FilterPlan fp = new FilterPlan(profileId, "Ha");
@@ -93,8 +93,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     Target t2 = new Target();
                     t2.Name = "IC1805";
-                    t2.RA = TestUtil.IC1805.RADegrees;
-                    t2.Dec = TestUtil.IC1805.Dec;
+                    t2.ra = TestUtil.IC1805.RADegrees;
+                    t2.dec = TestUtil.IC1805.Dec;
                     p2.Targets.Add(t2);
 
                     fp = new FilterPlan(profileId, "Ha");
@@ -175,8 +175,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     Target t1 = new Target();
                     t1.Name = "C00";
-                    t1.RA = TestUtil.C00.RA;
-                    t1.Dec = TestUtil.C00.Dec;
+                    t1.ra = TestUtil.C00.RA;
+                    t1.dec = TestUtil.C00.Dec;
                     p1.Targets.Add(t1);
 
                     t1.FilterPlans.Add(GetFilterPlan(profileId, "Lum", 5, 0, 60));
@@ -196,8 +196,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     Target t2 = new Target();
                     t2.Name = "C90";
-                    t2.RA = TestUtil.C90.RA;
-                    t2.Dec = TestUtil.C90.Dec;
+                    t2.ra = TestUtil.C90.RA;
+                    t2.dec = TestUtil.C90.Dec;
                     p2.Targets.Add(t2);
 
                     t2.FilterPlans.Add(GetFilterPlan(profileId, "Ha", 5, 0, 90));
@@ -251,8 +251,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     Target t1 = new Target();
                     t1.Name = "C00";
-                    t1.RA = TestUtil.C00.RA;
-                    t1.Dec = TestUtil.C00.Dec;
+                    t1.ra = TestUtil.C00.RA;
+                    t1.dec = TestUtil.C00.Dec;
                     p1.Targets.Add(t1);
 
                     t1.FilterPlans.Add(GetFilterPlan(profileId, "L", 5, 0, 60));

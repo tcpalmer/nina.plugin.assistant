@@ -5,6 +5,7 @@ using System;
 
 namespace NINA.Plugin.Assistant.Test.Util {
 
+    [TestFixture]
     public class UtilsTest {
 
         [Test]
@@ -32,6 +33,15 @@ namespace NINA.Plugin.Assistant.Test.Util {
             DateTime start = DateTime.Now;
             DateTime mid = Utils.GetMidpointTime(start, start.AddHours(1));
             mid.Should().Be(start.AddMinutes(30));
+        }
+
+        [Test]
+        [TestCase(0, "0h 0m 0s")]
+        [TestCase(75, "5h 0m 0s")]
+        [TestCase(90.25, "6h 1m 0s")]
+        [TestCase(345.25, "23h 1m 0s")]
+        public void TestGetRAString(double raDegrees, string expected) {
+            Utils.GetRAString(raDegrees).Should().Be(expected);
         }
     }
 

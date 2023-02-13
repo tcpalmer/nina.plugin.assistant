@@ -15,324 +15,321 @@
         <ResourceDictionary Source="../Resources/Converters.xaml" />
     </UserControl.Resources>
 
-    <Grid>
-        <StackPanel Margin="280,0,0,0">
-            <Label
-                Margin="0,0,0,16"
-                Content="Project"
-                FontSize="18"
-                FontWeight="Bold" />
-            <UniformGrid
-                Width="280"
-                Height="160"
-                Margin="12,0,0,6"
+    <StackPanel Margin="20,20,0,0" Orientation="Vertical" Width="600">
+        <Label
+            Margin="0,0,0,16"
+            Content="Project"
+            FontSize="18"
+            FontWeight="Bold" />
+        <UniformGrid
+            Width="280"
+            Height="160"
+            Margin="12,0,0,6"
+            HorizontalAlignment="Left"
+            Columns="2"
+            Rows="6">
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Name"
+                ToolTip="Name of the Project" />
+            <TextBox MaxHeight="20" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                <TextBox.Text>
+                    <Binding Path="ProjectProxy.Project.Name" UpdateSourceTrigger="LostFocus">
+                        <Binding.ValidationRules>
+                            <rules:RequiredFieldValidationRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ProjectProxy.Project.Name}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Description"
+                ToolTip="Description of the Project" />
+            <TextBox
+                MaxHeight="20"
+                Text="{Binding ProjectProxy.Project.Description}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ProjectProxy.Project.Description}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="State"
+                ToolTip="State of the Project" />
+            <ComboBox
+                MaxHeight="20"
+                ItemsSource="{Binding Source={local:EnumBindingSource {x:Type schema:ProjectState}}}"
+                SelectedValue="{Binding ProjectProxy.Project.State}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ProjectProxy.Project.State}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Priority"
+                ToolTip="Priority of the Project" />
+            <ComboBox
+                MaxHeight="20"
+                ItemsSource="{Binding Source={local:EnumBindingSource {x:Type schema:ProjectPriority}}}"
+                SelectedValue="{Binding ProjectProxy.Project.Priority}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ProjectProxy.Project.Priority}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Start Date"
+                ToolTip="Set the start date of the project" />
+            <DatePicker Margin="0,0,0,0" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                <DatePicker.Resources>
+                    <local:BindingHelper x:Key="helper" Data="{Binding}" />
+                </DatePicker.Resources>
+                <DatePicker.SelectedDate>
+                    <Binding Path="ProjectProxy.Project.StartDate">
+                        <Binding.ValidationRules>
+                            <rules:DateRangeRule>
+                                <rules:DateRangeRule.ValidRange>
+                                    <rules:DateCheck CheckBefore="True" CheckDate="{Binding Data.ProjectProxy.Project.EndDate, Source={StaticResource helper}}" />
+                                </rules:DateRangeRule.ValidRange>
+                            </rules:DateRangeRule>
+
+                        </Binding.ValidationRules>
+                    </Binding>
+                </DatePicker.SelectedDate>
+            </DatePicker>
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ProjectProxy.Project.StartDate}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="End Date"
+                ToolTip="Set the start date of the project" />
+            <DatePicker Margin="0,0,0,0" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                <DatePicker.Resources>
+                    <local:BindingHelper x:Key="helper" Data="{Binding}" />
+                </DatePicker.Resources>
+                <DatePicker.SelectedDate>
+                    <Binding Path="ProjectProxy.Project.EndDate">
+                        <Binding.ValidationRules>
+                            <rules:DateRangeRule>
+                                <rules:DateRangeRule.ValidRange>
+                                    <rules:DateCheck CheckBefore="False" CheckDate="{Binding Data.ProjectProxy.Project.StartDate, Source={StaticResource helper}}" />
+                                </rules:DateRangeRule.ValidRange>
+                            </rules:DateRangeRule>
+
+                        </Binding.ValidationRules>
+                    </Binding>
+                </DatePicker.SelectedDate>
+            </DatePicker>
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ProjectProxy.Project.EndDate}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+        </UniformGrid>
+        <UniformGrid
+            Width="280"
+            Height="190"
+            Margin="12,20,0,6"
+            HorizontalAlignment="Left"
+            Columns="2"
+            Rows="7">
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Minimum Time"
+                ToolTip="Minimum acquisition time for each project target" />
+            <ComboBox
+                MaxHeight="20"
+                ItemsSource="{Binding MinimumTimeChoices}"
+                SelectedValue="{Binding ProjectProxy.Project.MinimumTime, Mode=TwoWay, Converter={StaticResource ImagingMinutesConverter}}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ProjectProxy.Project.MinimumTime, Converter={StaticResource MinutesToHMConverter}}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Minimum Altitude"
+                ToolTip="Minimum altitude for project targets" />
+            <ComboBox
+                MaxHeight="20"
+                ItemsSource="{Binding MinimumAltitudeChoices}"
+                SelectedValue="{Binding ProjectProxy.Project.MinimumAltitude, Mode=TwoWay, Converter={StaticResource AltitudeChoicesConverter}}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ProjectProxy.Project.MinimumAltitude, Converter={StaticResource DegreesDisplayConverter}}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Use Custom Horizon"
+                ToolTip="" />
+            <CheckBox
                 HorizontalAlignment="Left"
-                Columns="2"
-                Rows="6">
+                VerticalAlignment="Center"
+                IsChecked="{Binding Path=ProjectProxy.Project.UseCustomHorizon, Mode=TwoWay}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ProjectProxy.Project.UseCustomHorizon}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Name"
-                    ToolTip="Name of the Project" />
-                <TextBox MaxHeight="20" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
-                    <TextBox.Text>
-                        <Binding Path="ProjectProxy.Project.Name" UpdateSourceTrigger="LostFocus">
-                            <Binding.ValidationRules>
-                                <rules:RequiredFieldValidationRule />
-                            </Binding.ValidationRules>
-                        </Binding>
-                    </TextBox.Text>
-                </TextBox>
-                <TextBlock
-                    MaxHeight="20"
-                    Margin="3,3,0,0"
-                    Text="{Binding ProjectProxy.Project.Name}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Horizon Offset"
+                ToolTip="" />
+            <TextBox MaxHeight="20" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                <TextBox.Text>
+                    <Binding Path="ProjectProxy.Project.HorizonOffset" UpdateSourceTrigger="LostFocus">
+                        <Binding.ValidationRules>
+                            <rules:DoubleRangeRule>
+                                <rules:DoubleRangeRule.ValidRange>
+                                    <rules:DoubleRangeChecker Maximum="90" Minimum="0" />
+                                </rules:DoubleRangeRule.ValidRange>
+                            </rules:DoubleRangeRule>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ProjectProxy.Project.HorizonOffset, Converter={StaticResource DegreesDisplayConverter}}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Description"
-                    ToolTip="Description of the Project" />
-                <TextBox
-                    MaxHeight="20"
-                    Text="{Binding ProjectProxy.Project.Description}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
-                <TextBlock
-                    MaxHeight="20"
-                    Margin="3,3,0,0"
-                    Text="{Binding ProjectProxy.Project.Description}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Filter Switch Frequency"
+                ToolTip="" />
+            <TextBox MaxHeight="20" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                <TextBox.Text>
+                    <Binding Path="ProjectProxy.Project.FilterSwitchFrequency" UpdateSourceTrigger="LostFocus">
+                        <Binding.ValidationRules>
+                            <rules:IntRangeRule>
+                                <rules:IntRangeRule.ValidRange>
+                                    <rules:IntRangeChecker Maximum="999" Minimum="0" />
+                                </rules:IntRangeRule.ValidRange>
+                            </rules:IntRangeRule>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ProjectProxy.Project.FilterSwitchFrequency}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="State"
-                    ToolTip="State of the Project" />
-                <ComboBox
-                    MaxHeight="20"
-                    ItemsSource="{Binding Source={local:EnumBindingSource {x:Type schema:ProjectState}}}"
-                    SelectedValue="{Binding ProjectProxy.Project.State}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
-                <TextBlock
-                    MaxHeight="20"
-                    Margin="3,3,0,0"
-                    Text="{Binding ProjectProxy.Project.State}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Dither Every"
+                ToolTip="" />
+            <TextBox MaxHeight="20" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                <TextBox.Text>
+                    <Binding Path="ProjectProxy.Project.DitherEvery" UpdateSourceTrigger="LostFocus">
+                        <Binding.ValidationRules>
+                            <rules:IntRangeRule>
+                                <rules:IntRangeRule.ValidRange>
+                                    <rules:IntRangeChecker Maximum="999" Minimum="0" />
+                                </rules:IntRangeRule.ValidRange>
+                            </rules:IntRangeRule>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ProjectProxy.Project.DitherEvery}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Priority"
-                    ToolTip="Priority of the Project" />
-                <ComboBox
-                    MaxHeight="20"
-                    ItemsSource="{Binding Source={local:EnumBindingSource {x:Type schema:ProjectPriority}}}"
-                    SelectedValue="{Binding ProjectProxy.Project.Priority}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
-                <TextBlock
-                    MaxHeight="20"
-                    Margin="3,3,0,0"
-                    Text="{Binding ProjectProxy.Project.Priority}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Start Date"
-                    ToolTip="Set the start date of the project" />
-                <DatePicker Margin="0,0,0,0" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
-                    <DatePicker.Resources>
-                        <local:BindingHelper x:Key="helper" Data="{Binding}" />
-                    </DatePicker.Resources>
-                    <DatePicker.SelectedDate>
-                        <Binding Path="ProjectProxy.Project.StartDate">
-                            <Binding.ValidationRules>
-                                <rules:DateRangeRule>
-                                    <rules:DateRangeRule.ValidRange>
-                                        <rules:DateCheck CheckBefore="True" CheckDate="{Binding Data.ProjectProxy.Project.EndDate, Source={StaticResource helper}}" />
-                                    </rules:DateRangeRule.ValidRange>
-                                </rules:DateRangeRule>
-
-                            </Binding.ValidationRules>
-                        </Binding>
-                    </DatePicker.SelectedDate>
-                </DatePicker>
-                <TextBlock
-                    MaxHeight="20"
-                    Margin="3,3,0,0"
-                    Text="{Binding ProjectProxy.Project.StartDate}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="End Date"
-                    ToolTip="Set the start date of the project" />
-                <DatePicker Margin="0,0,0,0" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
-                    <DatePicker.Resources>
-                        <local:BindingHelper x:Key="helper" Data="{Binding}" />
-                    </DatePicker.Resources>
-                    <DatePicker.SelectedDate>
-                        <Binding Path="ProjectProxy.Project.EndDate">
-                            <Binding.ValidationRules>
-                                <rules:DateRangeRule>
-                                    <rules:DateRangeRule.ValidRange>
-                                        <rules:DateCheck CheckBefore="False" CheckDate="{Binding Data.ProjectProxy.Project.StartDate, Source={StaticResource helper}}" />
-                                    </rules:DateRangeRule.ValidRange>
-                                </rules:DateRangeRule>
-
-                            </Binding.ValidationRules>
-                        </Binding>
-                    </DatePicker.SelectedDate>
-                </DatePicker>
-                <TextBlock
-                    MaxHeight="20"
-                    Margin="3,3,0,0"
-                    Text="{Binding ProjectProxy.Project.EndDate}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
-            </UniformGrid>
-            <UniformGrid
-                Width="280"
-                Height="190"
-                Margin="12,20,0,6"
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Enable Image Grader"
+                ToolTip="" />
+            <CheckBox
                 HorizontalAlignment="Left"
-                Columns="2"
-                Rows="7">
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Minimum Time"
-                    ToolTip="Minimum acquisition time for each project target" />
-                <ComboBox
-                    MaxHeight="20"
-                    ItemsSource="{Binding MinimumTimeChoices}"
-                    SelectedValue="{Binding ProjectProxy.Project.MinimumTime, Mode=TwoWay, Converter={StaticResource ImagingMinutesConverter}}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
-                <TextBlock
-                    MaxHeight="20"
-                    Margin="3,3,0,0"
-                    Text="{Binding ProjectProxy.Project.MinimumTime, Converter={StaticResource MinutesToHMConverter}}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+                VerticalAlignment="Center"
+                IsChecked="{Binding Path=ProjectProxy.Project.EnableGrader, Mode=TwoWay}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ProjectProxy.Project.EnableGrader}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+        </UniformGrid>
 
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Minimum Altitude"
-                    ToolTip="Minimum altitude for project targets" />
-                <ComboBox
-                    MaxHeight="20"
-                    ItemsSource="{Binding MinimumAltitudeChoices}"
-                    SelectedValue="{Binding ProjectProxy.Project.MinimumAltitude, Mode=TwoWay, Converter={StaticResource AltitudeChoicesConverter}}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
-                <TextBlock
-                    MaxHeight="20"
-                    Margin="3,3,0,0"
-                    Text="{Binding ProjectProxy.Project.MinimumAltitude, Converter={StaticResource DegreesDisplayConverter}}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+        <UniformGrid
+            Width="140"
+            Margin="20,26,0,0"
+            HorizontalAlignment="Left">
+            <Button
+                Width="50"
+                Height="34"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Right"
+                Command="{Binding EditCommand}"
+                Content="Edit"
+                Style="{StaticResource SecondaryBackgroundButton}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+            <Button
+                Width="50"
+                Height="34"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Right"
+                Command="{Binding SaveCommand}"
+                Content="Save"
+                IsEnabled="{Binding ProjectChanged}"
+                Style="{StaticResource SecondaryBackgroundButton}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+            <Button
+                Width="56"
+                Height="34"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Right"
+                Command="{Binding CancelCommand}"
+                Content="Cancel"
+                Style="{StaticResource SecondaryBackgroundButton}"
+                Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+        </UniformGrid>
 
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Use Custom Horizon"
-                    ToolTip="" />
-                <CheckBox
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    IsChecked="{Binding Path=ProjectProxy.Project.UseCustomHorizon, Mode=TwoWay}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
-                <TextBlock
-                    MaxHeight="20"
-                    Margin="3,3,0,0"
-                    Text="{Binding ProjectProxy.Project.UseCustomHorizon}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Horizon Offset"
-                    ToolTip="" />
-                <TextBox MaxHeight="20" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
-                    <TextBox.Text>
-                        <Binding Path="ProjectProxy.Project.HorizonOffset" UpdateSourceTrigger="LostFocus">
-                            <Binding.ValidationRules>
-                                <rules:DoubleRangeRule>
-                                    <rules:DoubleRangeRule.ValidRange>
-                                        <rules:DoubleRangeChecker Maximum="90" Minimum="0" />
-                                    </rules:DoubleRangeRule.ValidRange>
-                                </rules:DoubleRangeRule>
-                            </Binding.ValidationRules>
-                        </Binding>
-                    </TextBox.Text>
-
-                </TextBox>
-                <TextBlock
-                    MaxHeight="20"
-                    Margin="3,3,0,0"
-                    Text="{Binding ProjectProxy.Project.HorizonOffset, Converter={StaticResource DegreesDisplayConverter}}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Filter Switch Frequency"
-                    ToolTip="" />
-                <TextBox MaxHeight="20" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
-                    <TextBox.Text>
-                        <Binding Path="ProjectProxy.Project.FilterSwitchFrequency" UpdateSourceTrigger="LostFocus">
-                            <Binding.ValidationRules>
-                                <rules:IntRangeRule>
-                                    <rules:IntRangeRule.ValidRange>
-                                        <rules:IntRangeChecker Maximum="999" Minimum="0" />
-                                    </rules:IntRangeRule.ValidRange>
-                                </rules:IntRangeRule>
-                            </Binding.ValidationRules>
-                        </Binding>
-                    </TextBox.Text>
-                </TextBox>
-                <TextBlock
-                    MaxHeight="20"
-                    Margin="3,3,0,0"
-                    Text="{Binding ProjectProxy.Project.FilterSwitchFrequency}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Dither Every"
-                    ToolTip="" />
-                <TextBox MaxHeight="20" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
-                    <TextBox.Text>
-                        <Binding Path="ProjectProxy.Project.DitherEvery" UpdateSourceTrigger="LostFocus">
-                            <Binding.ValidationRules>
-                                <rules:IntRangeRule>
-                                    <rules:IntRangeRule.ValidRange>
-                                        <rules:IntRangeChecker Maximum="999" Minimum="0" />
-                                    </rules:IntRangeRule.ValidRange>
-                                </rules:IntRangeRule>
-                            </Binding.ValidationRules>
-                        </Binding>
-                    </TextBox.Text>
-                </TextBox>
-                <TextBlock
-                    MaxHeight="20"
-                    Margin="3,3,0,0"
-                    Text="{Binding ProjectProxy.Project.DitherEvery}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Enable Image Grader"
-                    ToolTip="" />
-                <CheckBox
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    IsChecked="{Binding Path=ProjectProxy.Project.EnableGrader, Mode=TwoWay}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
-                <TextBlock
-                    MaxHeight="20"
-                    Margin="3,3,0,0"
-                    Text="{Binding ProjectProxy.Project.EnableGrader}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-            </UniformGrid>
-
-            <UniformGrid
-                Width="140"
-                Margin="20,26,0,0"
-                HorizontalAlignment="Left">
-                <Button
-                    Width="50"
-                    Height="34"
-                    VerticalAlignment="Center"
-                    HorizontalContentAlignment="Right"
-                    Command="{Binding EditCommand}"
-                    Content="Edit"
-                    Style="{StaticResource TertiaryBackgroundButton}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-                <Button
-                    Width="50"
-                    Height="34"
-                    VerticalAlignment="Center"
-                    HorizontalContentAlignment="Right"
-                    Command="{Binding SaveCommand}"
-                    Content="Save"
-                    IsEnabled="{Binding ProjectChanged}"
-                    Style="{StaticResource TertiaryBackgroundButton}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
-                <Button
-                    Width="56"
-                    Height="34"
-                    VerticalAlignment="Center"
-                    HorizontalContentAlignment="Right"
-                    Command="{Binding CancelCommand}"
-                    Content="Cancel"
-                    Style="{StaticResource TertiaryBackgroundButton}"
-                    Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
-            </UniformGrid>
-
-        </StackPanel>
-    </Grid>
+    </StackPanel>
 </UserControl>

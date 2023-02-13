@@ -225,7 +225,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.PlanId = Guid.NewGuid().ToString();
             this.DatabaseId = target.Id;
             this.Name = target.Name;
-            this.Coordinates = target.GetCoordinates();
+            this.Coordinates = target.Coordinates;
             this.Epoch = target.Epoch;
             this.Rotation = target.Rotation;
             this.ROI = target.ROI;

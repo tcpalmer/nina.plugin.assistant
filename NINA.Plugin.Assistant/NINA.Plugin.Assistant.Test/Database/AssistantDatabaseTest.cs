@@ -201,8 +201,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     Target t1 = new Target();
                     t1.Name = "M42";
-                    t1.RA = TestUtil.M42.RADegrees;
-                    t1.Dec = TestUtil.M42.Dec;
+                    t1.ra = TestUtil.M42.RADegrees;
+                    t1.dec = TestUtil.M42.Dec;
                     p1.Targets.Add(t1);
 
                     FilterPlan fp = new FilterPlan(profileId, "Ha");
@@ -243,8 +243,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     Target t2 = new Target();
                     t2.Name = "IC1805";
-                    t2.RA = TestUtil.IC1805.RADegrees;
-                    t2.Dec = TestUtil.IC1805.Dec;
+                    t2.ra = TestUtil.IC1805.RADegrees;
+                    t2.dec = TestUtil.IC1805.Dec;
                     p2.Targets.Add(t2);
 
                     fp = new FilterPlan(profileId, "Ha");

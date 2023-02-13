@@ -2,8 +2,8 @@
 
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
-    public partial class ProjectView : UserControl {
-        public ProjectView() {
+    public partial class TargetView : UserControl {
+        public TargetView() {
             InitializeComponent();
         }
     }
