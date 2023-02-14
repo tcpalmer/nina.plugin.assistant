@@ -81,12 +81,12 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     ///
 
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Ha"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "OIII"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "SII"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "R"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "G"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "B"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Ha"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "OIII"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "SII"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "R"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "G"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "B"));
 
                     context.SaveChanges();
                 }
@@ -159,7 +159,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     //ap.MoonAvoidanceSeparation = 55;
                     //ap.MoonAvoidanceWidth = 7;
                     FilterPreference fpref = new FilterPreference(Guid.NewGuid().ToString(), "Ha");
-                    context.FilterPreferencePlanSet.Add(fpref);
+                    context.FilterPreferenceSet.Add(fpref);
 
                     p.EnableGrader = true;
                     p.MinimumAltitude = 22;
@@ -196,7 +196,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                         }
                     }
 
-                    List<FilterPreference> filterPreferences = context.FilterPreferencePlanSet.ToList();
+                    List<FilterPreference> filterPreferences = context.FilterPreferenceSet.ToList();
                     foreach (FilterPreference preference in filterPreferences) {
                         TestContext.WriteLine($"filter pref:\n{preference}");
                     }

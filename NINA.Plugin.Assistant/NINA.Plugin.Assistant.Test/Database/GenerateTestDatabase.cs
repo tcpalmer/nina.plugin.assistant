@@ -118,9 +118,9 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     context.ProjectSet.Add(p2);
 
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Ha"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "OIII"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "SII"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Ha"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "OIII"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "SII"));
 
                     //ImageMetadata imd = new ImageMetadata(PlanMocks.GetImageSavedEventArgs(DateTime.Now, "Ha"));
                     //AcquiredImage ai = new AcquiredImage(1, DateTime.Now, "Ha", imd);
@@ -207,13 +207,13 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     context.ProjectSet.Add(p1);
                     context.ProjectSet.Add(p2);
 
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Lum"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Red"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Green"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Blue"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Ha"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "OIII"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "SII"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Lum"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Red"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Green"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Blue"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Ha"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "OIII"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "SII"));
 
                     context.SaveChanges();
                 }
@@ -262,10 +262,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     context.ProjectSet.Add(p1);
 
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "L"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "R"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "G"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "B"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "L"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "R"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "G"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "B"));
 
                     context.SaveChanges();
                 }

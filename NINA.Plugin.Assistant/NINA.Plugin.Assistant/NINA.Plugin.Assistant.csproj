@@ -299,6 +299,10 @@
     <Compile Include="Controls\AssistantManager\AssistantManagerVM.cs" />
     <Compile Include="Controls\AssistantManager\BindingHelper.cs" />
     <Compile Include="Controls\AssistantManager\EnumBindingSourceExtension.cs" />
+    <Compile Include="Controls\AssistantManager\FilterPlanView.xaml.cs">
+      <DependentUpon>FilterPlanView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AssistantManager\FilterPlanViewVM.cs" />
     <Compile Include="Controls\AssistantManager\TargetView.xaml.cs">
       <DependentUpon>TargetView.xaml</DependentUpon>
     </Compile>
@@ -308,13 +312,14 @@
       <DependentUpon>ProjectView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\AssistantManager\ProjectViewVM.cs" />
+    <Compile Include="Controls\Converters\AllowEmptyConverter.cs" />
     <Compile Include="Controls\Converters\AltitudeChoicesConverter.cs" />
     <Compile Include="Controls\Converters\DegreesDisplayConverter.cs" />
     <Compile Include="Controls\Converters\ImagingMinutesConverter.cs" />
     <Compile Include="Controls\Converters\MinutesToHMConverter.cs" />
     <Compile Include="Controls\ValidationRules\ValidationRules.cs" />
     <Compile Include="Database\AssistantDatabaseInteraction.cs" />
-    <Compile Include="Database\AssistantDbContext.cs" />
+    <Compile Include="Database\AssistantDatabaseContext.cs" />
     <Compile Include="Database\AssistantPlanLoader.cs" />
     <Compile Include="Database\Schema\AcquiredImage.cs" />
     <Compile Include="Database\Schema\FilterPlan.cs" />
@@ -366,6 +371,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Controls\AssistantManager\AssistantManagerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\AssistantManager\FilterPlanView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

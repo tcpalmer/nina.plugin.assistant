@@ -268,9 +268,9 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     context.ProjectSet.Add(p2);
 
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Ha"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "OIII"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "SII"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Ha"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "OIII"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "SII"));
 
                     context.SaveChanges();
                 }

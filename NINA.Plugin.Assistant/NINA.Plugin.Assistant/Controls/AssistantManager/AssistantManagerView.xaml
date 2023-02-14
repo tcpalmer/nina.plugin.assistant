@@ -55,5 +55,10 @@
                 <local:TargetView DataContext="{Binding TargetViewVM}" />
             </StackPanel>
         </Border>
+        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+            <StackPanel Visibility="{Binding ShowFilterPlanView}">
+                <local:FilterPlanView DataContext="{Binding FilterPlanViewVM}" />
+            </StackPanel>
+        </Border>
     </StackPanel>
 </UserControl>

@@ -25,7 +25,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             EditCommand = new RelayCommand(Edit);
             SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(Cancel);
-
         }
 
         private void TargetProxy_PropertyChanged(object sender, PropertyChangedEventArgs e) {

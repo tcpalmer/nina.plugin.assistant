@@ -4,6 +4,7 @@ using Assistant.NINAPlugin.Plan;
 using NINA.Core.Utility;
 using NINA.WPF.Base.Interfaces.Mediator;
 using System;
+using System.Data.Entity.Migrations;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
@@ -46,24 +47,29 @@ namespace Assistant.NINAPlugin.Sequencer {
         private void Update(IPlanTarget planTarget, string filterName, bool accepted, ImageSavedEventArgs msg) {
 
             using (var context = new AssistantDatabaseInteraction().GetContext()) {
-                try {
+                using (var transaction = context.Database.BeginTransaction()) {
 
-                    // Update the filter plan record
-                    FilterPlan filterPlan = context.GetFilterPlan(planTarget.DatabaseId, filterName);
-                    filterPlan.Acquired++;
+                    try {
+                        // Update the filter plan record
+                        FilterPlan filterPlan = context.GetFilterPlan(planTarget.DatabaseId, filterName);
+                        filterPlan.Acquired++;
 
-                    if (accepted) {
-                        filterPlan.Accepted++;
+                        if (accepted) {
+                            filterPlan.Accepted++;
+                        }
+
+                        context.FilterPlanSet.AddOrUpdate(filterPlan);
+
+                        // Save the acquired image record
+                        AcquiredImage acquiredImage = new AcquiredImage(planTarget.DatabaseId, msg.MetaData.Image.ExposureStart, filterName, new ImageMetadata(msg));
+                        context.AcquiredImageSet.Add(acquiredImage);
+
+                        context.SaveChanges();
+                        transaction.Commit();
                     }
-
-                    // Save the acquired image record
-                    AcquiredImage acquiredImage = new AcquiredImage(planTarget.DatabaseId, msg.MetaData.Image.ExposureStart, filterName, new ImageMetadata(msg));
-                    context.AcquiredImageSet.Add(acquiredImage);
-
-                    context.SaveChanges();
-                }
-                catch (Exception e) {
-                    Logger.Error($"Assistant: exception updating database for saved image: {e.Message}\n{e.StackTrace}");
+                    catch (Exception e) {
+                        Logger.Error($"Assistant: exception updating database for saved image: {e.Message}\n{e.StackTrace}");
+                    }
                 }
             }
         }

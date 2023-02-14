@@ -4,6 +4,7 @@
     xmlns:ac="clr-namespace:Assistant.NINAPlugin.Controls.Converters"
     xmlns:nc="clr-namespace:NINA.Core.Utility.Converters;assembly=NINA.Core">
 
+    <ac:AllowEmptyConverter x:Key="AllowEmptyConverter" />
     <ac:ImagingMinutesConverter x:Key="ImagingMinutesConverter" />
     <ac:AltitudeChoicesConverter x:Key="AltitudeChoicesConverter" />
     <nc:BooleanToVisibilityCollapsedConverter x:Key="BooleanToVisibilityCollapsedConverter" />

@@ -17,6 +17,47 @@ namespace Assistant.NINAPlugin.Controls.ValidationRules {
         }
     }
 
+    public class DoubleMinimumRule : ValidationRule {
+
+        private MinimumValue _minimumValue;
+
+        public MinimumValue MinimumValue {
+            get { return _minimumValue; }
+            set { _minimumValue = value; }
+        }
+
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo) {
+            double parameter = 0;
+
+            try {
+                if (("" + value).Length > 0) {
+                    parameter = double.Parse("" + value);
+                }
+            }
+            catch (Exception e) {
+                return new ValidationResult(false, "Illegal characters or " + e.Message);
+            }
+
+            if ((parameter < MinimumValue.MinimumVal)) {
+                return new ValidationResult(false,
+                    "Please enter a value >= " + MinimumValue.MinimumVal);
+            }
+
+            return new ValidationResult(true, null);
+        }
+    }
+
+    public class MinimumValue : DependencyObject {
+
+        public double MinimumVal {
+            get { return (double)GetValue(MinimumProperty); }
+            set { SetValue(MinimumProperty, value); }
+        }
+
+        public static readonly DependencyProperty MinimumProperty =
+            DependencyProperty.Register("MinimumVal", typeof(double), typeof(DoubleRangeChecker), new UIPropertyMetadata(double.MinValue));
+    }
+
     public class DateRangeRule : ValidationRule {
         private DateCheck _dateCheck;
 

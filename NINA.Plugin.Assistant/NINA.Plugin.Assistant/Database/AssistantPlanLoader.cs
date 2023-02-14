@@ -9,7 +9,7 @@ namespace Assistant.NINAPlugin.Database {
 
     public class AssistantPlanLoader {
 
-        public List<IPlanProject> LoadActiveProjects(AssistantDbContext context, IProfile activeProfile, DateTime atTime) {
+        public List<IPlanProject> LoadActiveProjects(AssistantDatabaseContext context, IProfile activeProfile, DateTime atTime) {
             List<Project> projects = null;
             List<FilterPreference> filterPrefs = null;
             string profileId = activeProfile.Id.ToString();

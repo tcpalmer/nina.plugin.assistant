@@ -1,10 +1,8 @@
-﻿using NINA.Core.Utility;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Data.Entity.Migrations;
 using System.Data.Entity.ModelConfiguration;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -104,45 +102,45 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         [NotMapped]
         public DateTime CreateDate {
-            get { return AssistantDbContext.UnixSecondsToDateTime(createDate); }
+            get { return AssistantDatabaseContext.UnixSecondsToDateTime(createDate); }
             set {
-                createDate = AssistantDbContext.DateTimeToUnixSeconds(value);
+                createDate = AssistantDatabaseContext.DateTimeToUnixSeconds(value);
                 RaisePropertyChanged(nameof(CreateDate));
             }
         }
 
         [NotMapped]
         public DateTime? ActiveDate {
-            get { return AssistantDbContext.UnixSecondsToDateTime(activeDate); }
+            get { return AssistantDatabaseContext.UnixSecondsToDateTime(activeDate); }
             set {
-                activeDate = AssistantDbContext.DateTimeToUnixSeconds(value);
+                activeDate = AssistantDatabaseContext.DateTimeToUnixSeconds(value);
                 RaisePropertyChanged(nameof(ActiveDate));
             }
         }
 
         [NotMapped]
         public DateTime? InactiveDate {
-            get { return AssistantDbContext.UnixSecondsToDateTime(inactiveDate); }
+            get { return AssistantDatabaseContext.UnixSecondsToDateTime(inactiveDate); }
             set {
-                inactiveDate = AssistantDbContext.DateTimeToUnixSeconds(value);
+                inactiveDate = AssistantDatabaseContext.DateTimeToUnixSeconds(value);
                 RaisePropertyChanged(nameof(InactiveDate));
             }
         }
 
         [NotMapped]
         public DateTime? StartDate {
-            get { return AssistantDbContext.UnixSecondsToDateTime(startDate); }
+            get { return AssistantDatabaseContext.UnixSecondsToDateTime(startDate); }
             set {
-                startDate = AssistantDbContext.DateTimeToUnixSeconds(value);
+                startDate = AssistantDatabaseContext.DateTimeToUnixSeconds(value);
                 RaisePropertyChanged(nameof(StartDate));
             }
         }
 
         [NotMapped]
         public DateTime? EndDate {
-            get { return AssistantDbContext.UnixSecondsToDateTime(endDate); }
+            get { return AssistantDatabaseContext.UnixSecondsToDateTime(endDate); }
             set {
-                endDate = AssistantDbContext.DateTimeToUnixSeconds(value);
+                endDate = AssistantDatabaseContext.DateTimeToUnixSeconds(value);
                 RaisePropertyChanged(nameof(EndDate));
             }
         }
@@ -236,23 +234,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public event PropertyChangedEventHandler PropertyChanged;
         protected void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public bool Save() {
-            // TODO: should this really live elsewhere?
-            Logger.Debug($"Assistant: saving Project Id={Id} Name={Name}");
-            using (var context = new AssistantDatabaseInteraction().GetContext()) {
-                try {
-                    // TODO: can this be atomic with rollback?
-                    context.ProjectSet.AddOrUpdate(this);
-                    context.SaveChanges();
-                    return true;
-                }
-                catch (Exception e) {
-                    Logger.Error($"error persisting Project: {e.Message} {e.StackTrace}");
-                    return false;
-                }
-            }
         }
 
         public object Clone() {

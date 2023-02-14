@@ -60,6 +60,24 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        private Visibility showFilterPlanView = Visibility.Hidden;
+        public Visibility ShowFilterPlanView {
+            get => showFilterPlanView;
+            set {
+                showFilterPlanView = value;
+                RaisePropertyChanged(nameof(ShowFilterPlanView));
+            }
+        }
+
+        private FilterPlanViewVM filterPlanViewVM;
+        public FilterPlanViewVM FilterPlanViewVM {
+            get => filterPlanViewVM;
+            set {
+                filterPlanViewVM = value;
+                RaisePropertyChanged(nameof(FilterPlanViewVM));
+            }
+        }
+
         public ICommand SelectedItemChangedCommand { get; private set; }
         private void SelectedItemChanged(object obj) {
             TreeDataItem item = obj as TreeDataItem;
@@ -70,6 +88,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         Project project = (Project)item.Data;
                         ProjectViewVM = new ProjectViewVM(this, project);
                         ShowTargetView = Visibility.Collapsed;
+                        ShowFilterPlanView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Visible;
                         break;
 
@@ -78,13 +97,24 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         Target target = (Target)item.Data;
                         TargetViewVM = new TargetViewVM(this, target);
                         ShowProjectView = Visibility.Collapsed;
+                        ShowFilterPlanView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Visible;
+                        break;
+
+                    case TreeDataType.FilterPlan:
+                        activeTreeDataItem = item;
+                        FilterPlan filterPlan = (FilterPlan)item.Data;
+                        FilterPlanViewVM = new FilterPlanViewVM(this, filterPlan);
+                        ShowProjectView = Visibility.Collapsed;
+                        ShowTargetView = Visibility.Collapsed;
+                        ShowFilterPlanView = Visibility.Visible;
                         break;
 
                     default:
                         activeTreeDataItem = null;
                         ShowProjectView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
+                        ShowFilterPlanView = Visibility.Collapsed;
                         break;
                 }
             }
@@ -149,24 +179,38 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public void SaveProject(Project project) {
-            // TODO: move Save to dbContext
-            if (project.Save()) {
-                activeTreeDataItem.Data = project;
-                activeTreeDataItem.Header = project.Name;
-            }
-            else {
-                Notification.ShowError("Failed to save Assistant Project (see log for details)");
+            using (var context = new AssistantDatabaseInteraction().GetContext()) {
+                if (context.SaveProject(project)) {
+                    activeTreeDataItem.Data = project;
+                    activeTreeDataItem.Header = project.Name;
+                }
+                else {
+                    Notification.ShowError("Failed to save Assistant Project (see log for details)");
+                }
             }
         }
 
         public void SaveTarget(Target target) {
-            // TODO: move Save to dbContext
-            if (target.Save()) {
-                activeTreeDataItem.Data = target;
-                activeTreeDataItem.Header = target.Name;
+            using (var context = new AssistantDatabaseInteraction().GetContext()) {
+                if (context.SaveTarget(target)) {
+                    activeTreeDataItem.Data = target;
+                    activeTreeDataItem.Header = target.Name;
+                }
+                else {
+                    Notification.ShowError("Failed to save Assistant Target (see log for details)");
+                }
             }
-            else {
-                Notification.ShowError("Failed to save Assistant Target (see log for details)");
+        }
+
+        public void SaveFilterPlan(FilterPlan filterPlan) {
+            using (var context = new AssistantDatabaseInteraction().GetContext()) {
+                if (context.SaveFilterPlan(filterPlan)) {
+                    activeTreeDataItem.Data = filterPlan;
+                    activeTreeDataItem.Header = filterPlan.FilterName;
+                }
+                else {
+                    Notification.ShowError("Failed to save Assistant Filter Plan (see log for details)");
+                }
             }
         }
     }

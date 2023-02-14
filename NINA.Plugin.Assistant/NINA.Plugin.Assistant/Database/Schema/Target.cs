@@ -1,12 +1,10 @@
 ﻿using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
-using NINA.Core.Utility;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Data.Entity.Migrations;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -243,23 +241,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
             ra = Coordinates.RA;
             dec = Coordinates.Dec;
-        }
-
-        public bool Save() {
-            // TODO: should this really live elsewhere?
-            Logger.Debug($"Assistant: saving Target Id={Id} Name={Name}");
-            using (var context = new AssistantDatabaseInteraction().GetContext()) {
-                try {
-                    // TODO: can this be atomic with rollback?
-                    context.TargetSet.AddOrUpdate(this);
-                    context.SaveChanges();
-                    return true;
-                }
-                catch (Exception e) {
-                    Logger.Error($"error persisting Target: {e.Message} {e.StackTrace}");
-                    return false;
-                }
-            }
         }
 
         public object Clone() {

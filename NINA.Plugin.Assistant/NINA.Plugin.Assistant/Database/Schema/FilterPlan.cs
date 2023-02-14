@@ -1,31 +1,121 @@
 ﻿using NINA.Core.Model.Equipment;
 using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public class FilterPlan : ICloneable {
+    public enum BinningModeEnum {
+        [Description("1x1")] OneXOne,
+    }
+
+    public class FilterPlan : INotifyPropertyChanged, ICloneable {
 
         [Key] public int Id { get; set; }
-        [Required] public string FilterName { get; set; }
-        [Required] public string ProfileId { get; set; }
-        [Required] public double Exposure { get; set; }
+        [Required] public string filterName { get; set; }
+        [Required] public string profileId { get; set; }
+        [Required] public double exposure { get; set; }
 
-        public int? Gain { get; set; }
-        public int? Offset { get; set; }
+        public int? gain { get; set; }
+        public int? offset { get; set; }
         public int? bin { get; set; }
-        public int? ReadoutMode { get; set; }
+        public int? readoutMode { get; set; }
 
-        public int Desired { get; set; }
-        public int Acquired { get; set; }
-        public int Accepted { get; set; }
+        public int desired { get; set; }
+        public int acquired { get; set; }
+        public int accepted { get; set; }
+
+        [NotMapped]
+        public string FilterName {
+            get { return filterName; }
+            set {
+                filterName = value;
+                RaisePropertyChanged(nameof(FilterName));
+            }
+        }
+
+        [NotMapped]
+        public string ProfileId {
+            get { return profileId; }
+            set {
+                profileId = value;
+                RaisePropertyChanged(nameof(ProfileId));
+            }
+        }
+
+        [NotMapped]
+        public double Exposure {
+            get { return exposure; }
+            set {
+                exposure = value;
+                RaisePropertyChanged(nameof(Exposure));
+            }
+        }
+
+        [NotMapped]
+        public int? Gain {
+            get { return gain; }
+            set {
+                gain = value;
+                RaisePropertyChanged(nameof(Gain));
+            }
+        }
+
+        [NotMapped]
+        public int? Offset {
+            get { return offset; }
+            set {
+                offset = value;
+                RaisePropertyChanged(nameof(Offset));
+            }
+        }
 
         [NotMapped]
         public BinningMode BinningMode {
             get { return new BinningMode((short)bin, (short)bin); }
-            set { bin = value.X; }
+            set {
+                bin = value.X;
+                RaisePropertyChanged(nameof(BinningMode));
+            }
+        }
+
+        [NotMapped]
+        public int? ReadoutMode {
+            get { return readoutMode; }
+            set {
+                readoutMode = value;
+                RaisePropertyChanged(nameof(ReadoutMode));
+            }
+        }
+
+        [NotMapped]
+        public int Desired {
+            get { return desired; }
+            set {
+                desired = value;
+                RaisePropertyChanged(nameof(Desired));
+            }
+        }
+
+        [NotMapped]
+        public int Acquired {
+            get { return acquired; }
+            set {
+                acquired = value;
+                RaisePropertyChanged(nameof(Acquired));
+            }
+        }
+
+        [NotMapped]
+        public int Accepted {
+            get { return accepted; }
+            set {
+                accepted = value;
+                RaisePropertyChanged(nameof(Accepted));
+            }
         }
 
         [ForeignKey("Target")] public int targetId { get; set; }
@@ -44,6 +134,11 @@ namespace Assistant.NINAPlugin.Database.Schema {
             Desired = 1;
             Acquired = 0;
             Accepted = 0;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public object Clone() {

@@ -74,4 +74,18 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
     }
+
+    public class FilterPlanProxy : TemporaryProxy<FilterPlan> {
+
+        public FilterPlanProxy(FilterPlan filterPlan) : base(filterPlan) {
+        }
+
+        public FilterPlan FilterPlan {
+            get => Proxy;
+            set {
+                Proxy = value;
+            }
+        }
+    }
+
 }
