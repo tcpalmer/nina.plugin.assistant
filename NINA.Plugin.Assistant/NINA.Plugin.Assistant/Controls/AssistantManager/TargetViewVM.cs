@@ -27,6 +27,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             EditCommand = new RelayCommand(Edit);
             SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(Cancel);
+            CopyCommand = new RelayCommand(Copy);
+            DeleteCommand = new RelayCommand(Delete);
         }
 
         private void TargetProxy_PropertyChanged(object sender, PropertyChangedEventArgs e) {
@@ -38,12 +40,12 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        private bool showTargetEditView = false;
-        public bool ShowTargetEditView {
-            get => showTargetEditView;
+        private bool showEditView = false;
+        public bool ShowEditView {
+            get => showEditView;
             set {
-                showTargetEditView = value;
-                RaisePropertyChanged(nameof(ShowTargetEditView));
+                showEditView = value;
+                RaisePropertyChanged(nameof(ShowEditView));
             }
         }
 
@@ -59,11 +61,13 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand EditCommand { get; private set; }
         public ICommand SaveCommand { get; private set; }
         public ICommand CancelCommand { get; private set; }
+        public ICommand CopyCommand { get; private set; }
+        public ICommand DeleteCommand { get; private set; }
 
         private void Edit(object obj) {
             TargetProxy.PropertyChanged += TargetProxy_PropertyChanged;
             managerVM.SetEditMode(true);
-            ShowTargetEditView = true;
+            ShowEditView = true;
             TargetChanged = false;
         }
 
@@ -71,15 +75,23 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             managerVM.SaveTarget(TargetProxy.Proxy);
             TargetProxy.OnSave();
             TargetProxy.PropertyChanged -= TargetProxy_PropertyChanged;
-            ShowTargetEditView = false;
+            ShowEditView = false;
             managerVM.SetEditMode(false);
         }
 
         private void Cancel(object obj) {
             TargetProxy.OnCancel();
             TargetProxy.PropertyChanged -= TargetProxy_PropertyChanged;
-            ShowTargetEditView = false;
+            ShowEditView = false;
             managerVM.SetEditMode(false);
+        }
+
+        private void Copy(object obj) {
+            managerVM.CopyItem();
+        }
+
+        private void Delete(object obj) {
+            managerVM.DeleteItem();
         }
 
     }

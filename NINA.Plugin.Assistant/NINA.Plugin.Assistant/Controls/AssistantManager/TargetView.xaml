@@ -5,6 +5,7 @@
     xmlns:astro="clr-namespace:NINA.Astrometry;assembly=NINA.Astrometry"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
+    xmlns:uc="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:nrules="clr-namespace:NINA.Core.Utility.ValidationRules;assembly=NINA.Core"
     xmlns:rules="clr-namespace:Assistant.NINAPlugin.Controls.ValidationRules"
@@ -21,10 +22,12 @@
         Margin="20,20,0,0"
         Orientation="Vertical">
         <Label
-            Margin="0,0,0,16"
+            Margin="0,0,0,6"
             Content="Target"
             FontSize="18"
             FontWeight="Bold" />
+        <uc:ActionMenuBar DataContext="{Binding}"/>
+
         <UniformGrid
             Width="320"
             Height="160"
@@ -38,7 +41,7 @@
                 FontWeight="Bold"
                 Text="Name"
                 ToolTip="Name of the Target" />
-            <TextBox MaxHeight="20" Visibility="{Binding ShowTargetEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+            <TextBox MaxHeight="20" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox.Text>
                     <Binding Path="TargetProxy.Target.Name" UpdateSourceTrigger="LostFocus">
                         <Binding.ValidationRules>
@@ -51,14 +54,14 @@
                 MaxHeight="20"
                 Margin="3,3,0,0"
                 Text="{Binding TargetProxy.Target.Name}"
-                Visibility="{Binding ShowTargetEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
             <TextBlock
                 VerticalAlignment="Center"
                 FontWeight="Bold"
                 Text="RA"
                 ToolTip="RA coordinate" />
-            <StackPanel Orientation="Horizontal" Visibility="{Binding ShowTargetEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+            <StackPanel Orientation="Horizontal" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox
                     MinWidth="40"
                     Margin="5,0,0,0"
@@ -102,14 +105,14 @@
             <TextBlock
                 MaxHeight="20"
                 Text="{Binding TargetProxy.Target.RAString}"
-                Visibility="{Binding ShowTargetEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
             <TextBlock
                 VerticalAlignment="Center"
                 FontWeight="Bold"
                 Text="Dec"
                 ToolTip="Dec coordinate" />
-            <StackPanel Orientation="Horizontal" Visibility="{Binding ShowTargetEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+            <StackPanel Orientation="Horizontal" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox
                     MinWidth="40"
                     Margin="5,0,0,0"
@@ -156,7 +159,7 @@
             <TextBlock
                 MaxHeight="20"
                 Text="{Binding TargetProxy.Target.DecString}"
-                Visibility="{Binding ShowTargetEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
             <TextBlock
                 VerticalAlignment="Center"
@@ -167,19 +170,19 @@
                 MaxHeight="20"
                 ItemsSource="{Binding Source={local:EnumBindingSource {x:Type astro:Epoch}}}"
                 SelectedValue="{Binding TargetProxy.Target.Epoch}"
-                Visibility="{Binding ShowTargetEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+                Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
             <TextBlock
                 MaxHeight="20"
                 Margin="3,3,0,0"
                 Text="{Binding TargetProxy.Target.Epoch}"
-                Visibility="{Binding ShowTargetEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
             <TextBlock
                 VerticalAlignment="Center"
                 FontWeight="Bold"
                 Text="Rotation"
                 ToolTip="Target rotation" />
-            <TextBox MaxHeight="20" Visibility="{Binding ShowTargetEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+            <TextBox MaxHeight="20" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox.Text>
                     <Binding Path="TargetProxy.Target.Rotation" UpdateSourceTrigger="LostFocus">
                         <Binding.ValidationRules>
@@ -195,14 +198,14 @@
             <TextBlock
                 MaxHeight="20"
                 Text="{Binding TargetProxy.Target.Rotation, Converter={StaticResource DegreesDisplayConverter}}"
-                Visibility="{Binding ShowTargetEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
             <TextBlock
                 VerticalAlignment="Center"
                 FontWeight="Bold"
                 Text="ROI"
                 ToolTip="Target region of interest" />
-            <TextBox MaxHeight="20" Visibility="{Binding ShowTargetEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+            <TextBox MaxHeight="20" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox.Text>
                     <Binding Path="TargetProxy.Target.ROI" UpdateSourceTrigger="LostFocus">
                         <Binding.ValidationRules>
@@ -218,43 +221,8 @@
             <TextBlock
                 MaxHeight="20"
                 Text="{Binding TargetProxy.Target.ROI}"
-                Visibility="{Binding ShowTargetEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
         </UniformGrid>
-
-        <UniformGrid
-            Width="140"
-            Margin="20,26,0,0"
-            HorizontalAlignment="Left">
-            <Button
-                Width="50"
-                Height="34"
-                VerticalAlignment="Center"
-                HorizontalContentAlignment="Right"
-                Command="{Binding EditCommand}"
-                Content="Edit"
-                Style="{StaticResource SecondaryBackgroundButton}"
-                Visibility="{Binding ShowTargetEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-            <Button
-                Width="50"
-                Height="34"
-                VerticalAlignment="Center"
-                HorizontalContentAlignment="Right"
-                Command="{Binding SaveCommand}"
-                Content="Save"
-                IsEnabled="{Binding TargetChanged}"
-                Style="{StaticResource SecondaryBackgroundButton}"
-                Visibility="{Binding ShowTargetEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
-            <Button
-                Width="56"
-                Height="34"
-                VerticalAlignment="Center"
-                HorizontalContentAlignment="Right"
-                Command="{Binding CancelCommand}"
-                Content="Cancel"
-                Style="{StaticResource SecondaryBackgroundButton}"
-                Visibility="{Binding ShowTargetEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
-        </UniformGrid>
-
     </StackPanel>
 </UserControl>

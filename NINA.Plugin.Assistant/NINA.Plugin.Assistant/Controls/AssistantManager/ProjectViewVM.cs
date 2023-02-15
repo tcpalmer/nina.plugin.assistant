@@ -32,6 +32,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             EditCommand = new RelayCommand(Edit);
             SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(Cancel);
+            CopyCommand = new RelayCommand(Copy);
+            DeleteCommand = new RelayCommand(Delete);
         }
 
         private void InitializeRuleWeights(Project project) {
@@ -96,12 +98,12 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        private bool showProjectEditView = false;
-        public bool ShowProjectEditView {
-            get => showProjectEditView;
+        private bool showEditView = false;
+        public bool ShowEditView {
+            get => showEditView;
             set {
-                showProjectEditView = value;
-                RaisePropertyChanged(nameof(ShowProjectEditView));
+                showEditView = value;
+                RaisePropertyChanged(nameof(ShowEditView));
             }
         }
 
@@ -117,11 +119,13 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand EditCommand { get; private set; }
         public ICommand SaveCommand { get; private set; }
         public ICommand CancelCommand { get; private set; }
+        public ICommand CopyCommand { get; private set; }
+        public ICommand DeleteCommand { get; private set; }
 
         private void Edit(object obj) {
             ProjectProxy.PropertyChanged += ProjectProxy_PropertyChanged;
             managerVM.SetEditMode(true);
-            ShowProjectEditView = true;
+            ShowEditView = true;
             ProjectChanged = false;
         }
 
@@ -131,7 +135,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ProjectProxy.OnSave();
             InitializeRuleWeights(ProjectProxy.Proxy);
             ProjectProxy.PropertyChanged -= ProjectProxy_PropertyChanged;
-            ShowProjectEditView = false;
+            ShowEditView = false;
             managerVM.SetEditMode(false);
         }
 
@@ -139,8 +143,17 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ProjectProxy.OnCancel();
             ProjectProxy.PropertyChanged -= ProjectProxy_PropertyChanged;
             InitializeRuleWeights(ProjectProxy.Proxy);
-            ShowProjectEditView = false;
+            ShowEditView = false;
             managerVM.SetEditMode(false);
         }
+
+        private void Copy(object obj) {
+            managerVM.CopyItem();
+        }
+
+        private void Delete(object obj) {
+            managerVM.DeleteItem();
+        }
+
     }
 }

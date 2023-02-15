@@ -202,6 +202,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        // TODO: this should go away
         public void SaveFilterPlan(FilterPlan filterPlan) {
             using (var context = new AssistantDatabaseInteraction().GetContext()) {
                 if (context.SaveFilterPlan(filterPlan)) {
@@ -212,6 +213,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     Notification.ShowError("Failed to save Assistant Filter Plan (see log for details)");
                 }
             }
+        }
+
+        public void CopyItem() {
+            Logger.Info($"COPY: {activeTreeDataItem.Header}");
+            Clipboard.SetItem(activeTreeDataItem);
+        }
+
+        public void DeleteItem() {
+            Logger.Info($"DELETE: {activeTreeDataItem.Header}");
         }
     }
 
@@ -245,11 +255,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 case MenuItemType.Paste:
                     Logger.Info($"PASTE: {Clipboard.GetItem().Header}");
                     break;
-                case MenuItemType.Copy:
-                    Logger.Info($"COPY: {context.Item.Header}");
-                    Clipboard.SetItem(context.Item);
-                    break;
-                case MenuItemType.Delete: break;
             }
         }
 
@@ -287,20 +292,12 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 case TreeDataType.Project:
                     contextMenu.Items.Add(GetMenuItem("New Target", MenuItemType.New));
                     contextMenu.Items.Add(GetMenuItem("Paste Target", MenuItemType.Paste));
-                    contextMenu.Items.Add(new Separator());
-                    contextMenu.Items.Add(GetMenuItem("Copy Project", MenuItemType.Copy));
-                    contextMenu.Items.Add(GetMenuItem("Delete Project", MenuItemType.Delete));
                     break;
                 case TreeDataType.Target:
                     contextMenu.Items.Add(GetMenuItem("New Filter Plan", MenuItemType.New));
                     contextMenu.Items.Add(GetMenuItem("Paste Filter Plan", MenuItemType.Paste));
-                    contextMenu.Items.Add(new Separator());
-                    contextMenu.Items.Add(GetMenuItem("Copy Target", MenuItemType.Copy));
-                    contextMenu.Items.Add(GetMenuItem("Delete Target", MenuItemType.Delete));
                     break;
                 case TreeDataType.FilterPlan:
-                    contextMenu.Items.Add(GetMenuItem("Copy Filter Plan", MenuItemType.Copy));
-                    contextMenu.Items.Add(GetMenuItem("Delete Filter Plan", MenuItemType.Delete));
                     break;
                 default:
                     break;
@@ -319,7 +316,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
     }
 
     public enum MenuItemType {
-        New, Paste, Copy, Delete
+        New, Paste
     }
 
     public class MenuItemContext {

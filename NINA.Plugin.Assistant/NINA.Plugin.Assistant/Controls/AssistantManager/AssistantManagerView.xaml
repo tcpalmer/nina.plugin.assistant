@@ -6,7 +6,6 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:uc="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     d:DesignHeight="600"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -14,9 +13,9 @@
     <UserControl.Resources>
         <ResourceDictionary Source="../Resources/Resources.xaml" />
     </UserControl.Resources>
-    
-    <StackPanel Orientation="Horizontal" Margin="0,20,0,20">
-        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" >
+
+    <StackPanel Margin="0,20,0,20" Orientation="Horizontal">
+        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
             <TreeView
                 x:Name="ProjectsTreeView"
                 Width="260"
@@ -50,18 +49,27 @@
                 </i:Interaction.Triggers>
             </TreeView>
         </Border>
-        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
-            <StackPanel Visibility="{Binding ShowProjectView}">
+        <Border
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            Visibility="{Binding ShowProjectView}">
+            <StackPanel>
                 <local:ProjectView DataContext="{Binding ProjectViewVM}" />
             </StackPanel>
         </Border>
-        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
-            <StackPanel Visibility="{Binding ShowTargetView}">
+        <Border
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            Visibility="{Binding ShowTargetView}">
+            <StackPanel>
                 <local:TargetView DataContext="{Binding TargetViewVM}" />
             </StackPanel>
         </Border>
-        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
-            <StackPanel Visibility="{Binding ShowFilterPlanView}">
+        <Border
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            Visibility="{Binding ShowFilterPlanView}">
+            <StackPanel>
                 <local:FilterPlanView DataContext="{Binding FilterPlanViewVM}" />
             </StackPanel>
         </Border>
