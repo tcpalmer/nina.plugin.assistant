@@ -120,6 +120,7 @@ namespace Assistant.NINAPlugin.Plan {
         public string RejectedReason { get; set; }
 
         public PlanProject(IProfile profile, Project project, Dictionary<string, FilterPreference> filterPreference) {
+
             this.PlanId = Guid.NewGuid().ToString();
             this.DatabaseId = project.Id;
             this.Name = project.Name;
@@ -131,6 +132,16 @@ namespace Assistant.NINAPlugin.Plan {
             this.InactiveDate = project.InactiveDate;
             this.StartDate = project.StartDate;
             this.EndDate = project.EndDate;
+
+            this.MinimumTime = project.MinimumTime;
+            this.MinimumAltitude = project.MinimumAltitude;
+            this.UseCustomHorizon = project.UseCustomHorizon;
+            this.HorizonOffset = project.HorizonOffset;
+            this.FilterSwitchFrequency = project.FilterSwitchFrequency;
+            this.DitherEvery = project.DitherEvery;
+            this.EnableGrader = project.EnableGrader;
+            this.RuleWeights = GetRuleWeightsDictionary(project.RuleWeights);
+
             this.HorizonDefinition = DetermineHorizon(profile, project);
             this.Rejected = false;
 
@@ -138,6 +149,15 @@ namespace Assistant.NINAPlugin.Plan {
             foreach (Target target in project.Targets) {
                 Targets.Add(new PlanTarget(this, target, filterPreference));
             }
+        }
+
+        private Dictionary<string, double> GetRuleWeightsDictionary(List<RuleWeight> ruleWeights) {
+            Dictionary<string, double> dict = new Dictionary<string, double>(ruleWeights.Count);
+            ruleWeights.ForEach((rw) => {
+                dict.Add(rw.Name, rw.Weight);
+            });
+
+            return dict;
         }
 
         public override string ToString() {
@@ -149,6 +169,19 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"Priority: {Priority}");
             sb.AppendLine($"StartDate: {Utils.FormatDateTimeFull(StartDate)}");
             sb.AppendLine($"EndDate: {Utils.FormatDateTimeFull(EndDate)}");
+
+            sb.AppendLine($"MinimumTime: {MinimumTime}");
+            sb.AppendLine($"MinimumAltitude: {MinimumAltitude}");
+            sb.AppendLine($"UseCustomHorizon: {UseCustomHorizon}");
+            sb.AppendLine($"HorizonOffset: {HorizonOffset}");
+            sb.AppendLine($"FilterSwitchFrequency: {FilterSwitchFrequency}");
+            sb.AppendLine($"DitherEvery: {DitherEvery}");
+            sb.AppendLine($"EnableGrader: {EnableGrader}");
+            sb.AppendLine($"RuleWeights:");
+            foreach (KeyValuePair<string, double> entry in RuleWeights) {
+                sb.AppendLine($"  {entry.Key}: {entry.Value}");
+            }
+
             sb.AppendLine($"Horizon: {HorizonDefinition}");
             sb.AppendLine($"Rejected: {Rejected}");
             sb.AppendLine($"RejectedReason: {RejectedReason}");

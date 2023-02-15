@@ -6,14 +6,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:nrules="clr-namespace:NINA.Core.Utility.ValidationRules;assembly=NINA.Core"
     xmlns:rules="clr-namespace:Assistant.NINAPlugin.Controls.ValidationRules"
     d:DesignHeight="500"
     d:DesignWidth="800"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <ResourceDictionary Source="../Resources/Converters.xaml" />
+        <ResourceDictionary Source="../Resources/Resources.xaml" />
     </UserControl.Resources>
 
     <StackPanel
@@ -104,11 +103,12 @@
                 FontWeight="Bold"
                 Text="Gain"
                 ToolTip="Camera gain (leave blank to use camera default)" />
-            <TextBox
-                MaxHeight="20"
-                Visibility="{Binding ShowFilterPlanEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+            <TextBox MaxHeight="20" Visibility="{Binding ShowFilterPlanEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox.Text>
-                    <Binding Path="FilterPlanProxy.FilterPlan.Gain" Converter="{StaticResource AllowEmptyConverter}" UpdateSourceTrigger="LostFocus">
+                    <Binding
+                        Converter="{StaticResource AllowEmptyConverter}"
+                        Path="FilterPlanProxy.FilterPlan.Gain"
+                        UpdateSourceTrigger="LostFocus">
                         <Binding.ValidationRules>
                             <rules:IntRangeRule>
                                 <rules:IntRangeRule.ValidRange>
@@ -130,11 +130,12 @@
                 FontWeight="Bold"
                 Text="Offset"
                 ToolTip="Camera offset (leave blank to use camera default)" />
-            <TextBox
-                MaxHeight="20"
-                Visibility="{Binding ShowFilterPlanEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+            <TextBox MaxHeight="20" Visibility="{Binding ShowFilterPlanEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox.Text>
-                    <Binding Path="FilterPlanProxy.FilterPlan.Offset" Converter="{StaticResource AllowEmptyConverter}" UpdateSourceTrigger="LostFocus">
+                    <Binding
+                        Converter="{StaticResource AllowEmptyConverter}"
+                        Path="FilterPlanProxy.FilterPlan.Offset"
+                        UpdateSourceTrigger="LostFocus">
                         <Binding.ValidationRules>
                             <rules:IntRangeRule>
                                 <rules:IntRangeRule.ValidRange>

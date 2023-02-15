@@ -38,7 +38,6 @@ namespace Assistant.NINAPlugin.Database {
             }
 
             return planProjects;
-
         }
 
         private Dictionary<string, FilterPreference> GetFilterPrefDictionary(List<FilterPreference> filterPrefs) {

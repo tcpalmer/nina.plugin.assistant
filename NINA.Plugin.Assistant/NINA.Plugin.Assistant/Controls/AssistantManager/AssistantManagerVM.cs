@@ -86,7 +86,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     case TreeDataType.Project:
                         activeTreeDataItem = item;
                         Project project = (Project)item.Data;
-                        ProjectViewVM = new ProjectViewVM(this, project);
+                        ProjectViewVM = new ProjectViewVM(this, profileService, project);
                         ShowTargetView = Visibility.Collapsed;
                         ShowFilterPlanView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Visible;
@@ -95,7 +95,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     case TreeDataType.Target:
                         activeTreeDataItem = item;
                         Target target = (Target)item.Data;
-                        TargetViewVM = new TargetViewVM(this, target);
+                        TargetViewVM = new TargetViewVM(this, profileService, target);
                         ShowProjectView = Visibility.Collapsed;
                         ShowFilterPlanView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Visible;
@@ -104,7 +104,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     case TreeDataType.FilterPlan:
                         activeTreeDataItem = item;
                         FilterPlan filterPlan = (FilterPlan)item.Data;
-                        FilterPlanViewVM = new FilterPlanViewVM(this, filterPlan);
+                        FilterPlanViewVM = new FilterPlanViewVM(this, profileService, filterPlan);
                         ShowProjectView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
                         ShowFilterPlanView = Visibility.Visible;

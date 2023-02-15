@@ -1,13 +1,15 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Util;
 using NINA.Core.Utility;
+using NINA.Profile.Interfaces;
+using NINA.WPF.Base.ViewModel;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Input;
 
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
-    public class ProjectViewVM : BaseINPC {
+    public class ProjectViewVM : BaseVM {
 
         private AssistantManagerVM managerVM;
         private ProjectProxy projectProxy;
@@ -20,14 +22,27 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        public ProjectViewVM(AssistantManagerVM managerVM, Project project) {
+        public ProjectViewVM(AssistantManagerVM managerVM, IProfileService profileService, Project project) : base(profileService) {
             this.managerVM = managerVM;
             ProjectProxy = new ProjectProxy(project);
 
+            InitializeRuleWeights(ProjectProxy.Proxy);
             InitializeCombos();
+
             EditCommand = new RelayCommand(Edit);
             SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(Cancel);
+        }
+
+        private void InitializeRuleWeights(Project project) {
+            List<RuleWeight> ruleWeights = new List<RuleWeight>();
+
+            project.RuleWeights.ForEach((rw) => {
+                rw.PropertyChanged += ProjectProxy_PropertyChanged;
+                ruleWeights.Add(rw);
+            });
+
+            RuleWeights = ruleWeights;
         }
 
         private void ProjectProxy_PropertyChanged(object sender, PropertyChangedEventArgs e) {
@@ -49,6 +64,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             MinimumAltitudeChoices = new List<string>();
             for (int i = 0; i <= 60; i += 5) {
                 MinimumAltitudeChoices.Add(i + "°");
+            }
+        }
+
+        private List<RuleWeight> ruleWeights = new List<RuleWeight>();
+        public List<RuleWeight> RuleWeights {
+            get => ruleWeights;
+            set {
+                ruleWeights = value;
+                RaisePropertyChanged(nameof(RuleWeights));
             }
         }
 
@@ -102,8 +126,10 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private void Save(object obj) {
+            ProjectProxy.Proxy.RuleWeights = RuleWeights;
             managerVM.SaveProject(ProjectProxy.Proxy);
             ProjectProxy.OnSave();
+            InitializeRuleWeights(ProjectProxy.Proxy);
             ProjectProxy.PropertyChanged -= ProjectProxy_PropertyChanged;
             ShowProjectEditView = false;
             managerVM.SetEditMode(false);
@@ -112,9 +138,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private void Cancel(object obj) {
             ProjectProxy.OnCancel();
             ProjectProxy.PropertyChanged -= ProjectProxy_PropertyChanged;
+            InitializeRuleWeights(ProjectProxy.Proxy);
             ShowProjectEditView = false;
             managerVM.SetEditMode(false);
         }
-
     }
 }

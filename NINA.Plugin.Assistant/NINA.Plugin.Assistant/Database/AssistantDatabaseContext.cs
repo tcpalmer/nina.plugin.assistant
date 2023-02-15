@@ -77,6 +77,7 @@ namespace Assistant.NINAPlugin.Database {
             using (var transaction = Database.BeginTransaction()) {
                 try {
                     ProjectSet.AddOrUpdate(project);
+                    project.RuleWeights.ForEach(item => RuleWeightSet.AddOrUpdate(item));
                     SaveChanges();
                     transaction.Commit();
                     return true;

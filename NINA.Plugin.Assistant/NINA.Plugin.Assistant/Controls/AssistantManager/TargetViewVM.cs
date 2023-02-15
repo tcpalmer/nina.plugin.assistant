@@ -1,11 +1,13 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using NINA.Core.Utility;
+using NINA.Profile.Interfaces;
+using NINA.WPF.Base.ViewModel;
 using System.ComponentModel;
 using System.Windows.Input;
 
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
-    public class TargetViewVM : BaseINPC {
+    public class TargetViewVM : BaseVM {
 
         private AssistantManagerVM managerVM;
         private TargetProxy targetProxy;
@@ -18,7 +20,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        public TargetViewVM(AssistantManagerVM managerVM, Target target) {
+        public TargetViewVM(AssistantManagerVM managerVM, IProfileService profileService, Target target) : base(profileService) {
             this.managerVM = managerVM;
             TargetProxy = new TargetProxy(target);
 

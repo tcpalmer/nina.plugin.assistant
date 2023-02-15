@@ -59,8 +59,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
             EnableGrader = true;
 
             ruleWeights = new List<RuleWeight>();
-            RuleWeights = new Dictionary<string, double>();
-
             Targets = new List<Target>();
         }
 
@@ -209,24 +207,10 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
-        Dictionary<string, double> _ruleWeights;
-
-        [NotMapped]
-        public Dictionary<string, double> RuleWeights {
-            get {
-                if (_ruleWeights == null) {
-                    _ruleWeights = new Dictionary<string, double>();
-                    if (ruleWeights?.Count > 0) {
-                        foreach (RuleWeight ruleWeight in ruleWeights) {
-                            _ruleWeights.Add(ruleWeight.Name, ruleWeight.Weight);
-                        }
-                    }
-                }
-
-                return _ruleWeights;
-            }
+        public List<RuleWeight> RuleWeights {
+            get => ruleWeights;
             set {
-                _ruleWeights = value;
+                ruleWeights = value;
                 RaisePropertyChanged(nameof(RuleWeights));
             }
         }
@@ -237,7 +221,17 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         public object Clone() {
-            return MemberwiseClone();
+            Project clone = (Project)MemberwiseClone();
+
+            List<RuleWeight> list = new List<RuleWeight>();
+            if (ruleWeights != null) {
+                ruleWeights.ForEach((item) => {
+                    list.Add((RuleWeight)item.Clone());
+                });
+            }
+
+            clone.RuleWeights = list;
+            return clone;
         }
 
         public override string ToString() {
@@ -260,7 +254,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"EnableGrader: {EnableGrader}");
             sb.AppendLine($"RuleWeights:");
             foreach (var item in RuleWeights) {
-                sb.AppendLine($"  {item.Key} {item.Value}");
+                sb.AppendLine($"  {item.Name} {item.Weight}");
             }
             sb.AppendLine();
 

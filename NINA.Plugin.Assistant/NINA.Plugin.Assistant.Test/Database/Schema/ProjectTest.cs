@@ -24,12 +24,16 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
             p1.MinimumTime = 90;
             p1.UseCustomHorizon = true;
 
-            Dictionary<string, double> rw = new Dictionary<string, double>();
-            rw.Add("a", 1);
-            rw.Add("b", 2);
-            p1.RuleWeights = rw;
+            p1.RuleWeights = new List<RuleWeight> {
+                        {new RuleWeight("a", .1) },
+                        {new RuleWeight("b", .2) },
+                    };
 
             Project p2 = (Project)p1.Clone();
+
+            p1.RuleWeights.Clear();
+            p1.RuleWeights.Add(new RuleWeight("c", .3));
+            p1.RuleWeights.Add(new RuleWeight("d", .4));
 
             p2.Name.Should().Be("p1N");
             p2.Description.Should().Be("p1D");
@@ -41,8 +45,13 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
             p2.MinimumAltitude.Should().Be(10);
             p2.MinimumTime.Should().Be(90);
             p2.UseCustomHorizon.Should().Be(true);
-            p2.RuleWeights["a"].Should().Be(1);
-            p2.RuleWeights["b"].Should().Be(2);
+            p2.RuleWeights.Count.Should().Be(2);
+            p2.RuleWeights[0].Weight.Should().Be(.1);
+            p2.RuleWeights[1].Weight.Should().Be(.2);
+
+            p1.RuleWeights.Count.Should().Be(2);
+            p1.RuleWeights[0].Weight.Should().Be(.3);
+            p1.RuleWeights[1].Weight.Should().Be(.4);
         }
 
     }

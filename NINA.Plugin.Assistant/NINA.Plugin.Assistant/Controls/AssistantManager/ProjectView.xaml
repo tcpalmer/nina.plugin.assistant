@@ -7,15 +7,19 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:rules="clr-namespace:Assistant.NINAPlugin.Controls.ValidationRules"
     xmlns:schema="clr-namespace:Assistant.NINAPlugin.Database.Schema"
+    xmlns:util="clr-namespace:NINA.Core.Utility;assembly=NINA.Core"
     d:DesignHeight="500"
     d:DesignWidth="800"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <ResourceDictionary Source="../Resources/Converters.xaml" />
+        <ResourceDictionary Source="../Resources/Resources.xaml" />
     </UserControl.Resources>
 
-    <StackPanel Margin="20,20,0,0" Orientation="Vertical" Width="600">
+    <StackPanel
+        Width="600"
+        Margin="20,20,0,0"
+        Orientation="Vertical">
         <Label
             Margin="0,0,0,16"
             Content="Project"
@@ -156,7 +160,7 @@
         <UniformGrid
             Width="280"
             Height="190"
-            Margin="12,20,0,6"
+            Margin="12,12,0,6"
             HorizontalAlignment="Left"
             Columns="2"
             Rows="7">
@@ -196,7 +200,7 @@
                 VerticalAlignment="Center"
                 FontWeight="Bold"
                 Text="Use Custom Horizon"
-                ToolTip="" />
+                ToolTip="Use local custom horizon" />
             <CheckBox
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
@@ -212,7 +216,7 @@
                 VerticalAlignment="Center"
                 FontWeight="Bold"
                 Text="Horizon Offset"
-                ToolTip="" />
+                ToolTip="Offset from custom horizon" />
             <TextBox MaxHeight="20" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox.Text>
                     <Binding Path="ProjectProxy.Project.HorizonOffset" UpdateSourceTrigger="LostFocus">
@@ -236,7 +240,7 @@
                 VerticalAlignment="Center"
                 FontWeight="Bold"
                 Text="Filter Switch Frequency"
-                ToolTip="" />
+                ToolTip="How often to switch filters, use zero to stay on filter until done" />
             <TextBox MaxHeight="20" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox.Text>
                     <Binding Path="ProjectProxy.Project.FilterSwitchFrequency" UpdateSourceTrigger="LostFocus">
@@ -259,8 +263,8 @@
             <TextBlock
                 VerticalAlignment="Center"
                 FontWeight="Bold"
-                Text="Dither Every"
-                ToolTip="" />
+                Text="Dither After Every"
+                ToolTip="Dither after exposures" />
             <TextBox MaxHeight="20" Visibility="{Binding ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox.Text>
                     <Binding Path="ProjectProxy.Project.DitherEvery" UpdateSourceTrigger="LostFocus">
@@ -284,7 +288,7 @@
                 VerticalAlignment="Center"
                 FontWeight="Bold"
                 Text="Enable Image Grader"
-                ToolTip="" />
+                ToolTip="Enable automatic grading of images to determine whether they are acceptable or not" />
             <CheckBox
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
@@ -295,7 +299,123 @@
                 Margin="3,3,0,0"
                 Text="{Binding ProjectProxy.Project.EnableGrader}"
                 Visibility="{Binding ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
         </UniformGrid>
+
+        <TextBlock
+            Margin="12,14,0,6"
+            FontSize="14"
+            FontWeight="Bold"
+            Text="Scoring Engine Rule Weights" />
+        <DataGrid
+            Height="100"
+            Margin="12,0,0,0"
+            AutoGenerateColumns="False"
+            BorderThickness="0"
+            CanUserAddRows="false"
+            HeadersVisibility="None"
+            HorizontalScrollBarVisibility="Disabled"
+            ItemsSource="{Binding RuleWeights}"
+            RowHeight="22"
+            VerticalScrollBarVisibility="Auto">
+
+            <DataGrid.Resources>
+                <util:BindingProxy x:Key="bindProxy" Data="{Binding}" />
+            </DataGrid.Resources>
+
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="MinHeight" Value="22" />
+                    <Setter Property="Margin" Value="5,3,5,3" />
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="{StaticResource ButtonBackgroundBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="False">
+                            <Setter Property="Background" Value="Transparent" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.CellStyle>
+
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="MinHeight" Value="22" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="{StaticResource SecondaryBackgroundBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="False">
+                            <Setter Property="Background" Value="Transparent" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+
+            <DataGrid.Columns>
+
+                <DataGridTemplateColumn
+                    Width="*"
+                    CanUserSort="False"
+                    Header="Rule">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock
+                                Width="Auto"
+                                Margin="0,0,0,0"
+                                Text="{Binding Name}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn
+                    Width="*"
+                    CanUserSort="False"
+                    Header="Weight"
+                    Visibility="{Binding Data.ShowProjectEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}, Source={StaticResource bindProxy}}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox MaxHeight="20">
+                                <TextBox.Text>
+                                    <Binding
+                                        Mode="TwoWay"
+                                        Path="Weight"
+                                        UpdateSourceTrigger="LostFocus">
+                                        <Binding.ValidationRules>
+                                            <rules:DoubleRangeRule>
+                                                <rules:DoubleRangeRule.ValidRange>
+                                                    <rules:DoubleRangeChecker Maximum="1" Minimum="0" />
+                                                </rules:DoubleRangeRule.ValidRange>
+                                            </rules:DoubleRangeRule>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </TextBox.Text>
+                            </TextBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn
+                    Width="*"
+                    CanUserSort="False"
+                    Header="Weight"
+                    Visibility="{Binding Data.ShowProjectEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}, Source={StaticResource bindProxy}}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock
+                                Width="Auto"
+                                Margin="0,0,0,0"
+                                Text="{Binding Weight}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+            </DataGrid.Columns>
+        </DataGrid>
 
         <UniformGrid
             Width="140"

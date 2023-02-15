@@ -57,6 +57,13 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 p1.DitherEvery.Should().Be(14);
                 p1.EnableGrader.Should().BeFalse();
 
+                p1.RuleWeights[0].Name.Should().Be("a");
+                p1.RuleWeights[1].Name.Should().Be("b");
+                p1.RuleWeights[2].Name.Should().Be("c");
+                p1.RuleWeights[0].Weight.Should().BeApproximately(.1, 0.001);
+                p1.RuleWeights[1].Weight.Should().BeApproximately(.2, 0.001);
+                p1.RuleWeights[2].Weight.Should().BeApproximately(.3, 0.001);
+
                 Target t1p1 = p1.Targets[0];
                 t1p1.Name = "M42";
                 t1p1.RA.Should().BeApproximately(83.82, 0.001);
@@ -80,6 +87,13 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 p2.FilterSwitchFrequency.Should().Be(14);
                 p2.DitherEvery.Should().Be(16);
                 p2.EnableGrader.Should().BeFalse();
+
+                p2.RuleWeights[0].Name.Should().Be("d");
+                p2.RuleWeights[1].Name.Should().Be("e");
+                p2.RuleWeights[2].Name.Should().Be("f");
+                p2.RuleWeights[0].Weight.Should().BeApproximately(.4, 0.001);
+                p2.RuleWeights[1].Weight.Should().BeApproximately(.5, 0.001);
+                p2.RuleWeights[2].Weight.Should().BeApproximately(.6, 0.001);
 
                 Target t1p2 = p2.Targets[0];
                 t1p2.Name = "IC1805";
@@ -199,6 +213,12 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p1.DitherEvery = 14;
                     p1.EnableGrader = false;
 
+                    p1.RuleWeights = new List<RuleWeight> {
+                        {new RuleWeight("a", .1) },
+                        {new RuleWeight("b", .2) },
+                        {new RuleWeight("c", .3) }
+                    };
+
                     Target t1 = new Target();
                     t1.Name = "M42";
                     t1.ra = TestUtil.M42.RADegrees;
@@ -240,6 +260,12 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p2.FilterSwitchFrequency = 14;
                     p2.DitherEvery = 16;
                     p2.EnableGrader = false;
+
+                    p2.RuleWeights = new List<RuleWeight> {
+                        {new RuleWeight("d", .4) },
+                        {new RuleWeight("e", .5) },
+                        {new RuleWeight("f", .6) }
+                    };
 
                     Target t2 = new Target();
                     t2.Name = "IC1805";
@@ -290,17 +316,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     throw e;
                 }
             }
-
         }
-
-        /*
-        private void SetDefaultRuleWeights(AssistantProjectPreferences prefs) {
-            Dictionary<string, IScoringRule> rules = ScoringRule.GetAllScoringRules();
-            foreach (KeyValuePair<string, IScoringRule> entry in rules) {
-                var rule = entry.Value;
-                prefs.AddRuleWeight(rule.Name, rule.DefaultWeight);
-            }
-        }*/
     }
-
 }

@@ -163,10 +163,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     p.EnableGrader = true;
                     p.MinimumAltitude = 22;
-                    p.RuleWeights = new Dictionary<string, double> {
-                        { "foo", 0.3 },
-                        { "bar", 0.8 },
-                        { "foo", 0.4 }
+                    p.RuleWeights = new List<RuleWeight> {
+                        {new RuleWeight("foo", 0.3) },
+                        {new RuleWeight("bar", 0.8) },
+                        {new RuleWeight("foo", 0.4) },
                     };
 
                     context.SaveChanges();

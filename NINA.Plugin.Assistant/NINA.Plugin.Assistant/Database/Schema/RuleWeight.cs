@@ -1,22 +1,51 @@
-﻿using System;
+﻿using Assistant.NINAPlugin.Util;
+using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public class RuleWeight : ICloneable {
+    public class RuleWeight : INotifyPropertyChanged, ICloneable {
 
         [Key] public int Id { get; set; }
-        [Required] public string Name { get; set; }
-        [Required] public double Weight { get; set; }
+        [Required] public string name { get; set; }
+        [Required] public double weight { get; set; }
+
+        [NotMapped]
+        public string Name {
+            get => name;
+            set {
+                name = value;
+                RaisePropertyChanged(nameof(Name));
+            }
+        }
+
+        [NotMapped]
+        public double Weight {
+            get => weight;
+            set {
+                weight = value;
+                RaisePropertyChanged(nameof(Weight));
+            }
+        }
 
         public virtual Project Project { get; set; }
 
         public RuleWeight() { }
 
         public RuleWeight(string name, double weight) {
+            Assert.isTrue(weight >= 0 && weight <= 1, "weight must be 0-1");
+
             Name = name;
             Weight = weight;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public object Clone() {
