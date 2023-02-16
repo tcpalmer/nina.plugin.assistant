@@ -15,7 +15,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
         [Key] public int Id { get; set; }
 
         [Required]
-        [StringLength(255, ErrorMessage = "Target name must be less than 256 characters")]
         public string name { get; set; }
 
         [Required] public double ra { get; set; }

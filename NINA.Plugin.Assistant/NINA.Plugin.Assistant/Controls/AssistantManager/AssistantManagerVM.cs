@@ -223,6 +223,31 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public void DeleteItem() {
             Logger.Info($"DELETE: {activeTreeDataItem.Header}");
         }
+
+        public static void PasteItem(object parent, object item) {
+            using (var context = new AssistantDatabaseInteraction().GetContext()) {
+                bool status = true;
+
+                switch (parent) {
+                    case Project project:
+                        Logger.Info($"PASTE: parent is Project {project.Name}, item is {item.GetType()}");
+                        status = context.PasteTarget((Project)parent, (Target)item);
+                        break;
+
+                    case Target target:
+                        Logger.Info($"PASTE: parent is Target {target.Name}, item is {item.GetType()}");
+                        break;
+                    default:
+                        Logger.Info($"PASTE parent is? {parent.GetType()}, item is {item.GetType()}");
+                        break;
+                }
+
+                if (!status) {
+                    Notification.ShowError("Failed to paste (see log for details)");
+                }
+            }
+        }
+
     }
 
     public enum TreeDataType {
@@ -253,7 +278,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             switch (context.Type) {
                 case MenuItemType.New: break;
                 case MenuItemType.Paste:
-                    Logger.Info($"PASTE: {Clipboard.GetItem().Header}");
+                    AssistantManagerVM.PasteItem(context.Item.Data, Clipboard.GetItem().Data);
                     break;
             }
         }

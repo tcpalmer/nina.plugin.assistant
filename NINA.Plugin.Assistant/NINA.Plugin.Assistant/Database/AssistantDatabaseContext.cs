@@ -2,6 +2,7 @@
 using NINA.Core.Utility;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Data.Entity.Migrations;
 using System.Data.Entity.ModelConfiguration.Conventions;
@@ -135,6 +136,49 @@ namespace Assistant.NINAPlugin.Database {
                     return false;
                 }
             }
+        }
+
+        public bool PasteTarget(Project project, Target existing) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    // TODO: did not work - got two copies of target AND two copies of the pasted target
+                    Target target = ShallowCopyEntity(existing);
+                    target.FilterPlans.Clear();
+                    target.Project = project;
+                    TargetSet.Add(target);
+                    SaveChanges();
+                    transaction.Commit();
+                    return true;
+                }
+                catch (Exception e) {
+                    Logger.Error($"Assistant: error pasting target: {e.Message} {e.StackTrace}");
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Makes a shallow copy of an entity object. This works much like a MemberwiseClone
+        /// but directly instantiates a new object and copies only properties that work with
+        /// EF and don't have the NotMappedAttribute.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type.</typeparam>
+        /// <param name="source">The source entity.</param>
+        public static TEntity ShallowCopyEntity<TEntity>(TEntity source) where TEntity : class, new() {
+
+            // Get properties from EF that are read/write and not marked witht he NotMappedAttribute
+            var sourceProperties = typeof(TEntity)
+                                    .GetProperties()
+                                    .Where(p => p.CanRead && p.CanWrite && p.GetCustomAttributes(typeof(NotMappedAttribute), true).Length == 0);
+            var newObj = new TEntity();
+
+            foreach (var property in sourceProperties) {
+                property.SetValue(newObj, property.GetValue(source, null), null);
+
+            }
+
+            return newObj;
+
         }
 
         public static long DateTimeToUnixSeconds(DateTime? dateTime) {
