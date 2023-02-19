@@ -74,24 +74,6 @@
                     </Button>
                 </StackPanel>
             </StackPanel>
-            <Popup
-                Width="200"
-                Height="150"
-                Margin="0,10,0,0"
-                IsOpen="{Binding ShowEditView}">
-                <Border
-                    Background="{StaticResource BackgroundBrush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="2">
-                    <StackPanel>
-                        <TextBlock Text="This will delete the project and all associated targets.  Are you sure?" />
-                        <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
-                            <Button Content="Delete" />
-                            <Button Content="Cancel" />
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-            </Popup>
         </StackPanel>
 
         <UniformGrid

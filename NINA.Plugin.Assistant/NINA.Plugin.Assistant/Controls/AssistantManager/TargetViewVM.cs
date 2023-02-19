@@ -91,7 +91,11 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private void Delete(object obj) {
-            managerVM.DeleteTarget(TargetProxy.Proxy);
+            string message = $"Delete target '{TargetProxy.Target.Name}'?  This cannot be undone.";
+            ConfirmationMessageBox messageBox = new ConfirmationMessageBox(message, "Delete");
+            if (messageBox.Show()) {
+                managerVM.DeleteTarget(TargetProxy.Proxy);
+            }
         }
 
     }

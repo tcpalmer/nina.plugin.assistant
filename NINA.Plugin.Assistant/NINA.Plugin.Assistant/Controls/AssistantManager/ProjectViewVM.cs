@@ -160,7 +160,11 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private void Delete(object obj) {
-            managerVM.DeleteProject(ProjectProxy.Proxy);
+            string message = $"Delete project '{ProjectProxy.Project.Name}' and any associated targets?  This cannot be undone.";
+            ConfirmationMessageBox messageBox = new ConfirmationMessageBox(message, "Delete");
+            if (messageBox.Show()) {
+                managerVM.DeleteProject(ProjectProxy.Proxy);
+            }
         }
 
         private void AddTarget(object obj) {
