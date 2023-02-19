@@ -29,6 +29,17 @@ namespace NINA.Plugin.Assistant.Test.Util {
         }
 
         [Test]
+        [TestCase(null, " (1)")]
+        [TestCase("", " (1)")]
+        [TestCase("foo", "foo (1)")]
+        [TestCase("foo (1)", "foo (2)")]
+        [TestCase("foo (99)", "foo (100)")]
+        public void TestCopiedItemName(string name, string expected) {
+            string sut = Utils.CopiedItemName(name);
+            sut.Should().Be(expected);
+        }
+
+        [Test]
         public void TestMidpoint() {
             DateTime start = DateTime.Now;
             DateTime mid = Utils.GetMidpointTime(start, start.AddHours(1));

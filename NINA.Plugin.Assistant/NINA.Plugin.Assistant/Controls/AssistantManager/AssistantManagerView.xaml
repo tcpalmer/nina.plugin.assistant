@@ -15,7 +15,7 @@
     </UserControl.Resources>
 
     <StackPanel Margin="0,20,0,20" Orientation="Horizontal">
-        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Height="600">
             <TreeView
                 x:Name="ProjectsTreeView"
                 Width="260"
@@ -48,6 +48,14 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </TreeView>
+        </Border>
+        <Border
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            Visibility="{Binding ShowProfileView}">
+            <StackPanel>
+                <local:ProfileView DataContext="{Binding ProfileViewVM}" />
+            </StackPanel>
         </Border>
         <Border
             BorderBrush="{StaticResource BorderBrush}"

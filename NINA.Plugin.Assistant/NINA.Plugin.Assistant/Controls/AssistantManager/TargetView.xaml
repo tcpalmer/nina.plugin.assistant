@@ -5,28 +5,34 @@
     xmlns:astro="clr-namespace:NINA.Astrometry;assembly=NINA.Astrometry"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
-    xmlns:uc="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:nrules="clr-namespace:NINA.Core.Utility.ValidationRules;assembly=NINA.Core"
     xmlns:rules="clr-namespace:Assistant.NINAPlugin.Controls.ValidationRules"
+    xmlns:uc="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     d:DesignHeight="500"
     d:DesignWidth="800"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <ResourceDictionary Source="../Resources/Converters.xaml" />
+        <ResourceDictionary Source="../Resources/Resources.xaml" />
     </UserControl.Resources>
 
     <StackPanel
         Width="600"
         Margin="20,20,0,0"
         Orientation="Vertical">
-        <Label
-            Margin="0,0,0,6"
-            Content="Target"
-            FontSize="18"
-            FontWeight="Bold" />
-        <uc:ActionMenuBar DataContext="{Binding}"/>
+        <StackPanel Orientation="Horizontal">
+            <Label
+                Margin="0,0,0,6"
+                Content="Target:"
+                FontSize="18"
+                FontWeight="Bold" />
+            <Label
+                Margin="0,0,0,6"
+                Content="{Binding TargetProxy.Target.Name}"
+                FontSize="18" />
+        </StackPanel>
+        <uc:ActionMenuBar DataContext="{Binding}" />
 
         <UniformGrid
             Width="320"

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Assistant.NINAPlugin.Plan.Scoring.Rules;
+using Assistant.NINAPlugin.Util;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -17,7 +19,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         Low, Normal, High
     }
 
-    public class Project : INotifyPropertyChanged, ICloneable {
+    public class Project : INotifyPropertyChanged {
 
         [Key] public int Id { get; set; }
         [Required] public string ProfileId { get; set; }
@@ -39,8 +41,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public int ditherEvery { get; set; }
         public int enableGrader { get; set; }
 
-        public List<RuleWeight> ruleWeights { get; set; }
-        public List<Target> Targets { get; set; }
+        public virtual List<RuleWeight> ruleWeights { get; set; }
+        public virtual List<Target> Targets { get; set; }
 
         public Project() { }
 
@@ -58,7 +60,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             DitherEvery = 0;
             EnableGrader = true;
 
-            ruleWeights = new List<RuleWeight>();
+            ruleWeights = GetDefaultRuleWeights();
             Targets = new List<Target>();
         }
 
@@ -144,6 +146,14 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
+        public bool ActiveNow {
+            get {
+                DateTime now = DateTime.Now;
+                return State == ProjectState.Active && StartDate <= now && now <= EndDate;
+            }
+        }
+
+        [NotMapped]
         public int MinimumTime {
             get => minimumTime;
             set {
@@ -220,18 +230,45 @@ namespace Assistant.NINAPlugin.Database.Schema {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public object Clone() {
-            Project clone = (Project)MemberwiseClone();
+        public Project GetPasteCopy(string newProfileId) {
+            Project project = new Project();
 
-            List<RuleWeight> list = new List<RuleWeight>();
-            if (ruleWeights != null) {
-                ruleWeights.ForEach((item) => {
-                    list.Add((RuleWeight)item.Clone());
-                });
+            project.ProfileId = newProfileId;
+            project.name = Utils.CopiedItemName(name);
+            project.description = description;
+            project.state_col = state_col;
+            project.priority_col = priority_col;
+            project.createDate = createDate;
+            project.activeDate = activeDate;
+            project.inactiveDate = inactiveDate;
+            project.startDate = startDate;
+            project.endDate = endDate;
+            project.minimumTime = minimumTime;
+            project.minimumAltitude = minimumAltitude;
+            project.useCustomHorizon = useCustomHorizon;
+            project.horizonOffset = horizonOffset;
+            project.filterSwitchFrequency = filterSwitchFrequency;
+            project.ditherEvery = ditherEvery;
+            project.enableGrader = enableGrader;
+
+            project.Targets = new List<Target>(Targets.Count);
+            Targets.ForEach(item => project.Targets.Add(item.GetPasteCopy(newProfileId)));
+
+            project.ruleWeights = new List<RuleWeight>(ruleWeights.Count);
+            ruleWeights.ForEach(item => project.ruleWeights.Add(item.GetPasteCopy()));
+
+            return project;
+        }
+
+        private List<RuleWeight> GetDefaultRuleWeights() {
+            Dictionary<string, IScoringRule> rules = ScoringRule.GetAllScoringRules();
+            List<RuleWeight> ruleWeights = new List<RuleWeight>(rules.Count);
+            foreach (KeyValuePair<string, IScoringRule> entry in rules) {
+                var rule = entry.Value;
+                ruleWeights.Add(new RuleWeight(rule.Name, rule.DefaultWeight));
             }
 
-            clone.RuleWeights = list;
-            return clone;
+            return ruleWeights;
         }
 
         public override string ToString() {
@@ -265,9 +302,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
     internal class ProjectConfiguration : EntityTypeConfiguration<Project> {
 
         public ProjectConfiguration() {
-            HasKey(x => new { x.Id });
-            Property(x => x.state_col).HasColumnName("state");
-            Property(x => x.priority_col).HasColumnName("priority");
+            HasKey(p => new { p.Id });
+            HasMany(p => p.Targets)
+                .WithRequired(e => e.Project)
+                .HasForeignKey(e => e.ProjectId);
+            HasMany(p => p.ruleWeights)
+                .WithRequired(r => r.Project)
+                .HasForeignKey(r => r.ProjectId);
+            Property(p => p.state_col).HasColumnName("state");
+            Property(p => p.priority_col).HasColumnName("priority");
         }
     }
 }

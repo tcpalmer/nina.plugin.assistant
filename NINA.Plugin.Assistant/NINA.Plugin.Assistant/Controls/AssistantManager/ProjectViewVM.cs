@@ -34,6 +34,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             CancelCommand = new RelayCommand(Cancel);
             CopyCommand = new RelayCommand(Copy);
             DeleteCommand = new RelayCommand(Delete);
+            AddTargetCommand = new RelayCommand(AddTarget);
+            PasteTargetCommand = new RelayCommand(PasteTarget);
         }
 
         private void InitializeRuleWeights(Project project) {
@@ -116,11 +118,17 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        public bool PasteEnabled {
+            get => Clipboard.HasType(TreeDataType.Target);
+        }
+
         public ICommand EditCommand { get; private set; }
         public ICommand SaveCommand { get; private set; }
         public ICommand CancelCommand { get; private set; }
         public ICommand CopyCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }
+        public ICommand AddTargetCommand { get; private set; }
+        public ICommand PasteTargetCommand { get; private set; }
 
         private void Edit(object obj) {
             ProjectProxy.PropertyChanged += ProjectProxy_PropertyChanged;
@@ -152,7 +160,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private void Delete(object obj) {
-            managerVM.DeleteItem();
+            managerVM.DeleteProject(ProjectProxy.Proxy);
+        }
+
+        private void AddTarget(object obj) {
+            managerVM.AddNewTarget(ProjectProxy.Proxy);
+        }
+
+        private void PasteTarget(object obj) {
+            managerVM.PasteTarget(ProjectProxy.Proxy);
         }
 
     }

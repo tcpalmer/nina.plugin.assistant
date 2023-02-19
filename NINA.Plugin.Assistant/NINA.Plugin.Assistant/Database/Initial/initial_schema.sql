@@ -30,9 +30,9 @@ CREATE TABLE IF NOT EXISTS `target` (
 	`epochcode`		INTEGER NOT NULL,
 	`rotation`		REAL,
 	`roi`			REAL,
-	`project_id`	INTEGER,
-	PRIMARY KEY(`id`),
-	FOREIGN KEY(`project_id`) REFERENCES `project`(`Id`)
+	`projectid`		INTEGER,
+	FOREIGN KEY(`projectId`) REFERENCES `project`(`Id`),
+	PRIMARY KEY(`id`)
 );
 
 CREATE TABLE IF NOT EXISTS `filterplan` (
@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS `filterplan` (
 	`acquired`		INTEGER,
 	`accepted`		INTEGER,
 	`targetid`		INTEGER,
-	PRIMARY KEY(`Id`),
-	FOREIGN KEY(`targetId`) REFERENCES `target`(`Id`)
+	FOREIGN KEY(`targetId`) REFERENCES `target`(`Id`),
+	PRIMARY KEY(`Id`)
 );
 
 CREATE TABLE IF NOT EXISTS `filterpreference` (
@@ -68,8 +68,8 @@ CREATE TABLE IF NOT EXISTS `ruleweight` (
 	`Id`			INTEGER NOT NULL,
 	`name`			TEXT NOT NULL,
     `weight`		REAL NOT NULL,
-	`project_id`	INTEGER,
-	FOREIGN KEY(`project_id`) REFERENCES `project`(`Id`)
+	`projectid`		INTEGER,
+	FOREIGN KEY(`projectId`) REFERENCES `project`(`Id`)
 	PRIMARY KEY(`Id`)
 );
 

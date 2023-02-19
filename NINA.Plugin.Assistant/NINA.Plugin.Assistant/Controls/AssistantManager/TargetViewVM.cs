@@ -91,7 +91,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private void Delete(object obj) {
-            managerVM.DeleteItem();
+            managerVM.DeleteTarget(TargetProxy.Proxy);
         }
 
     }

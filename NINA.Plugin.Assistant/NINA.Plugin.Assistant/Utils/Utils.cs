@@ -29,6 +29,22 @@ namespace Assistant.NINAPlugin.Util {
             return 0;
         }
 
+        public static string CopiedItemName(string name) {
+            if (string.IsNullOrEmpty(name)) {
+                return " (1)";
+            }
+
+            Regex re = new Regex(@"^(.*) \((\d+)\)$");
+            Match match = re.Match(name);
+            if (match.Success) {
+                string baseName = match.Groups[1].Value;
+                int count = int.Parse(match.Groups[2].Value);
+                return $"{baseName} ({count + 1})";
+            }
+
+            return name + " (1)";
+        }
+
         public static string FormatDateTimeFull(DateTime? dateTime) {
             return dateTime == null ? "n/a" : String.Format("{0:MM/dd/yyyy HH:mm:ss zzzz}", dateTime);
         }

@@ -1,5 +1,4 @@
 ﻿using NINA.Core.Model.Equipment;
-using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,7 +11,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         [Description("1x1")] OneXOne,
     }
 
-    public class FilterPlan : INotifyPropertyChanged, ICloneable {
+    public class FilterPlan : INotifyPropertyChanged {
 
         [Key] public int Id { get; set; }
         [Required] public string filterName { get; set; }
@@ -27,6 +26,9 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public int desired { get; set; }
         public int acquired { get; set; }
         public int accepted { get; set; }
+
+        [ForeignKey("Target")] public int TargetId { get; set; }
+        public virtual Target Target { get; set; }
 
         [NotMapped]
         public string FilterName {
@@ -118,9 +120,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
             }
         }
 
-        [ForeignKey("Target")] public int targetId { get; set; }
-        public Target Target { get; set; }
-
         public FilterPlan() { }
 
         public FilterPlan(string profileId, string filterName) {
@@ -141,8 +140,21 @@ namespace Assistant.NINAPlugin.Database.Schema {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public object Clone() {
-            return MemberwiseClone();
+        public FilterPlan GetPasteCopy(string newProfileId) {
+            FilterPlan filterPlan = new FilterPlan();
+
+            filterPlan.filterName = filterName;
+            filterPlan.profileId = newProfileId;
+            filterPlan.exposure = exposure;
+            filterPlan.gain = gain;
+            filterPlan.offset = offset;
+            filterPlan.bin = bin;
+            filterPlan.readoutMode = readoutMode;
+            filterPlan.desired = desired;
+            filterPlan.acquired = 0;
+            filterPlan.accepted = 0;
+
+            return filterPlan;
         }
 
         public override string ToString() {

@@ -5,12 +5,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity.ModelConfiguration;
 using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public class Target : INotifyPropertyChanged, ICloneable {
+    public class Target : INotifyPropertyChanged {
 
         [Key] public int Id { get; set; }
 
@@ -23,11 +24,14 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public double rotation { get; set; }
         public double roi { get; set; }
 
+        [ForeignKey("Project")] public int ProjectId { get; set; }
         public virtual Project Project { get; set; }
 
-        public List<FilterPlan> FilterPlans { get; set; }
+        public virtual List<FilterPlan> FilterPlans { get; set; }
 
         public Target() {
+            ra = 0;
+            dec = 0;
             epochCode = (int)Epoch.J2000;
             rotation = 0;
             roi = 1;
@@ -242,9 +246,18 @@ namespace Assistant.NINAPlugin.Database.Schema {
             dec = Coordinates.Dec;
         }
 
-        public object Clone() {
-            return MemberwiseClone();
-            // TODO: filter plans?
+        public Target GetPasteCopy(string profileId) {
+            Target target = new Target();
+
+            target.name = Utils.CopiedItemName(name);
+            target.ra = ra;
+            target.dec = dec;
+            target.epochCode = epochCode;
+            target.rotation = rotation;
+            target.roi = roi;
+            FilterPlans.ForEach(item => target.FilterPlans.Add(item.GetPasteCopy(profileId)));
+
+            return target;
         }
 
         public override string ToString() {
@@ -259,6 +272,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
             return sb.ToString();
         }
+    }
 
+    internal class TargetConfiguration : EntityTypeConfiguration<Target> {
+
+        public TargetConfiguration() {
+            HasKey(t => new { t.Id });
+            HasMany(t => t.FilterPlans)
+             .WithRequired(e => e.Target)
+             .HasForeignKey(e => e.TargetId);
+        }
     }
 }

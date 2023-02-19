@@ -1,5 +1,4 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
-using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -9,7 +8,7 @@ using System.Text;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public class FilterPreference : INotifyPropertyChanged, ICloneable {
+    public class FilterPreference : INotifyPropertyChanged {
 
         [Key] public int Id { get; set; }
         [Required] public string profileId { get; set; }
@@ -128,10 +127,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public event PropertyChangedEventHandler PropertyChanged;
         protected void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public object Clone() {
-            return MemberwiseClone();
         }
 
     }

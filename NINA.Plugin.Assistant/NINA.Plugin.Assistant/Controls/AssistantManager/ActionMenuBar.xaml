@@ -21,8 +21,9 @@
             HorizontalContentAlignment="Right"
             Command="{Binding EditCommand}"
             IsEnabled="{Binding ShowEditView, Converter={StaticResource InverseBooleanConverter}}"
-            Style="{StaticResource TertiaryBackgroundButton}"
-            ToolTip="Edit">
+            Style="{StaticResource BackgroundButton}"
+            ToolTip="Edit"
+            ToolTipService.ShowOnDisabled="True">
             <Grid>
                 <Path
                     Margin="5"
@@ -39,8 +40,9 @@
             HorizontalContentAlignment="Right"
             Command="{Binding CopyCommand}"
             IsEnabled="{Binding ShowEditView, Converter={StaticResource InverseBooleanConverter}}"
-            Style="{StaticResource TertiaryBackgroundButton}"
-            ToolTip="Copy">
+            Style="{StaticResource BackgroundButton}"
+            ToolTip="Copy"
+            ToolTipService.ShowOnDisabled="True">
             <Grid>
                 <Path
                     Margin="5"
@@ -57,8 +59,9 @@
             HorizontalContentAlignment="Right"
             Command="{Binding DeleteCommand}"
             IsEnabled="{Binding ShowEditView, Converter={StaticResource InverseBooleanConverter}}"
-            Style="{StaticResource TertiaryBackgroundButton}"
-            ToolTip="Delete">
+            Style="{StaticResource BackgroundButton}"
+            ToolTip="Delete"
+            ToolTipService.ShowOnDisabled="True">
             <Grid>
                 <Path
                     Margin="5"
@@ -73,14 +76,15 @@
             Margin="10,0,0,0"
             VerticalAlignment="Center"
             HorizontalContentAlignment="Right"
-            Command="{Binding CancelCommand}"
+            Command="{Binding SaveCommand}"
             IsEnabled="{Binding ShowEditView}"
-            Style="{StaticResource TertiaryBackgroundButton}"
-            ToolTip="Cancel">
+            Style="{StaticResource BackgroundButton}"
+            ToolTip="Save"
+            ToolTipService.ShowOnDisabled="True">
             <Grid>
                 <Path
                     Margin="5"
-                    Data="{StaticResource CancelSVG}"
+                    Data="{StaticResource SaveSVG}"
                     Fill="{StaticResource ButtonForegroundBrush}"
                     Stretch="Uniform" />
             </Grid>
@@ -91,14 +95,15 @@
             Margin="10,0,0,0"
             VerticalAlignment="Center"
             HorizontalContentAlignment="Right"
-            Command="{Binding SaveCommand}"
+            Command="{Binding CancelCommand}"
             IsEnabled="{Binding ShowEditView}"
-            Style="{StaticResource TertiaryBackgroundButton}"
-            ToolTip="Save">
+            Style="{StaticResource BackgroundButton}"
+            ToolTip="Cancel"
+            ToolTipService.ShowOnDisabled="True">
             <Grid>
                 <Path
                     Margin="5"
-                    Data="{StaticResource SaveSVG}"
+                    Data="{StaticResource CancelSVG}"
                     Fill="{StaticResource ButtonForegroundBrush}"
                     Stretch="Uniform" />
             </Grid>

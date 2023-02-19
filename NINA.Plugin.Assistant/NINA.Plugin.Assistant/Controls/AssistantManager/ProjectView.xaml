@@ -21,12 +21,78 @@
         Width="600"
         Margin="20,20,0,0"
         Orientation="Vertical">
-        <Label
-            Margin="0,0,0,6"
-            Content="Project"
-            FontSize="18"
-            FontWeight="Bold" />
-        <uc:ActionMenuBar DataContext="{Binding}"/>
+        <StackPanel Orientation="Horizontal">
+            <Label
+                Margin="0,0,0,6"
+                Content="Project:"
+                FontSize="18"
+                FontWeight="Bold" />
+            <Label
+                Margin="0,0,0,6"
+                Content="{Binding ProjectProxy.Project.Name}"
+                FontSize="18" />
+        </StackPanel>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <uc:ActionMenuBar DataContext="{Binding}" />
+                <StackPanel Margin="18,0,0,16" Orientation="Horizontal">
+                    <Button
+                        Width="25"
+                        Height="25"
+                        Margin="10,0,0,0"
+                        VerticalAlignment="Center"
+                        HorizontalContentAlignment="Right"
+                        Command="{Binding AddTargetCommand}"
+                        Style="{StaticResource BackgroundButton}"
+                        ToolTip="Add target">
+                        <Grid>
+                            <Path
+                                Margin="5"
+                                Data="{StaticResource NewSVG}"
+                                Fill="{StaticResource ButtonForegroundBrush}"
+                                Stretch="Uniform" />
+                        </Grid>
+                    </Button>
+                    <Button
+                        Width="25"
+                        Height="25"
+                        Margin="10,0,0,0"
+                        VerticalAlignment="Center"
+                        HorizontalContentAlignment="Right"
+                        Command="{Binding PasteTargetCommand}"
+                        IsEnabled="{Binding PasteEnabled}"
+                        Style="{StaticResource BackgroundButton}"
+                        ToolTip="Paste target"
+                        ToolTipService.ShowOnDisabled="True">
+                        <Grid>
+                            <Path
+                                Margin="5"
+                                Data="{StaticResource PasteSVG}"
+                                Fill="{StaticResource ButtonForegroundBrush}"
+                                Stretch="Uniform" />
+                        </Grid>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+            <Popup
+                Width="200"
+                Height="150"
+                Margin="0,10,0,0"
+                IsOpen="{Binding ShowEditView}">
+                <Border
+                    Background="{StaticResource BackgroundBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="2">
+                    <StackPanel>
+                        <TextBlock Text="This will delete the project and all associated targets.  Are you sure?" />
+                        <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
+                            <Button Content="Delete" />
+                            <Button Content="Cancel" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Popup>
+        </StackPanel>
 
         <UniformGrid
             Width="280"

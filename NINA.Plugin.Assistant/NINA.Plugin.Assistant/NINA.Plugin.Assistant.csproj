@@ -306,6 +306,10 @@
       <DependentUpon>FilterPlanView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\AssistantManager\FilterPlanViewVM.cs" />
+    <Compile Include="Controls\AssistantManager\ProfileView.xaml.cs">
+      <DependentUpon>ProfileView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AssistantManager\ProfileViewVM.cs" />
     <Compile Include="Controls\AssistantManager\TargetView.xaml.cs">
       <DependentUpon>TargetView.xaml</DependentUpon>
     </Compile>
@@ -319,7 +323,11 @@
     <Compile Include="Controls\Converters\AltitudeChoicesConverter.cs" />
     <Compile Include="Controls\Converters\DegreesDisplayConverter.cs" />
     <Compile Include="Controls\Converters\ImagingMinutesConverter.cs" />
+    <Compile Include="Controls\Converters\StatusConverter.cs" />
     <Compile Include="Controls\Converters\MinutesToHMConverter.cs" />
+    <Compile Include="Controls\Resources\SVGDictionary.xaml.cs">
+      <DependentUpon>SVGDictionary.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ValidationRules\ValidationRules.cs" />
     <Compile Include="Database\AssistantDatabaseInteraction.cs" />
     <Compile Include="Database\AssistantDatabaseContext.cs" />
@@ -385,6 +393,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\AssistantManager\ProfileView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\AssistantManager\ProjectView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -398,6 +410,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Resources\Resources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Resources\SVGDictionary.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

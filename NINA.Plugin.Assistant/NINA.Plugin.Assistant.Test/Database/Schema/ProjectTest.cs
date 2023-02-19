@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Util;
 using FluentAssertions;
 using NUnit.Framework;
 using System;
@@ -10,7 +11,7 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
     public class ProjectTest {
 
         [Test]
-        public void TestClone() {
+        public void TestGetPasteCopy() {
             DateTime onDate = DateTime.Now.Date;
             Project p1 = new Project("profileId");
             p1.Name = "p1N";
@@ -29,13 +30,14 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
                         {new RuleWeight("b", .2) },
                     };
 
-            Project p2 = (Project)p1.Clone();
+            Project p2 = (Project)p1.GetPasteCopy("profileId2");
 
             p1.RuleWeights.Clear();
             p1.RuleWeights.Add(new RuleWeight("c", .3));
             p1.RuleWeights.Add(new RuleWeight("d", .4));
 
-            p2.Name.Should().Be("p1N");
+            p2.Name.Should().Be(Utils.CopiedItemName("p1N"));
+            p2.ProfileId.Should().Be("profileId2");
             p2.Description.Should().Be("p1D");
             p2.ActiveDate.Should().Be(onDate);
             p2.StartDate.Should().Be(onDate.AddDays(1));

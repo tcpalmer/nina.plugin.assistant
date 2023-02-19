@@ -2,7 +2,6 @@
 using NINA.Core.Utility;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Data.Entity.Migrations;
 using System.Data.Entity.ModelConfiguration.Conventions;
@@ -31,6 +30,7 @@ namespace Assistant.NINAPlugin.Database {
 
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
             modelBuilder.Configurations.Add(new ProjectConfiguration());
+            modelBuilder.Configurations.Add(new TargetConfiguration());
             modelBuilder.Configurations.Add(new FilterPreferenceConfiguration());
             modelBuilder.Configurations.Add(new AcquiredImageConfiguration());
 
@@ -57,12 +57,25 @@ namespace Assistant.NINAPlugin.Database {
             return filterPrefs.ToList();
         }
 
+        public Project GetProject(int projectId) {
+            return ProjectSet
+                .Include("targets.filterplans")
+                .Include("ruleweights")
+                .Where(p => p.Id == projectId)
+                .FirstOrDefault();
+        }
+
         public Target GetTarget(int projectId, int targetId) {
-            return TargetSet.Include("filterplans").Where(t => t.Project.Id == projectId && t.Id == targetId).First();
+            return TargetSet
+                .Include("filterplans")
+                .Where(t => t.Project.Id == projectId && t.Id == targetId)
+                .FirstOrDefault();
         }
 
         public FilterPlan GetFilterPlan(int targetId, string filterName) {
-            return FilterPlanSet.Where(f => f.targetId == targetId && f.filterName == filterName).First();
+            return FilterPlanSet
+                .Where(f => f.TargetId == targetId && f.filterName == filterName)
+                .FirstOrDefault();
         }
 
         public List<AcquiredImage> GetAcquiredImages(int targetId, string filterName) {
@@ -73,7 +86,23 @@ namespace Assistant.NINAPlugin.Database {
             return images.ToList();
         }
 
-        public bool SaveProject(Project project) {
+        public Project AddNewProject(Project project) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    ProjectSet.Add(project);
+                    SaveChanges();
+                    transaction.Commit();
+                    return GetProject(project.Id);
+                }
+                catch (Exception e) {
+                    Logger.Error($"Assistant: error adding new project: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
+                }
+            }
+        }
+
+        public Project SaveProject(Project project) {
             Logger.Debug($"Assistant: saving Project Id={project.Id} Name={project.Name}");
             using (var transaction = Database.BeginTransaction()) {
                 try {
@@ -81,26 +110,114 @@ namespace Assistant.NINAPlugin.Database {
                     project.RuleWeights.ForEach(item => RuleWeightSet.AddOrUpdate(item));
                     SaveChanges();
                     transaction.Commit();
-                    return true;
+                    return GetProject(project.Id);
                 }
                 catch (Exception e) {
                     Logger.Error($"Assistant: error persisting Project: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
+                }
+            }
+        }
+
+        public Project PasteProject(string profileId, Project source) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    Project project = source.GetPasteCopy(profileId);
+                    ProjectSet.Add(project);
+                    SaveChanges();
+                    transaction.Commit();
+                    return GetProject(project.Id);
+                }
+                catch (Exception e) {
+                    Logger.Error($"Assistant: error pasting project: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
+                }
+            }
+        }
+
+        public bool DeleteProject(Project project) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    project = GetProject(project.Id);
+                    ProjectSet.Remove(project);
+                    SaveChanges();
+                    transaction.Commit();
+                    return true;
+                }
+                catch (Exception e) {
+                    Logger.Error($"Assistant: error deleting project: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
                     return false;
                 }
             }
         }
 
-        public bool SaveTarget(Target target) {
+        public Target AddNewTarget(Project project, Target target) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    project = GetProject(project.Id);
+                    project.Targets.Add(target);
+                    SaveChanges();
+                    transaction.Commit();
+                    return GetTarget(target.Project.Id, target.Id);
+                }
+                catch (Exception e) {
+                    Logger.Error($"Assistant: error adding new target: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
+                }
+            }
+        }
+
+        public Target SaveTarget(Target target) {
             Logger.Debug($"Assistant: saving Target Id={target.Id} Name={target.Name}");
             using (var transaction = Database.BeginTransaction()) {
                 try {
                     TargetSet.AddOrUpdate(target);
                     SaveChanges();
                     transaction.Commit();
-                    return true;
+                    return GetTarget(target.Project.Id, target.Id);
                 }
                 catch (Exception e) {
                     Logger.Error($"Assistant: error persisting Target: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
+                }
+            }
+        }
+
+        public Target PasteTarget(Project project, Target source) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    Target target = source.GetPasteCopy(project.ProfileId);
+                    project = GetProject(project.Id);
+                    project.Targets.Add(target);
+                    SaveChanges();
+                    transaction.Commit();
+                    return GetTarget(project.Id, target.Id);
+                }
+                catch (Exception e) {
+                    Logger.Error($"Assistant: error pasting target: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
+                }
+            }
+        }
+
+        public bool DeleteTarget(Target target) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    target = GetTarget(target.ProjectId, target.Id);
+                    TargetSet.Remove(target);
+                    SaveChanges();
+                    transaction.Commit();
+                    return true;
+                }
+                catch (Exception e) {
+                    Logger.Error($"Assistant: error deleting target: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
                     return false;
                 }
             }
@@ -117,6 +234,7 @@ namespace Assistant.NINAPlugin.Database {
                 }
                 catch (Exception e) {
                     Logger.Error($"Assistant: error persisting Filter Plan: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
                     return false;
                 }
             }
@@ -133,52 +251,10 @@ namespace Assistant.NINAPlugin.Database {
                 }
                 catch (Exception e) {
                     Logger.Error($"Assistant: error persisting Filter Preferences: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
                     return false;
                 }
             }
-        }
-
-        public bool PasteTarget(Project project, Target existing) {
-            using (var transaction = Database.BeginTransaction()) {
-                try {
-                    // TODO: did not work - got two copies of target AND two copies of the pasted target
-                    Target target = ShallowCopyEntity(existing);
-                    target.FilterPlans.Clear();
-                    target.Project = project;
-                    TargetSet.Add(target);
-                    SaveChanges();
-                    transaction.Commit();
-                    return true;
-                }
-                catch (Exception e) {
-                    Logger.Error($"Assistant: error pasting target: {e.Message} {e.StackTrace}");
-                    return false;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Makes a shallow copy of an entity object. This works much like a MemberwiseClone
-        /// but directly instantiates a new object and copies only properties that work with
-        /// EF and don't have the NotMappedAttribute.
-        /// </summary>
-        /// <typeparam name="TEntity">The entity type.</typeparam>
-        /// <param name="source">The source entity.</param>
-        public static TEntity ShallowCopyEntity<TEntity>(TEntity source) where TEntity : class, new() {
-
-            // Get properties from EF that are read/write and not marked witht he NotMappedAttribute
-            var sourceProperties = typeof(TEntity)
-                                    .GetProperties()
-                                    .Where(p => p.CanRead && p.CanWrite && p.GetCustomAttributes(typeof(NotMappedAttribute), true).Length == 0);
-            var newObj = new TEntity();
-
-            foreach (var property in sourceProperties) {
-                property.SetValue(newObj, property.GetValue(source, null), null);
-
-            }
-
-            return newObj;
-
         }
 
         public static long DateTimeToUnixSeconds(DateTime? dateTime) {
@@ -189,27 +265,35 @@ namespace Assistant.NINAPlugin.Database {
             return CoreUtil.UnixTimeStampToDateTime(seconds == null ? 0 : seconds.Value);
         }
 
+        private static void RollbackTransaction(DbContextTransaction transaction) {
+            try {
+                Logger.Warning("Assistant: rolling back database changes");
+                transaction.Rollback();
+            }
+            catch (Exception e) {
+                Logger.Error($"Assistant: error executing transaction rollback: {e.Message} {e.StackTrace}");
+            }
+        }
+
         private class CreateOrMigrateDatabaseInitializer<TContext> : CreateDatabaseIfNotExists<TContext>,
                 IDatabaseInitializer<TContext> where TContext : AssistantDatabaseContext {
 
             void IDatabaseInitializer<TContext>.InitializeDatabase(TContext context) {
 
                 if (!DatabaseExists(context)) {
-
                     Logger.Debug("Assistant database: creating database schema");
-                    try {
-                        context.Database.BeginTransaction();
-
-                        // TODO: make this locate in the Assembly ...
-                        string initial = "C:\\Users\\Tom\\source\\repos\\nina.plugin.assistant\\NINA.Plugin.Assistant\\NINA.Plugin.Assistant\\Database\\Initial";
-                        var initial_schema = Path.Combine(initial, "initial_schema.sql");
-                        context.Database.ExecuteSqlCommand(File.ReadAllText(initial_schema));
-
-                        context.Database.CurrentTransaction.Commit();
-                    }
-                    catch (Exception ex) {
-                        context.Database.CurrentTransaction.Rollback();
-                        Logger.Error(ex);
+                    using (var transaction = context.Database.BeginTransaction()) {
+                        try {
+                            // TODO: make this locate in the Assembly ...
+                            string initial = "C:\\Users\\Tom\\source\\repos\\nina.plugin.assistant\\NINA.Plugin.Assistant\\NINA.Plugin.Assistant\\Database\\Initial";
+                            var initial_schema = Path.Combine(initial, "initial_schema.sql");
+                            context.Database.ExecuteSqlCommand(File.ReadAllText(initial_schema));
+                            transaction.Commit();
+                        }
+                        catch (Exception e) {
+                            Logger.Error($"Assistant: error creating or initializing database: {e.Message} {e.StackTrace}");
+                            RollbackTransaction(transaction);
+                        }
                     }
                 }
             }
@@ -220,5 +304,6 @@ namespace Assistant.NINAPlugin.Database {
             }
 
         }
+
     }
 }

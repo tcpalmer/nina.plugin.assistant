@@ -183,6 +183,46 @@ namespace NINA.Plugin.Assistant.Test.Database {
             }
         }
 
+        [Test, Order(4)]
+        [NonParallelizable]
+        public void TestPasteProject() {
+            using (var context = db.GetContext()) {
+                List<Project> projects = context.GetAllProjects(profileId);
+                projects.Count.Should().Be(2);
+                Project p2 = projects[1];
+
+                Target p2t1 = p2.Targets.First();
+                TestContext.WriteLine($"P2T1: {p2t1}");
+
+                Project pasted = context.PasteProject("abcd-9876", p2);
+                pasted.Should().NotBeNull();
+
+                Target t = pasted.Targets.First();
+                t.ra = 1.23;
+                context.SaveTarget(t);
+
+                Project pasted2 = context.PasteProject("abcd-9876", pasted);
+                Target pasted2t1 = pasted2.Targets.First();
+                TestContext.WriteLine($"PS2T1: {pasted2t1}");
+            }
+        }
+
+        [Test, Order(5)]
+        [NonParallelizable]
+        public void TestPasteTarget() {
+            using (var context = db.GetContext()) {
+
+                List<Project> projects = context.GetAllProjects(profileId);
+                projects.Count.Should().Be(2);
+
+                Project p1 = projects[0];
+                Project p2 = projects[1];
+                Target p2t1 = p2.Targets[0];
+
+                context.PasteTarget(p1, p2t1).Should().NotBeNull();
+            }
+        }
+
         private void AssertFilterPlan(FilterPlan filterPlan, string filterName, int exp, int desired) {
             filterPlan.FilterName.Should().Be(filterName);
             filterPlan.Exposure.Should().Be(exp);

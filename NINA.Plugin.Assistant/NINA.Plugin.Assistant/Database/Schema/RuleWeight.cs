@@ -1,5 +1,4 @@
 ﻿using Assistant.NINAPlugin.Util;
-using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,7 +7,7 @@ using System.Text;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public class RuleWeight : INotifyPropertyChanged, ICloneable {
+    public class RuleWeight : INotifyPropertyChanged {
 
         [Key] public int Id { get; set; }
         [Required] public string name { get; set; }
@@ -32,6 +31,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             }
         }
 
+        [ForeignKey("Project")] public int ProjectId { get; set; }
         public virtual Project Project { get; set; }
 
         public RuleWeight() { }
@@ -48,8 +48,13 @@ namespace Assistant.NINAPlugin.Database.Schema {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public object Clone() {
-            return MemberwiseClone();
+        public RuleWeight GetPasteCopy() {
+            RuleWeight ruleWeight = new RuleWeight {
+                name = name,
+                weight = weight
+            };
+
+            return ruleWeight;
         }
 
         public override string ToString() {
@@ -59,7 +64,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
             return sb.ToString();
         }
-
     }
 
 }
