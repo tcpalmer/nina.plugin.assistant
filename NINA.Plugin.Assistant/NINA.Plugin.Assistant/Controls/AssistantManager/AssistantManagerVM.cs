@@ -395,34 +395,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        // TODO: this should go away - legacy from context menu approach
-        /*
-        public static void PasteItem(TreeDataItem parentTreeDataItem, object parent, object existing) {
-            using (var context = new AssistantDatabaseInteraction().GetContext()) {
-                bool status = true;
-
-                switch (parent) {
-                    case Project project:
-                        Logger.Info($"PASTE: parent is Project {project.Name}, item is {existing.GetType()}");
-                        status = context.PasteTarget((Project)parent, (Target)existing);
-                        break;
-
-                    case Target target:
-                        Logger.Info($"PASTE: parent is Target {target.Name}, item is {existing.GetType()}");
-                        break;
-                    default:
-                        Logger.Info($"PASTE parent is? {parent.GetType()}, item is {existing.GetType()}");
-                        break;
-                }
-
-                if (!status) {
-                    Notification.ShowError("Failed to paste (see log for details)");
-                }
-
-                // TODO: we have to reload parentTreeDataItem children and get it to redisplay
-                // We could have the paste op return the parent with all children (old and new)
-            }
-        }*/
     }
 
     public enum TreeDataType {
@@ -442,92 +414,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             TreeParent = parent;
             Data = data;
             Header = name;
-
-            if (Type != TreeDataType.Folder) {
-                MouseRightButtonDown += TreeDataItem_MouseRightButtonDown;
-            }
-        }
-
-        private static RelayCommand menuItemCommand = new RelayCommand(MenuItemCommandExecute, MenuItemCommandCanExecute);
-
-        private static void MenuItemCommandExecute(object obj) {
-            MenuItemContext context = obj as MenuItemContext;
-            switch (context.Type) {
-                case MenuItemType.New: break;
-                case MenuItemType.Paste:
-                    //AssistantManagerVM.PasteItem(context.Item, context.Item.Data, Clipboard.GetItem().Data);
-                    break;
-            }
-        }
-
-        private static bool MenuItemCommandCanExecute(object obj) {
-            MenuItemContext context = obj as MenuItemContext;
-            if (context == null) {
-                return false;
-            }
-
-            if (context.Type != MenuItemType.Paste) {
-                return true;
-            }
-
-            switch (context.Item.Type) {
-                case TreeDataType.Profile: return Clipboard.HasType(TreeDataType.Project);
-                case TreeDataType.Project: return Clipboard.HasType(TreeDataType.Target);
-                case TreeDataType.Target: return Clipboard.HasType(TreeDataType.FilterPlan);
-                default: return false;
-            }
-        }
-
-        private void TreeDataItem_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
-            ContextMenu = GetContextMenu();
-            e.Handled = true;
-        }
-
-        private ContextMenu GetContextMenu() {
-            ContextMenu contextMenu = new ContextMenu();
-
-            switch (Type) {
-                case TreeDataType.Profile:
-                    contextMenu.Items.Add(GetMenuItem("New Project", MenuItemType.New));
-                    contextMenu.Items.Add(GetMenuItem("Paste Project", MenuItemType.Paste));
-                    break;
-                case TreeDataType.Project:
-                    contextMenu.Items.Add(GetMenuItem("New Target", MenuItemType.New));
-                    contextMenu.Items.Add(GetMenuItem("Paste Target", MenuItemType.Paste));
-                    break;
-                case TreeDataType.Target:
-                    contextMenu.Items.Add(GetMenuItem("New Filter Plan", MenuItemType.New));
-                    contextMenu.Items.Add(GetMenuItem("Paste Filter Plan", MenuItemType.Paste));
-                    break;
-                case TreeDataType.FilterPlan:
-                    break;
-                default:
-                    break;
-            }
-
-            return contextMenu;
-        }
-
-        private MenuItem GetMenuItem(string header, MenuItemType type) {
-            MenuItem menuItem = new MenuItem();
-            menuItem.Header = header;
-            menuItem.Command = menuItemCommand;
-            menuItem.CommandParameter = new MenuItemContext(type, this);
-            return menuItem;
-        }
-    }
-
-    public enum MenuItemType {
-        New, Paste
-    }
-
-    public class MenuItemContext {
-        public MenuItemType Type { get; set; }
-        public TreeDataItem Item { get; set; }
-
-        public MenuItemContext(MenuItemType type, TreeDataItem item) {
-            Type = type;
-            Item = item;
         }
     }
 
@@ -553,3 +439,4 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private Clipboard() { }
     }
 }
+
