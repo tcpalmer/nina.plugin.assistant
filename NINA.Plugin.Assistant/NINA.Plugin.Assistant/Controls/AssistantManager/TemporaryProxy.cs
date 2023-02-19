@@ -96,11 +96,11 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
     }
 
-    public class FilterPlanProxy : TemporaryProxy<FilterPlan> {
+    public class ExposurePlanProxy : TemporaryProxy<ExposurePlan> {
 
-        public FilterPlanProxy(FilterPlan filterPlan) : base(filterPlan) { }
+        public ExposurePlanProxy(ExposurePlan exposurePlan) : base(exposurePlan) { }
 
-        public FilterPlan FilterPlan {
+        public ExposurePlan ExposurePlan {
             get => Proxy;
             set {
                 Proxy = value;

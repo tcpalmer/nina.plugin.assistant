@@ -224,7 +224,7 @@ namespace Assistant.NINAPlugin.Plan {
         Epoch Epoch { get; set; }
         double Rotation { get; set; }
         double ROI { get; set; }
-        List<IPlanFilter> FilterPlans { get; set; }
+        List<IPlanExposure> ExposurePlans { get; set; }
         IPlanProject Project { get; set; }
         bool Rejected { get; set; }
         string RejectedReason { get; set; }
@@ -245,7 +245,7 @@ namespace Assistant.NINAPlugin.Plan {
         public Epoch Epoch { get; set; }
         public double Rotation { get; set; }
         public double ROI { get; set; }
-        public List<IPlanFilter> FilterPlans { get; set; }
+        public List<IPlanExposure> ExposurePlans { get; set; }
         public IPlanProject Project { get; set; }
         public bool Rejected { get; set; }
         public string RejectedReason { get; set; }
@@ -265,14 +265,14 @@ namespace Assistant.NINAPlugin.Plan {
             this.Project = planProject;
             this.Rejected = false;
 
-            this.FilterPlans = new List<IPlanFilter>();
-            foreach (FilterPlan plan in target.FilterPlans) {
+            this.ExposurePlans = new List<IPlanExposure>();
+            foreach (ExposurePlan plan in target.ExposurePlans) {
                 FilterPreference filterPrefs = filterPreference[plan.FilterName];
-                PlanFilter planFilter = new PlanFilter(this, plan, filterPrefs);
+                PlanExposure planExposure = new PlanExposure(this, plan, filterPrefs);
 
                 // add only if the plan is incomplete
-                if (planFilter.IsIncomplete()) {
-                    this.FilterPlans.Add(planFilter);
+                if (planExposure.IsIncomplete()) {
+                    this.ExposurePlans.Add(planExposure);
                 }
             }
         }
@@ -298,9 +298,9 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"Rejected: {Rejected}");
             sb.AppendLine($"RejectedReason: {RejectedReason}");
 
-            sb.AppendLine("-- FilterPlans:");
-            foreach (PlanFilter planFilter in FilterPlans) {
-                sb.AppendLine(planFilter.ToString());
+            sb.AppendLine("-- ExposurePlans:");
+            foreach (PlanExposure planExposure in ExposurePlans) {
+                sb.AppendLine(planExposure.ToString());
             }
 
             return sb.ToString();
@@ -327,7 +327,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
     }
 
-    public interface IPlanFilter {
+    public interface IPlanExposure {
         string PlanId { get; set; }
         int DatabaseId { get; set; }
         string FilterName { get; set; }
@@ -356,7 +356,7 @@ namespace Assistant.NINAPlugin.Plan {
         string ToString();
     }
 
-    public class PlanFilter : IPlanFilter {
+    public class PlanExposure : IPlanExposure {
 
         public string PlanId { get; set; }
         public int DatabaseId { get; set; }
@@ -382,18 +382,18 @@ namespace Assistant.NINAPlugin.Plan {
 
         public int PlannedExposures { get; set; }
 
-        public PlanFilter(IPlanTarget planTarget, FilterPlan filterPlan, FilterPreference filterPrefs) {
+        public PlanExposure(IPlanTarget planTarget, ExposurePlan exposurePlan, FilterPreference filterPrefs) {
             this.PlanId = Guid.NewGuid().ToString();
-            this.DatabaseId = filterPlan.Id;
-            this.FilterName = filterPlan.FilterName;
-            this.ExposureLength = filterPlan.Exposure;
-            this.Gain = filterPlan.Gain;
-            this.Offset = filterPlan.Offset;
-            this.BinningMode = filterPlan.BinningMode;
-            this.ReadoutMode = filterPlan.ReadoutMode;
-            this.Desired = filterPlan.Desired;
-            this.Acquired = filterPlan.Acquired;
-            this.Accepted = filterPlan.Accepted;
+            this.DatabaseId = exposurePlan.Id;
+            this.FilterName = exposurePlan.FilterName;
+            this.ExposureLength = exposurePlan.Exposure;
+            this.Gain = exposurePlan.Gain;
+            this.Offset = exposurePlan.Offset;
+            this.BinningMode = exposurePlan.BinningMode;
+            this.ReadoutMode = exposurePlan.ReadoutMode;
+            this.Desired = exposurePlan.Desired;
+            this.Acquired = exposurePlan.Acquired;
+            this.Accepted = exposurePlan.Accepted;
             this.PlanTarget = planTarget;
 
             this.TwilightLevel = filterPrefs.TwilightLevel;
@@ -440,7 +440,7 @@ namespace Assistant.NINAPlugin.Plan {
         public const string TargetNotVisible = "not visible at this time";
         public const string TargetNotYetVisible = "not yet visible at this time";
         public const string TargetMoonAvoidance = "moon avoidance";
-        public const string TargetAllFilterPlans = "all filter plans rejected";
+        public const string TargetAllExposurePlans = "all exposure plans rejected";
 
         public const string FilterComplete = "complete";
         public const string FilterMoonAvoidance = "moon avoidance";

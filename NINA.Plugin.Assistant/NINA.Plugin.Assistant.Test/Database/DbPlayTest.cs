@@ -47,9 +47,9 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t1.dec = AstroUtil.DMSToDegrees("-5:23:28");
                     p1.Targets.Add(t1);
 
-                    t1.FilterPlans.Add(new FilterPlan { ProfileId = profileId, FilterName = "Ha", Desired = 5 });
-                    t1.FilterPlans.Add(new FilterPlan { ProfileId = profileId, FilterName = "OIII", Desired = 5 });
-                    t1.FilterPlans.Add(new FilterPlan { ProfileId = profileId, FilterName = "SII", Desired = 5 });
+                    t1.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, FilterName = "Ha", Desired = 5 });
+                    t1.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, FilterName = "OIII", Desired = 5 });
+                    t1.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, FilterName = "SII", Desired = 5 });
 
                     context.ProjectSet.Add(p1);
 
@@ -73,9 +73,9 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t2.dec = AstroUtil.DMSToDegrees("28:5:0");
                     p2.Targets.Add(t2);
 
-                    t2.FilterPlans.Add(new FilterPlan { ProfileId = profileId, FilterName = "R", Desired = 5 });
-                    t2.FilterPlans.Add(new FilterPlan { ProfileId = profileId, FilterName = "G", Desired = 5 });
-                    t2.FilterPlans.Add(new FilterPlan { ProfileId = profileId, FilterName = "B", Desired = 5 });
+                    t2.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, FilterName = "R", Desired = 5 });
+                    t2.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, FilterName = "G", Desired = 5 });
+                    t2.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, FilterName = "B", Desired = 5 });
 
                     context.ProjectSet.Add(p2);
 
@@ -130,13 +130,13 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t.dec = -10.23;
                     p.Targets.Add(t);
 
-                    FilterPlan ep1 = new FilterPlan();
+                    ExposurePlan ep1 = new ExposurePlan();
                     ep1.FilterName = "Ha";
-                    FilterPlan ep2 = new FilterPlan();
+                    ExposurePlan ep2 = new ExposurePlan();
                     ep2.FilterName = "OIII";
 
-                    t.FilterPlans.Add(ep1);
-                    t.FilterPlans.Add(ep2);
+                    t.ExposurePlans.Add(ep1);
+                    t.ExposurePlans.Add(ep2);
 
                     t = new Target();
                     t.Name = "M 42: Frame 2";
@@ -144,13 +144,13 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t.dec = -10.54;
                     p.Targets.Add(t);
 
-                    ep1 = new FilterPlan();
+                    ep1 = new ExposurePlan();
                     ep1.FilterName = "Ha";
-                    ep2 = new FilterPlan();
+                    ep2 = new ExposurePlan();
                     ep2.FilterName = "OIII";
 
-                    t.FilterPlans.Add(ep1);
-                    t.FilterPlans.Add(ep2);
+                    t.ExposurePlans.Add(ep1);
+                    t.ExposurePlans.Add(ep2);
 
                     context.ProjectSet.Add(p);
 
@@ -171,7 +171,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     context.SaveChanges();
 
-                    List<Project> projects = context.ProjectSet.Include("targets.filterplans").Include("preferences").ToList();
+                    List<Project> projects = context.ProjectSet.Include("targets.exposureplans").Include("preferences").ToList();
                     TestContext.WriteLine($"num projects: {projects.Count}");
 
                     foreach (Project project in projects) {
@@ -188,10 +188,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
                         foreach (Target target in targets) {
                             TestContext.WriteLine($"     target: {target.Name}");
                             TestContext.WriteLine($"project pid: {target.Project.ProfileId}");
-                            List<FilterPlan> filterPlans = target.FilterPlans;
+                            List<ExposurePlan> exposurePlans = target.ExposurePlans;
 
-                            foreach (FilterPlan filterPlan in filterPlans) {
-                                TestContext.WriteLine($"     exp plan: {filterPlan.FilterName} {filterPlan.Exposure}");
+                            foreach (ExposurePlan exposurePlan in exposurePlans) {
+                                TestContext.WriteLine($"     exp plan: {exposurePlan.FilterName} {exposurePlan.Exposure}");
                             }
                         }
                     }
@@ -214,10 +214,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     foreach (Target target in targets2) {
                         TestContext.WriteLine($"     target: {target.Name}");
                         TestContext.WriteLine($"project pid: {target.Project.ProfileId}");
-                        List<FilterPlan> filterPlans = target.FilterPlans;
+                        List<ExposurePlan> exposurePlans = target.ExposurePlans;
 
-                        foreach (FilterPlan filterPlan in filterPlans) {
-                            TestContext.WriteLine($"     exp plan: {filterPlan.FilterName} {filterPlan.Exposure}");
+                        foreach (ExposurePlan exposurePlan in exposurePlans) {
+                            TestContext.WriteLine($"     exp plan: {exposurePlan.FilterName} {exposurePlan.Exposure}");
                         }
                     }
 

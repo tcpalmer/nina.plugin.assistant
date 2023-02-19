@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `target` (
 	PRIMARY KEY(`id`)
 );
 
-CREATE TABLE IF NOT EXISTS `filterplan` (
+CREATE TABLE IF NOT EXISTS `exposureplan` (
 	`Id`			INTEGER NOT NULL,
 	`filtername`	TEXT NOT NULL,
 	`profileId`		TEXT NOT NULL,

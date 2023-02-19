@@ -131,7 +131,7 @@ namespace Assistant.NINAPlugin.Plan {
                 foreach (IPlanTarget planTarget in planProject.Targets) {
                     planTarget.Rejected = false;
                     planTarget.RejectedReason = null;
-                    foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
+                    foreach (IPlanExposure planFilter in planTarget.ExposurePlans) {
                         planFilter.Accepted += planFilter.PlannedExposures;
                         planFilter.PlannedExposures = 0;
                         planFilter.Rejected = false;
@@ -238,7 +238,7 @@ namespace Assistant.NINAPlugin.Plan {
                 foreach (IPlanTarget planTarget in planProject.Targets) {
                     if (planTarget.Rejected) { continue; }
 
-                    foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
+                    foreach (IPlanExposure planFilter in planTarget.ExposurePlans) {
                         if (planFilter.IsIncomplete() && planFilter.MoonAvoidanceEnabled) {
                             if (RejectForMoonAvoidance(planTarget, planFilter)) {
                                 SetRejected(planFilter, Reasons.FilterMoonAvoidance);
@@ -386,7 +386,7 @@ namespace Assistant.NINAPlugin.Plan {
             planTarget.RejectedReason = reason;
         }
 
-        private void SetRejected(IPlanFilter planFilter, string reason) {
+        private void SetRejected(IPlanExposure planFilter, string reason) {
             planFilter.Rejected = true;
             planFilter.RejectedReason = reason;
         }
@@ -404,7 +404,7 @@ namespace Assistant.NINAPlugin.Plan {
                     if (planTarget.Rejected) { continue; }
                     bool targetRejected = true;
 
-                    foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
+                    foreach (IPlanExposure planFilter in planTarget.ExposurePlans) {
                         if (!planFilter.Rejected) {
                             targetRejected = false;
                             break;
@@ -412,7 +412,7 @@ namespace Assistant.NINAPlugin.Plan {
                     }
 
                     if (targetRejected) {
-                        SetRejected(planTarget, Reasons.TargetAllFilterPlans);
+                        SetRejected(planTarget, Reasons.TargetAllExposurePlans);
                     }
 
                     if (!planTarget.Rejected) {
@@ -432,7 +432,7 @@ namespace Assistant.NINAPlugin.Plan {
         private bool ProjectIsInComplete(IPlanProject planProject) {
             bool incomplete = false;
             foreach (IPlanTarget target in planProject.Targets) {
-                foreach (IPlanFilter planFilter in target.FilterPlans) {
+                foreach (IPlanExposure planFilter in target.ExposurePlans) {
                     if (planFilter.IsIncomplete()) {
                         incomplete = true;
                     }
@@ -447,7 +447,7 @@ namespace Assistant.NINAPlugin.Plan {
 
         private TwilightLevel GetOverallTwilight(IPlanTarget planTarget) {
             TwilightLevel twilightLevel = TwilightLevel.Nighttime;
-            foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
+            foreach (IPlanExposure planFilter in planTarget.ExposurePlans) {
                 // find most permissive (brightest) twilight over all incomplete plans
                 if (planFilter.IsIncomplete() && planFilter.TwilightLevel > twilightLevel) {
                     twilightLevel = planFilter.TwilightLevel;
@@ -457,7 +457,7 @@ namespace Assistant.NINAPlugin.Plan {
             return twilightLevel;
         }
 
-        private bool RejectForMoonAvoidance(IPlanTarget planTarget, IPlanFilter planFilter) {
+        private bool RejectForMoonAvoidance(IPlanTarget planTarget, IPlanExposure planFilter) {
             DateTime midPointTime = Utils.GetMidpointTime(planTarget.StartTime, planTarget.EndTime);
             double moonAge = AstrometryUtils.GetMoonAge(midPointTime);
             double moonSeparation = AstrometryUtils.GetMoonSeparationAngle(observerInfo, midPointTime, planTarget.Coordinates);

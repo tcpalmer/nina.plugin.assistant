@@ -71,10 +71,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 t1p1.Rotation.Should().BeApproximately(0, 0.001);
                 t1p1.ROI.Should().BeApproximately(1, 0.001);
 
-                t1p1.FilterPlans.Count.Should().Be(3);
-                t1p1.FilterPlans[0].FilterName.Should().Be("Ha");
-                t1p1.FilterPlans[1].FilterName.Should().Be("OIII");
-                t1p1.FilterPlans[2].FilterName.Should().Be("SII");
+                t1p1.ExposurePlans.Count.Should().Be(3);
+                t1p1.ExposurePlans[0].FilterName.Should().Be("Ha");
+                t1p1.ExposurePlans[1].FilterName.Should().Be("OIII");
+                t1p1.ExposurePlans[2].FilterName.Should().Be("SII");
 
                 Project p2 = projects[1];
                 p2.Name.Should().Be("Project: IC1805");
@@ -101,10 +101,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 t1p2.Dec.Should().BeApproximately(61.45, 0.001);
                 t1p2.Rotation.Should().BeApproximately(0, 0.001);
                 t1p2.ROI.Should().BeApproximately(1, 0.001);
-                t1p2.FilterPlans.Count.Should().Be(3);
-                t1p2.FilterPlans[0].FilterName.Should().Be("Ha");
-                t1p2.FilterPlans[1].FilterName.Should().Be("OIII");
-                t1p2.FilterPlans[2].FilterName.Should().Be("SII");
+                t1p2.ExposurePlans.Count.Should().Be(3);
+                t1p2.ExposurePlans[0].FilterName.Should().Be("Ha");
+                t1p2.ExposurePlans[1].FilterName.Should().Be("OIII");
+                t1p2.ExposurePlans[2].FilterName.Should().Be("SII");
 
                 context.GetFilterPreferences("").Count.Should().Be(0);
                 List<FilterPreference> fPrefs = context.GetFilterPreferences(profileId);
@@ -122,13 +122,13 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 p1 = projects[0];
                 p1.Name.Should().Be("Project: M42");
 
-                // Test GetFilterPlan
-                AssertFilterPlan(context.GetFilterPlan(t1p1.Id, "Ha"), "Ha", 20, 3);
-                AssertFilterPlan(context.GetFilterPlan(t1p1.Id, "OIII"), "OIII", 20, 3);
-                AssertFilterPlan(context.GetFilterPlan(t1p1.Id, "SII"), "SII", 20, 3);
-                AssertFilterPlan(context.GetFilterPlan(t1p2.Id, "Ha"), "Ha", 20, 5);
-                AssertFilterPlan(context.GetFilterPlan(t1p2.Id, "OIII"), "OIII", 20, 5);
-                AssertFilterPlan(context.GetFilterPlan(t1p2.Id, "SII"), "SII", 20, 5);
+                // Test GetExposurePlan
+                AssertExposurePlan(context.GetExposurePlan(t1p1.Id, "Ha"), "Ha", 20, 3);
+                AssertExposurePlan(context.GetExposurePlan(t1p1.Id, "OIII"), "OIII", 20, 3);
+                AssertExposurePlan(context.GetExposurePlan(t1p1.Id, "SII"), "SII", 20, 3);
+                AssertExposurePlan(context.GetExposurePlan(t1p2.Id, "Ha"), "Ha", 20, 5);
+                AssertExposurePlan(context.GetExposurePlan(t1p2.Id, "OIII"), "OIII", 20, 5);
+                AssertExposurePlan(context.GetExposurePlan(t1p2.Id, "SII"), "SII", 20, 5);
             }
         }
 
@@ -165,10 +165,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
         [Test, Order(3)]
         [NonParallelizable]
-        public void TestWriteUpdateFilterPlans() {
+        public void TestWriteUpdateExposurePlans() {
             using (var context = db.GetContext()) {
                 Target target = context.GetTarget(1, 1);
-                FilterPlan fp = target.FilterPlans.Where(t => t.FilterName == "Ha").First();
+                ExposurePlan fp = target.ExposurePlans.Where(t => t.FilterName == "Ha").First();
                 fp.Acquired += 2;
                 fp.Accepted += 1;
                 context.SaveChanges();
@@ -176,7 +176,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
             using (var context = db.GetContext()) {
                 Target target = context.GetTarget(1, 1);
-                FilterPlan fp = target.FilterPlans.Where(t => t.FilterName == "Ha").First();
+                ExposurePlan fp = target.ExposurePlans.Where(t => t.FilterName == "Ha").First();
                 fp.Desired.Should().Be(3);
                 fp.Acquired.Should().Be(2);
                 fp.Accepted.Should().Be(1);
@@ -223,16 +223,16 @@ namespace NINA.Plugin.Assistant.Test.Database {
             }
         }
 
-        private void AssertFilterPlan(FilterPlan filterPlan, string filterName, int exp, int desired) {
-            filterPlan.FilterName.Should().Be(filterName);
-            filterPlan.Exposure.Should().Be(exp);
-            filterPlan.Desired.Should().Be(desired);
-            filterPlan.Acquired.Should().Be(0);
-            filterPlan.Accepted.Should().Be(0);
-            filterPlan.Gain.Should().Be(100);
-            filterPlan.Offset.Should().Be(10);
-            filterPlan.bin.Should().Be(1);
-            filterPlan.ReadoutMode.Should().Be(-1);
+        private void AssertExposurePlan(ExposurePlan exposurePlan, string filterName, int exp, int desired) {
+            exposurePlan.FilterName.Should().Be(filterName);
+            exposurePlan.Exposure.Should().Be(exp);
+            exposurePlan.Desired.Should().Be(desired);
+            exposurePlan.Acquired.Should().Be(0);
+            exposurePlan.Accepted.Should().Be(0);
+            exposurePlan.Gain.Should().Be(100);
+            exposurePlan.Offset.Should().Be(10);
+            exposurePlan.bin.Should().Be(1);
+            exposurePlan.ReadoutMode.Should().Be(-1);
         }
 
         private void LoadTestDatabase() {
@@ -265,24 +265,24 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t1.dec = TestUtil.M42.Dec;
                     p1.Targets.Add(t1);
 
-                    FilterPlan fp = new FilterPlan(profileId, "Ha");
+                    ExposurePlan fp = new ExposurePlan(profileId, "Ha");
                     fp.Desired = 3;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t1.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "OIII");
+                    t1.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "OIII");
                     fp.Desired = 3;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t1.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "SII");
+                    t1.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "SII");
                     fp.Desired = 3;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t1.FilterPlans.Add(fp);
+                    t1.ExposurePlans.Add(fp);
 
                     context.ProjectSet.Add(p1);
 
@@ -313,24 +313,24 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t2.dec = TestUtil.IC1805.Dec;
                     p2.Targets.Add(t2);
 
-                    fp = new FilterPlan(profileId, "Ha");
+                    fp = new ExposurePlan(profileId, "Ha");
                     fp.Desired = 5;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t2.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "OIII");
+                    t2.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "OIII");
                     fp.Desired = 5;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t2.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "SII");
+                    t2.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "SII");
                     fp.Desired = 5;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t2.FilterPlans.Add(fp);
+                    t2.ExposurePlans.Add(fp);
 
                     context.ProjectSet.Add(p2);
 

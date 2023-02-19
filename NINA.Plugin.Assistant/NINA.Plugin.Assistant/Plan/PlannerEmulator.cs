@@ -48,14 +48,14 @@ namespace Assistant.NINAPlugin.Plan {
             IPlanTarget planTarget = GetBasePlanTarget("T01", planProject, Cp5n5);
             planTarget.EndTime = endTime;
 
-            IPlanFilter lum = GetPlanFilter("Lum", 8, null, null, 3);
-            IPlanFilter red = GetPlanFilter("R", 8, null, null, 3);
-            IPlanFilter grn = GetPlanFilter("G", 8, null, null, 3);
-            IPlanFilter blu = GetPlanFilter("B", 8, null, null, 3);
-            planTarget.FilterPlans.Add(lum);
-            planTarget.FilterPlans.Add(red);
-            planTarget.FilterPlans.Add(grn);
-            planTarget.FilterPlans.Add(blu);
+            IPlanExposure lum = GetPlanFilter("Lum", 8, null, null, 3);
+            IPlanExposure red = GetPlanFilter("R", 8, null, null, 3);
+            IPlanExposure grn = GetPlanFilter("G", 8, null, null, 3);
+            IPlanExposure blu = GetPlanFilter("B", 8, null, null, 3);
+            planTarget.ExposurePlans.Add(lum);
+            planTarget.ExposurePlans.Add(red);
+            planTarget.ExposurePlans.Add(grn);
+            planTarget.ExposurePlans.Add(blu);
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             instructions.Add(new PlanMessage("planner emulator: Plan1"));
@@ -73,7 +73,7 @@ namespace Assistant.NINAPlugin.Plan {
             return new AssistantPlan(planTarget, timeInterval, instructions);
         }
 
-        private IPlanFilter GetPlanFilter(string name, int exposure, int? gain, int? offset, int desired) {
+        private IPlanExposure GetPlanFilter(string name, int exposure, int? gain, int? offset, int desired) {
             PlanFilterEmulator planFilter = new PlanFilterEmulator();
             planFilter.FilterName = name;
             planFilter.ExposureLength = exposure;
@@ -146,7 +146,7 @@ namespace Assistant.NINAPlugin.Plan {
         public double ROI { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public List<IPlanFilter> FilterPlans { get; set; }
+        public List<IPlanExposure> ExposurePlans { get; set; }
 
         public int DatabaseId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public Epoch Epoch { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -156,7 +156,7 @@ namespace Assistant.NINAPlugin.Plan {
 
         public PlanTargetEmulator() {
             this.PlanId = Guid.NewGuid().ToString();
-            this.FilterPlans = new List<IPlanFilter>();
+            this.ExposurePlans = new List<IPlanExposure>();
         }
 
         public void SetCircumstances(TargetCircumstances targetCircumstances) {
@@ -164,7 +164,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
     }
 
-    class PlanFilterEmulator : IPlanFilter {
+    class PlanFilterEmulator : IPlanExposure {
 
         public string PlanId { get; set; }
         public string FilterName { get; set; }

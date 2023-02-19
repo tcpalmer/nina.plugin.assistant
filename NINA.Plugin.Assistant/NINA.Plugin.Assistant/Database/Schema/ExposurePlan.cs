@@ -11,7 +11,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         [Description("1x1")] OneXOne,
     }
 
-    public class FilterPlan : INotifyPropertyChanged {
+    public class ExposurePlan : INotifyPropertyChanged {
 
         [Key] public int Id { get; set; }
         [Required] public string filterName { get; set; }
@@ -120,9 +120,9 @@ namespace Assistant.NINAPlugin.Database.Schema {
             }
         }
 
-        public FilterPlan() { }
+        public ExposurePlan() { }
 
-        public FilterPlan(string profileId, string filterName) {
+        public ExposurePlan(string profileId, string filterName) {
             this.ProfileId = profileId;
             this.FilterName = filterName;
             Exposure = 60;
@@ -140,21 +140,21 @@ namespace Assistant.NINAPlugin.Database.Schema {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public FilterPlan GetPasteCopy(string newProfileId) {
-            FilterPlan filterPlan = new FilterPlan();
+        public ExposurePlan GetPasteCopy(string newProfileId) {
+            ExposurePlan exposurePlan = new ExposurePlan();
 
-            filterPlan.filterName = filterName;
-            filterPlan.profileId = newProfileId;
-            filterPlan.exposure = exposure;
-            filterPlan.gain = gain;
-            filterPlan.offset = offset;
-            filterPlan.bin = bin;
-            filterPlan.readoutMode = readoutMode;
-            filterPlan.desired = desired;
-            filterPlan.acquired = 0;
-            filterPlan.accepted = 0;
+            exposurePlan.filterName = filterName;
+            exposurePlan.profileId = newProfileId;
+            exposurePlan.exposure = exposure;
+            exposurePlan.gain = gain;
+            exposurePlan.offset = offset;
+            exposurePlan.bin = bin;
+            exposurePlan.readoutMode = readoutMode;
+            exposurePlan.desired = desired;
+            exposurePlan.acquired = 0;
+            exposurePlan.accepted = 0;
 
-            return filterPlan;
+            return exposurePlan;
         }
 
         public override string ToString() {

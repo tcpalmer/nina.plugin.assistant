@@ -21,15 +21,15 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
             Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
-            Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("Ha", 10, 0);
+            Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("Ha", 10, 0);
             PlanMocks.AddMockPlanFilter(pt, pf);
             PlanMocks.AddMockPlanTarget(pp1, pt);
 
             Mock<IPlanProject> pp2 = PlanMocks.GetMockPlanProject("pp2", ProjectState.Active);
             pt = PlanMocks.GetMockPlanTarget("M31", TestUtil.M31);
-            pf = PlanMocks.GetMockPlanFilter("OIII", 10, 10);
+            pf = PlanMocks.GetMockPlanExposure("OIII", 10, 10);
             PlanMocks.AddMockPlanFilter(pt, pf);
-            pf = PlanMocks.GetMockPlanFilter("SII", 10, 10);
+            pf = PlanMocks.GetMockPlanExposure("SII", 10, 10);
             PlanMocks.AddMockPlanFilter(pt, pf);
             PlanMocks.AddMockPlanTarget(pp2, pt);
 
@@ -44,7 +44,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pp.Rejected.Should().BeFalse();
             IPlanTarget pt1 = pp.Targets[0];
             pt1.Rejected.Should().BeFalse();
-            IPlanFilter pf1 = pt1.FilterPlans[0];
+            IPlanExposure pf1 = pt1.ExposurePlans[0];
             pf1.Rejected.Should().BeFalse();
 
             pp = projects[1];
@@ -52,10 +52,10 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pp.Rejected.Should().BeTrue();
             pp.RejectedReason.Should().Be(Reasons.ProjectComplete);
             pt1 = pp.Targets[0];
-            pf1 = pt1.FilterPlans[0];
+            pf1 = pt1.ExposurePlans[0];
             pf1.Rejected.Should().BeTrue();
             pf1.RejectedReason.Should().Be(Reasons.FilterComplete);
-            pf1 = pt1.FilterPlans[1];
+            pf1 = pt1.ExposurePlans[1];
             pf1.Rejected.Should().BeTrue();
             pf1.RejectedReason.Should().Be(Reasons.FilterComplete);
         }
@@ -90,7 +90,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
             Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
-            Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("Ha", 10, 0);
+            Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("Ha", 10, 0);
             PlanMocks.AddMockPlanFilter(pt, pf);
             PlanMocks.AddMockPlanTarget(pp1, pt);
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
@@ -114,7 +114,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
             Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
-            Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("Ha", 10, 0);
+            Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("Ha", 10, 0);
             PlanMocks.AddMockPlanFilter(pt, pf);
             PlanMocks.AddMockPlanTarget(pp1, pt);
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
@@ -136,7 +136,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
             Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
-            Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("Ha", 10, 0);
+            Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("Ha", 10, 0);
             PlanMocks.AddMockPlanFilter(pt, pf);
             PlanMocks.AddMockPlanTarget(pp1, pt);
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
@@ -163,13 +163,13 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pt.SetupProperty(m => m.StartTime, new DateTime(2023, 12, 25, 18, 9, 0));
             pt.SetupProperty(m => m.EndTime, new DateTime(2023, 12, 26, 5, 17, 0));
 
-            Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("L", 10, 0);
+            Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("L", 10, 0);
             pf.SetupProperty(f => f.MoonAvoidanceEnabled, true);
             pf.SetupProperty(f => f.MoonAvoidanceSeparation, 50);
             pf.SetupProperty(f => f.MoonAvoidanceWidth, 7);
             PlanMocks.AddMockPlanFilter(pt, pf);
 
-            pf = PlanMocks.GetMockPlanFilter("Ha", 10, 0);
+            pf = PlanMocks.GetMockPlanExposure("Ha", 10, 0);
             pf.SetupProperty(f => f.MoonAvoidanceEnabled, true);
             pf.SetupProperty(f => f.MoonAvoidanceSeparation, 30);
             pf.SetupProperty(f => f.MoonAvoidanceWidth, 7);
@@ -188,11 +188,11 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             IPlanTarget pt1 = pp.Targets[0];
             pt1.Rejected.Should().BeFalse();
 
-            IPlanFilter pf1 = pt1.FilterPlans[0];
+            IPlanExposure pf1 = pt1.ExposurePlans[0];
             pf1.Rejected.Should().BeTrue();
             pf1.RejectedReason.Should().Be(Reasons.FilterMoonAvoidance);
 
-            pf1 = pt1.FilterPlans[1];
+            pf1 = pt1.ExposurePlans[1];
             pf1.Rejected.Should().BeFalse();
         }
 

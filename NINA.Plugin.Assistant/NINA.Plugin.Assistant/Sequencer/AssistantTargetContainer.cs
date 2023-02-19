@@ -238,7 +238,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             Add(new InstructionWrapper(monitor, planTarget.PlanId, slewCenter));
         }
 
-        private void AddSwitchFilter(IPlanFilter planFilter) {
+        private void AddSwitchFilter(IPlanExposure planFilter) {
             Logger.Info($"Assistant: adding switch filter: {planFilter.FilterName}");
 
             SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator);
@@ -252,7 +252,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             Add(new InstructionWrapper(monitor, planFilter.PlanId, switchFilter));
         }
 
-        private void AddTakeExposure(IPlanFilter planFilter) {
+        private void AddTakeExposure(IPlanExposure planFilter) {
             Logger.Info($"Assistant: adding take exposure: {planFilter.FilterName}");
 
             TakeExposure takeExposure = new TakeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM);

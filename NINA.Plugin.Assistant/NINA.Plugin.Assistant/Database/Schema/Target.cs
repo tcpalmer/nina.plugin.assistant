@@ -27,7 +27,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         [ForeignKey("Project")] public int ProjectId { get; set; }
         public virtual Project Project { get; set; }
 
-        public virtual List<FilterPlan> FilterPlans { get; set; }
+        public virtual List<ExposurePlan> ExposurePlans { get; set; }
 
         public Target() {
             ra = 0;
@@ -35,7 +35,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             epochCode = (int)Epoch.J2000;
             rotation = 0;
             roi = 1;
-            FilterPlans = new List<FilterPlan>();
+            ExposurePlans = new List<ExposurePlan>();
         }
 
         [NotMapped]
@@ -255,7 +255,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             target.epochCode = epochCode;
             target.rotation = rotation;
             target.roi = roi;
-            FilterPlans.ForEach(item => target.FilterPlans.Add(item.GetPasteCopy(profileId)));
+            ExposurePlans.ForEach(item => target.ExposurePlans.Add(item.GetPasteCopy(profileId)));
 
             return target;
         }
@@ -278,7 +278,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public TargetConfiguration() {
             HasKey(t => new { t.Id });
-            HasMany(t => t.FilterPlans)
+            HasMany(t => t.ExposurePlans)
              .WithRequired(e => e.Target)
              .HasForeignKey(e => e.TargetId);
         }

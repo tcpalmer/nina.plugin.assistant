@@ -53,24 +53,24 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t1.dec = TestUtil.M42.Dec;
                     p1.Targets.Add(t1);
 
-                    FilterPlan fp = new FilterPlan(profileId, "Ha");
+                    ExposurePlan fp = new ExposurePlan(profileId, "Ha");
                     fp.Desired = 3;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t1.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "OIII");
+                    t1.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "OIII");
                     fp.Desired = 3;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t1.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "SII");
+                    t1.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "SII");
                     fp.Desired = 3;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t1.FilterPlans.Add(fp);
+                    t1.ExposurePlans.Add(fp);
 
                     context.ProjectSet.Add(p1);
 
@@ -97,24 +97,24 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t2.dec = TestUtil.IC1805.Dec;
                     p2.Targets.Add(t2);
 
-                    fp = new FilterPlan(profileId, "Ha");
+                    fp = new ExposurePlan(profileId, "Ha");
                     fp.Desired = 5;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t2.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "OIII");
+                    t2.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "OIII");
                     fp.Desired = 5;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t2.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "SII");
+                    t2.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "SII");
                     fp.Desired = 5;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t2.FilterPlans.Add(fp);
+                    t2.ExposurePlans.Add(fp);
 
                     context.ProjectSet.Add(p2);
 
@@ -149,7 +149,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
         }
 
         [Test]
-        //[Ignore("")]
+        [Ignore("")]
         public void RealTest1() {
 
             using (var context = db.GetContext()) {
@@ -179,10 +179,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t1.dec = TestUtil.C00.Dec;
                     p1.Targets.Add(t1);
 
-                    t1.FilterPlans.Add(GetFilterPlan(profileId, "Lum", 5, 0, 60));
-                    t1.FilterPlans.Add(GetFilterPlan(profileId, "Red", 5, 0, 60));
-                    t1.FilterPlans.Add(GetFilterPlan(profileId, "Green", 5, 0, 60));
-                    t1.FilterPlans.Add(GetFilterPlan(profileId, "Blue", 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "Lum", 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "Red", 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "Green", 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "Blue", 5, 0, 60));
 
                     Project p2 = new Project(profileId);
                     p2.Name = "Project: C90";
@@ -200,9 +200,9 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t2.dec = TestUtil.C90.Dec;
                     p2.Targets.Add(t2);
 
-                    t2.FilterPlans.Add(GetFilterPlan(profileId, "Ha", 5, 0, 90));
-                    t2.FilterPlans.Add(GetFilterPlan(profileId, "OIII", 5, 0, 90));
-                    t2.FilterPlans.Add(GetFilterPlan(profileId, "SII", 5, 0, 90));
+                    t2.ExposurePlans.Add(GetExposurePlan(profileId, "Ha", 5, 0, 90));
+                    t2.ExposurePlans.Add(GetExposurePlan(profileId, "OIII", 5, 0, 90));
+                    t2.ExposurePlans.Add(GetExposurePlan(profileId, "SII", 5, 0, 90));
 
                     context.ProjectSet.Add(p1);
                     context.ProjectSet.Add(p2);
@@ -232,7 +232,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 try {
                     DateTime atTime = new DateTime(2023, 1, 28);
                     string profileId = "3c160865-776f-4f72-8a05-5964225ca0fa"; // Zim
-                                                                               //string profileId = "1f78fa60-ab20-41af-9c17-a12016553007"; // Astroimaging Redcat 51 / ASI1600mm
+                    //string profileId = "1f78fa60-ab20-41af-9c17-a12016553007"; // Astroimaging Redcat 51 / ASI1600mm
 
                     Project p1 = new Project(profileId);
                     p1.Name = "Project: C00";
@@ -255,10 +255,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t1.dec = TestUtil.C00.Dec;
                     p1.Targets.Add(t1);
 
-                    t1.FilterPlans.Add(GetFilterPlan(profileId, "L", 5, 0, 60));
-                    t1.FilterPlans.Add(GetFilterPlan(profileId, "R", 5, 0, 60));
-                    //t1.filterplans.Add(GetFilterPlan(profileId, "G", 5, 0, 60));
-                    //t1.filterplans.Add(GetFilterPlan(profileId, "B", 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "L", 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "R", 5, 0, 60));
+                    //t1.ExposurePlans.Add(GetExposurePlan(profileId, "G", 5, 0, 60));
+                    //t1.ExposurePlans.Add(GetExposurePlan(profileId, "B", 5, 0, 60));
 
                     context.ProjectSet.Add(p1);
 
@@ -290,8 +290,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
             return new AssistantDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
         }
 
-        private FilterPlan GetFilterPlan(string profileId, string filterName, int desired, int accepted, int exposure) {
-            FilterPlan fp = new FilterPlan(profileId, filterName);
+        private ExposurePlan GetExposurePlan(string profileId, string filterName, int desired, int accepted, int exposure) {
+            ExposurePlan fp = new ExposurePlan(profileId, filterName);
             fp.Desired = desired;
             fp.Accepted = accepted;
             fp.Exposure = exposure;

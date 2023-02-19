@@ -76,9 +76,9 @@
         <Border
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1"
-            Visibility="{Binding ShowFilterPlanView}">
+            Visibility="{Binding ShowExposurePlanView}">
             <StackPanel>
-                <local:FilterPlanView DataContext="{Binding FilterPlanViewVM}" />
+                <local:ExposurePlanView DataContext="{Binding ExposurePlanViewVM}" />
             </StackPanel>
         </Border>
     </StackPanel>

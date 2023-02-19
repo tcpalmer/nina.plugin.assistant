@@ -16,7 +16,7 @@ namespace Assistant.NINAPlugin.Database {
         public DbSet<Project> ProjectSet { get; set; }
         public DbSet<RuleWeight> RuleWeightSet { get; set; }
         public DbSet<Target> TargetSet { get; set; }
-        public DbSet<FilterPlan> FilterPlanSet { get; set; }
+        public DbSet<ExposurePlan> ExposurePlanSet { get; set; }
         public DbSet<FilterPreference> FilterPreferenceSet { get; set; }
         public DbSet<AcquiredImage> AcquiredImageSet { get; set; }
 
@@ -39,13 +39,13 @@ namespace Assistant.NINAPlugin.Database {
         }
 
         public List<Project> GetAllProjects(string profileId) {
-            var projects = ProjectSet.Include("targets.filterplans").Include("ruleweights").Where(p => p.ProfileId.Equals(profileId));
+            var projects = ProjectSet.Include("targets.exposureplans").Include("ruleweights").Where(p => p.ProfileId.Equals(profileId));
             return projects.ToList();
         }
 
         public List<Project> GetActiveProjects(string profileId, DateTime atTime) {
             long secs = DateTimeToUnixSeconds(atTime);
-            var projects = ProjectSet.Include("targets.filterplans").Include("ruleweights").Where(p =>
+            var projects = ProjectSet.Include("targets.exposureplans").Include("ruleweights").Where(p =>
                 p.ProfileId.Equals(profileId) &&
                 p.state_col == (int)ProjectState.Active &&
                 p.startDate <= secs && secs <= p.endDate);
@@ -59,7 +59,7 @@ namespace Assistant.NINAPlugin.Database {
 
         public Project GetProject(int projectId) {
             return ProjectSet
-                .Include("targets.filterplans")
+                .Include("targets.exposureplans")
                 .Include("ruleweights")
                 .Where(p => p.Id == projectId)
                 .FirstOrDefault();
@@ -67,14 +67,14 @@ namespace Assistant.NINAPlugin.Database {
 
         public Target GetTarget(int projectId, int targetId) {
             return TargetSet
-                .Include("filterplans")
+                .Include("exposureplans")
                 .Where(t => t.Project.Id == projectId && t.Id == targetId)
                 .FirstOrDefault();
         }
 
-        public FilterPlan GetFilterPlan(int targetId, string filterName) {
-            return FilterPlanSet
-                .Where(f => f.TargetId == targetId && f.filterName == filterName)
+        public ExposurePlan GetExposurePlan(int targetId, string filterName) {
+            return ExposurePlanSet
+                .Where(e => e.TargetId == targetId && e.filterName == filterName)
                 .FirstOrDefault();
         }
 
@@ -223,11 +223,11 @@ namespace Assistant.NINAPlugin.Database {
             }
         }
 
-        public bool SaveFilterPlan(FilterPlan filterPlan) {
-            Logger.Debug($"Assistant: saving Filter Plan Id={filterPlan.Id} Name={filterPlan.FilterName}");
+        public bool SaveExposurePlan(ExposurePlan exposurePlan) {
+            Logger.Debug($"Assistant: saving Exposure Plan Id={exposurePlan.Id} Name={exposurePlan.FilterName}");
             using (var transaction = Database.BeginTransaction()) {
                 try {
-                    FilterPlanSet.AddOrUpdate(filterPlan);
+                    ExposurePlanSet.AddOrUpdate(exposurePlan);
                     SaveChanges();
                     transaction.Commit();
                     return true;

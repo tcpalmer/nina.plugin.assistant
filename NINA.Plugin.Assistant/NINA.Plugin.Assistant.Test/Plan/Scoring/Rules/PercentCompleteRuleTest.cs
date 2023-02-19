@@ -15,8 +15,8 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
         public void testPercentComplete0() {
             Mock<IScoringEngine> scoringEngineMock = PlanMocks.GetMockScoringEnging();
             Mock<IPlanTarget> targetMock = PlanMocks.GetMockPlanTarget("", TestUtil.SPICA);
-            Mock<IPlanFilter> filterPlanMock = PlanMocks.GetMockPlanFilter("", 10, 0);
-            PlanMocks.AddMockPlanFilter(targetMock, filterPlanMock);
+            Mock<IPlanExposure> exposurePlanMock = PlanMocks.GetMockPlanExposure("", 10, 0);
+            PlanMocks.AddMockPlanFilter(targetMock, exposurePlanMock);
 
             PercentCompleteRule sut = new PercentCompleteRule();
             sut.Score(scoringEngineMock.Object, targetMock.Object).Should().BeApproximately(0, 0.00001);
@@ -26,8 +26,8 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
         public void testPercentComplete60() {
             Mock<IScoringEngine> scoringEngineMock = PlanMocks.GetMockScoringEnging();
             Mock<IPlanTarget> targetMock = PlanMocks.GetMockPlanTarget("", TestUtil.SPICA);
-            Mock<IPlanFilter> filterPlanMock = PlanMocks.GetMockPlanFilter("", 10, 6);
-            PlanMocks.AddMockPlanFilter(targetMock, filterPlanMock);
+            Mock<IPlanExposure> exposurePlanMock = PlanMocks.GetMockPlanExposure("", 10, 6);
+            PlanMocks.AddMockPlanFilter(targetMock, exposurePlanMock);
 
             PercentCompleteRule sut = new PercentCompleteRule();
             sut.Score(scoringEngineMock.Object, targetMock.Object).Should().BeApproximately(0.6, 0.00001);
@@ -37,8 +37,8 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
         public void testPercentComplete100() {
             Mock<IScoringEngine> scoringEngineMock = PlanMocks.GetMockScoringEnging();
             Mock<IPlanTarget> targetMock = PlanMocks.GetMockPlanTarget("", TestUtil.SPICA);
-            Mock<IPlanFilter> filterPlanMock = PlanMocks.GetMockPlanFilter("", 10, 10);
-            PlanMocks.AddMockPlanFilter(targetMock, filterPlanMock);
+            Mock<IPlanExposure> exposurePlanMock = PlanMocks.GetMockPlanExposure("", 10, 10);
+            PlanMocks.AddMockPlanFilter(targetMock, exposurePlanMock);
 
             PercentCompleteRule sut = new PercentCompleteRule();
             sut.Score(scoringEngineMock.Object, targetMock.Object).Should().BeApproximately(1.0, 0.00001);

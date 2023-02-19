@@ -306,10 +306,10 @@
     <Compile Include="Controls\AssistantManager\BindingHelper.cs" />
     <Compile Include="Controls\AssistantManager\ConfirmationMessageBox.cs" />
     <Compile Include="Controls\AssistantManager\EnumBindingSourceExtension.cs" />
-    <Compile Include="Controls\AssistantManager\FilterPlanView.xaml.cs">
-      <DependentUpon>FilterPlanView.xaml</DependentUpon>
+    <Compile Include="Controls\AssistantManager\ExposurePlanView.xaml.cs">
+      <DependentUpon>ExposurePlanView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\AssistantManager\FilterPlanViewVM.cs" />
+    <Compile Include="Controls\AssistantManager\ExposurePlanViewVM.cs" />
     <Compile Include="Controls\AssistantManager\ProfileView.xaml.cs">
       <DependentUpon>ProfileView.xaml</DependentUpon>
     </Compile>
@@ -337,7 +337,7 @@
     <Compile Include="Database\AssistantDatabaseContext.cs" />
     <Compile Include="Database\AssistantPlanLoader.cs" />
     <Compile Include="Database\Schema\AcquiredImage.cs" />
-    <Compile Include="Database\Schema\FilterPlan.cs" />
+    <Compile Include="Database\Schema\ExposurePlan.cs" />
     <Compile Include="Database\Schema\FilterPreference.cs" />
     <Compile Include="Database\Schema\ImageMetadata.cs" />
     <Compile Include="Database\Schema\Project.cs" />
@@ -393,7 +393,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\AssistantManager\FilterPlanView.xaml">
+    <Page Include="Controls\AssistantManager\ExposurePlanView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

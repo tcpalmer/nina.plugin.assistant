@@ -51,14 +51,14 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                     try {
                         // Update the filter plan record
-                        FilterPlan filterPlan = context.GetFilterPlan(planTarget.DatabaseId, filterName);
-                        filterPlan.Acquired++;
+                        ExposurePlan exposurePlan = context.GetExposurePlan(planTarget.DatabaseId, filterName);
+                        exposurePlan.Acquired++;
 
                         if (accepted) {
-                            filterPlan.Accepted++;
+                            exposurePlan.Accepted++;
                         }
 
-                        context.FilterPlanSet.AddOrUpdate(filterPlan);
+                        context.ExposurePlanSet.AddOrUpdate(exposurePlan);
 
                         // Save the acquired image record
                         AcquiredImage acquiredImage = new AcquiredImage(planTarget.DatabaseId, msg.MetaData.Image.ExposureStart, filterName, new ImageMetadata(msg));

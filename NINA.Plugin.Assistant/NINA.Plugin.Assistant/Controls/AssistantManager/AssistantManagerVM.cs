@@ -80,21 +80,21 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        private Visibility showFilterPlanView = Visibility.Hidden;
-        public Visibility ShowFilterPlanView {
-            get => showFilterPlanView;
+        private Visibility showExposurePlanView = Visibility.Hidden;
+        public Visibility ShowExposurePlanView {
+            get => showExposurePlanView;
             set {
-                showFilterPlanView = value;
-                RaisePropertyChanged(nameof(ShowFilterPlanView));
+                showExposurePlanView = value;
+                RaisePropertyChanged(nameof(ShowExposurePlanView));
             }
         }
 
-        private FilterPlanViewVM filterPlanViewVM;
-        public FilterPlanViewVM FilterPlanViewVM {
-            get => filterPlanViewVM;
+        private ExposurePlanViewVM exposurePlanViewVM;
+        public ExposurePlanViewVM ExposurePlanViewVM {
+            get => exposurePlanViewVM;
             set {
-                filterPlanViewVM = value;
-                RaisePropertyChanged(nameof(FilterPlanViewVM));
+                exposurePlanViewVM = value;
+                RaisePropertyChanged(nameof(ExposurePlanViewVM));
             }
         }
 
@@ -107,7 +107,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         activeTreeDataItem = item;
                         ProfileViewVM = new ProfileViewVM(this, profileService, item);
                         ShowTargetView = Visibility.Collapsed;
-                        ShowFilterPlanView = Visibility.Collapsed;
+                        ShowExposurePlanView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
                         ShowProfileView = Visibility.Visible;
                         break;
@@ -118,7 +118,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         ProjectViewVM = new ProjectViewVM(this, profileService, project);
                         ShowProfileView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
-                        ShowFilterPlanView = Visibility.Collapsed;
+                        ShowExposurePlanView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Visible;
 
                         StringBuilder sb = new StringBuilder();
@@ -135,28 +135,28 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         TargetViewVM = new TargetViewVM(this, profileService, target);
                         ShowProfileView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
-                        ShowFilterPlanView = Visibility.Collapsed;
+                        ShowExposurePlanView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Visible;
 
                         Logger.Debug($"TARGET: {target.Name}\n{target}");
 
                         break;
 
-                    case TreeDataType.FilterPlan:
+                    case TreeDataType.ExposurePlan:
                         activeTreeDataItem = item;
-                        FilterPlan filterPlan = (FilterPlan)item.Data;
-                        FilterPlanViewVM = new FilterPlanViewVM(this, profileService, filterPlan);
+                        ExposurePlan exposurePlan = (ExposurePlan)item.Data;
+                        ExposurePlanViewVM = new ExposurePlanViewVM(this, profileService, exposurePlan);
                         ShowProfileView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
-                        ShowFilterPlanView = Visibility.Visible;
+                        ShowExposurePlanView = Visibility.Visible;
                         break;
 
                     default:
                         activeTreeDataItem = null;
                         ShowProjectView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
-                        ShowFilterPlanView = Visibility.Collapsed;
+                        ShowExposurePlanView = Visibility.Collapsed;
                         break;
                 }
             }
@@ -203,9 +203,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                             TreeDataItem targetItem = new TreeDataItem(TreeDataType.Target, target.Name, target, projectItem);
                             projectItem.Items.Add(targetItem);
 
-                            foreach (FilterPlan filterPlan in target.FilterPlans) {
-                                TreeDataItem filterPlanItem = new TreeDataItem(TreeDataType.FilterPlan, filterPlan.FilterName, filterPlan, targetItem);
-                                targetItem.Items.Add(filterPlanItem);
+                            foreach (ExposurePlan exposurePlan in target.ExposurePlans) {
+                                TreeDataItem exposurePlanItem = new TreeDataItem(TreeDataType.ExposurePlan, exposurePlan.FilterName, exposurePlan, targetItem);
+                                targetItem.Items.Add(exposurePlanItem);
                             }
                         }
                     }
@@ -355,9 +355,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     parentItem.Items.Add(newTargetItem);
                     newTargetItem.IsSelected = true;
                     parentItem.IsExpanded = true;
-                    // TODO: need to add Target to children of parent project??
-                    // IFF we continue to manager FilterPlans in the tree under targets, then we'd need to
-                    // add this target's FPs as children of targetItem
                 }
                 else {
                     Notification.ShowError("Failed to paste new Assistant Project (see log for details)");
@@ -382,23 +379,10 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             Clipboard.SetItem(activeTreeDataItem);
         }
 
-        // TODO: this should go away when part of integrated Target view/edit
-        public void SaveFilterPlan(FilterPlan filterPlan) {
-            using (var context = new AssistantDatabaseInteraction().GetContext()) {
-                if (context.SaveFilterPlan(filterPlan)) {
-                    activeTreeDataItem.Data = filterPlan;
-                    activeTreeDataItem.Header = filterPlan.FilterName;
-                }
-                else {
-                    Notification.ShowError("Failed to save Assistant Filter Plan (see log for details)");
-                }
-            }
-        }
-
     }
 
     public enum TreeDataType {
-        Folder, Profile, Project, Target, FilterPlan
+        Folder, Profile, Project, Target, ExposurePlan
     }
 
     public class TreeDataItem : TreeViewItem {

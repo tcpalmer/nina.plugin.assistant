@@ -29,13 +29,13 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanInstruction> list = new ExposurePlanner(pt, window, ntc).Plan();
             AssertPlan(GetExpectedTestTypical(ntc), list);
 
-            Assert.AreEqual(nbExposures, pt.FilterPlans[0].PlannedExposures);
-            Assert.AreEqual(nbExposures, pt.FilterPlans[1].PlannedExposures);
-            Assert.AreEqual(nbExposures, pt.FilterPlans[2].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.FilterPlans[3].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.FilterPlans[4].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.FilterPlans[5].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.FilterPlans[6].PlannedExposures);
+            Assert.AreEqual(nbExposures, pt.ExposurePlans[0].PlannedExposures);
+            Assert.AreEqual(nbExposures, pt.ExposurePlans[1].PlannedExposures);
+            Assert.AreEqual(nbExposures, pt.ExposurePlans[2].PlannedExposures);
+            Assert.AreEqual(wbExposures, pt.ExposurePlans[3].PlannedExposures);
+            Assert.AreEqual(wbExposures, pt.ExposurePlans[4].PlannedExposures);
+            Assert.AreEqual(wbExposures, pt.ExposurePlans[5].PlannedExposures);
+            Assert.AreEqual(wbExposures, pt.ExposurePlans[6].PlannedExposures);
         }
 
         [Test]
@@ -55,13 +55,13 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanInstruction> list = new ExposurePlanner(pt, window, ntc).Plan();
             AssertPlan(GetExpectedTestTypicalFS2(ntc), list);
 
-            Assert.AreEqual(11, pt.FilterPlans[0].PlannedExposures);
-            Assert.AreEqual(9, pt.FilterPlans[1].PlannedExposures);
-            Assert.AreEqual(8, pt.FilterPlans[2].PlannedExposures);
-            Assert.AreEqual(4, pt.FilterPlans[3].PlannedExposures);
-            Assert.AreEqual(4, pt.FilterPlans[4].PlannedExposures);
-            Assert.AreEqual(4, pt.FilterPlans[5].PlannedExposures);
-            Assert.AreEqual(4, pt.FilterPlans[6].PlannedExposures);
+            Assert.AreEqual(11, pt.ExposurePlans[0].PlannedExposures);
+            Assert.AreEqual(9, pt.ExposurePlans[1].PlannedExposures);
+            Assert.AreEqual(8, pt.ExposurePlans[2].PlannedExposures);
+            Assert.AreEqual(4, pt.ExposurePlans[3].PlannedExposures);
+            Assert.AreEqual(4, pt.ExposurePlans[4].PlannedExposures);
+            Assert.AreEqual(4, pt.ExposurePlans[5].PlannedExposures);
+            Assert.AreEqual(4, pt.ExposurePlans[6].PlannedExposures);
         }
 
         [Test]
@@ -81,13 +81,13 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanInstruction> list = new ExposurePlanner(pt, window, ntc).Plan();
             AssertPlan(GetExpectedWindowNotFilled(ntc), list);
 
-            Assert.AreEqual(nbExposures, pt.FilterPlans[0].PlannedExposures);
-            Assert.AreEqual(nbExposures, pt.FilterPlans[1].PlannedExposures);
-            Assert.AreEqual(nbExposures, pt.FilterPlans[2].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.FilterPlans[3].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.FilterPlans[4].PlannedExposures);
-            Assert.AreEqual(9, pt.FilterPlans[5].PlannedExposures);
-            Assert.AreEqual(0, pt.FilterPlans[6].PlannedExposures);
+            Assert.AreEqual(nbExposures, pt.ExposurePlans[0].PlannedExposures);
+            Assert.AreEqual(nbExposures, pt.ExposurePlans[1].PlannedExposures);
+            Assert.AreEqual(nbExposures, pt.ExposurePlans[2].PlannedExposures);
+            Assert.AreEqual(wbExposures, pt.ExposurePlans[3].PlannedExposures);
+            Assert.AreEqual(wbExposures, pt.ExposurePlans[4].PlannedExposures);
+            Assert.AreEqual(9, pt.ExposurePlans[5].PlannedExposures);
+            Assert.AreEqual(0, pt.ExposurePlans[6].PlannedExposures);
         }
 
         [Test]
@@ -105,10 +105,10 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanInstruction> list = new ExposurePlanner(pt, window, ntc).Plan();
             AssertPlan(GetExpectedTestNoNightAtDusk(ntc), list);
 
-            Assert.AreEqual(exposures, pt.FilterPlans[0].PlannedExposures);
-            Assert.AreEqual(exposures, pt.FilterPlans[1].PlannedExposures);
-            Assert.AreEqual(exposures, pt.FilterPlans[2].PlannedExposures);
-            Assert.AreEqual(0, pt.FilterPlans[3].PlannedExposures);
+            Assert.AreEqual(exposures, pt.ExposurePlans[0].PlannedExposures);
+            Assert.AreEqual(exposures, pt.ExposurePlans[1].PlannedExposures);
+            Assert.AreEqual(exposures, pt.ExposurePlans[2].PlannedExposures);
+            Assert.AreEqual(0, pt.ExposurePlans[3].PlannedExposures);
         }
 
         [Test]
@@ -126,10 +126,10 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanInstruction> list = new ExposurePlanner(pt, window, ntc).Plan();
             AssertPlan(GetExpectedTestNoNightAtDawn(ntc), list);
 
-            Assert.AreEqual(exposures, pt.FilterPlans[0].PlannedExposures);
-            Assert.AreEqual(18, pt.FilterPlans[1].PlannedExposures);
-            Assert.AreEqual(0, pt.FilterPlans[2].PlannedExposures);
-            Assert.AreEqual(0, pt.FilterPlans[3].PlannedExposures);
+            Assert.AreEqual(exposures, pt.ExposurePlans[0].PlannedExposures);
+            Assert.AreEqual(18, pt.ExposurePlans[1].PlannedExposures);
+            Assert.AreEqual(0, pt.ExposurePlans[2].PlannedExposures);
+            Assert.AreEqual(0, pt.ExposurePlans[3].PlannedExposures);
         }
 
         private Mock<IPlanProject> GetTestProject(DateTime dateTime, int filterSwitchFrequency, int nbExposures, int nbExposureLength, int wbExposures, int wbExposureLength) {
@@ -140,25 +140,25 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
             PlanMocks.AddMockPlanTarget(pp, pt);
 
-            Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("Ha", nbExposures, 0, nbExposureLength);
+            Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("Ha", nbExposures, 0, nbExposureLength);
             pf.Object.TwilightLevel = TwilightLevel.Astronomical;
             PlanMocks.AddMockPlanFilter(pt, pf);
-            pf = PlanMocks.GetMockPlanFilter("OIII", nbExposures, 0, nbExposureLength);
+            pf = PlanMocks.GetMockPlanExposure("OIII", nbExposures, 0, nbExposureLength);
             pf.Object.TwilightLevel = TwilightLevel.Astronomical;
             PlanMocks.AddMockPlanFilter(pt, pf);
-            pf = PlanMocks.GetMockPlanFilter("SII", nbExposures, 0, nbExposureLength);
+            pf = PlanMocks.GetMockPlanExposure("SII", nbExposures, 0, nbExposureLength);
             pf.Object.TwilightLevel = TwilightLevel.Astronomical;
             PlanMocks.AddMockPlanFilter(pt, pf);
-            pf = PlanMocks.GetMockPlanFilter("L", wbExposures, 0, wbExposureLength);
+            pf = PlanMocks.GetMockPlanExposure("L", wbExposures, 0, wbExposureLength);
             pf.Object.TwilightLevel = TwilightLevel.Nighttime;
             PlanMocks.AddMockPlanFilter(pt, pf);
-            pf = PlanMocks.GetMockPlanFilter("R", wbExposures, 0, wbExposureLength);
+            pf = PlanMocks.GetMockPlanExposure("R", wbExposures, 0, wbExposureLength);
             pf.Object.TwilightLevel = TwilightLevel.Nighttime;
             PlanMocks.AddMockPlanFilter(pt, pf);
-            pf = PlanMocks.GetMockPlanFilter("G", wbExposures, 0, wbExposureLength);
+            pf = PlanMocks.GetMockPlanExposure("G", wbExposures, 0, wbExposureLength);
             pf.Object.TwilightLevel = TwilightLevel.Nighttime;
             PlanMocks.AddMockPlanFilter(pt, pf);
-            pf = PlanMocks.GetMockPlanFilter("B", wbExposures, 0, wbExposureLength);
+            pf = PlanMocks.GetMockPlanExposure("B", wbExposures, 0, wbExposureLength);
             pf.Object.TwilightLevel = TwilightLevel.Nighttime;
             PlanMocks.AddMockPlanFilter(pt, pf);
 
@@ -173,16 +173,16 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
             PlanMocks.AddMockPlanTarget(pp, pt);
 
-            Mock<IPlanFilter> pf = PlanMocks.GetMockPlanFilter("Civil", exposures, 0, exposureLength);
+            Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("Civil", exposures, 0, exposureLength);
             pf.Object.TwilightLevel = TwilightLevel.Civil;
             PlanMocks.AddMockPlanFilter(pt, pf);
-            pf = PlanMocks.GetMockPlanFilter("Nautical", exposures, 0, exposureLength);
+            pf = PlanMocks.GetMockPlanExposure("Nautical", exposures, 0, exposureLength);
             pf.Object.TwilightLevel = TwilightLevel.Nautical;
             PlanMocks.AddMockPlanFilter(pt, pf);
-            pf = PlanMocks.GetMockPlanFilter("Astro", exposures, 0, exposureLength);
+            pf = PlanMocks.GetMockPlanExposure("Astro", exposures, 0, exposureLength);
             pf.Object.TwilightLevel = TwilightLevel.Astronomical;
             PlanMocks.AddMockPlanFilter(pt, pf);
-            pf = PlanMocks.GetMockPlanFilter("Night", exposures, 0, exposureLength);
+            pf = PlanMocks.GetMockPlanExposure("Night", exposures, 0, exposureLength);
             pf.Object.TwilightLevel = TwilightLevel.Nighttime;
             PlanMocks.AddMockPlanFilter(pt, pf);
 
@@ -237,13 +237,13 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         private List<IPlanInstruction> GetExpectedTestTypical(NighttimeCircumstances ntc) {
             List<IPlanInstruction> actual = new List<IPlanInstruction>();
 
-            Mock<IPlanFilter> Ha = PlanMocks.GetMockPlanFilter("Ha", 10, 0, 180);
-            Mock<IPlanFilter> OIII = PlanMocks.GetMockPlanFilter("OIII", 10, 0, 180);
-            Mock<IPlanFilter> SII = PlanMocks.GetMockPlanFilter("SII", 10, 0, 180);
-            Mock<IPlanFilter> L = PlanMocks.GetMockPlanFilter("L", 10, 0, 120);
-            Mock<IPlanFilter> R = PlanMocks.GetMockPlanFilter("R", 10, 0, 120);
-            Mock<IPlanFilter> G = PlanMocks.GetMockPlanFilter("G", 10, 0, 120);
-            Mock<IPlanFilter> B = PlanMocks.GetMockPlanFilter("B", 10, 0, 120);
+            Mock<IPlanExposure> Ha = PlanMocks.GetMockPlanExposure("Ha", 10, 0, 180);
+            Mock<IPlanExposure> OIII = PlanMocks.GetMockPlanExposure("OIII", 10, 0, 180);
+            Mock<IPlanExposure> SII = PlanMocks.GetMockPlanExposure("SII", 10, 0, 180);
+            Mock<IPlanExposure> L = PlanMocks.GetMockPlanExposure("L", 10, 0, 120);
+            Mock<IPlanExposure> R = PlanMocks.GetMockPlanExposure("R", 10, 0, 120);
+            Mock<IPlanExposure> G = PlanMocks.GetMockPlanExposure("G", 10, 0, 120);
+            Mock<IPlanExposure> B = PlanMocks.GetMockPlanExposure("B", 10, 0, 120);
 
             actual.Add(new PlanMessage(""));
             actual.Add(new PlanMessage(""));
@@ -268,13 +268,13 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         private List<IPlanInstruction> GetExpectedTestTypicalFS2(NighttimeCircumstances ntc) {
             List<IPlanInstruction> actual = new List<IPlanInstruction>();
 
-            Mock<IPlanFilter> Ha = PlanMocks.GetMockPlanFilter("Ha", 10, 0, 180);
-            Mock<IPlanFilter> OIII = PlanMocks.GetMockPlanFilter("OIII", 10, 0, 180);
-            Mock<IPlanFilter> SII = PlanMocks.GetMockPlanFilter("SII", 10, 0, 180);
-            Mock<IPlanFilter> L = PlanMocks.GetMockPlanFilter("L", 10, 0, 120);
-            Mock<IPlanFilter> R = PlanMocks.GetMockPlanFilter("R", 10, 0, 120);
-            Mock<IPlanFilter> G = PlanMocks.GetMockPlanFilter("G", 10, 0, 120);
-            Mock<IPlanFilter> B = PlanMocks.GetMockPlanFilter("B", 10, 0, 120);
+            Mock<IPlanExposure> Ha = PlanMocks.GetMockPlanExposure("Ha", 10, 0, 180);
+            Mock<IPlanExposure> OIII = PlanMocks.GetMockPlanExposure("OIII", 10, 0, 180);
+            Mock<IPlanExposure> SII = PlanMocks.GetMockPlanExposure("SII", 10, 0, 180);
+            Mock<IPlanExposure> L = PlanMocks.GetMockPlanExposure("L", 10, 0, 120);
+            Mock<IPlanExposure> R = PlanMocks.GetMockPlanExposure("R", 10, 0, 120);
+            Mock<IPlanExposure> G = PlanMocks.GetMockPlanExposure("G", 10, 0, 120);
+            Mock<IPlanExposure> B = PlanMocks.GetMockPlanExposure("B", 10, 0, 120);
 
             actual.Add(new PlanMessage(""));
             actual.Add(new PlanMessage(""));
@@ -309,13 +309,13 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         private List<IPlanInstruction> GetExpectedWindowNotFilled(NighttimeCircumstances ntc) {
             List<IPlanInstruction> actual = new List<IPlanInstruction>();
 
-            Mock<IPlanFilter> Ha = PlanMocks.GetMockPlanFilter("Ha", 10, 0, 180);
-            Mock<IPlanFilter> OIII = PlanMocks.GetMockPlanFilter("OIII", 10, 0, 180);
-            Mock<IPlanFilter> SII = PlanMocks.GetMockPlanFilter("SII", 10, 0, 180);
-            Mock<IPlanFilter> L = PlanMocks.GetMockPlanFilter("L", 10, 0, 120);
-            Mock<IPlanFilter> R = PlanMocks.GetMockPlanFilter("R", 10, 0, 120);
-            Mock<IPlanFilter> G = PlanMocks.GetMockPlanFilter("G", 10, 0, 120);
-            Mock<IPlanFilter> B = PlanMocks.GetMockPlanFilter("B", 10, 0, 120);
+            Mock<IPlanExposure> Ha = PlanMocks.GetMockPlanExposure("Ha", 10, 0, 180);
+            Mock<IPlanExposure> OIII = PlanMocks.GetMockPlanExposure("OIII", 10, 0, 180);
+            Mock<IPlanExposure> SII = PlanMocks.GetMockPlanExposure("SII", 10, 0, 180);
+            Mock<IPlanExposure> L = PlanMocks.GetMockPlanExposure("L", 10, 0, 120);
+            Mock<IPlanExposure> R = PlanMocks.GetMockPlanExposure("R", 10, 0, 120);
+            Mock<IPlanExposure> G = PlanMocks.GetMockPlanExposure("G", 10, 0, 120);
+            Mock<IPlanExposure> B = PlanMocks.GetMockPlanExposure("B", 10, 0, 120);
 
             actual.Add(new PlanMessage(""));
             actual.Add(new PlanMessage(""));
@@ -334,9 +334,9 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         private List<IPlanInstruction> GetExpectedTestNoNightAtDusk(TestNighttimeCircumstances ntc) {
             List<IPlanInstruction> actual = new List<IPlanInstruction>();
 
-            Mock<IPlanFilter> Civil = PlanMocks.GetMockPlanFilter("Civil", 10, 0, 180);
-            Mock<IPlanFilter> Nautical = PlanMocks.GetMockPlanFilter("Nautical", 10, 0, 180);
-            Mock<IPlanFilter> Astro = PlanMocks.GetMockPlanFilter("Astro", 10, 0, 180);
+            Mock<IPlanExposure> Civil = PlanMocks.GetMockPlanExposure("Civil", 10, 0, 180);
+            Mock<IPlanExposure> Nautical = PlanMocks.GetMockPlanExposure("Nautical", 10, 0, 180);
+            Mock<IPlanExposure> Astro = PlanMocks.GetMockPlanExposure("Astro", 10, 0, 180);
 
             actual.Add(new PlanMessage(""));
             actual.Add(new PlanMessage(""));
@@ -356,8 +356,8 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         private List<IPlanInstruction> GetExpectedTestNoNightAtDawn(TestNighttimeCircumstances ntc) {
             List<IPlanInstruction> actual = new List<IPlanInstruction>();
 
-            Mock<IPlanFilter> Civil = PlanMocks.GetMockPlanFilter("Civil", 10, 0, 180);
-            Mock<IPlanFilter> Nautical = PlanMocks.GetMockPlanFilter("Nautical", 10, 0, 180);
+            Mock<IPlanExposure> Civil = PlanMocks.GetMockPlanExposure("Civil", 10, 0, 180);
+            Mock<IPlanExposure> Nautical = PlanMocks.GetMockPlanExposure("Nautical", 10, 0, 180);
 
             actual.Add(new PlanMessage(""));
             actual.Add(new PlanMessage(""));
@@ -370,7 +370,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             return actual;
         }
 
-        private void AddActualExposures(List<IPlanInstruction> actual, IPlanFilter planFilter, int count) {
+        private void AddActualExposures(List<IPlanInstruction> actual, IPlanExposure planFilter, int count) {
             actual.Add(new PlanSwitchFilter(planFilter));
             for (int i = 0; i < count; i++) {
                 actual.Add(new PlanTakeExposure(planFilter));
