@@ -225,6 +225,22 @@ namespace Assistant.NINAPlugin.Database.Schema {
             }
         }
 
+        [NotMapped]
+        public string PercentComplete {
+            get {
+                double totalDesired = 0;
+                double totalAccepted = 0;
+                foreach (Target target in Targets) {
+                    foreach (ExposurePlan plan in target.ExposurePlans) {
+                        totalDesired += plan.Desired;
+                        totalAccepted += plan.Accepted;
+                    }
+                }
+
+                return string.Format("{0:0.##}%", (totalAccepted / totalDesired) * 100);
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

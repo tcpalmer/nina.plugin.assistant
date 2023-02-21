@@ -1,4 +1,5 @@
-﻿using Assistant.NINAPlugin.Database;
+﻿using Assistant.NINAPlugin.Controls.Util;
+using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
@@ -7,7 +8,7 @@ using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -80,24 +81,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        private Visibility showExposurePlanView = Visibility.Hidden;
-        public Visibility ShowExposurePlanView {
-            get => showExposurePlanView;
-            set {
-                showExposurePlanView = value;
-                RaisePropertyChanged(nameof(ShowExposurePlanView));
-            }
-        }
-
-        private ExposurePlanViewVM exposurePlanViewVM;
-        public ExposurePlanViewVM ExposurePlanViewVM {
-            get => exposurePlanViewVM;
-            set {
-                exposurePlanViewVM = value;
-                RaisePropertyChanged(nameof(ExposurePlanViewVM));
-            }
-        }
-
         public ICommand SelectedItemChangedCommand { get; private set; }
         private void SelectedItemChanged(object obj) {
             TreeDataItem item = obj as TreeDataItem;
@@ -107,7 +90,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         activeTreeDataItem = item;
                         ProfileViewVM = new ProfileViewVM(this, profileService, item);
                         ShowTargetView = Visibility.Collapsed;
-                        ShowExposurePlanView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
                         ShowProfileView = Visibility.Visible;
                         break;
@@ -118,15 +100,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         ProjectViewVM = new ProjectViewVM(this, profileService, project);
                         ShowProfileView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
-                        ShowExposurePlanView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Visible;
-
-                        StringBuilder sb = new StringBuilder();
-                        sb.AppendLine($"PROJECT: {project.Name}\n{project}");
-                        sb.AppendLine("-- Targets --");
-                        project.Targets.ForEach(t => sb.AppendLine(t.ToString()));
-                        Logger.Debug(sb.ToString());
-
                         break;
 
                     case TreeDataType.Target:
@@ -135,28 +109,14 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         TargetViewVM = new TargetViewVM(this, profileService, target);
                         ShowProfileView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
-                        ShowExposurePlanView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Visible;
-
-                        Logger.Debug($"TARGET: {target.Name}\n{target}");
-
-                        break;
-
-                    case TreeDataType.ExposurePlan:
-                        activeTreeDataItem = item;
-                        ExposurePlan exposurePlan = (ExposurePlan)item.Data;
-                        ExposurePlanViewVM = new ExposurePlanViewVM(this, profileService, exposurePlan);
-                        ShowProfileView = Visibility.Collapsed;
-                        ShowProjectView = Visibility.Collapsed;
-                        ShowTargetView = Visibility.Collapsed;
-                        ShowExposurePlanView = Visibility.Visible;
                         break;
 
                     default:
                         activeTreeDataItem = null;
+                        ShowProfileView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
-                        ShowExposurePlanView = Visibility.Collapsed;
                         break;
                 }
             }
@@ -199,14 +159,10 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         TreeDataItem projectItem = new TreeDataItem(TreeDataType.Project, project.Name, project, profileItem);
                         profileItem.Items.Add(projectItem);
 
-                        foreach (Target target in project.Targets) {
+                        List<Target> targetList = project.Targets;
+                        foreach (Target target in targetList) {
                             TreeDataItem targetItem = new TreeDataItem(TreeDataType.Target, target.Name, target, projectItem);
                             projectItem.Items.Add(targetItem);
-
-                            foreach (ExposurePlan exposurePlan in target.ExposurePlans) {
-                                TreeDataItem exposurePlanItem = new TreeDataItem(TreeDataType.ExposurePlan, exposurePlan.FilterName, exposurePlan, targetItem);
-                                targetItem.Items.Add(exposurePlanItem);
-                            }
                         }
                     }
                 }
@@ -375,14 +331,44 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        public Target DeleteExposurePlan(Target target, ExposurePlan exposurePlan) {
+            using (var context = new AssistantDatabaseInteraction().GetContext()) {
+                Target updatedTarget = context.DeleteExposurePlan(target, exposurePlan);
+                if (updatedTarget != null) {
+                    activeTreeDataItem.Data = updatedTarget;
+                }
+                else {
+                    Notification.ShowError("Failed to delete Assistant Exposure Plan (see log for details)");
+                }
+
+                return updatedTarget;
+            }
+        }
+
         public void CopyItem() {
             Clipboard.SetItem(activeTreeDataItem);
+        }
+
+        public IProfile GetProfile(string profileId) {
+            if (profileService.ActiveProfile.Id.ToString() == profileId) {
+                Logger.Trace($"Assistant: getting active profile {profileId}");
+                return profileService.ActiveProfile;
+            }
+
+            ProfileMeta profileMeta = profileService.Profiles.Where(p => p.Id.ToString() == profileId).FirstOrDefault();
+            if (profileMeta != null) {
+                Logger.Trace($"Assistant: getting profile from disk {profileId}");
+                return ProfileLoader.Load(profileMeta.Location);
+            }
+
+            Logger.Error($"Assistant: failed to load profile, id = {profileId}");
+            return null;
         }
 
     }
 
     public enum TreeDataType {
-        Folder, Profile, Project, Target, ExposurePlan
+        Folder, Profile, Project, Target
     }
 
     public class TreeDataItem : TreeViewItem {

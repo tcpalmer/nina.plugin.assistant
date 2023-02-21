@@ -42,6 +42,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             List<RuleWeight> ruleWeights = new List<RuleWeight>();
 
             project.RuleWeights.ForEach((rw) => {
+                rw.PropertyChanged -= ProjectProxy_PropertyChanged;
                 rw.PropertyChanged += ProjectProxy_PropertyChanged;
                 ruleWeights.Add(rw);
             });
@@ -51,7 +52,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private void ProjectProxy_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             if (e?.PropertyName != nameof(ProjectProxy.Proxy)) {
-                ProjectChanged = true;
+                ItemEdited = true;
             }
             else {
                 RaisePropertyChanged(nameof(ProjectProxy));
@@ -109,12 +110,12 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        private bool projectChanged = false;
-        public bool ProjectChanged {
-            get => projectChanged;
+        private bool itemEdited = false;
+        public bool ItemEdited {
+            get => itemEdited;
             set {
-                projectChanged = value;
-                RaisePropertyChanged(nameof(ProjectChanged));
+                itemEdited = value;
+                RaisePropertyChanged(nameof(ItemEdited));
             }
         }
 
@@ -134,7 +135,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ProjectProxy.PropertyChanged += ProjectProxy_PropertyChanged;
             managerVM.SetEditMode(true);
             ShowEditView = true;
-            ProjectChanged = false;
+            ItemEdited = false;
         }
 
         private void Save(object obj) {

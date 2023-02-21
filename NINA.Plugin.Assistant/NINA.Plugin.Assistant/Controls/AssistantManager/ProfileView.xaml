@@ -15,7 +15,7 @@
 
     <StackPanel
         Name="ProfileViewPanel"
-        Width="600"
+        Width="700"
         Margin="20,20,0,0"
         Orientation="Vertical">
         <StackPanel Orientation="Horizontal">
@@ -70,6 +70,11 @@
         </StackPanel>
 
         <ListView ItemsSource="{Binding Projects}">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Height" Value="25" />
+                </Style>
+            </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
                     <GridViewColumn Width="30">
@@ -170,6 +175,15 @@
                                 FontWeight="Bold"
                                 Text="End Date"
                                 ToolTip="Project end date" />
+                        </GridViewColumn.Header>
+                    </GridViewColumn>
+                    <GridViewColumn Width="35" DisplayMemberBinding="{Binding Path=PercentComplete}">
+                        <GridViewColumn.Header>
+                            <TextBlock
+                                FontSize="14"
+                                FontWeight="Bold"
+                                Text="%"
+                                ToolTip="Percent complete" />
                         </GridViewColumn.Header>
                     </GridViewColumn>
                 </GridView>

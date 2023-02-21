@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using NINA.Core.Utility;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -18,6 +19,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public void ProxyPropertyChanged(object sender, PropertyChangedEventArgs e) {
+            Logger.Info($"PPC: {e?.PropertyName}");
             RaisePropertyChanged(e.PropertyName);
         }
 
@@ -55,7 +57,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         /// </summary>
         /// <typeparam name="TEntity">The entity type</typeparam>
         /// <param name="source">The source entity</param>
-        TEntity CopyEntity<TEntity>(TEntity source) where TEntity : class, new() {
+        public virtual TEntity CopyEntity<TEntity>(TEntity source) where TEntity : class, new() {
 
             // Get properties from EF that are read/write and not marked with NotMappedAttribute
             var sourceProperties = typeof(TEntity)
@@ -82,6 +84,23 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 Proxy = value;
             }
         }
+
+        public override TEntity CopyEntity<TEntity>(TEntity sourceEntity) {
+            TEntity copyEntity = base.CopyEntity(sourceEntity);
+            Project source = sourceEntity as Project;
+            Project copy = copyEntity as Project;
+
+            // Deepen the copy for the RuleWeights list
+            copy.RuleWeights = new List<RuleWeight>(source.RuleWeights.Count);
+            source.RuleWeights.ForEach(rw => {
+                rw.PropertyChanged -= ProxyPropertyChanged;
+                RuleWeight copyRuleWeight = base.CopyEntity(rw);
+                copyRuleWeight.PropertyChanged += ProxyPropertyChanged;
+                copy.RuleWeights.Add(copyRuleWeight);
+            });
+
+            return copyEntity;
+        }
     }
 
     public class TargetProxy : TemporaryProxy<Target> {
@@ -94,17 +113,22 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 Proxy = value;
             }
         }
-    }
 
-    public class ExposurePlanProxy : TemporaryProxy<ExposurePlan> {
+        public override TEntity CopyEntity<TEntity>(TEntity sourceEntity) {
+            TEntity copyEntity = base.CopyEntity(sourceEntity);
+            Target source = sourceEntity as Target;
+            Target copy = copyEntity as Target;
 
-        public ExposurePlanProxy(ExposurePlan exposurePlan) : base(exposurePlan) { }
+            // Deepen the copy for the ExposurePlan list
+            copy.ExposurePlans = new List<ExposurePlan>(source.ExposurePlans.Count);
+            source.ExposurePlans.ForEach(plan => {
+                plan.PropertyChanged -= ProxyPropertyChanged;
+                ExposurePlan copyExposurePlan = base.CopyEntity(plan);
+                copyExposurePlan.PropertyChanged += ProxyPropertyChanged;
+                copy.ExposurePlans.Add(copyExposurePlan);
+            });
 
-        public ExposurePlan ExposurePlan {
-            get => Proxy;
-            set {
-                Proxy = value;
-            }
+            return copyEntity;
         }
     }
 

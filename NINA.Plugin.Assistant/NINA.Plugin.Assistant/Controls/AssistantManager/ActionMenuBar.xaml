@@ -77,7 +77,7 @@
             VerticalAlignment="Center"
             HorizontalContentAlignment="Right"
             Command="{Binding SaveCommand}"
-            IsEnabled="{Binding ShowEditView}"
+            IsEnabled="{Binding ItemEdited}"
             Style="{StaticResource BackgroundButton}"
             ToolTip="Save"
             ToolTipService.ShowOnDisabled="True">

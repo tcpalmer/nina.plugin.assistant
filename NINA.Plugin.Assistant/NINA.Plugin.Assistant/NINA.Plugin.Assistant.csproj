@@ -306,10 +306,6 @@
     <Compile Include="Controls\AssistantManager\BindingHelper.cs" />
     <Compile Include="Controls\AssistantManager\ConfirmationMessageBox.cs" />
     <Compile Include="Controls\AssistantManager\EnumBindingSourceExtension.cs" />
-    <Compile Include="Controls\AssistantManager\ExposurePlanView.xaml.cs">
-      <DependentUpon>ExposurePlanView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\AssistantManager\ExposurePlanViewVM.cs" />
     <Compile Include="Controls\AssistantManager\ProfileView.xaml.cs">
       <DependentUpon>ProfileView.xaml</DependentUpon>
     </Compile>
@@ -373,6 +369,7 @@
     <Compile Include="Sequencer\ImageGrader.cs" />
     <Compile Include="Sequencer\ImageSaveWatcher.cs" />
     <Compile Include="Sequencer\SequenceCommands.cs" />
+    <Compile Include="Controls\Utils\ProfileLoader.cs" />
     <Compile Include="Utils\Utils.cs" />
     <Compile Include="Utils\Assert.cs" />
   </ItemGroup>
@@ -390,10 +387,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\AssistantManager\AssistantManagerView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controls\AssistantManager\ExposurePlanView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

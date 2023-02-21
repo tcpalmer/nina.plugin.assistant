@@ -72,6 +72,23 @@ namespace Assistant.NINAPlugin.Database {
                 .FirstOrDefault();
         }
 
+        public Target GetTargetByProject(int projectId, int targetId) {
+            Project project = GetProject(projectId);
+            return project.Targets.Where(t => t.Id == targetId).FirstOrDefault();
+            /*
+            return TargetSet
+                .Include("exposureplans")
+                .Where(t => t.Project.Id == projectId && t.Id == targetId)
+                .FirstOrDefault();
+            */
+        }
+
+        public ExposurePlan GetExposurePlan(int id) {
+            return ExposurePlanSet
+                .Where(p => p.Id == id)
+                .FirstOrDefault();
+        }
+
         public ExposurePlan GetExposurePlan(int targetId, string filterName) {
             return ExposurePlanSet
                 .Where(e => e.TargetId == targetId && e.filterName == filterName)
@@ -176,6 +193,8 @@ namespace Assistant.NINAPlugin.Database {
             using (var transaction = Database.BeginTransaction()) {
                 try {
                     TargetSet.AddOrUpdate(target);
+                    target.ExposurePlans.ForEach(plan => { ExposurePlanSet.AddOrUpdate(plan); });
+
                     SaveChanges();
                     transaction.Commit();
                     return GetTarget(target.Project.Id, target.Id);
@@ -233,9 +252,26 @@ namespace Assistant.NINAPlugin.Database {
                     return true;
                 }
                 catch (Exception e) {
-                    Logger.Error($"Assistant: error persisting Filter Plan: {e.Message} {e.StackTrace}");
+                    Logger.Error($"Assistant: error persisting Exposure Plan: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return false;
+                }
+            }
+        }
+
+        public Target DeleteExposurePlan(Target target, ExposurePlan exposurePlan) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    exposurePlan = GetExposurePlan(exposurePlan.Id);
+                    ExposurePlanSet.Remove(exposurePlan);
+                    SaveChanges();
+                    transaction.Commit();
+                    return GetTargetByProject(target.ProjectId, target.Id);
+                }
+                catch (Exception e) {
+                    Logger.Error($"Assistant: error deleting Filter Plan: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
                 }
             }
         }

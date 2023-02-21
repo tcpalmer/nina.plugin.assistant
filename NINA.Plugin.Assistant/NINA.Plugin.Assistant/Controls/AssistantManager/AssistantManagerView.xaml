@@ -52,6 +52,7 @@
         <Border
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1"
+            Height="600"
             Visibility="{Binding ShowProfileView}">
             <StackPanel>
                 <local:ProfileView DataContext="{Binding ProfileViewVM}" />
@@ -60,6 +61,7 @@
         <Border
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1"
+            Height="600"
             Visibility="{Binding ShowProjectView}">
             <StackPanel>
                 <local:ProjectView DataContext="{Binding ProjectViewVM}" />
@@ -68,17 +70,10 @@
         <Border
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1"
+            Height="600"
             Visibility="{Binding ShowTargetView}">
             <StackPanel>
                 <local:TargetView DataContext="{Binding TargetViewVM}" />
-            </StackPanel>
-        </Border>
-        <Border
-            BorderBrush="{StaticResource BorderBrush}"
-            BorderThickness="1"
-            Visibility="{Binding ShowExposurePlanView}">
-            <StackPanel>
-                <local:ExposurePlanView DataContext="{Binding ExposurePlanViewVM}" />
             </StackPanel>
         </Border>
     </StackPanel>

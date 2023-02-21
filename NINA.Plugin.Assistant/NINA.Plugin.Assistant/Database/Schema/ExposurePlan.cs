@@ -7,10 +7,6 @@ using System.Text;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public enum BinningModeEnum {
-        [Description("1x1")] OneXOne,
-    }
-
     public class ExposurePlan : INotifyPropertyChanged {
 
         [Key] public int Id { get; set; }
