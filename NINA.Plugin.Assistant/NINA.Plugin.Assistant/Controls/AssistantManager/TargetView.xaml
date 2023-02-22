@@ -34,22 +34,60 @@
                 Content="{Binding TargetProxy.Target.Name}"
                 FontSize="18" />
         </StackPanel>
-        <uc:ActionMenuBar DataContext="{Binding}" />
+        <StackPanel Orientation="Horizontal">
+            <uc:ActionMenuBar DataContext="{Binding}" />
+            <StackPanel Margin="18,0,0,16" Orientation="Horizontal">
+                <Button
+                    Width="25"
+                    Height="25"
+                    Margin="10,0,0,0"
+                    VerticalAlignment="Center"
+                    HorizontalContentAlignment="Right"
+                    Command="{Binding ShowTargetImportViewCommand}"
+                    IsEnabled="{Binding ShowEditView}"
+                    Style="{StaticResource BackgroundButton}"
+                    ToolTip="Import coordinates"
+                    ToolTipService.ShowOnDisabled="True">
+                    <Grid>
+                        <Path
+                            Margin="5"
+                            Data="{StaticResource ImportSVG}"
+                            Fill="{StaticResource ButtonForegroundBrush}"
+                            Stretch="Uniform" />
+                    </Grid>
+                </Button>
+            </StackPanel>
+        </StackPanel>
 
-        <UniformGrid
-            Width="320"
-            Height="160"
+        <Grid
+            Width="600"
             Margin="12,0,0,6"
-            HorizontalAlignment="Left"
-            Columns="2"
-            Rows="6">
+            HorizontalAlignment="Left">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="140" />
+                <ColumnDefinition Width="460" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition MinHeight="25" />
+                <RowDefinition MinHeight="25" />
+                <RowDefinition MinHeight="25" />
+                <RowDefinition MinHeight="25" />
+            </Grid.RowDefinitions>
 
             <TextBlock
+                Grid.Row="0"
+                Grid.Column="0"
                 VerticalAlignment="Center"
                 FontWeight="Bold"
                 Text="Name"
                 ToolTip="Name of the Target" />
-            <TextBox MaxHeight="20" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+            <TextBox
+                Grid.Row="0"
+                Grid.Column="1"
+                Width="180"
+                MaxHeight="20"
+                HorizontalAlignment="Left"
+                Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox.Text>
                     <Binding Path="TargetProxy.Target.Name" UpdateSourceTrigger="LostFocus">
                         <Binding.ValidationRules>
@@ -59,20 +97,29 @@
                 </TextBox.Text>
             </TextBox>
             <TextBlock
+                Grid.Row="0"
+                Grid.Column="1"
                 MaxHeight="20"
-                Margin="3,3,0,0"
+                Margin="0,0,0,0"
                 Text="{Binding TargetProxy.Target.Name}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
             <TextBlock
+                Grid.Row="1"
+                Grid.Column="0"
                 VerticalAlignment="Center"
                 FontWeight="Bold"
-                Text="RA"
-                ToolTip="RA coordinate" />
-            <StackPanel Orientation="Horizontal" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                Text="Coordinates"
+                ToolTip="Target coordinates" />
+            <StackPanel
+                Grid.Row="1"
+                Grid.Column="1"
+                Orientation="Horizontal"
+                Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox
-                    MinWidth="40"
-                    Margin="5,0,0,0"
+                    MinWidth="25"
+                    Margin="0,0,0,0"
+                    VerticalContentAlignment="Center"
                     TextAlignment="Right">
                     <TextBox.Text>
                         <Binding Path="TargetProxy.Target.RAHours" UpdateSourceTrigger="LostFocus">
@@ -84,8 +131,9 @@
                 </TextBox>
                 <TextBlock VerticalAlignment="Center">h</TextBlock>
                 <TextBox
-                    MinWidth="40"
-                    Margin="5,0,0,0"
+                    MinWidth="25"
+                    Margin="8,0,0,0"
+                    VerticalContentAlignment="Center"
                     TextAlignment="Right">
                     <TextBox.Text>
                         <Binding Path="TargetProxy.Target.RAMinutes" UpdateSourceTrigger="LostFocus">
@@ -97,8 +145,9 @@
                 </TextBox>
                 <TextBlock VerticalAlignment="Center">m</TextBlock>
                 <TextBox
-                    MinWidth="40"
-                    Margin="5,0,0,0"
+                    MinWidth="25"
+                    Margin="8,0,0,0"
+                    VerticalContentAlignment="Center"
                     TextAlignment="Right">
                     <TextBox.Text>
                         <Binding Path="TargetProxy.Target.RASeconds" UpdateSourceTrigger="LostFocus">
@@ -109,21 +158,11 @@
                     </TextBox.Text>
                 </TextBox>
                 <TextBlock VerticalAlignment="Center">s</TextBlock>
-            </StackPanel>
-            <TextBlock
-                MaxHeight="20"
-                Text="{Binding TargetProxy.Target.RAString}"
-                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
-            <TextBlock
-                VerticalAlignment="Center"
-                FontWeight="Bold"
-                Text="Dec"
-                ToolTip="Dec coordinate" />
-            <StackPanel Orientation="Horizontal" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox
-                    MinWidth="40"
-                    Margin="5,0,0,0"
+                    MinWidth="25"
+                    Margin="28,0,0,0"
+                    VerticalContentAlignment="Center"
                     TextAlignment="Right">
                     <TextBox.Text>
                         <MultiBinding Converter="{StaticResource DecDegreeConverter}" UpdateSourceTrigger="LostFocus">
@@ -138,8 +177,9 @@
                 </TextBox>
                 <TextBlock VerticalAlignment="Center">d</TextBlock>
                 <TextBox
-                    MinWidth="40"
-                    Margin="5,0,0,0"
+                    MinWidth="25"
+                    Margin="8,0,0,0"
+                    VerticalContentAlignment="Center"
                     TextAlignment="Right">
                     <TextBox.Text>
                         <Binding Path="TargetProxy.Target.DecMinutes" UpdateSourceTrigger="LostFocus">
@@ -151,8 +191,9 @@
                 </TextBox>
                 <TextBlock VerticalAlignment="Center">m</TextBlock>
                 <TextBox
-                    MinWidth="40"
-                    Margin="5,0,0,0"
+                    MinWidth="25"
+                    Margin="8,0,0,0"
+                    VerticalContentAlignment="Center"
                     TextAlignment="Right">
                     <TextBox.Text>
                         <Binding Path="TargetProxy.Target.DecSeconds" UpdateSourceTrigger="LostFocus">
@@ -163,57 +204,80 @@
                     </TextBox.Text>
                 </TextBox>
                 <TextBlock VerticalAlignment="Center">s</TextBlock>
+                <ComboBox
+                    MaxHeight="20"
+                    Margin="28,0,0,0"
+                    ItemsSource="{Binding Source={local:EnumBindingSource {x:Type astro:Epoch}}}"
+                    SelectedValue="{Binding TargetProxy.Target.Epoch}" />
             </StackPanel>
-            <TextBlock
-                MaxHeight="20"
-                Text="{Binding TargetProxy.Target.DecString}"
-                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+            <StackPanel
+                Grid.Row="1"
+                Grid.Column="1"
+                Orientation="Horizontal"
+                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}">
+                <TextBlock MaxHeight="20" Text="{Binding TargetProxy.Target.RAString}" />
+                <TextBlock
+                    MaxHeight="20"
+                    Margin="16,0,0,0"
+                    Text="{Binding TargetProxy.Target.DecString}" />
+                <TextBlock
+                    MaxHeight="20"
+                    Margin="16,0,0,0"
+                    Text="{Binding TargetProxy.Target.Epoch}" />
+            </StackPanel>
 
             <TextBlock
-                VerticalAlignment="Center"
-                FontWeight="Bold"
-                Text="Epoch"
-                ToolTip="Epoch of the coordinates" />
-            <ComboBox
-                MaxHeight="20"
-                ItemsSource="{Binding Source={local:EnumBindingSource {x:Type astro:Epoch}}}"
-                SelectedValue="{Binding TargetProxy.Target.Epoch}"
-                Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
-            <TextBlock
-                MaxHeight="20"
-                Margin="3,3,0,0"
-                Text="{Binding TargetProxy.Target.Epoch}"
-                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
-            <TextBlock
+                Grid.Row="2"
+                Grid.Column="0"
                 VerticalAlignment="Center"
                 FontWeight="Bold"
                 Text="Rotation"
                 ToolTip="Target rotation" />
-            <TextBox MaxHeight="20" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
-                <TextBox.Text>
-                    <Binding Path="TargetProxy.Target.Rotation" UpdateSourceTrigger="LostFocus">
-                        <Binding.ValidationRules>
-                            <rules:DoubleRangeRule>
-                                <rules:DoubleRangeRule.ValidRange>
-                                    <rules:DoubleRangeChecker Maximum="360" Minimum="0" />
-                                </rules:DoubleRangeRule.ValidRange>
-                            </rules:DoubleRangeRule>
-                        </Binding.ValidationRules>
-                    </Binding>
-                </TextBox.Text>
-            </TextBox>
+            <StackPanel
+                Grid.Row="2"
+                Grid.Column="1"
+                Orientation="Horizontal"
+                Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                <TextBox
+                    Width="30"
+                    MaxHeight="20"
+                    HorizontalAlignment="Left">
+                    <TextBox.Text>
+                        <Binding Path="TargetProxy.Target.Rotation" UpdateSourceTrigger="LostFocus">
+                            <Binding.ValidationRules>
+                                <rules:DoubleRangeRule>
+                                    <rules:DoubleRangeRule.ValidRange>
+                                        <rules:DoubleRangeChecker Maximum="360" Minimum="0" />
+                                    </rules:DoubleRangeRule.ValidRange>
+                                </rules:DoubleRangeRule>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <TextBlock Margin="2,0,0,0" Text="°" />
+            </StackPanel>
             <TextBlock
+                Grid.Row="2"
+                Grid.Column="1"
                 MaxHeight="20"
                 Text="{Binding TargetProxy.Target.Rotation, Converter={StaticResource DegreesDisplayConverter}}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
             <TextBlock
+                Grid.Row="3"
+                Grid.Column="0"
                 VerticalAlignment="Center"
                 FontWeight="Bold"
                 Text="ROI"
                 ToolTip="Target region of interest" />
-            <TextBox MaxHeight="20" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+            <TextBox
+                Grid.Row="3"
+                Grid.Column="1"
+                Width="30"
+                MaxHeight="20"
+                HorizontalAlignment="Left"
+                Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox.Text>
                     <Binding Path="TargetProxy.Target.ROI" UpdateSourceTrigger="LostFocus">
                         <Binding.ValidationRules>
@@ -227,11 +291,20 @@
                 </TextBox.Text>
             </TextBox>
             <TextBlock
+                Grid.Row="3"
+                Grid.Column="1"
                 MaxHeight="20"
                 Text="{Binding TargetProxy.Target.ROI}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
-        </UniformGrid>
+        </Grid>
+
+        <StackPanel
+            Margin="12,0,0,6"
+            Orientation="Vertical"
+            Visibility="{Binding ShowTargetImportView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+            <uc:TargetImportView DataContext="{Binding TargetImportVM}" />
+        </StackPanel>
 
         <TextBlock
             Margin="12,14,0,6"

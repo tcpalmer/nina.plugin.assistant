@@ -19,7 +19,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public void ProxyPropertyChanged(object sender, PropertyChangedEventArgs e) {
-            Logger.Info($"PPC: {e?.PropertyName}");
             RaisePropertyChanged(e.PropertyName);
         }
 

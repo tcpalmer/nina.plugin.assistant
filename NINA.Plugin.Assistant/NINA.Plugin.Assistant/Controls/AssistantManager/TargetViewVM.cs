@@ -1,7 +1,9 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using NINA.Core.Model.Equipment;
 using NINA.Core.Utility;
+using NINA.Equipment.Interfaces;
 using NINA.Profile.Interfaces;
+using NINA.WPF.Base.Interfaces.ViewModel;
 using NINA.WPF.Base.ViewModel;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,25 +16,18 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private AssistantManagerVM managerVM;
         private IProfile profile;
-        private TargetProxy targetProxy;
 
-        public TargetProxy TargetProxy {
-            get => targetProxy;
-            set {
-                targetProxy = value;
-                RaisePropertyChanged(nameof(TargetProxy));
-            }
-        }
-
-        public TargetViewVM(AssistantManagerVM managerVM, IProfileService profileService, Target target) : base(profileService) {
+        public TargetViewVM(AssistantManagerVM managerVM, IProfileService profileService, IDeepSkyObjectSearchVM deepSkyObjectSearchVM, IPlanetariumFactory planetariumFactory, Target target) : base(profileService) {
             this.managerVM = managerVM;
             TargetProxy = new TargetProxy(target);
 
             profile = managerVM.GetProfile(target.Project.ProfileId);
+
             InitializeCombos();
             InitializeExposurePlans(TargetProxy.Proxy);
 
             EditCommand = new RelayCommand(Edit);
+            ShowTargetImportViewCommand = new RelayCommand(ShowTargetImportViewCmd);
             SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(Cancel);
             CopyCommand = new RelayCommand(Copy);
@@ -40,6 +35,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
             AddExposurePlanCommand = new RelayCommand(AddExposurePlan);
             DeleteExposurePlanCommand = new RelayCommand(DeleteExposurePlan);
+
+            TargetImportVM = new TargetImportVM(deepSkyObjectSearchVM, planetariumFactory);
+            TargetImportVM.PropertyChanged += ImportTarget_PropertyChanged;
         }
 
         private void InitializeCombos() {
@@ -61,6 +59,24 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
 
             return filterNames;
+        }
+
+        private TargetProxy targetProxy;
+        public TargetProxy TargetProxy {
+            get => targetProxy;
+            set {
+                targetProxy = value;
+                RaisePropertyChanged(nameof(TargetProxy));
+            }
+        }
+
+        private void TargetProxy_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+            if (e?.PropertyName != nameof(TargetProxy.Proxy)) {
+                ItemEdited = true;
+            }
+            else {
+                RaisePropertyChanged(nameof(TargetProxy));
+            }
         }
 
         private List<string> _filterNameChoices;
@@ -102,21 +118,21 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        private void TargetProxy_PropertyChanged(object sender, PropertyChangedEventArgs e) {
-            if (e?.PropertyName != nameof(TargetProxy.Proxy)) {
-                ItemEdited = true;
-            }
-            else {
-                RaisePropertyChanged(nameof(TargetProxy));
-            }
-        }
-
         private bool showEditView = false;
         public bool ShowEditView {
             get => showEditView;
             set {
                 showEditView = value;
                 RaisePropertyChanged(nameof(ShowEditView));
+            }
+        }
+
+        private bool showTargetImportView = false;
+        public bool ShowTargetImportView {
+            get => showTargetImportView;
+            set {
+                showTargetImportView = value;
+                RaisePropertyChanged(nameof(ShowTargetImportView));
             }
         }
 
@@ -129,7 +145,20 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        private TargetImportVM targetImportVM;
+        public TargetImportVM TargetImportVM { get => targetImportVM; set => targetImportVM = value; }
+
+        private void ImportTarget_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+            if (TargetImportVM.Target.Name != null) {
+                TargetProxy.Proxy.Name = TargetImportVM.Target.Name;
+            }
+
+            TargetProxy.Proxy.Coordinates = TargetImportVM.Target.Coordinates;
+            RaisePropertyChanged(nameof(TargetProxy.Proxy));
+        }
+
         public ICommand EditCommand { get; private set; }
+        public ICommand ShowTargetImportViewCommand { get; private set; }
         public ICommand SaveCommand { get; private set; }
         public ICommand CancelCommand { get; private set; }
         public ICommand CopyCommand { get; private set; }
@@ -144,6 +173,10 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ItemEdited = false;
         }
 
+        private void ShowTargetImportViewCmd(object obj) {
+            ShowTargetImportView = !ShowTargetImportView;
+        }
+
         private void Save(object obj) {
             TargetProxy.Proxy.ExposurePlans = ExposurePlans;
             managerVM.SaveTarget(TargetProxy.Proxy);
@@ -151,6 +184,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             InitializeExposurePlans(TargetProxy.Proxy);
             TargetProxy.PropertyChanged -= TargetProxy_PropertyChanged;
             ShowEditView = false;
+            ShowTargetImportView = false;
             managerVM.SetEditMode(false);
         }
 
@@ -159,6 +193,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             TargetProxy.PropertyChanged -= TargetProxy_PropertyChanged;
             InitializeExposurePlans(TargetProxy.Proxy);
             ShowEditView = false;
+            ShowTargetImportView = false;
             managerVM.SetEditMode(false);
         }
 

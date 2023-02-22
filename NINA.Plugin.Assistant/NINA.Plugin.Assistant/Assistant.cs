@@ -1,9 +1,11 @@
 ﻿using Assistant.NINAPlugin.Controls.AssistantManager;
 using NINA.Core.Utility;
+using NINA.Equipment.Interfaces;
 using NINA.Plugin;
 using NINA.Plugin.Interfaces;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
+using NINA.WPF.Base.Interfaces.ViewModel;
 using System;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
@@ -22,7 +24,7 @@ namespace Assistant.NINAPlugin {
         private IProfileService profileService;
 
         [ImportingConstructor]
-        public AssistantPlugin(IProfileService profileService) {
+        public AssistantPlugin(IProfileService profileService, IDeepSkyObjectSearchVM deepSkyObjectSearchVM, IPlanetariumFactory planetariumFactory) {
             if (Properties.Settings.Default.UpdateSettings) {
                 Properties.Settings.Default.Upgrade();
                 Properties.Settings.Default.UpdateSettings = false;
@@ -35,7 +37,7 @@ namespace Assistant.NINAPlugin {
 
             InitPluginHome();
 
-            AssistantManagerVM = new AssistantManagerVM(profileService);
+            AssistantManagerVM = new AssistantManagerVM(profileService, deepSkyObjectSearchVM, planetariumFactory);
         }
 
         private void InitPluginHome() {

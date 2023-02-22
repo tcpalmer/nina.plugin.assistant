@@ -71,6 +71,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             }
             set {
                 coordinates = value;
+                RaiseCoordinatesChanged();
             }
         }
 

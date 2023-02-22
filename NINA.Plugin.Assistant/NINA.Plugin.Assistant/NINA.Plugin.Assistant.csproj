@@ -310,6 +310,10 @@
       <DependentUpon>ProfileView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\AssistantManager\ProfileViewVM.cs" />
+    <Compile Include="Controls\AssistantManager\TargetImportView.xaml.cs">
+      <DependentUpon>TargetImportView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AssistantManager\TargetImportVM.cs" />
     <Compile Include="Controls\AssistantManager\TargetView.xaml.cs">
       <DependentUpon>TargetView.xaml</DependentUpon>
     </Compile>
@@ -395,6 +399,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\AssistantManager\ProjectView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\AssistantManager\TargetImportView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

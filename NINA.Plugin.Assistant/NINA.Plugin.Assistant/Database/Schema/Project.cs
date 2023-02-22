@@ -226,7 +226,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
-        public string PercentComplete {
+        public double PercentComplete {
             get {
                 double totalDesired = 0;
                 double totalAccepted = 0;
@@ -237,7 +237,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
                     }
                 }
 
-                return string.Format("{0:0.##}%", (totalAccepted / totalDesired) * 100);
+                return (totalAccepted / totalDesired) * 100;
             }
         }
 

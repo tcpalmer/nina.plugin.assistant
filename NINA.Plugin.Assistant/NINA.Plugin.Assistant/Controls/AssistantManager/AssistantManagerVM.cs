@@ -3,8 +3,10 @@ using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
+using NINA.Equipment.Interfaces;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
+using NINA.WPF.Base.Interfaces.ViewModel;
 using NINA.WPF.Base.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -17,11 +19,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class AssistantManagerVM : BaseVM {
 
+        private IDeepSkyObjectSearchVM deepSkyObjectSearchVM;
+        private IPlanetariumFactory planetariumFactory;
         private AssistantDatabaseInteraction database;
         private TreeDataItem activeTreeDataItem;
-        private bool isEditMode = false;
 
-        public AssistantManagerVM(IProfileService profileService) : base(profileService) {
+        public AssistantManagerVM(IProfileService profileService, IDeepSkyObjectSearchVM deepSkyObjectSearchVM, IPlanetariumFactory planetariumFactory) : base(profileService) {
+            this.deepSkyObjectSearchVM = deepSkyObjectSearchVM;
+            this.planetariumFactory = planetariumFactory;
+
             database = new AssistantDatabaseInteraction();
 
             SelectedItemChangedCommand = new RelayCommand(SelectedItemChanged);
@@ -106,7 +112,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     case TreeDataType.Target:
                         activeTreeDataItem = item;
                         Target target = (Target)item.Data;
-                        TargetViewVM = new TargetViewVM(this, profileService, target);
+                        TargetViewVM = new TargetViewVM(this, profileService, deepSkyObjectSearchVM, planetariumFactory, target);
                         ShowProfileView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Visible;
@@ -172,7 +178,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public void SetEditMode(bool editMode) {
-            isEditMode = editMode;
             TreeViewEabled = !editMode;
         }
 
