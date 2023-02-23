@@ -6,6 +6,7 @@ using NINA.Core.Utility.Notification;
 using NINA.Equipment.Interfaces;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
+using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using NINA.WPF.Base.ViewModel;
 using System;
@@ -19,12 +20,22 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class AssistantManagerVM : BaseVM {
 
+        private IApplicationMediator applicationMediator;
+        private IFramingAssistantVM framingAssistantVM;
         private IDeepSkyObjectSearchVM deepSkyObjectSearchVM;
         private IPlanetariumFactory planetariumFactory;
         private AssistantDatabaseInteraction database;
         private TreeDataItem activeTreeDataItem;
 
-        public AssistantManagerVM(IProfileService profileService, IDeepSkyObjectSearchVM deepSkyObjectSearchVM, IPlanetariumFactory planetariumFactory) : base(profileService) {
+        public AssistantManagerVM(IProfileService profileService,
+            IApplicationMediator applicationMediator,
+            IFramingAssistantVM framingAssistantVM,
+            IDeepSkyObjectSearchVM deepSkyObjectSearchVM,
+            IPlanetariumFactory planetariumFactory)
+            : base(profileService) {
+
+            this.applicationMediator = applicationMediator;
+            this.framingAssistantVM = framingAssistantVM;
             this.deepSkyObjectSearchVM = deepSkyObjectSearchVM;
             this.planetariumFactory = planetariumFactory;
 
@@ -112,7 +123,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     case TreeDataType.Target:
                         activeTreeDataItem = item;
                         Target target = (Target)item.Data;
-                        TargetViewVM = new TargetViewVM(this, profileService, deepSkyObjectSearchVM, planetariumFactory, target);
+                        TargetViewVM = new TargetViewVM(this, profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory, target);
                         ShowProfileView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Visible;

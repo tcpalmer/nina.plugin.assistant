@@ -225,6 +225,23 @@
                     MaxHeight="20"
                     Margin="16,0,0,0"
                     Text="{Binding TargetProxy.Target.Epoch}" />
+                <Button
+                    Width="25"
+                    Height="25"
+                    Margin="10,0,0,0"
+                    VerticalAlignment="Center"
+                    HorizontalContentAlignment="Right"
+                    Command="{Binding SendCoordinatesToFramingAssistantCommand}"
+                    ToolTip="Send coordinates to the Framing Wizard">
+                    <Grid>
+                        <Path
+                            Margin="5"
+                            Data="{StaticResource FocusAssistantSVG}"
+                            Fill="{StaticResource ButtonForegroundBrush}"
+                            Stretch="Uniform" />
+                    </Grid>
+                </Button>
+
             </StackPanel>
 
             <TextBlock

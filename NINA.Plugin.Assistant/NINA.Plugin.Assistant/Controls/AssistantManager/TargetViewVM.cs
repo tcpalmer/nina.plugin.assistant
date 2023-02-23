@@ -1,8 +1,11 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
+using NINA.Astrometry;
+using NINA.Core.Enum;
 using NINA.Core.Model.Equipment;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
 using NINA.Profile.Interfaces;
+using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using NINA.WPF.Base.ViewModel;
 using System.Collections.Generic;
@@ -17,7 +20,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private AssistantManagerVM managerVM;
         private IProfile profile;
 
-        public TargetViewVM(AssistantManagerVM managerVM, IProfileService profileService, IDeepSkyObjectSearchVM deepSkyObjectSearchVM, IPlanetariumFactory planetariumFactory, Target target) : base(profileService) {
+        public TargetViewVM(AssistantManagerVM managerVM,
+            IProfileService profileService,
+            IApplicationMediator applicationMediator,
+            IFramingAssistantVM framingAssistantVM,
+            IDeepSkyObjectSearchVM deepSkyObjectSearchVM,
+            IPlanetariumFactory planetariumFactory,
+            Target target)
+            : base(profileService) {
+
             this.managerVM = managerVM;
             TargetProxy = new TargetProxy(target);
 
@@ -27,14 +38,20 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             InitializeExposurePlans(TargetProxy.Proxy);
 
             EditCommand = new RelayCommand(Edit);
-            ShowTargetImportViewCommand = new RelayCommand(ShowTargetImportViewCmd);
             SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(Cancel);
             CopyCommand = new RelayCommand(Copy);
             DeleteCommand = new RelayCommand(Delete);
 
+            ShowTargetImportViewCommand = new RelayCommand(ShowTargetImportViewCmd);
+
             AddExposurePlanCommand = new RelayCommand(AddExposurePlan);
             DeleteExposurePlanCommand = new RelayCommand(DeleteExposurePlan);
+
+            SendCoordinatesToFramingAssistantCommand = new AsyncCommand<bool>(async () => {
+                applicationMediator.ChangeTab(ApplicationTab.FRAMINGASSISTANT);
+                return await framingAssistantVM.SetCoordinates(TargetDSO);
+            });
 
             TargetImportVM = new TargetImportVM(deepSkyObjectSearchVM, planetariumFactory);
             TargetImportVM.PropertyChanged += ImportTarget_PropertyChanged;
@@ -76,6 +93,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
             else {
                 RaisePropertyChanged(nameof(TargetProxy));
+            }
+        }
+
+        public DeepSkyObject TargetDSO {
+            get {
+                Target target = TargetProxy.Target;
+                DeepSkyObject dso = new DeepSkyObject(string.Empty, target.Coordinates, profileService.ActiveProfile.ApplicationSettings.SkyAtlasImageRepository, profileService.ActiveProfile.AstrometrySettings.Horizon);
+                dso.Name = target.Name;
+                return dso;
             }
         }
 
@@ -158,11 +184,14 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public ICommand EditCommand { get; private set; }
-        public ICommand ShowTargetImportViewCommand { get; private set; }
         public ICommand SaveCommand { get; private set; }
         public ICommand CancelCommand { get; private set; }
         public ICommand CopyCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }
+
+        public ICommand SendCoordinatesToFramingAssistantCommand { get; private set; }
+        public ICommand ShowTargetImportViewCommand { get; private set; }
+
         public ICommand AddExposurePlanCommand { get; private set; }
         public ICommand DeleteExposurePlanCommand { get; private set; }
 
