@@ -423,7 +423,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <ComboBox ItemsSource="{Binding ElementName=TargetViewPanel, Path=DataContext.FilterNameChoices}" SelectedValue="{Binding FilterName, Mode=TwoWay}" />
+                            <ComboBox ItemsSource="{Binding ElementName=TargetViewPanel, Path=DataContext.FilterNameChoices}" SelectedValue="{Binding FilterName, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
@@ -441,7 +441,7 @@
                         <DataTemplate>
                             <TextBox Width="Auto">
                                 <TextBox.Text>
-                                    <Binding Path="Exposure">
+                                    <Binding Path="Exposure" UpdateSourceTrigger="LostFocus">
                                         <Binding.ValidationRules>
                                             <rules:DoubleRangeRule>
                                                 <rules:DoubleRangeRule.ValidRange>
@@ -469,7 +469,10 @@
                         <DataTemplate>
                             <TextBox Width="Auto">
                                 <TextBox.Text>
-                                    <Binding Converter="{StaticResource MinusOneToEmptyStringConverter}" Path="Gain">
+                                    <Binding
+                                        Converter="{StaticResource MinusOneToEmptyStringConverter}"
+                                        Path="Gain"
+                                        UpdateSourceTrigger="LostFocus">
                                         <Binding.ValidationRules>
                                             <rules:NullableIntegerRule />
                                         </Binding.ValidationRules>
@@ -493,7 +496,10 @@
                         <DataTemplate>
                             <TextBox Width="Auto">
                                 <TextBox.Text>
-                                    <Binding Converter="{StaticResource MinusOneToEmptyStringConverter}" Path="Offset">
+                                    <Binding
+                                        Converter="{StaticResource MinusOneToEmptyStringConverter}"
+                                        Path="Offset"
+                                        UpdateSourceTrigger="LostFocus">
                                         <Binding.ValidationRules>
                                             <rules:NullableIntegerRule />
                                         </Binding.ValidationRules>
@@ -515,7 +521,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <ComboBox ItemsSource="{Binding ElementName=TargetViewPanel, Path=DataContext.BinningModeChoices}" SelectedValue="{Binding BinningMode, Mode=TwoWay}" />
+                            <ComboBox ItemsSource="{Binding ElementName=TargetViewPanel, Path=DataContext.BinningModeChoices}" SelectedValue="{Binding BinningMode, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
@@ -533,9 +539,12 @@
                         <DataTemplate>
                             <TextBox Width="Auto">
                                 <TextBox.Text>
-                                    <Binding Converter="{StaticResource MinusOneToEmptyStringConverter}" Path="ReadoutMode">
-                                        <Binding.ValidationRules> 
-                                            <rules:NullableIntegerRule /> 
+                                    <Binding
+                                        Converter="{StaticResource MinusOneToEmptyStringConverter}"
+                                        Path="ReadoutMode"
+                                        UpdateSourceTrigger="LostFocus">
+                                        <Binding.ValidationRules>
+                                            <rules:NullableIntegerRule />
                                         </Binding.ValidationRules>
                                     </Binding>
                                 </TextBox.Text>
@@ -555,7 +564,19 @@
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <TextBox Width="Auto" Text="{Binding Desired}" />
+                            <TextBox Width="Auto">
+                                <TextBox.Text>
+                                    <Binding Path="Desired" UpdateSourceTrigger="LostFocus">
+                                        <Binding.ValidationRules>
+                                            <rules:IntRangeRule>
+                                                <rules:IntRangeRule.ValidRange>
+                                                    <rules:IntRangeChecker Maximum="9999" Minimum="1" />
+                                                </rules:IntRangeRule.ValidRange>
+                                            </rules:IntRangeRule>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </TextBox.Text>
+                            </TextBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
@@ -571,7 +592,19 @@
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <TextBox Width="Auto" Text="{Binding Accepted}" />
+                            <TextBox Width="Auto">
+                                <TextBox.Text>
+                                    <Binding Path="Accepted" UpdateSourceTrigger="LostFocus">
+                                        <Binding.ValidationRules>
+                                            <rules:IntRangeRule>
+                                                <rules:IntRangeRule.ValidRange>
+                                                    <rules:IntRangeChecker Maximum="9999" Minimum="0" />
+                                                </rules:IntRangeRule.ValidRange>
+                                            </rules:IntRangeRule>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </TextBox.Text>
+                            </TextBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
