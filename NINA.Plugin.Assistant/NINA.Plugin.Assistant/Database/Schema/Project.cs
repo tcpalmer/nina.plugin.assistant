@@ -237,7 +237,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
                     }
                 }
 
-                return (totalAccepted / totalDesired) * 100;
+                return totalDesired == 0 ? 0 : (totalAccepted / totalDesired) * 100;
             }
         }
 

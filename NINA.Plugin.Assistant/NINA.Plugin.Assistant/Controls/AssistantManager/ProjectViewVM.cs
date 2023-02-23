@@ -145,6 +145,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             InitializeRuleWeights(ProjectProxy.Proxy);
             ProjectProxy.PropertyChanged -= ProjectProxy_PropertyChanged;
             ShowEditView = false;
+            ItemEdited = false;
             managerVM.SetEditMode(false);
         }
 
@@ -153,6 +154,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ProjectProxy.PropertyChanged -= ProjectProxy_PropertyChanged;
             InitializeRuleWeights(ProjectProxy.Proxy);
             ShowEditView = false;
+            ItemEdited = false;
             managerVM.SetEditMode(false);
         }
 

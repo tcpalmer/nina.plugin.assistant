@@ -213,6 +213,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             InitializeExposurePlans(TargetProxy.Proxy);
             TargetProxy.PropertyChanged -= TargetProxy_PropertyChanged;
             ShowEditView = false;
+            ItemEdited = false;
             ShowTargetImportView = false;
             managerVM.SetEditMode(false);
         }
@@ -222,6 +223,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             TargetProxy.PropertyChanged -= TargetProxy_PropertyChanged;
             InitializeExposurePlans(TargetProxy.Proxy);
             ShowEditView = false;
+            ItemEdited = false;
             ShowTargetImportView = false;
             managerVM.SetEditMode(false);
         }

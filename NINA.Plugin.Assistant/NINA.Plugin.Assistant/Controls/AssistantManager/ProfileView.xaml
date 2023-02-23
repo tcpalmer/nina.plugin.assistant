@@ -69,16 +69,75 @@
             </Button>
         </StackPanel>
 
-        <ListView ItemsSource="{Binding Projects}">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="Height" Value="25" />
-                </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.View>
-                <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Width="30">
-                        <GridViewColumn.CellTemplate>
+        <Grid>
+
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <DataGrid
+                x:Name="PlanDataGrid"
+                Height="500"
+                Margin="0,0,0,0"
+                HorizontalAlignment="Left"
+                AutoGenerateColumns="False"
+                BorderThickness="0"
+                HeadersVisibility="Column"
+                HorizontalScrollBarVisibility="Hidden"
+                IsReadOnly="True"
+                ItemsSource="{Binding Projects}"
+                RowHeight="28"
+                VerticalScrollBarVisibility="Auto">
+
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="{x:Type DataGridColumnHeader}">
+                        <Setter Property="HorizontalAlignment" Value="Left" />
+                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="MinHeight" Value="25" />
+                        <Setter Property="Margin" Value="5,3,5,3" />
+                        <Setter Property="FontWeight" Value="Bold" />
+                        <Setter Property="FontSize" Value="12" />
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="MinHeight" Value="22" />
+                        <Setter Property="Margin" Value="5,3,5,3" />
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ButtonBackgroundBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.CellStyle>
+
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="MinHeight" Value="22" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="VerticalAlignment" Value="Center" />
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="{StaticResource SecondaryBackgroundBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Width="30" CanUserSort="False">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Button
                                     Width="18"
@@ -97,10 +156,11 @@
                                     </Grid>
                                 </Button>
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Width="30">
-                        <GridViewColumn.CellTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="30" CanUserSort="False">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Button
                                     Width="18"
@@ -119,35 +179,36 @@
                                     </Grid>
                                 </Button>
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Width="140" DisplayMemberBinding="{Binding Path=Name}">
-                        <GridViewColumn.Header>
-                            <TextBlock
-                                FontSize="14"
-                                FontWeight="Bold"
-                                Text="Name"
-                                ToolTip="Project Name" />
-                        </GridViewColumn.Header>
-                    </GridViewColumn>
-                    <GridViewColumn Width="50" DisplayMemberBinding="{Binding Path=State}">
-                        <GridViewColumn.Header>
-                            <TextBlock
-                                FontSize="14"
-                                FontWeight="Bold"
-                                Text="State"
-                                ToolTip="Project State" />
-                        </GridViewColumn.Header>
-                    </GridViewColumn>
-                    <GridViewColumn Width="50">
-                        <GridViewColumn.Header>
-                            <TextBlock
-                                FontSize="14"
-                                FontWeight="Bold"
-                                Text="Active"
-                                ToolTip="Project state active and between dates?" />
-                        </GridViewColumn.Header>
-                        <GridViewColumn.CellTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="180" CanUserSort="False">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="Name" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="50" CanUserSort="False">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="State" ToolTip="Project state" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Width="Auto" Text="{Binding State}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="50" CanUserSort="False">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="Active" ToolTip="Project state active and between dates?" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Path
                                     Width="15"
@@ -157,38 +218,45 @@
                                     Fill="{Binding ActiveNow, Converter={StaticResource StatusMarkColorConverter}}"
                                     Stretch="Uniform" />
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Width="75" DisplayMemberBinding="{Binding Path=StartDate, StringFormat='{}{0:yyyy/MM/dd}'}">
-                        <GridViewColumn.Header>
-                            <TextBlock
-                                FontSize="14"
-                                FontWeight="Bold"
-                                Text="Start Date"
-                                ToolTip="Project start date" />
-                        </GridViewColumn.Header>
-                    </GridViewColumn>
-                    <GridViewColumn Width="75" DisplayMemberBinding="{Binding Path=EndDate, StringFormat='{}{0:yyyy/MM/dd}'}">
-                        <GridViewColumn.Header>
-                            <TextBlock
-                                FontSize="14"
-                                FontWeight="Bold"
-                                Text="End Date"
-                                ToolTip="Project end date" />
-                        </GridViewColumn.Header>
-                    </GridViewColumn>
-                    <GridViewColumn Width="40" DisplayMemberBinding="{Binding Path=PercentComplete, StringFormat={}{0:0}%}">
-                        <GridViewColumn.Header>
-                            <TextBlock
-                                FontSize="14"
-                                FontWeight="Bold"
-                                Text="%"
-                                ToolTip="Percent complete" />
-                        </GridViewColumn.Header>
-                    </GridViewColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="*" CanUserSort="False">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="State Date" ToolTip="Project start date" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=StartDate, StringFormat='{}{0:yyyy/MM/dd}'}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="*" CanUserSort="False">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="End Date" ToolTip="Project end date" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=EndDate, StringFormat='{}{0:yyyy/MM/dd}'}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="*" CanUserSort="False">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="%" ToolTip="Percent complete" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=PercentComplete, StringFormat={}{0:0}%}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
 
     </StackPanel>
 
