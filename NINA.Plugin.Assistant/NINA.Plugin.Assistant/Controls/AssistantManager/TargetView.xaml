@@ -462,12 +462,20 @@
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Width="Auto" Text="{Binding Gain}" />
+                            <TextBlock Width="Auto" Text="{Binding Gain, Converter={StaticResource MinusOneToEmptyStringConverter}}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <TextBox Width="Auto" Text="{Binding Gain}" />
+                            <TextBox Width="Auto">
+                                <TextBox.Text>
+                                    <Binding Converter="{StaticResource MinusOneToEmptyStringConverter}" Path="Gain">
+                                        <Binding.ValidationRules>
+                                            <rules:NullableIntegerRule />
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </TextBox.Text>
+                            </TextBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
@@ -478,12 +486,20 @@
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Width="Auto" Text="{Binding Offset}" />
+                            <TextBlock Width="Auto" Text="{Binding Offset, Converter={StaticResource MinusOneToEmptyStringConverter}}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <TextBox Width="Auto" Text="{Binding Offset}" />
+                            <TextBox Width="Auto">
+                                <TextBox.Text>
+                                    <Binding Converter="{StaticResource MinusOneToEmptyStringConverter}" Path="Offset">
+                                        <Binding.ValidationRules>
+                                            <rules:NullableIntegerRule />
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </TextBox.Text>
+                            </TextBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
@@ -510,12 +526,20 @@
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Width="Auto" Text="{Binding ReadoutMode}" />
+                            <TextBlock Width="Auto" Text="{Binding ReadoutMode, Converter={StaticResource MinusOneToEmptyStringConverter}}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <TextBox Width="Auto" Text="{Binding ReadoutMode}" />
+                            <TextBox Width="Auto">
+                                <TextBox.Text>
+                                    <Binding Converter="{StaticResource MinusOneToEmptyStringConverter}" Path="ReadoutMode">
+                                        <Binding.ValidationRules> 
+                                            <rules:NullableIntegerRule /> 
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </TextBox.Text>
+                            </TextBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>

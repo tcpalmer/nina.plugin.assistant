@@ -387,10 +387,10 @@ namespace Assistant.NINAPlugin.Plan {
             this.DatabaseId = exposurePlan.Id;
             this.FilterName = exposurePlan.FilterName;
             this.ExposureLength = exposurePlan.Exposure;
-            this.Gain = exposurePlan.Gain;
-            this.Offset = exposurePlan.Offset;
+            this.Gain = GetNullableIntValue(exposurePlan.Gain);
+            this.Offset = GetNullableIntValue(exposurePlan.Offset);
             this.BinningMode = exposurePlan.BinningMode;
-            this.ReadoutMode = exposurePlan.ReadoutMode;
+            this.ReadoutMode = GetNullableIntValue(exposurePlan.ReadoutMode);
             this.Desired = exposurePlan.Desired;
             this.Acquired = exposurePlan.Acquired;
             this.Accepted = exposurePlan.Accepted;
@@ -425,6 +425,14 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"Rejected: {Rejected}");
             sb.AppendLine($"RejectedReason: {RejectedReason}");
             return sb.ToString();
+        }
+
+        private int? GetNullableIntValue(int value) {
+            if (value >= 0) {
+                return value;
+            }
+
+            return null;
         }
     }
 

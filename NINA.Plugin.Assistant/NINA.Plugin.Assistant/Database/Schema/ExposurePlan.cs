@@ -14,10 +14,10 @@ namespace Assistant.NINAPlugin.Database.Schema {
         [Required] public string profileId { get; set; }
         [Required] public double exposure { get; set; }
 
-        public int? gain { get; set; }
-        public int? offset { get; set; }
+        public int gain { get; set; }
+        public int offset { get; set; }
         public int? bin { get; set; }
-        public int? readoutMode { get; set; }
+        public int readoutMode { get; set; }
 
         public int desired { get; set; }
         public int acquired { get; set; }
@@ -54,7 +54,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
-        public int? Gain {
+        public int Gain {
             get { return gain; }
             set {
                 gain = value;
@@ -63,7 +63,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
-        public int? Offset {
+        public int Offset {
             get { return offset; }
             set {
                 offset = value;
@@ -81,7 +81,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
-        public int? ReadoutMode {
+        public int ReadoutMode {
             get { return readoutMode; }
             set {
                 readoutMode = value;
@@ -122,8 +122,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
             this.ProfileId = profileId;
             this.FilterName = filterName;
             Exposure = 60;
-            Gain = 0;
-            Offset = 0;
+            Gain = -1;
+            Offset = -1;
             BinningMode = new BinningMode(1, 1);
             ReadoutMode = -1;
             Desired = 1;

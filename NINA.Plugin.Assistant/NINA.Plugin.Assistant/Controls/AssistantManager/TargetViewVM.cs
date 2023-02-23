@@ -247,9 +247,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             Target proxy = TargetProxy.Proxy;
             ExposurePlan exposurePlan = new ExposurePlan(profile.Id.ToString(), filterName);
             exposurePlan.TargetId = proxy.Id;
-            exposurePlan.Gain = null;
-            exposurePlan.Offset = null;
-            exposurePlan.ReadoutMode = null;
+            exposurePlan.Gain = -1;
+            exposurePlan.Offset = -1;
+            exposurePlan.ReadoutMode = -1;
 
             proxy.ExposurePlans.Add(exposurePlan);
             InitializeExposurePlans(proxy);

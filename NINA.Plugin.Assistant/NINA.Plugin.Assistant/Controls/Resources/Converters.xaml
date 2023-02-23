@@ -9,6 +9,7 @@
     <ac:AltitudeChoicesConverter x:Key="AltitudeChoicesConverter" />
     <nc:BooleanToVisibilityCollapsedConverter x:Key="BooleanToVisibilityCollapsedConverter" />
     <nc:InverseBooleanToVisibilityCollapsedConverter x:Key="InverseBooleanToVisibilityCollapsedConverter" />
+    <nc:MinusOneToEmptyStringConverter x:Key="MinusOneToEmptyStringConverter" />
     <ac:DegreesDisplayConverter x:Key="DegreesDisplayConverter" />
     <ac:MinutesToHMConverter x:Key="MinutesToHMConverter" />
     <ac:StatusConverter x:Key="StatusConverter" />

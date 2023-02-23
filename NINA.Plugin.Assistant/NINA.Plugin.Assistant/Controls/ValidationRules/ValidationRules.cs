@@ -201,4 +201,30 @@ namespace Assistant.NINAPlugin.Controls.ValidationRules {
             DependencyProperty.Register("Maximum", typeof(double), typeof(DoubleRangeChecker), new UIPropertyMetadata(double.MaxValue));
     }
 
+    public class NullableIntegerRule : ValidationRule {
+
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo) {
+
+            string s = value as string;
+            if (string.IsNullOrEmpty(s)) {
+                return new ValidationResult(true, null);
+            }
+
+            int parameter = 0;
+            try {
+                if (("" + value).Length > 0) {
+                    parameter = int.Parse("" + value);
+                }
+            }
+            catch (Exception e) {
+                return new ValidationResult(false, "Illegal characters or " + e.Message);
+            }
+
+            if (parameter < 0) {
+                return new ValidationResult(false, "Value must be empty or >= 0");
+            }
+
+            return new ValidationResult(true, null);
+        }
+    }
 }
