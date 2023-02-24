@@ -306,6 +306,10 @@
     <Compile Include="Controls\AssistantManager\BindingHelper.cs" />
     <Compile Include="Controls\AssistantManager\ConfirmationMessageBox.cs" />
     <Compile Include="Controls\AssistantManager\EnumBindingSourceExtension.cs" />
+    <Compile Include="Controls\AssistantManager\FilterPrefView.xaml.cs">
+      <DependentUpon>FilterPrefView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AssistantManager\FilterPrefViewVM.cs" />
     <Compile Include="Controls\AssistantManager\ProfileView.xaml.cs">
       <DependentUpon>ProfileView.xaml</DependentUpon>
     </Compile>
@@ -332,6 +336,7 @@
     <Compile Include="Controls\Resources\SVGDictionary.xaml.cs">
       <DependentUpon>SVGDictionary.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Utils\FilterPrefsReconciliation.cs" />
     <Compile Include="Controls\ValidationRules\ValidationRules.cs" />
     <Compile Include="Database\AssistantDatabaseInteraction.cs" />
     <Compile Include="Database\AssistantDatabaseContext.cs" />
@@ -391,6 +396,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\AssistantManager\AssistantManagerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\AssistantManager\FilterPrefView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

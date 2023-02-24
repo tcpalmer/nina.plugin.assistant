@@ -39,8 +39,12 @@ namespace Assistant.NINAPlugin.Database {
         }
 
         public List<Project> GetAllProjects(string profileId) {
-            var projects = ProjectSet.Include("targets.exposureplans").Include("ruleweights").Where(p => p.ProfileId.Equals(profileId));
-            return projects.ToList();
+            return ProjectSet
+                .Include("targets.exposureplans")
+                .Include("ruleweights")
+                .Where(p => p.ProfileId
+                .Equals(profileId))
+                .ToList();
         }
 
         public List<Project> GetActiveProjects(string profileId, DateTime atTime) {
@@ -53,8 +57,7 @@ namespace Assistant.NINAPlugin.Database {
         }
 
         public List<FilterPreference> GetFilterPreferences(string profileId) {
-            var filterPrefs = FilterPreferenceSet.Where(p => p.profileId == profileId);
-            return filterPrefs.ToList();
+            return FilterPreferenceSet.Where(p => p.profileId == profileId).ToList();
         }
 
         public Project GetProject(int projectId) {
@@ -75,12 +78,6 @@ namespace Assistant.NINAPlugin.Database {
         public Target GetTargetByProject(int projectId, int targetId) {
             Project project = GetProject(projectId);
             return project.Targets.Where(t => t.Id == targetId).FirstOrDefault();
-            /*
-            return TargetSet
-                .Include("exposureplans")
-                .Where(t => t.Project.Id == projectId && t.Id == targetId)
-                .FirstOrDefault();
-            */
         }
 
         public ExposurePlan GetExposurePlan(int id) {
@@ -289,6 +286,23 @@ namespace Assistant.NINAPlugin.Database {
                     Logger.Error($"Assistant: error persisting Filter Preferences: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return false;
+                }
+            }
+        }
+
+        public void AddFilterPreferences(List<FilterPreference> filterPreferences) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    filterPreferences.ForEach(filterPreference => {
+                        FilterPreferenceSet.AddOrUpdate(filterPreference);
+                    });
+
+                    SaveChanges();
+                    transaction.Commit();
+                }
+                catch (Exception e) {
+                    Logger.Error($"Assistant: error persisting Filter Preferences: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
                 }
             }
         }

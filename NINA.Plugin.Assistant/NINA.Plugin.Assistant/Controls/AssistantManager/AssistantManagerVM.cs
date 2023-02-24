@@ -25,6 +25,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private IDeepSkyObjectSearchVM deepSkyObjectSearchVM;
         private IPlanetariumFactory planetariumFactory;
         private AssistantDatabaseInteraction database;
+
+        private TreeDataItem selectedTreeDataItem;
         private TreeDataItem activeTreeDataItem;
 
         public AssistantManagerVM(IProfileService profileService,
@@ -98,16 +100,39 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        private Visibility showFilterPrefView = Visibility.Hidden;
+        public Visibility ShowFilterPrefView {
+            get => showFilterPrefView;
+            set {
+                showFilterPrefView = value;
+                RaisePropertyChanged(nameof(ShowFilterPrefView));
+            }
+        }
+
+        private FilterPrefViewVM filterPrefViewVM;
+        public FilterPrefViewVM FilterPrefViewVM {
+            get => filterPrefViewVM;
+            set {
+                filterPrefViewVM = value;
+                RaisePropertyChanged(nameof(FilterPrefViewVM));
+            }
+        }
+
         public ICommand SelectedItemChangedCommand { get; private set; }
         private void SelectedItemChanged(object obj) {
             TreeDataItem item = obj as TreeDataItem;
             if (item != null) {
+
+                DeselectOppositeTree(selectedTreeDataItem, item);
+                selectedTreeDataItem = item;
+
                 switch (item.Type) {
-                    case TreeDataType.Profile:
+                    case TreeDataType.ProjectProfile:
                         activeTreeDataItem = item;
                         ProfileViewVM = new ProfileViewVM(this, profileService, item);
                         ShowTargetView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
+                        ShowFilterPrefView = Visibility.Collapsed;
                         ShowProfileView = Visibility.Visible;
                         break;
 
@@ -117,6 +142,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         ProjectViewVM = new ProjectViewVM(this, profileService, project);
                         ShowProfileView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
+                        ShowFilterPrefView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Visible;
                         break;
 
@@ -126,7 +152,18 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         TargetViewVM = new TargetViewVM(this, profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory, target);
                         ShowProfileView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
+                        ShowFilterPrefView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Visible;
+                        break;
+
+                    case TreeDataType.FilterPref:
+                        activeTreeDataItem = item;
+                        FilterPreference filterPreference = (FilterPreference)item.Data;
+                        FilterPrefViewVM = new FilterPrefViewVM(this, profileService, filterPreference);
+                        ShowProfileView = Visibility.Collapsed;
+                        ShowProjectView = Visibility.Collapsed;
+                        ShowTargetView = Visibility.Collapsed;
+                        ShowFilterPrefView = Visibility.Visible;
                         break;
 
                     default:
@@ -134,9 +171,24 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         ShowProfileView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
+                        ShowFilterPrefView = Visibility.Collapsed;
                         break;
                 }
             }
+        }
+
+        private void DeselectOppositeTree(TreeDataItem existingItem, TreeDataItem newItem) {
+            if (existingItem == null) {
+                return;
+            }
+
+            TreeDataItem existingItemRoot = existingItem.GetRoot();
+            TreeDataItem newItemRoot = newItem.GetRoot();
+            if (existingItemRoot.Type == newItemRoot.Type) {
+                return;
+            }
+
+            TreeDataItem.VisitAll(existingItemRoot, i => { i.IsSelected = false; });
         }
 
         List<TreeDataItem> rootProjectsList;
@@ -148,6 +200,18 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             set {
                 rootProjectsList = value;
                 RaisePropertyChanged(nameof(RootProjectsList));
+            }
+        }
+
+        List<TreeDataItem> rootFilterPrefsList;
+        public List<TreeDataItem> RootFilterPrefsList {
+            get {
+                rootFilterPrefsList = LoadFilterPrefsTree();
+                return rootFilterPrefsList;
+            }
+            set {
+                rootFilterPrefsList = value;
+                RaisePropertyChanged(nameof(RootFilterPrefsList));
             }
         }
 
@@ -163,12 +227,12 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private List<TreeDataItem> LoadProjectsTree() {
 
             List<TreeDataItem> rootList = new List<TreeDataItem>();
-            TreeDataItem profilesFolder = new TreeDataItem(TreeDataType.Folder, "Profiles", null);
+            TreeDataItem profilesFolder = new TreeDataItem(TreeDataType.ProjectRoot, "Profiles", null);
             rootList.Add(profilesFolder);
 
             using (var context = database.GetContext()) {
                 foreach (ProfileMeta profile in profileService.Profiles) {
-                    TreeDataItem profileItem = new TreeDataItem(TreeDataType.Profile, profile.Name, profile, profilesFolder);
+                    TreeDataItem profileItem = new TreeDataItem(TreeDataType.ProjectProfile, profile.Name, profile, profilesFolder);
                     profilesFolder.Items.Add(profileItem);
 
                     List<Project> projects = context.GetAllProjects(profile.Id.ToString());
@@ -181,6 +245,30 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                             TreeDataItem targetItem = new TreeDataItem(TreeDataType.Target, target.Name, target, projectItem);
                             projectItem.Items.Add(targetItem);
                         }
+                    }
+                }
+            }
+
+            return rootList;
+        }
+
+        private List<TreeDataItem> LoadFilterPrefsTree() {
+
+            FilterPrefsReconciliation.ReconcileProfileFilterPrefs(profileService);
+
+            List<TreeDataItem> rootList = new List<TreeDataItem>();
+            TreeDataItem profilesFolder = new TreeDataItem(TreeDataType.FilterPrefRoot, "Profiles", null);
+            rootList.Add(profilesFolder);
+
+            using (var context = database.GetContext()) {
+                foreach (ProfileMeta profile in profileService.Profiles) {
+                    TreeDataItem profileItem = new TreeDataItem(TreeDataType.FilterPrefProfile, profile.Name, profile, profilesFolder);
+                    profilesFolder.Items.Add(profileItem);
+
+                    List<FilterPreference> filterPrefs = context.GetFilterPreferences(profile.Id.ToString());
+                    foreach (FilterPreference filterPreference in filterPrefs) {
+                        TreeDataItem filterPrefItem = new TreeDataItem(TreeDataType.FilterPref, filterPreference.FilterName, filterPreference, profileItem);
+                        profileItem.Items.Add(filterPrefItem);
                     }
                 }
             }
@@ -347,6 +435,18 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        public void SaveFilterPreference(FilterPreference filterPreference) {
+            using (var context = new AssistantDatabaseInteraction().GetContext()) {
+                if (context.SaveFilterPreference(filterPreference)) {
+                    activeTreeDataItem.Data = filterPreference;
+                    activeTreeDataItem.Header = filterPreference.FilterName;
+                }
+                else {
+                    Notification.ShowError("Failed to save Assistant Filter Preference (see log for details)");
+                }
+            }
+        }
+
         public Target DeleteExposurePlan(Target target, ExposurePlan exposurePlan) {
             using (var context = new AssistantDatabaseInteraction().GetContext()) {
                 Target updatedTarget = context.DeleteExposurePlan(target, exposurePlan);
@@ -366,15 +466,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public IProfile GetProfile(string profileId) {
-            if (profileService.ActiveProfile.Id.ToString() == profileId) {
-                Logger.Trace($"Assistant: getting active profile {profileId}");
-                return profileService.ActiveProfile;
-            }
-
             ProfileMeta profileMeta = profileService.Profiles.Where(p => p.Id.ToString() == profileId).FirstOrDefault();
             if (profileMeta != null) {
-                Logger.Trace($"Assistant: getting profile from disk {profileId}");
-                return ProfileLoader.Load(profileMeta.Location);
+                return ProfileLoader.Load(profileService, profileMeta);
             }
 
             Logger.Error($"Assistant: failed to load profile, id = {profileId}");
@@ -384,7 +478,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
     }
 
     public enum TreeDataType {
-        Folder, Profile, Project, Target
+        ProjectRoot, FilterPrefRoot, ProjectProfile, FilterPrefProfile, Project, Target, FilterPref
     }
 
     public class TreeDataItem : TreeViewItem {
@@ -400,6 +494,22 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             TreeParent = parent;
             Data = data;
             Header = name;
+        }
+
+        public TreeDataItem GetRoot() {
+            TreeDataItem item = this;
+            while (item.TreeParent != null) {
+                item = item.TreeParent;
+            }
+
+            return item;
+        }
+
+        public static void VisitAll(TreeDataItem item, Action<TreeDataItem> action) {
+            action(item);
+            foreach (TreeDataItem child in item.Items) {
+                VisitAll(child, action);
+            }
         }
     }
 

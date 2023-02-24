@@ -11,9 +11,13 @@ namespace Assistant.NINAPlugin.Controls.Util {
 
     public class ProfileLoader {
 
-        public static IProfile Load(string path) {
+        public static IProfile Load(IProfileService profileService, ProfileMeta profileMeta) {
 
-            string cacheKey = GetCacheKey(path);
+            if (profileService.ActiveProfile.Id.ToString() == profileMeta.Id.ToString()) {
+                return profileService.ActiveProfile;
+            }
+
+            string cacheKey = GetCacheKey(profileMeta.Location);
             IProfile profile = ProfileCache.Get(cacheKey);
             if (profile != null) {
                 return profile;
@@ -21,14 +25,14 @@ namespace Assistant.NINAPlugin.Controls.Util {
 
             FileStream fs = null;
             try {
-                fs = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
+                fs = new FileStream(profileMeta.Location, FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
                 var serializer = new DataContractSerializer(typeof(Profile));
                 profile = (Profile)serializer.ReadObject(fs);
                 ProfileCache.Put(profile, cacheKey);
                 return profile;
             }
             catch (Exception e) {
-                Logger.Error($"failed to read profile at {path}: {e.Message} {e.StackTrace}");
+                Logger.Error($"failed to read profile at {profileMeta.Location}: {e.Message} {e.StackTrace}");
                 if (fs != null) {
                     fs.Close();
                 }

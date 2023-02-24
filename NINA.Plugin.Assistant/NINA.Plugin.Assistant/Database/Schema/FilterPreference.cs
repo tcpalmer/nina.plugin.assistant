@@ -90,8 +90,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
             TwilightLevel = TwilightLevel.Nighttime;
             MoonAvoidanceEnabled = false;
-            MoonAvoidanceSeparation = 0;
-            MoonAvoidanceWidth = 0;
+            MoonAvoidanceSeparation = 60;
+            MoonAvoidanceWidth = 7;
             MaximumHumidity = 0;
         }
 

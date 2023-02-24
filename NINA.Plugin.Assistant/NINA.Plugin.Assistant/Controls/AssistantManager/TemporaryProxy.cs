@@ -131,4 +131,16 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
     }
 
+    public class FilterPreferenceProxy : TemporaryProxy<FilterPreference> {
+
+        public FilterPreferenceProxy(FilterPreference filterPreference) : base(filterPreference) { }
+
+        public FilterPreference FilterPreference {
+            get => Proxy;
+            set {
+                Proxy = value;
+            }
+        }
+    }
+
 }
