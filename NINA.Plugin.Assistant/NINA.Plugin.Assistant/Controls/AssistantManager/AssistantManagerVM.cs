@@ -55,6 +55,14 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        public AssistantTreeViewVM ProjectsTreeViewVM {
+            get => new AssistantTreeViewVM(this, profileService, "Projects", RootProjectsList, 350);
+        }
+
+        public AssistantTreeViewVM FilterPrefsTreeViewVM {
+            get => new AssistantTreeViewVM(this, profileService, "Filter Preferences", RootFilterPrefsList, 180);
+        }
+
         private ProfileViewVM profileViewVM;
         public ProfileViewVM ProfileViewVM {
             get => profileViewVM;
@@ -119,6 +127,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public ICommand SelectedItemChangedCommand { get; private set; }
+
         private void SelectedItemChanged(object obj) {
             TreeDataItem item = obj as TreeDataItem;
             if (item != null) {

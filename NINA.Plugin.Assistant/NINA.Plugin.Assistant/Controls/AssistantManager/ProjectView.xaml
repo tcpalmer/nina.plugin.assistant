@@ -43,8 +43,10 @@
                         VerticalAlignment="Center"
                         HorizontalContentAlignment="Right"
                         Command="{Binding AddTargetCommand}"
+                        IsEnabled="{Binding ShowEditView, Converter={StaticResource InverseBooleanConverter}}"
                         Style="{StaticResource BackgroundButton}"
-                        ToolTip="Add target">
+                        ToolTip="Add target"
+                        ToolTipService.ShowOnDisabled="True">
                         <Grid>
                             <Path
                                 Margin="5"
