@@ -4,6 +4,7 @@ using Assistant.NINAPlugin.Plan;
 using NINA.Core.Utility;
 using NINA.WPF.Base.Interfaces.Mediator;
 using System;
+using System.Data.Entity.Migrations;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
@@ -40,30 +41,37 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             // HACK
             accepted = true;
-            //Update(planTarget, msg.Filter, accepted, msg);  NEED A WAY TO NOT DO THIS FOR EMULATOR
+            // TODO: Need a way to NOT do this for the emulator
+            // TODO: But for a 'perfect plan' we do need to update proxy exposure plans so it thinks it's making progress
+            //Update(planTarget, msg.Filter, accepted, msg);
         }
 
         private void Update(IPlanTarget planTarget, string filterName, bool accepted, ImageSavedEventArgs msg) {
 
             using (var context = new AssistantDatabaseInteraction().GetContext()) {
-                try {
+                using (var transaction = context.Database.BeginTransaction()) {
 
-                    // Update the filter plan record
-                    FilterPlan filterPlan = context.GetFilterPlan(planTarget.DatabaseId, filterName);
-                    filterPlan.Acquired++;
+                    try {
+                        // Update the filter plan record
+                        ExposurePlan exposurePlan = context.GetExposurePlan(planTarget.DatabaseId, filterName);
+                        exposurePlan.Acquired++;
 
-                    if (accepted) {
-                        filterPlan.Accepted++;
+                        if (accepted) {
+                            exposurePlan.Accepted++;
+                        }
+
+                        context.ExposurePlanSet.AddOrUpdate(exposurePlan);
+
+                        // Save the acquired image record
+                        AcquiredImage acquiredImage = new AcquiredImage(planTarget.DatabaseId, msg.MetaData.Image.ExposureStart, filterName, new ImageMetadata(msg));
+                        context.AcquiredImageSet.Add(acquiredImage);
+
+                        context.SaveChanges();
+                        transaction.Commit();
                     }
-
-                    // Save the acquired image record
-                    AcquiredImage acquiredImage = new AcquiredImage(planTarget.DatabaseId, msg.MetaData.Image.ExposureStart, filterName, new ImageMetadata(msg));
-                    context.AcquiredImageSet.Add(acquiredImage);
-
-                    context.SaveChanges();
-                }
-                catch (Exception e) {
-                    Logger.Error($"Assistant: exception updating database for saved image: {e.Message}\n{e.StackTrace}");
+                    catch (Exception e) {
+                        Logger.Error($"Assistant: exception updating database for saved image: {e.Message}\n{e.StackTrace}");
+                    }
                 }
             }
         }

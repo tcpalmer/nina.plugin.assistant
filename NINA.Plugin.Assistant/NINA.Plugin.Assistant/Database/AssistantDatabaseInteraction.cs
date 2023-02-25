@@ -20,8 +20,8 @@ namespace Assistant.NINAPlugin.Database {
             this.connectionString = connectionString;
         }
 
-        public AssistantDbContext GetContext() {
-            return new AssistantDbContext(connectionString);
+        public AssistantDatabaseContext GetContext() {
+            return new AssistantDatabaseContext(connectionString);
         }
     }
 

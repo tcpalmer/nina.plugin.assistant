@@ -108,6 +108,9 @@
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.39\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
+    <Reference Include="ModernMessageBoxLib, Version=1.3.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ModernMessageBoxLib.1.3.1\lib\net45\ModernMessageBoxLib.dll</HintPath>
+    </Reference>
     <Reference Include="Namotion.Reflection, Version=2.0.10.0, Culture=neutral, PublicKeyToken=c2f9c3bdfae56102, processorArchitecture=MSIL">
       <HintPath>..\packages\Namotion.Reflection.2.0.10\lib\net45\Namotion.Reflection.dll</HintPath>
     </Reference>
@@ -293,23 +296,57 @@
     <Compile Include="Astrometry\DSORiseAndSet.cs" />
     <Compile Include="Astrometry\HorizonDefinition.cs" />
     <Compile Include="Astrometry\HorizontalCoordinate.cs" />
+    <Compile Include="Controls\AssistantManager\ActionMenuBar.xaml.cs">
+      <DependentUpon>ActionMenuBar.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\AssistantManager\AssistantManagerView.xaml.cs">
       <DependentUpon>AssistantManagerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\AssistantManager\AssistantManagerVM.cs" />
+    <Compile Include="Controls\AssistantManager\AssistantTreeView.xaml.cs">
+      <DependentUpon>AssistantTreeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AssistantManager\AssistantTreeViewVM.cs" />
+    <Compile Include="Controls\AssistantManager\BindingHelper.cs" />
+    <Compile Include="Controls\AssistantManager\ConfirmationMessageBox.cs" />
+    <Compile Include="Controls\AssistantManager\EnumBindingSourceExtension.cs" />
+    <Compile Include="Controls\AssistantManager\FilterPrefView.xaml.cs">
+      <DependentUpon>FilterPrefView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AssistantManager\FilterPrefViewVM.cs" />
+    <Compile Include="Controls\AssistantManager\ProfileView.xaml.cs">
+      <DependentUpon>ProfileView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AssistantManager\ProfileViewVM.cs" />
+    <Compile Include="Controls\AssistantManager\TargetImportView.xaml.cs">
+      <DependentUpon>TargetImportView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AssistantManager\TargetImportVM.cs" />
+    <Compile Include="Controls\AssistantManager\TargetView.xaml.cs">
+      <DependentUpon>TargetView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AssistantManager\TargetViewVM.cs" />
     <Compile Include="Controls\AssistantManager\TemporaryProxy.cs" />
     <Compile Include="Controls\AssistantManager\ProjectView.xaml.cs">
       <DependentUpon>ProjectView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\AssistantManager\ProjectViewVM.cs" />
+    <Compile Include="Controls\Converters\AllowEmptyConverter.cs" />
     <Compile Include="Controls\Converters\AltitudeChoicesConverter.cs" />
+    <Compile Include="Controls\Converters\DegreesDisplayConverter.cs" />
     <Compile Include="Controls\Converters\ImagingMinutesConverter.cs" />
-    <Compile Include="Controls\ValidationRules\RequiredFieldValidationRule.cs" />
+    <Compile Include="Controls\Converters\StatusConverter.cs" />
+    <Compile Include="Controls\Converters\MinutesToHMConverter.cs" />
+    <Compile Include="Controls\Resources\SVGDictionary.xaml.cs">
+      <DependentUpon>SVGDictionary.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Utils\FilterPrefsReconciliation.cs" />
+    <Compile Include="Controls\ValidationRules\ValidationRules.cs" />
     <Compile Include="Database\AssistantDatabaseInteraction.cs" />
-    <Compile Include="Database\AssistantDbContext.cs" />
+    <Compile Include="Database\AssistantDatabaseContext.cs" />
     <Compile Include="Database\AssistantPlanLoader.cs" />
     <Compile Include="Database\Schema\AcquiredImage.cs" />
-    <Compile Include="Database\Schema\FilterPlan.cs" />
+    <Compile Include="Database\Schema\ExposurePlan.cs" />
     <Compile Include="Database\Schema\FilterPreference.cs" />
     <Compile Include="Database\Schema\ImageMetadata.cs" />
     <Compile Include="Database\Schema\Project.cs" />
@@ -345,6 +382,7 @@
     <Compile Include="Sequencer\ImageGrader.cs" />
     <Compile Include="Sequencer\ImageSaveWatcher.cs" />
     <Compile Include="Sequencer\SequenceCommands.cs" />
+    <Compile Include="Controls\Utils\ProfileLoader.cs" />
     <Compile Include="Utils\Utils.cs" />
     <Compile Include="Utils\Assert.cs" />
   </ItemGroup>
@@ -357,7 +395,23 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Controls\AssistantManager\ActionMenuBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\AssistantManager\AssistantManagerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\AssistantManager\AssistantTreeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\AssistantManager\FilterPrefView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\AssistantManager\ProfileView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -365,7 +419,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\AssistantManager\TargetImportView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\AssistantManager\TargetView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\Resources\Converters.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Resources\Resources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Resources\SVGDictionary.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -373,12 +443,18 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Properties\DesignTimeResources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+      <ContainsDesignTimeResources>true</ContainsDesignTimeResources>
+    </Page>
     <Page Include="Sequencer\AssistantInstructionTemplate.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Controls\Resources\SVG\" />
     <Folder Include="Database\Initial\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -412,6 +488,8 @@
 
       echo "Copying $(PlatformName) $(TargetFileName)"
       xcopy "$(TargetPath)" "%25localappdata%25\NINA\Plugins\$(TargetName)" /h/i/c/k/e/r/y
+      xcopy "$(TargetDir)ModernMessageBoxLib.dll" "%25localappdata%25\NINA\Plugins\$(TargetName)" /h/i/c/k/e/r/y
+
 </PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\packages\Google.Protobuf.Tools.3.18.1\build\Google.Protobuf.Tools.targets" Condition="Exists('..\packages\Google.Protobuf.Tools.3.18.1\build\Google.Protobuf.Tools.targets')" />

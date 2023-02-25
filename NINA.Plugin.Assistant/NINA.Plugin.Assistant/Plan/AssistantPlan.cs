@@ -120,6 +120,7 @@ namespace Assistant.NINAPlugin.Plan {
         public string RejectedReason { get; set; }
 
         public PlanProject(IProfile profile, Project project, Dictionary<string, FilterPreference> filterPreference) {
+
             this.PlanId = Guid.NewGuid().ToString();
             this.DatabaseId = project.Id;
             this.Name = project.Name;
@@ -131,6 +132,16 @@ namespace Assistant.NINAPlugin.Plan {
             this.InactiveDate = project.InactiveDate;
             this.StartDate = project.StartDate;
             this.EndDate = project.EndDate;
+
+            this.MinimumTime = project.MinimumTime;
+            this.MinimumAltitude = project.MinimumAltitude;
+            this.UseCustomHorizon = project.UseCustomHorizon;
+            this.HorizonOffset = project.HorizonOffset;
+            this.FilterSwitchFrequency = project.FilterSwitchFrequency;
+            this.DitherEvery = project.DitherEvery;
+            this.EnableGrader = project.EnableGrader;
+            this.RuleWeights = GetRuleWeightsDictionary(project.RuleWeights);
+
             this.HorizonDefinition = DetermineHorizon(profile, project);
             this.Rejected = false;
 
@@ -138,6 +149,15 @@ namespace Assistant.NINAPlugin.Plan {
             foreach (Target target in project.Targets) {
                 Targets.Add(new PlanTarget(this, target, filterPreference));
             }
+        }
+
+        private Dictionary<string, double> GetRuleWeightsDictionary(List<RuleWeight> ruleWeights) {
+            Dictionary<string, double> dict = new Dictionary<string, double>(ruleWeights.Count);
+            ruleWeights.ForEach((rw) => {
+                dict.Add(rw.Name, rw.Weight);
+            });
+
+            return dict;
         }
 
         public override string ToString() {
@@ -149,6 +169,19 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"Priority: {Priority}");
             sb.AppendLine($"StartDate: {Utils.FormatDateTimeFull(StartDate)}");
             sb.AppendLine($"EndDate: {Utils.FormatDateTimeFull(EndDate)}");
+
+            sb.AppendLine($"MinimumTime: {MinimumTime}");
+            sb.AppendLine($"MinimumAltitude: {MinimumAltitude}");
+            sb.AppendLine($"UseCustomHorizon: {UseCustomHorizon}");
+            sb.AppendLine($"HorizonOffset: {HorizonOffset}");
+            sb.AppendLine($"FilterSwitchFrequency: {FilterSwitchFrequency}");
+            sb.AppendLine($"DitherEvery: {DitherEvery}");
+            sb.AppendLine($"EnableGrader: {EnableGrader}");
+            sb.AppendLine($"RuleWeights:");
+            foreach (KeyValuePair<string, double> entry in RuleWeights) {
+                sb.AppendLine($"  {entry.Key}: {entry.Value}");
+            }
+
             sb.AppendLine($"Horizon: {HorizonDefinition}");
             sb.AppendLine($"Rejected: {Rejected}");
             sb.AppendLine($"RejectedReason: {RejectedReason}");
@@ -191,7 +224,7 @@ namespace Assistant.NINAPlugin.Plan {
         Epoch Epoch { get; set; }
         double Rotation { get; set; }
         double ROI { get; set; }
-        List<IPlanFilter> FilterPlans { get; set; }
+        List<IPlanExposure> ExposurePlans { get; set; }
         IPlanProject Project { get; set; }
         bool Rejected { get; set; }
         string RejectedReason { get; set; }
@@ -212,7 +245,7 @@ namespace Assistant.NINAPlugin.Plan {
         public Epoch Epoch { get; set; }
         public double Rotation { get; set; }
         public double ROI { get; set; }
-        public List<IPlanFilter> FilterPlans { get; set; }
+        public List<IPlanExposure> ExposurePlans { get; set; }
         public IPlanProject Project { get; set; }
         public bool Rejected { get; set; }
         public string RejectedReason { get; set; }
@@ -225,21 +258,21 @@ namespace Assistant.NINAPlugin.Plan {
             this.PlanId = Guid.NewGuid().ToString();
             this.DatabaseId = target.Id;
             this.Name = target.Name;
-            this.Coordinates = target.GetCoordinates();
+            this.Coordinates = target.Coordinates;
             this.Epoch = target.Epoch;
             this.Rotation = target.Rotation;
             this.ROI = target.ROI;
             this.Project = planProject;
             this.Rejected = false;
 
-            this.FilterPlans = new List<IPlanFilter>();
-            foreach (FilterPlan plan in target.FilterPlans) {
+            this.ExposurePlans = new List<IPlanExposure>();
+            foreach (ExposurePlan plan in target.ExposurePlans) {
                 FilterPreference filterPrefs = filterPreference[plan.FilterName];
-                PlanFilter planFilter = new PlanFilter(this, plan, filterPrefs);
+                PlanExposure planExposure = new PlanExposure(this, plan, filterPrefs);
 
                 // add only if the plan is incomplete
-                if (planFilter.IsIncomplete()) {
-                    this.FilterPlans.Add(planFilter);
+                if (planExposure.IsIncomplete()) {
+                    this.ExposurePlans.Add(planExposure);
                 }
             }
         }
@@ -265,9 +298,9 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"Rejected: {Rejected}");
             sb.AppendLine($"RejectedReason: {RejectedReason}");
 
-            sb.AppendLine("-- FilterPlans:");
-            foreach (PlanFilter planFilter in FilterPlans) {
-                sb.AppendLine(planFilter.ToString());
+            sb.AppendLine("-- ExposurePlans:");
+            foreach (PlanExposure planExposure in ExposurePlans) {
+                sb.AppendLine(planExposure.ToString());
             }
 
             return sb.ToString();
@@ -294,7 +327,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
     }
 
-    public interface IPlanFilter {
+    public interface IPlanExposure {
         string PlanId { get; set; }
         int DatabaseId { get; set; }
         string FilterName { get; set; }
@@ -323,7 +356,7 @@ namespace Assistant.NINAPlugin.Plan {
         string ToString();
     }
 
-    public class PlanFilter : IPlanFilter {
+    public class PlanExposure : IPlanExposure {
 
         public string PlanId { get; set; }
         public int DatabaseId { get; set; }
@@ -349,18 +382,18 @@ namespace Assistant.NINAPlugin.Plan {
 
         public int PlannedExposures { get; set; }
 
-        public PlanFilter(IPlanTarget planTarget, FilterPlan filterPlan, FilterPreference filterPrefs) {
+        public PlanExposure(IPlanTarget planTarget, ExposurePlan exposurePlan, FilterPreference filterPrefs) {
             this.PlanId = Guid.NewGuid().ToString();
-            this.DatabaseId = filterPlan.Id;
-            this.FilterName = filterPlan.FilterName;
-            this.ExposureLength = filterPlan.Exposure;
-            this.Gain = filterPlan.Gain;
-            this.Offset = filterPlan.Offset;
-            this.BinningMode = filterPlan.BinningMode;
-            this.ReadoutMode = filterPlan.ReadoutMode;
-            this.Desired = filterPlan.Desired;
-            this.Acquired = filterPlan.Acquired;
-            this.Accepted = filterPlan.Accepted;
+            this.DatabaseId = exposurePlan.Id;
+            this.FilterName = exposurePlan.FilterName;
+            this.ExposureLength = exposurePlan.Exposure;
+            this.Gain = GetNullableIntValue(exposurePlan.Gain);
+            this.Offset = GetNullableIntValue(exposurePlan.Offset);
+            this.BinningMode = exposurePlan.BinningMode;
+            this.ReadoutMode = GetNullableIntValue(exposurePlan.ReadoutMode);
+            this.Desired = exposurePlan.Desired;
+            this.Acquired = exposurePlan.Acquired;
+            this.Accepted = exposurePlan.Accepted;
             this.PlanTarget = planTarget;
 
             this.TwilightLevel = filterPrefs.TwilightLevel;
@@ -393,6 +426,14 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"RejectedReason: {RejectedReason}");
             return sb.ToString();
         }
+
+        private int? GetNullableIntValue(int value) {
+            if (value >= 0) {
+                return value;
+            }
+
+            return null;
+        }
     }
 
     public class Reasons {
@@ -407,7 +448,7 @@ namespace Assistant.NINAPlugin.Plan {
         public const string TargetNotVisible = "not visible at this time";
         public const string TargetNotYetVisible = "not yet visible at this time";
         public const string TargetMoonAvoidance = "moon avoidance";
-        public const string TargetAllFilterPlans = "all filter plans rejected";
+        public const string TargetAllExposurePlans = "all exposure plans rejected";
 
         public const string FilterComplete = "complete";
         public const string FilterMoonAvoidance = "moon avoidance";

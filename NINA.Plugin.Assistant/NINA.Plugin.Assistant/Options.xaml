@@ -16,7 +16,7 @@
             <TextBlock
                 Margin="0,0,0,10"
                 VerticalAlignment="Center"
-                Text="Manage the Assistant database" />
+                Text="Manage the Assistant database of projects, targets, and exposure plans." />
             <uc:AssistantManagerView DataContext="{Binding AssistantManagerVM}" />
         </StackPanel>
     </DataTemplate>

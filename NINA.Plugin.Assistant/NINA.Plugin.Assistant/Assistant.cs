@@ -1,14 +1,15 @@
 ﻿using Assistant.NINAPlugin.Controls.AssistantManager;
 using NINA.Core.Utility;
-using NINA.Core.Utility.Notification;
+using NINA.Equipment.Interfaces;
 using NINA.Plugin;
 using NINA.Plugin.Interfaces;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
+using NINA.WPF.Base.Interfaces.Mediator;
+using NINA.WPF.Base.Interfaces.ViewModel;
 using System;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -24,7 +25,12 @@ namespace Assistant.NINAPlugin {
         private IProfileService profileService;
 
         [ImportingConstructor]
-        public AssistantPlugin(IProfileService profileService) {
+        public AssistantPlugin(IProfileService profileService,
+            IApplicationMediator applicationMediator,
+            IFramingAssistantVM framingAssistantVM,
+            IDeepSkyObjectSearchVM deepSkyObjectSearchVM,
+            IPlanetariumFactory planetariumFactory) {
+
             if (Properties.Settings.Default.UpdateSettings) {
                 Properties.Settings.Default.Upgrade();
                 Properties.Settings.Default.UpdateSettings = false;
@@ -37,8 +43,7 @@ namespace Assistant.NINAPlugin {
 
             InitPluginHome();
 
-            AssistantManagerVM = new AssistantManagerVM(profileService);
-            //StartDatabaseManagementApp();
+            AssistantManagerVM = new AssistantManagerVM(profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory);
         }
 
         private void InitPluginHome() {
@@ -47,39 +52,6 @@ namespace Assistant.NINAPlugin {
             }
 
             // TODO: backup database at the start of each NINA run, only keep 10 copies
-        }
-
-        private void StartDatabaseManagementApp() {
-            // TODO: clean up, make like RemoteCopy
-            // TODO: can get the active profile ID and pass as an argument
-            Process process = new Process();
-            process.StartInfo.FileName = "C:\\Users\\Tom\\source\\repos\\Names\\bin\\Debug\\net6.0-windows\\Names.exe";
-            process.StartInfo.Arguments = "";
-            process.StartInfo.CreateNoWindow = true;
-            process.StartInfo.UseShellExecute = false;
-            process.EnableRaisingEvents = true;
-            process.Exited += new EventHandler(ProcessExited);
-            bool isRunning = false;
-
-            try {
-                isRunning = process.Start();
-            }
-            catch (Exception) {
-                Logger.Error($"failed to start process: APP (check command and args)");
-                Notification.ShowError($"Failed to start APP background process, check command and args");
-                //runningProcessId = INACTIVE_PID;
-                isRunning = false;
-            }
-
-            if (isRunning) {
-                Logger.Info($"started process: pid={process.Id}");
-                Notification.ShowSuccess($"APP background process started");
-                //runningProcessId = process.Id;
-                //StartWatchTimer();
-            }
-            else {
-                Logger.Error($"failed to start process");
-            }
         }
 
         private AssistantManagerVM assistantManagerVM;

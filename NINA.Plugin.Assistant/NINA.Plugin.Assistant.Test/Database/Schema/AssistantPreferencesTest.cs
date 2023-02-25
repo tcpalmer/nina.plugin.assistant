@@ -32,8 +32,8 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
             var sut = new FilterPreference("123", "L");
             sut.TwilightLevel.Should().Be(TwilightLevel.Nighttime);
             sut.MoonAvoidanceEnabled.Should().BeFalse();
-            sut.MoonAvoidanceSeparation.Should().BeApproximately(0, 0.0001);
-            sut.MoonAvoidanceWidth.Should().Be(0);
+            sut.MoonAvoidanceSeparation.Should().BeApproximately(60, 0.0001);
+            sut.MoonAvoidanceWidth.Should().Be(7);
             sut.MaximumHumidity.Should().BeApproximately(0, 00001);
         }
 

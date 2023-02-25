@@ -84,7 +84,7 @@ namespace Assistant.NINAPlugin.Plan {
             if (twilightWindow != null) {
                 TimeInterval overlap = twilightWindow.Overlap(planInterval);
                 if (overlap != null && overlap.Duration > 0) {
-                    List<IPlanFilter> planFilters = GetPlanFiltersForTwilightLevel(twilightLevel);
+                    List<IPlanExposure> planFilters = GetPlanFiltersForTwilightLevel(twilightLevel);
                     List<IPlanInstruction> added = GetPlanInstructions(planFilters, overlap);
 
                     if (HasActionableInstructions(added)) {
@@ -100,7 +100,7 @@ namespace Assistant.NINAPlugin.Plan {
             return instructions;
         }
 
-        private List<IPlanInstruction> GetPlanInstructions(List<IPlanFilter> planFilters, TimeInterval timeWindow) {
+        private List<IPlanInstruction> GetPlanInstructions(List<IPlanExposure> planFilters, TimeInterval timeWindow) {
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             long timeRemaining = timeWindow.Duration;
             string lastFilter = null;
@@ -108,7 +108,7 @@ namespace Assistant.NINAPlugin.Plan {
             while (timeRemaining > 0) {
                 if (AllPlanFiltersAreComplete(planFilters)) { break; }
 
-                foreach (IPlanFilter planFilter in planFilters) {
+                foreach (IPlanExposure planFilter in planFilters) {
 
                     if (IsPlanFilterComplete(planFilter)) { continue; }
 
@@ -164,8 +164,8 @@ namespace Assistant.NINAPlugin.Plan {
             return false;
         }
 
-        private bool AllPlanFiltersAreComplete(List<IPlanFilter> planFilters) {
-            foreach (IPlanFilter planFilter in planFilters) {
+        private bool AllPlanFiltersAreComplete(List<IPlanExposure> planFilters) {
+            foreach (IPlanExposure planFilter in planFilters) {
                 if (!IsPlanFilterComplete(planFilter)) {
                     return false;
                 }
@@ -174,15 +174,15 @@ namespace Assistant.NINAPlugin.Plan {
             return true;
         }
 
-        private bool IsPlanFilterComplete(IPlanFilter planFilter) {
+        private bool IsPlanFilterComplete(IPlanExposure planFilter) {
             return planFilter.NeededExposures() <= planFilter.PlannedExposures;
         }
 
-        private List<IPlanFilter> GetPlanFiltersForTwilightLevel(TwilightLevel twilightLevel) {
-            return NightPrioritize(planTarget.FilterPlans.Where(f => f.TwilightLevel >= twilightLevel).ToList(), twilightLevel);
+        private List<IPlanExposure> GetPlanFiltersForTwilightLevel(TwilightLevel twilightLevel) {
+            return NightPrioritize(planTarget.ExposurePlans.Where(f => f.TwilightLevel >= twilightLevel).ToList(), twilightLevel);
         }
 
-        private List<IPlanFilter> NightPrioritize(List<IPlanFilter> planFilters, TwilightLevel twilightLevel) {
+        private List<IPlanExposure> NightPrioritize(List<IPlanExposure> planFilters, TwilightLevel twilightLevel) {
 
             // If the twilight level is nighttime, order the filters to prioritize those for nighttime only.
             // Assuming there are also filters for brighter twilights, the nighttime only should be done first,
@@ -194,13 +194,13 @@ namespace Assistant.NINAPlugin.Plan {
     }
 
     public interface IPlanInstruction {
-        IPlanFilter planFilter { get; set; }
+        IPlanExposure planFilter { get; set; }
     }
 
     public class PlanInstruction : IPlanInstruction {
-        public IPlanFilter planFilter { get; set; }
+        public IPlanExposure planFilter { get; set; }
 
-        public PlanInstruction(IPlanFilter planFilter) {
+        public PlanInstruction(IPlanExposure planFilter) {
             this.planFilter = planFilter;
         }
 
@@ -265,7 +265,7 @@ namespace Assistant.NINAPlugin.Plan {
     }
 
     public class PlanSwitchFilter : PlanInstruction {
-        public PlanSwitchFilter(IPlanFilter planFilter) : base(planFilter) { }
+        public PlanSwitchFilter(IPlanExposure planFilter) : base(planFilter) { }
 
         public override string ToString() {
             return $"SwitchFilter: {planFilter.FilterName}";
@@ -273,7 +273,7 @@ namespace Assistant.NINAPlugin.Plan {
     }
 
     public class PlanTakeExposure : PlanInstruction {
-        public PlanTakeExposure(IPlanFilter planFilter) : base(planFilter) { }
+        public PlanTakeExposure(IPlanExposure planFilter) : base(planFilter) { }
 
         public override string ToString() {
             return $"TakeExposure: {planFilter.FilterName} {planFilter.ExposureLength}";

@@ -19,7 +19,7 @@
             int desired = 0;
             int accepted = 0;
 
-            foreach (IPlanFilter planFilter in potentialTarget.FilterPlans) {
+            foreach (IPlanExposure planFilter in potentialTarget.ExposurePlans) {
                 desired += planFilter.Desired;
                 accepted += planFilter.Accepted;
             }

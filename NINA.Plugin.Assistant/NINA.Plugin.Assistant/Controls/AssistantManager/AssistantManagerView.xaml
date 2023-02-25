@@ -6,31 +6,59 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:uc="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     d:DesignHeight="600"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid>
-        <TreeView
-            x:Name="ProjectsTreeView"
-            Width="200"
-            MinHeight="600"
-            HorizontalAlignment="Left"
-            ItemsSource="{Binding RootProjectsList}">
-            <TreeView.Resources>
-                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Green" />
-                <Style TargetType="{x:Type local:TreeDataItem}">
-                    <Setter Property="Margin" Value="0,3,0,3" />
-                </Style>
-            </TreeView.Resources>
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="SelectedItemChanged">
-                    <i:InvokeCommandAction Command="{Binding SelectedItemChangedCommand}" CommandParameter="{Binding ElementName=ProjectsTreeView, Path=SelectedItem}" />
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </TreeView>
-        <StackPanel Visibility="{Binding ShowProjectView}">
-            <uc:ProjectView DataContext="{Binding ProjectViewVM}" />
-        </StackPanel>
-    </Grid>
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Resources/Resources.xaml" />
+    </UserControl.Resources>
+
+    <StackPanel Margin="0,20,0,20" Orientation="Horizontal">
+        <Border
+            Height="600"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1">
+            <StackPanel Orientation="Vertical">
+                <local:AssistantTreeView DataContext="{Binding ProjectsTreeViewVM}" />
+                <local:AssistantTreeView DataContext="{Binding FilterPrefsTreeViewVM}" />
+            </StackPanel>
+        </Border>
+        <Border
+            Height="600"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            Visibility="{Binding ShowProfileView}">
+            <StackPanel>
+                <local:ProfileView DataContext="{Binding ProfileViewVM}" />
+            </StackPanel>
+        </Border>
+        <Border
+            Height="600"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            Visibility="{Binding ShowProjectView}">
+            <StackPanel>
+                <local:ProjectView DataContext="{Binding ProjectViewVM}" />
+            </StackPanel>
+        </Border>
+        <Border
+            Height="600"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            Visibility="{Binding ShowTargetView}">
+            <StackPanel>
+                <local:TargetView DataContext="{Binding TargetViewVM}" />
+            </StackPanel>
+        </Border>
+        <Border
+            Height="600"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            Visibility="{Binding ShowFilterPrefView}">
+            <StackPanel>
+                <local:FilterPrefView DataContext="{Binding FilterPrefViewVM}" />
+            </StackPanel>
+        </Border>
+    </StackPanel>
 </UserControl>

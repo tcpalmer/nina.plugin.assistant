@@ -1,14 +1,19 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Util;
 using NINA.Core.Utility;
-using System;
+using NINA.Profile.Interfaces;
+using NINA.WPF.Base.ViewModel;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Windows.Input;
 
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
-    public class ProjectViewVM : BaseINPC {
+    public class ProjectViewVM : BaseVM {
 
+        private AssistantManagerVM managerVM;
         private ProjectProxy projectProxy;
+
         public ProjectProxy ProjectProxy {
             get => projectProxy;
             set {
@@ -17,55 +22,62 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        public ProjectViewVM(Project project) {
-            project.Description = "hello description";
+        public ProjectViewVM(AssistantManagerVM managerVM, IProfileService profileService, Project project) : base(profileService) {
+            this.managerVM = managerVM;
             ProjectProxy = new ProjectProxy(project);
 
+            InitializeRuleWeights(ProjectProxy.Proxy);
             InitializeCombos();
+
+            EditCommand = new RelayCommand(Edit);
+            SaveCommand = new RelayCommand(Save);
+            CancelCommand = new RelayCommand(Cancel);
+            CopyCommand = new RelayCommand(Copy);
+            DeleteCommand = new RelayCommand(Delete);
+            AddTargetCommand = new RelayCommand(AddTarget);
+            PasteTargetCommand = new RelayCommand(PasteTarget);
+        }
+
+        private void InitializeRuleWeights(Project project) {
+            List<RuleWeight> ruleWeights = new List<RuleWeight>();
+
+            project.RuleWeights.ForEach((rw) => {
+                rw.PropertyChanged -= ProjectProxy_PropertyChanged;
+                rw.PropertyChanged += ProjectProxy_PropertyChanged;
+                ruleWeights.Add(rw);
+            });
+
+            RuleWeights = ruleWeights;
+        }
+
+        private void ProjectProxy_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+            if (e?.PropertyName != nameof(ProjectProxy.Proxy)) {
+                ItemEdited = true;
+            }
+            else {
+                RaisePropertyChanged(nameof(ProjectProxy));
+            }
         }
 
         private void InitializeCombos() {
 
-            ProjectStateChoices = new AsyncObservableCollection<KeyValuePair<int, string>>();
-            foreach (int i in Enum.GetValues(typeof(ProjectState))) {
-                ProjectStateChoices.Add(new KeyValuePair<int, string>(i, Enum.GetName(typeof(ProjectState), i)));
-            }
-
-            ProjectPriorityChoices = new AsyncObservableCollection<KeyValuePair<int, string>>();
-            foreach (int i in Enum.GetValues(typeof(ProjectPriority))) {
-                ProjectPriorityChoices.Add(new KeyValuePair<int, string>(i, Enum.GetName(typeof(ProjectPriority), i)));
+            MinimumTimeChoices = new List<string>();
+            for (int i = 30; i <= 240; i += 30) {
+                MinimumTimeChoices.Add(Utils.MtoHM(i));
             }
 
             MinimumAltitudeChoices = new List<string>();
             for (int i = 0; i <= 60; i += 5) {
                 MinimumAltitudeChoices.Add(i + "°");
             }
-
-            MinimumTimeChoices = new List<string>();
-            for (int i = 30; i <= 240; i += 30) {
-                MinimumTimeChoices.Add(Utils.MtoHM(i));
-            }
         }
 
-        private AsyncObservableCollection<KeyValuePair<int, string>> _projectStateChoices;
-        public AsyncObservableCollection<KeyValuePair<int, string>> ProjectStateChoices {
-            get {
-                return _projectStateChoices;
-            }
+        private List<RuleWeight> ruleWeights = new List<RuleWeight>();
+        public List<RuleWeight> RuleWeights {
+            get => ruleWeights;
             set {
-                _projectStateChoices = value;
-                RaisePropertyChanged(nameof(ProjectStateChoices));
-            }
-        }
-
-        private AsyncObservableCollection<KeyValuePair<int, string>> _projectPriorityChoices;
-        public AsyncObservableCollection<KeyValuePair<int, string>> ProjectPriorityChoices {
-            get {
-                return _projectPriorityChoices;
-            }
-            set {
-                _projectPriorityChoices = value;
-                RaisePropertyChanged(nameof(ProjectPriorityChoices));
+                ruleWeights = value;
+                RaisePropertyChanged(nameof(RuleWeights));
             }
         }
 
@@ -87,6 +99,83 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 _minimumAltitudeChoices = value;
                 RaisePropertyChanged(nameof(MinimumAltitudeChoices));
             }
+        }
+
+        private bool showEditView = false;
+        public bool ShowEditView {
+            get => showEditView;
+            set {
+                showEditView = value;
+                RaisePropertyChanged(nameof(ShowEditView));
+            }
+        }
+
+        private bool itemEdited = false;
+        public bool ItemEdited {
+            get => itemEdited;
+            set {
+                itemEdited = value;
+                RaisePropertyChanged(nameof(ItemEdited));
+            }
+        }
+
+        public bool PasteEnabled {
+            get => Clipboard.HasType(TreeDataType.Target);
+        }
+
+        public ICommand EditCommand { get; private set; }
+        public ICommand SaveCommand { get; private set; }
+        public ICommand CancelCommand { get; private set; }
+        public ICommand CopyCommand { get; private set; }
+        public ICommand DeleteCommand { get; private set; }
+        public ICommand AddTargetCommand { get; private set; }
+        public ICommand PasteTargetCommand { get; private set; }
+
+        private void Edit(object obj) {
+            ProjectProxy.PropertyChanged += ProjectProxy_PropertyChanged;
+            managerVM.SetEditMode(true);
+            ShowEditView = true;
+            ItemEdited = false;
+        }
+
+        private void Save(object obj) {
+            ProjectProxy.Proxy.RuleWeights = RuleWeights;
+            managerVM.SaveProject(ProjectProxy.Proxy);
+            ProjectProxy.OnSave();
+            InitializeRuleWeights(ProjectProxy.Proxy);
+            ProjectProxy.PropertyChanged -= ProjectProxy_PropertyChanged;
+            ShowEditView = false;
+            ItemEdited = false;
+            managerVM.SetEditMode(false);
+        }
+
+        private void Cancel(object obj) {
+            ProjectProxy.OnCancel();
+            ProjectProxy.PropertyChanged -= ProjectProxy_PropertyChanged;
+            InitializeRuleWeights(ProjectProxy.Proxy);
+            ShowEditView = false;
+            ItemEdited = false;
+            managerVM.SetEditMode(false);
+        }
+
+        private void Copy(object obj) {
+            managerVM.CopyItem();
+        }
+
+        private void Delete(object obj) {
+            string message = $"Delete project '{ProjectProxy.Project.Name}' and any associated targets?  This cannot be undone.";
+            ConfirmationMessageBox messageBox = new ConfirmationMessageBox(message, "Delete");
+            if (messageBox.Show()) {
+                managerVM.DeleteProject(ProjectProxy.Proxy);
+            }
+        }
+
+        private void AddTarget(object obj) {
+            managerVM.AddNewTarget(ProjectProxy.Proxy);
+        }
+
+        private void PasteTarget(object obj) {
+            managerVM.PasteTarget(ProjectProxy.Proxy);
         }
 
     }

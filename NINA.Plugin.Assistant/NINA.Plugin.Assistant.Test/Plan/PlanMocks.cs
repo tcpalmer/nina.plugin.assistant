@@ -63,31 +63,31 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pt.SetupAllProperties();
             pt.SetupProperty(m => m.Name, name);
             pt.SetupProperty(m => m.Coordinates, coordinates);
-            pt.SetupProperty(m => m.FilterPlans, new List<IPlanFilter>());
+            pt.SetupProperty(m => m.ExposurePlans, new List<IPlanExposure>());
 
             return pt;
         }
 
-        public static Mock<IPlanFilter> GetMockPlanFilter(string filterName, int desired, int accepted) {
-            return GetMockPlanFilter(filterName, desired, accepted, 30);
+        public static Mock<IPlanExposure> GetMockPlanExposure(string filterName, int desired, int accepted) {
+            return GetMockPlanExposure(filterName, desired, accepted, 30);
         }
 
-        public static Mock<IPlanFilter> GetMockPlanFilter(string filterName, int desired, int accepted, int exposureLength) {
-            Mock<IPlanFilter> pf = new Mock<IPlanFilter>();
-            pf.SetupAllProperties();
-            pf.SetupProperty(m => m.FilterName, filterName);
-            pf.SetupProperty(m => m.ExposureLength, exposureLength);
-            pf.SetupProperty(m => m.Desired, desired);
-            pf.SetupProperty(m => m.Acquired, 0);
-            pf.SetupProperty(m => m.Accepted, accepted);
-            pf.Setup(m => m.NeededExposures()).Returns(accepted > desired ? 0 : desired - accepted);
-            pf.Setup(m => m.IsIncomplete()).Returns(accepted < desired);
-            return pf;
+        public static Mock<IPlanExposure> GetMockPlanExposure(string filterName, int desired, int accepted, int exposureLength) {
+            Mock<IPlanExposure> pe = new Mock<IPlanExposure>();
+            pe.SetupAllProperties();
+            pe.SetupProperty(m => m.FilterName, filterName);
+            pe.SetupProperty(m => m.ExposureLength, exposureLength);
+            pe.SetupProperty(m => m.Desired, desired);
+            pe.SetupProperty(m => m.Acquired, 0);
+            pe.SetupProperty(m => m.Accepted, accepted);
+            pe.Setup(m => m.NeededExposures()).Returns(accepted > desired ? 0 : desired - accepted);
+            pe.Setup(m => m.IsIncomplete()).Returns(accepted < desired);
+            return pe;
         }
 
-        public static void AddMockPlanFilter(Mock<IPlanTarget> pt, Mock<IPlanFilter> pf) {
+        public static void AddMockPlanFilter(Mock<IPlanTarget> pt, Mock<IPlanExposure> pf) {
             pf.SetupProperty(m => m.PlanTarget, pt.Object);
-            pt.Object.FilterPlans.Add(pf.Object);
+            pt.Object.ExposurePlans.Add(pf.Object);
         }
 
         public static void AddMockPlanTarget(Mock<IPlanProject> pp, Mock<IPlanTarget> pt) {

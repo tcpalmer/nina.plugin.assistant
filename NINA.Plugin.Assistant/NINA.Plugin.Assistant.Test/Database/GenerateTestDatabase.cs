@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.Plan.Scoring.Rules;
 using Moq;
 using NINA.Plugin.Assistant.Test.Astrometry;
 using NINA.Plugin.Assistant.Test.Plan;
@@ -48,28 +49,28 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     Target t1 = new Target();
                     t1.Name = "M42";
-                    t1.RA = TestUtil.M42.RADegrees;
-                    t1.Dec = TestUtil.M42.Dec;
+                    t1.ra = TestUtil.M42.RADegrees;
+                    t1.dec = TestUtil.M42.Dec;
                     p1.Targets.Add(t1);
 
-                    FilterPlan fp = new FilterPlan(profileId, "Ha");
+                    ExposurePlan fp = new ExposurePlan(profileId, "Ha");
                     fp.Desired = 3;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t1.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "OIII");
+                    t1.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "OIII");
                     fp.Desired = 3;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t1.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "SII");
+                    t1.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "SII");
                     fp.Desired = 3;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t1.FilterPlans.Add(fp);
+                    t1.ExposurePlans.Add(fp);
 
                     context.ProjectSet.Add(p1);
 
@@ -92,34 +93,34 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     Target t2 = new Target();
                     t2.Name = "IC1805";
-                    t2.RA = TestUtil.IC1805.RADegrees;
-                    t2.Dec = TestUtil.IC1805.Dec;
+                    t2.ra = TestUtil.IC1805.RADegrees;
+                    t2.dec = TestUtil.IC1805.Dec;
                     p2.Targets.Add(t2);
 
-                    fp = new FilterPlan(profileId, "Ha");
+                    fp = new ExposurePlan(profileId, "Ha");
                     fp.Desired = 5;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t2.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "OIII");
+                    t2.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "OIII");
                     fp.Desired = 5;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t2.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "SII");
+                    t2.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "SII");
                     fp.Desired = 5;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t2.FilterPlans.Add(fp);
+                    t2.ExposurePlans.Add(fp);
 
                     context.ProjectSet.Add(p2);
 
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Ha"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "OIII"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "SII"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Ha"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "OIII"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "SII"));
 
                     //ImageMetadata imd = new ImageMetadata(PlanMocks.GetImageSavedEventArgs(DateTime.Now, "Ha"));
                     //AcquiredImage ai = new AcquiredImage(1, DateTime.Now, "Ha", imd);
@@ -154,8 +155,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
             using (var context = db.GetContext()) {
                 try {
                     DateTime atTime = new DateTime(2023, 1, 26);
-                    //string profileId = "3c160865-776f-4f72-8a05-5964225ca0fa"; // Zim
-                    string profileId = "1f78fa60-ab20-41af-9c17-a12016553007"; // Astroimaging Redcat 51 / ASI1600mm
+                    string profileId = "3c160865-776f-4f72-8a05-5964225ca0fa"; // Zim
+                    //string profileId = "1f78fa60-ab20-41af-9c17-a12016553007"; // Astroimaging Redcat 51 / ASI1600mm
 
                     Project p1 = new Project(profileId);
                     p1.Name = "Project: C00";
@@ -164,27 +165,24 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p1.ActiveDate = atTime.AddDays(-1);
                     p1.StartDate = atTime;
                     p1.EndDate = atTime.AddDays(100);
-                    // TODO: new project prefs
-                    /*
-                    AssistantProjectPreferencesOLD p1Prefs = new AssistantProjectPreferencesOLD();
-                    p1Prefs.SetDefaults();
-                    p1Prefs.FilterSwitchFrequency = 0;
-                    p1Prefs.MinimumAltitude = 0;
-                    p1Prefs.EnableGrader = true;
-                    SetDefaultRuleWeights(p1Prefs);
-                    p1.preferences = new ProjectPreferenceOLD(p1Prefs);
-                    */
+                    p1.MinimumTime = 60;
+                    p1.MinimumAltitude = 22;
+                    p1.UseCustomHorizon = false;
+                    p1.HorizonOffset = 0;
+                    p1.FilterSwitchFrequency = 1;
+                    p1.DitherEvery = 2;
+                    SetDefaultRuleWeights(p1);
 
                     Target t1 = new Target();
                     t1.Name = "C00";
-                    t1.RA = TestUtil.C00.RA;
-                    t1.Dec = TestUtil.C00.Dec;
+                    t1.ra = TestUtil.C00.RA;
+                    t1.dec = TestUtil.C00.Dec;
                     p1.Targets.Add(t1);
 
-                    t1.FilterPlans.Add(GetFilterPlan(profileId, "Lum", 5, 0, 60));
-                    t1.FilterPlans.Add(GetFilterPlan(profileId, "Red", 5, 0, 60));
-                    t1.FilterPlans.Add(GetFilterPlan(profileId, "Green", 5, 0, 60));
-                    t1.FilterPlans.Add(GetFilterPlan(profileId, "Blue", 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "Lum", 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "Red", 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "Green", 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "Blue", 5, 0, 60));
 
                     Project p2 = new Project(profileId);
                     p2.Name = "Project: C90";
@@ -193,37 +191,29 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p2.ActiveDate = atTime.AddDays(-1);
                     p2.StartDate = atTime;
                     p2.EndDate = atTime.AddDays(100);
-                    // TODO: new project prefs
-                    /*
-                    AssistantProjectPreferencesOLD p2Prefs = new AssistantProjectPreferencesOLD();
-                    p2Prefs.SetDefaults();
-                    p2Prefs.FilterSwitchFrequency = 0;
-                    p2Prefs.MinimumAltitude = 0;
-                    p2Prefs.EnableGrader = true;
-                    SetDefaultRuleWeights(p2Prefs);
-                    p2.preferences = new ProjectPreferenceOLD(p2Prefs);
-                    */
+
+                    SetDefaultRuleWeights(p2);
 
                     Target t2 = new Target();
                     t2.Name = "C90";
-                    t2.RA = TestUtil.C90.RA;
-                    t2.Dec = TestUtil.C90.Dec;
+                    t2.ra = TestUtil.C90.RA;
+                    t2.dec = TestUtil.C90.Dec;
                     p2.Targets.Add(t2);
 
-                    t2.FilterPlans.Add(GetFilterPlan(profileId, "Ha", 5, 0, 90));
-                    t2.FilterPlans.Add(GetFilterPlan(profileId, "OIII", 5, 0, 90));
-                    t2.FilterPlans.Add(GetFilterPlan(profileId, "SII", 5, 0, 90));
+                    t2.ExposurePlans.Add(GetExposurePlan(profileId, "Ha", 5, 0, 90));
+                    t2.ExposurePlans.Add(GetExposurePlan(profileId, "OIII", 5, 0, 90));
+                    t2.ExposurePlans.Add(GetExposurePlan(profileId, "SII", 5, 0, 90));
 
                     context.ProjectSet.Add(p1);
                     context.ProjectSet.Add(p2);
 
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Lum"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Red"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Green"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Blue"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Ha"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "OIII"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "SII"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Lum"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Red"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Green"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Blue"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Ha"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "OIII"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "SII"));
 
                     context.SaveChanges();
                 }
@@ -242,7 +232,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 try {
                     DateTime atTime = new DateTime(2023, 1, 28);
                     string profileId = "3c160865-776f-4f72-8a05-5964225ca0fa"; // Zim
-                                                                               //string profileId = "1f78fa60-ab20-41af-9c17-a12016553007"; // Astroimaging Redcat 51 / ASI1600mm
+                    //string profileId = "1f78fa60-ab20-41af-9c17-a12016553007"; // Astroimaging Redcat 51 / ASI1600mm
 
                     Project p1 = new Project(profileId);
                     p1.Name = "Project: C00";
@@ -261,21 +251,21 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     Target t1 = new Target();
                     t1.Name = "C00";
-                    t1.RA = TestUtil.C00.RA;
-                    t1.Dec = TestUtil.C00.Dec;
+                    t1.ra = TestUtil.C00.RA;
+                    t1.dec = TestUtil.C00.Dec;
                     p1.Targets.Add(t1);
 
-                    t1.FilterPlans.Add(GetFilterPlan(profileId, "L", 5, 0, 60));
-                    t1.FilterPlans.Add(GetFilterPlan(profileId, "R", 5, 0, 60));
-                    //t1.filterplans.Add(GetFilterPlan(profileId, "G", 5, 0, 60));
-                    //t1.filterplans.Add(GetFilterPlan(profileId, "B", 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "L", 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "R", 5, 0, 60));
+                    //t1.ExposurePlans.Add(GetExposurePlan(profileId, "G", 5, 0, 60));
+                    //t1.ExposurePlans.Add(GetExposurePlan(profileId, "B", 5, 0, 60));
 
                     context.ProjectSet.Add(p1);
 
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "L"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "R"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "G"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "B"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "L"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "R"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "G"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "B"));
 
                     context.SaveChanges();
                 }
@@ -286,14 +276,22 @@ namespace NINA.Plugin.Assistant.Test.Database {
             }
         }
 
+        private void SetDefaultRuleWeights(Project project) {
+            Dictionary<string, IScoringRule> rules = ScoringRule.GetAllScoringRules();
+            foreach (KeyValuePair<string, IScoringRule> entry in rules) {
+                var rule = entry.Value;
+                project.ruleWeights.Add(new RuleWeight(rule.Name, rule.DefaultWeight));
+            }
+        }
+
         private AssistantDatabaseInteraction GetDatabase() {
             var testDbPath = Path.Combine(TestContext.CurrentContext.TestDirectory, @"assistantdb.sqlite");
             TestContext.WriteLine($"DB PATH: {testDbPath}");
             return new AssistantDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
         }
 
-        private FilterPlan GetFilterPlan(string profileId, string filterName, int desired, int accepted, int exposure) {
-            FilterPlan fp = new FilterPlan(profileId, filterName);
+        private ExposurePlan GetExposurePlan(string profileId, string filterName, int desired, int accepted, int exposure) {
+            ExposurePlan fp = new ExposurePlan(profileId, filterName);
             fp.Desired = desired;
             fp.Accepted = accepted;
             fp.Exposure = exposure;

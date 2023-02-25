@@ -1,27 +1,85 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
-using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity.ModelConfiguration;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public class FilterPreference : ICloneable {
+    public class FilterPreference : INotifyPropertyChanged {
 
         [Key] public int Id { get; set; }
-        [Required] public string ProfileId { get; set; }
-        [Required] public string FilterName { get; set; }
+        [Required] public string profileId { get; set; }
+        [Required] public string filterName { get; set; }
         public int twilightlevel_col { get; set; }
-        public bool MoonAvoidanceEnabled { get; set; }
-        public double MoonAvoidanceSeparation { get; set; }
-        public int MoonAvoidanceWidth { get; set; }
-        public double MaximumHumidity { get; set; }
+        public bool moonAvoidanceEnabled { get; set; }
+        public double moonAvoidanceSeparation { get; set; }
+        public int moonAvoidanceWidth { get; set; }
+        public double maximumHumidity { get; set; }
+
+        [NotMapped]
+        public string FilterName {
+            get { return filterName; }
+            set {
+                filterName = value;
+                RaisePropertyChanged(nameof(FilterName));
+            }
+        }
+
+        [NotMapped]
+        public string ProfileId {
+            get { return profileId; }
+            set {
+                profileId = value;
+                RaisePropertyChanged(nameof(ProfileId));
+            }
+        }
 
         [NotMapped]
         public TwilightLevel TwilightLevel {
             get { return (TwilightLevel)twilightlevel_col; }
-            set { twilightlevel_col = (int)value; }
+            set {
+                twilightlevel_col = (int)value;
+                RaisePropertyChanged(nameof(TwilightLevel));
+            }
+        }
+
+        [NotMapped]
+        public bool MoonAvoidanceEnabled {
+            get { return moonAvoidanceEnabled; }
+            set {
+                moonAvoidanceEnabled = value;
+                RaisePropertyChanged(nameof(MoonAvoidanceEnabled));
+            }
+        }
+
+        [NotMapped]
+        public double MoonAvoidanceSeparation {
+            get { return moonAvoidanceSeparation; }
+            set {
+                moonAvoidanceSeparation = value;
+                RaisePropertyChanged(nameof(MoonAvoidanceSeparation));
+            }
+        }
+
+        [NotMapped]
+        public int MoonAvoidanceWidth {
+            get { return moonAvoidanceWidth; }
+            set {
+                moonAvoidanceWidth = value;
+                RaisePropertyChanged(nameof(MoonAvoidanceWidth));
+            }
+        }
+
+        [NotMapped]
+        public double MaximumHumidity {
+            get { return maximumHumidity; }
+            set {
+                maximumHumidity = value;
+                RaisePropertyChanged(nameof(MaximumHumidity));
+            }
         }
 
         public FilterPreference() { }
@@ -32,8 +90,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
             TwilightLevel = TwilightLevel.Nighttime;
             MoonAvoidanceEnabled = false;
-            MoonAvoidanceSeparation = 0;
-            MoonAvoidanceWidth = 0;
+            MoonAvoidanceSeparation = 60;
+            MoonAvoidanceWidth = 7;
             MaximumHumidity = 0;
         }
 
@@ -66,8 +124,9 @@ namespace Assistant.NINAPlugin.Database.Schema {
             return sb.ToString();
         }
 
-        public object Clone() {
-            return MemberwiseClone();
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
     }

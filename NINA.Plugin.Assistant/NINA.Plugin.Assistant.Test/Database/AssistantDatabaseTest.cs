@@ -57,6 +57,13 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 p1.DitherEvery.Should().Be(14);
                 p1.EnableGrader.Should().BeFalse();
 
+                p1.RuleWeights[0].Name.Should().Be("a");
+                p1.RuleWeights[1].Name.Should().Be("b");
+                p1.RuleWeights[2].Name.Should().Be("c");
+                p1.RuleWeights[0].Weight.Should().BeApproximately(.1, 0.001);
+                p1.RuleWeights[1].Weight.Should().BeApproximately(.2, 0.001);
+                p1.RuleWeights[2].Weight.Should().BeApproximately(.3, 0.001);
+
                 Target t1p1 = p1.Targets[0];
                 t1p1.Name = "M42";
                 t1p1.RA.Should().BeApproximately(83.82, 0.001);
@@ -64,10 +71,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 t1p1.Rotation.Should().BeApproximately(0, 0.001);
                 t1p1.ROI.Should().BeApproximately(1, 0.001);
 
-                t1p1.FilterPlans.Count.Should().Be(3);
-                t1p1.FilterPlans[0].FilterName.Should().Be("Ha");
-                t1p1.FilterPlans[1].FilterName.Should().Be("OIII");
-                t1p1.FilterPlans[2].FilterName.Should().Be("SII");
+                t1p1.ExposurePlans.Count.Should().Be(3);
+                t1p1.ExposurePlans[0].FilterName.Should().Be("Ha");
+                t1p1.ExposurePlans[1].FilterName.Should().Be("OIII");
+                t1p1.ExposurePlans[2].FilterName.Should().Be("SII");
 
                 Project p2 = projects[1];
                 p2.Name.Should().Be("Project: IC1805");
@@ -81,16 +88,23 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 p2.DitherEvery.Should().Be(16);
                 p2.EnableGrader.Should().BeFalse();
 
+                p2.RuleWeights[0].Name.Should().Be("d");
+                p2.RuleWeights[1].Name.Should().Be("e");
+                p2.RuleWeights[2].Name.Should().Be("f");
+                p2.RuleWeights[0].Weight.Should().BeApproximately(.4, 0.001);
+                p2.RuleWeights[1].Weight.Should().BeApproximately(.5, 0.001);
+                p2.RuleWeights[2].Weight.Should().BeApproximately(.6, 0.001);
+
                 Target t1p2 = p2.Targets[0];
                 t1p2.Name = "IC1805";
                 t1p2.RA.Should().BeApproximately(38.175, 0.001);
                 t1p2.Dec.Should().BeApproximately(61.45, 0.001);
                 t1p2.Rotation.Should().BeApproximately(0, 0.001);
                 t1p2.ROI.Should().BeApproximately(1, 0.001);
-                t1p2.FilterPlans.Count.Should().Be(3);
-                t1p2.FilterPlans[0].FilterName.Should().Be("Ha");
-                t1p2.FilterPlans[1].FilterName.Should().Be("OIII");
-                t1p2.FilterPlans[2].FilterName.Should().Be("SII");
+                t1p2.ExposurePlans.Count.Should().Be(3);
+                t1p2.ExposurePlans[0].FilterName.Should().Be("Ha");
+                t1p2.ExposurePlans[1].FilterName.Should().Be("OIII");
+                t1p2.ExposurePlans[2].FilterName.Should().Be("SII");
 
                 context.GetFilterPreferences("").Count.Should().Be(0);
                 List<FilterPreference> fPrefs = context.GetFilterPreferences(profileId);
@@ -108,13 +122,13 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 p1 = projects[0];
                 p1.Name.Should().Be("Project: M42");
 
-                // Test GetFilterPlan
-                AssertFilterPlan(context.GetFilterPlan(t1p1.Id, "Ha"), "Ha", 20, 3);
-                AssertFilterPlan(context.GetFilterPlan(t1p1.Id, "OIII"), "OIII", 20, 3);
-                AssertFilterPlan(context.GetFilterPlan(t1p1.Id, "SII"), "SII", 20, 3);
-                AssertFilterPlan(context.GetFilterPlan(t1p2.Id, "Ha"), "Ha", 20, 5);
-                AssertFilterPlan(context.GetFilterPlan(t1p2.Id, "OIII"), "OIII", 20, 5);
-                AssertFilterPlan(context.GetFilterPlan(t1p2.Id, "SII"), "SII", 20, 5);
+                // Test GetExposurePlan
+                AssertExposurePlan(context.GetExposurePlan(t1p1.Id, "Ha"), "Ha", 20, 3);
+                AssertExposurePlan(context.GetExposurePlan(t1p1.Id, "OIII"), "OIII", 20, 3);
+                AssertExposurePlan(context.GetExposurePlan(t1p1.Id, "SII"), "SII", 20, 3);
+                AssertExposurePlan(context.GetExposurePlan(t1p2.Id, "Ha"), "Ha", 20, 5);
+                AssertExposurePlan(context.GetExposurePlan(t1p2.Id, "OIII"), "OIII", 20, 5);
+                AssertExposurePlan(context.GetExposurePlan(t1p2.Id, "SII"), "SII", 20, 5);
             }
         }
 
@@ -151,10 +165,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
         [Test, Order(3)]
         [NonParallelizable]
-        public void TestWriteUpdateFilterPlans() {
+        public void TestWriteUpdateExposurePlans() {
             using (var context = db.GetContext()) {
                 Target target = context.GetTarget(1, 1);
-                FilterPlan fp = target.FilterPlans.Where(t => t.FilterName == "Ha").First();
+                ExposurePlan fp = target.ExposurePlans.Where(t => t.FilterName == "Ha").First();
                 fp.Acquired += 2;
                 fp.Accepted += 1;
                 context.SaveChanges();
@@ -162,23 +176,63 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
             using (var context = db.GetContext()) {
                 Target target = context.GetTarget(1, 1);
-                FilterPlan fp = target.FilterPlans.Where(t => t.FilterName == "Ha").First();
+                ExposurePlan fp = target.ExposurePlans.Where(t => t.FilterName == "Ha").First();
                 fp.Desired.Should().Be(3);
                 fp.Acquired.Should().Be(2);
                 fp.Accepted.Should().Be(1);
             }
         }
 
-        private void AssertFilterPlan(FilterPlan filterPlan, string filterName, int exp, int desired) {
-            filterPlan.FilterName.Should().Be(filterName);
-            filterPlan.Exposure.Should().Be(exp);
-            filterPlan.Desired.Should().Be(desired);
-            filterPlan.Acquired.Should().Be(0);
-            filterPlan.Accepted.Should().Be(0);
-            filterPlan.Gain.Should().Be(100);
-            filterPlan.Offset.Should().Be(10);
-            filterPlan.bin.Should().Be(1);
-            filterPlan.ReadoutMode.Should().Be(-1);
+        [Test, Order(4)]
+        [NonParallelizable]
+        public void TestPasteProject() {
+            using (var context = db.GetContext()) {
+                List<Project> projects = context.GetAllProjects(profileId);
+                projects.Count.Should().Be(2);
+                Project p2 = projects[1];
+
+                Target p2t1 = p2.Targets.First();
+                TestContext.WriteLine($"P2T1: {p2t1}");
+
+                Project pasted = context.PasteProject("abcd-9876", p2);
+                pasted.Should().NotBeNull();
+
+                Target t = pasted.Targets.First();
+                t.ra = 1.23;
+                context.SaveTarget(t);
+
+                Project pasted2 = context.PasteProject("abcd-9876", pasted);
+                Target pasted2t1 = pasted2.Targets.First();
+                TestContext.WriteLine($"PS2T1: {pasted2t1}");
+            }
+        }
+
+        [Test, Order(5)]
+        [NonParallelizable]
+        public void TestPasteTarget() {
+            using (var context = db.GetContext()) {
+
+                List<Project> projects = context.GetAllProjects(profileId);
+                projects.Count.Should().Be(2);
+
+                Project p1 = projects[0];
+                Project p2 = projects[1];
+                Target p2t1 = p2.Targets[0];
+
+                context.PasteTarget(p1, p2t1).Should().NotBeNull();
+            }
+        }
+
+        private void AssertExposurePlan(ExposurePlan exposurePlan, string filterName, int exp, int desired) {
+            exposurePlan.FilterName.Should().Be(filterName);
+            exposurePlan.Exposure.Should().Be(exp);
+            exposurePlan.Desired.Should().Be(desired);
+            exposurePlan.Acquired.Should().Be(0);
+            exposurePlan.Accepted.Should().Be(0);
+            exposurePlan.Gain.Should().Be(100);
+            exposurePlan.Offset.Should().Be(10);
+            exposurePlan.bin.Should().Be(1);
+            exposurePlan.ReadoutMode.Should().Be(-1);
         }
 
         private void LoadTestDatabase() {
@@ -199,30 +253,36 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p1.DitherEvery = 14;
                     p1.EnableGrader = false;
 
+                    p1.RuleWeights = new List<RuleWeight> {
+                        {new RuleWeight("a", .1) },
+                        {new RuleWeight("b", .2) },
+                        {new RuleWeight("c", .3) }
+                    };
+
                     Target t1 = new Target();
                     t1.Name = "M42";
-                    t1.RA = TestUtil.M42.RADegrees;
-                    t1.Dec = TestUtil.M42.Dec;
+                    t1.ra = TestUtil.M42.RADegrees;
+                    t1.dec = TestUtil.M42.Dec;
                     p1.Targets.Add(t1);
 
-                    FilterPlan fp = new FilterPlan(profileId, "Ha");
+                    ExposurePlan fp = new ExposurePlan(profileId, "Ha");
                     fp.Desired = 3;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t1.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "OIII");
+                    t1.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "OIII");
                     fp.Desired = 3;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t1.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "SII");
+                    t1.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "SII");
                     fp.Desired = 3;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t1.FilterPlans.Add(fp);
+                    t1.ExposurePlans.Add(fp);
 
                     context.ProjectSet.Add(p1);
 
@@ -241,36 +301,42 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p2.DitherEvery = 16;
                     p2.EnableGrader = false;
 
+                    p2.RuleWeights = new List<RuleWeight> {
+                        {new RuleWeight("d", .4) },
+                        {new RuleWeight("e", .5) },
+                        {new RuleWeight("f", .6) }
+                    };
+
                     Target t2 = new Target();
                     t2.Name = "IC1805";
-                    t2.RA = TestUtil.IC1805.RADegrees;
-                    t2.Dec = TestUtil.IC1805.Dec;
+                    t2.ra = TestUtil.IC1805.RADegrees;
+                    t2.dec = TestUtil.IC1805.Dec;
                     p2.Targets.Add(t2);
 
-                    fp = new FilterPlan(profileId, "Ha");
+                    fp = new ExposurePlan(profileId, "Ha");
                     fp.Desired = 5;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t2.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "OIII");
+                    t2.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "OIII");
                     fp.Desired = 5;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t2.FilterPlans.Add(fp);
-                    fp = new FilterPlan(profileId, "SII");
+                    t2.ExposurePlans.Add(fp);
+                    fp = new ExposurePlan(profileId, "SII");
                     fp.Desired = 5;
                     fp.Exposure = 20;
                     fp.Gain = 100;
                     fp.Offset = 10;
-                    t2.FilterPlans.Add(fp);
+                    t2.ExposurePlans.Add(fp);
 
                     context.ProjectSet.Add(p2);
 
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "Ha"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "OIII"));
-                    context.FilterPreferencePlanSet.Add(new FilterPreference(profileId, "SII"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Ha"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "OIII"));
+                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "SII"));
 
                     context.SaveChanges();
                 }
@@ -290,17 +356,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     throw e;
                 }
             }
-
         }
-
-        /*
-        private void SetDefaultRuleWeights(AssistantProjectPreferences prefs) {
-            Dictionary<string, IScoringRule> rules = ScoringRule.GetAllScoringRules();
-            foreach (KeyValuePair<string, IScoringRule> entry in rules) {
-                var rule = entry.Value;
-                prefs.AddRuleWeight(rule.Name, rule.DefaultWeight);
-            }
-        }*/
     }
-
 }

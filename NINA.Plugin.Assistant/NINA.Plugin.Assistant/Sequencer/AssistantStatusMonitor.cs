@@ -29,7 +29,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 return "";
             }
 
-            foreach (IPlanFilter planFilter in planTarget.FilterPlans) {
+            foreach (IPlanExposure planFilter in planTarget.ExposurePlans) {
                 if (planFilter.PlanId == planItemId) {
                     return planFilter.FilterName;
                 }
