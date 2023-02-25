@@ -41,7 +41,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             // HACK
             accepted = true;
-            //Update(planTarget, msg.Filter, accepted, msg);  NEED A WAY TO NOT DO THIS FOR EMULATOR
+            // TODO: Need a way to NOT do this for the emulator
+            // TODO: But for a 'perfect plan' we do need to update proxy exposure plans so it thinks it's making progress
+            //Update(planTarget, msg.Filter, accepted, msg);
         }
 
         private void Update(IPlanTarget planTarget, string filterName, bool accepted, ImageSavedEventArgs msg) {
