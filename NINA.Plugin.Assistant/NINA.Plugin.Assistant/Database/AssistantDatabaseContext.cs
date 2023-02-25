@@ -6,8 +6,9 @@ using System.Data.Entity;
 using System.Data.Entity.Migrations;
 using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Data.SQLite;
-using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Resources;
 
 namespace Assistant.NINAPlugin.Database {
 
@@ -334,10 +335,7 @@ namespace Assistant.NINAPlugin.Database {
                     Logger.Debug("Assistant database: creating database schema");
                     using (var transaction = context.Database.BeginTransaction()) {
                         try {
-                            // TODO: make this locate in the Assembly ...
-                            string initial = "C:\\Users\\Tom\\source\\repos\\nina.plugin.assistant\\NINA.Plugin.Assistant\\NINA.Plugin.Assistant\\Database\\Initial";
-                            var initial_schema = Path.Combine(initial, "initial_schema.sql");
-                            context.Database.ExecuteSqlCommand(File.ReadAllText(initial_schema));
+                            context.Database.ExecuteSqlCommand(GetInitialSQL());
                             transaction.Commit();
                         }
                         catch (Exception e) {
@@ -351,6 +349,17 @@ namespace Assistant.NINAPlugin.Database {
             private bool DatabaseExists(TContext context) {
                 int numTables = context.Database.SqlQuery<int>("SELECT COUNT(*) FROM sqlite_master AS TABLES WHERE TYPE = 'table'").First();
                 return numTables > 0;
+            }
+
+            private string GetInitialSQL() {
+                try {
+                    ResourceManager rm = new ResourceManager("Assistant.NINAPlugin.Database.Initial.SQL", Assembly.GetExecutingAssembly());
+                    return (string)rm.GetObject("initial_schema");
+                }
+                catch (Exception ex) {
+                    Logger.Error($"failed to load Assistant database initial SQL: {ex.Message}");
+                    throw ex;
+                }
             }
 
         }
