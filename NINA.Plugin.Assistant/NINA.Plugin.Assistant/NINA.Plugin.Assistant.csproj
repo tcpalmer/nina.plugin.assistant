@@ -108,9 +108,6 @@
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.39\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
-    <Reference Include="ModernMessageBoxLib, Version=1.3.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ModernMessageBoxLib.1.3.1\lib\net45\ModernMessageBoxLib.dll</HintPath>
-    </Reference>
     <Reference Include="Namotion.Reflection, Version=2.0.10.0, Culture=neutral, PublicKeyToken=c2f9c3bdfae56102, processorArchitecture=MSIL">
       <HintPath>..\packages\Namotion.Reflection.2.0.10\lib\net45\Namotion.Reflection.dll</HintPath>
     </Reference>
@@ -308,7 +305,6 @@
     </Compile>
     <Compile Include="Controls\AssistantManager\AssistantTreeViewVM.cs" />
     <Compile Include="Controls\AssistantManager\BindingHelper.cs" />
-    <Compile Include="Controls\AssistantManager\ConfirmationMessageBox.cs" />
     <Compile Include="Controls\AssistantManager\DocumentationLink.xaml.cs">
       <DependentUpon>DocumentationLink.xaml</DependentUpon>
     </Compile>
@@ -509,7 +505,6 @@
 
       echo "Copying $(PlatformName) $(TargetFileName)"
       xcopy "$(TargetPath)" "%25localappdata%25\NINA\Plugins\$(TargetName)" /h/i/c/k/e/r/y
-      xcopy "$(TargetDir)ModernMessageBoxLib.dll" "%25localappdata%25\NINA\Plugins\$(TargetName)" /h/i/c/k/e/r/y
 
 </PostBuildEvent>
   </PropertyGroup>
