@@ -5,7 +5,7 @@ namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
     public class ProjectPriorityRule : ScoringRule {
 
         public const string RULE_NAME = "Project Priority";
-        public const double DEFAULT_WEIGHT = 0.5;
+        public const double DEFAULT_WEIGHT = .5 * WEIGHT_SCALE;
 
         public override string Name { get { return RULE_NAME; } }
         public override double DefaultWeight { get { return DEFAULT_WEIGHT; } }

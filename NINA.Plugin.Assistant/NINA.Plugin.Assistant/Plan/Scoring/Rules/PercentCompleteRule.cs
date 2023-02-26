@@ -3,7 +3,7 @@
     public class PercentCompleteRule : ScoringRule {
 
         public const string RULE_NAME = "Percent Complete";
-        public const double DEFAULT_WEIGHT = 0.5;
+        public const double DEFAULT_WEIGHT = .5 * WEIGHT_SCALE;
 
         public override string Name { get { return RULE_NAME; } }
         public override double DefaultWeight { get { return DEFAULT_WEIGHT; } }

@@ -449,7 +449,7 @@
                                         <Binding.ValidationRules>
                                             <rules:DoubleRangeRule>
                                                 <rules:DoubleRangeRule.ValidRange>
-                                                    <rules:DoubleRangeChecker Maximum="1" Minimum="0" />
+                                                    <rules:DoubleRangeChecker Maximum="100" Minimum="0" />
                                                 </rules:DoubleRangeRule.ValidRange>
                                             </rules:DoubleRangeRule>
                                         </Binding.ValidationRules>

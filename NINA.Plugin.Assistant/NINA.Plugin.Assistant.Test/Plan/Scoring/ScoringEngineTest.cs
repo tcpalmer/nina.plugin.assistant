@@ -20,7 +20,7 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring {
             Mock<IProfile> profileMock = new Mock<IProfile>();
 
             Dictionary<string, double> ruleWeights = new Dictionary<string, double>();
-            ruleWeights.Add("TestRule1", 0.75);
+            ruleWeights.Add("TestRule1", 75);
             List<IScoringRule> rules = new List<IScoringRule>();
             rules.Add(new TestRule("TestRule1", 0.5));
 
@@ -37,8 +37,8 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring {
             Mock<IProfile> profileMock = new Mock<IProfile>();
 
             Dictionary<string, double> ruleWeights = new Dictionary<string, double>();
-            ruleWeights.Add("TestRule1", 1);
-            ruleWeights.Add("TestRule2", 0.5);
+            ruleWeights.Add("TestRule1", 100);
+            ruleWeights.Add("TestRule2", 50);
             List<IScoringRule> rules = new List<IScoringRule>();
             rules.Add(new TestRule("TestRule1", 1));
             rules.Add(new TestRule("TestRule2", 0.5));
