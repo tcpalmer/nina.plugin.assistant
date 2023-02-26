@@ -13,6 +13,8 @@ namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
 
     public abstract class ScoringRule : IScoringRule {
 
+        public const double WEIGHT_SCALE = 100;
+
         public abstract string Name { get; }
         public abstract double DefaultWeight { get; }
 

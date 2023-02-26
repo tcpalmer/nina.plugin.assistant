@@ -37,7 +37,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public RuleWeight() { }
 
         public RuleWeight(string name, double weight) {
-            Assert.isTrue(weight >= 0 && weight <= 1, "weight must be 0-1");
+            Assert.isTrue(weight >= 0 && weight <= 100, "weight must be 0-100");
 
             Name = name;
             Weight = weight;
