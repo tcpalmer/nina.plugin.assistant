@@ -6,8 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:nrules="clr-namespace:NINA.Core.Utility.ValidationRules;assembly=NINA.Core"
     xmlns:ninactrl="clr-namespace:NINACustomControlLibrary;assembly=NINACustomControlLibrary"
+    xmlns:nrules="clr-namespace:NINA.Core.Utility.ValidationRules;assembly=NINA.Core"
     xmlns:rules="clr-namespace:Assistant.NINAPlugin.Controls.ValidationRules"
     xmlns:uc="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     xmlns:util="clr-namespace:NINA.Core.Utility;assembly=NINA.Core"
@@ -463,7 +463,10 @@
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ninactrl:HintTextBox Width="Auto" HintText="(Camera)" IsEnabled="False">
+                            <ninactrl:HintTextBox
+                                Width="Auto"
+                                HintText="(Camera)"
+                                IsEnabled="False">
                                 <ninactrl:HintTextBox.Text>
                                     <Binding
                                         Converter="{StaticResource MinusOneToEmptyStringConverter}"
@@ -501,7 +504,10 @@
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ninactrl:HintTextBox Width="Auto" HintText="(Camera)" IsEnabled="False">
+                            <ninactrl:HintTextBox
+                                Width="Auto"
+                                HintText="(Camera)"
+                                IsEnabled="False">
                                 <ninactrl:HintTextBox.Text>
                                     <Binding
                                         Converter="{StaticResource MinusOneToEmptyStringConverter}"
@@ -555,7 +561,10 @@
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ninactrl:HintTextBox Width="Auto" HintText="(Camera)" IsEnabled="False">
+                            <ninactrl:HintTextBox
+                                Width="Auto"
+                                HintText="(Camera)"
+                                IsEnabled="False">
                                 <ninactrl:HintTextBox.Text>
                                     <Binding
                                         Converter="{StaticResource MinusOneToEmptyStringConverter}"
