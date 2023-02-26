@@ -7,6 +7,7 @@
     xmlns:local="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:nrules="clr-namespace:NINA.Core.Utility.ValidationRules;assembly=NINA.Core"
+    xmlns:ninactrl="clr-namespace:NINACustomControlLibrary;assembly=NINACustomControlLibrary"
     xmlns:rules="clr-namespace:Assistant.NINAPlugin.Controls.ValidationRules"
     xmlns:uc="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     xmlns:util="clr-namespace:NINA.Core.Utility;assembly=NINA.Core"
@@ -458,17 +459,12 @@
 
                 <DataGridTemplateColumn Width="*" CanUserSort="False">
                     <DataGridTemplateColumn.Header>
-                        <TextBlock Text="Gain" ToolTip="Camera gain, leave blank for default" />
+                        <TextBlock Text="Gain" ToolTip="Camera gain, leave blank for camera default" />
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Width="Auto" Text="{Binding Gain, Converter={StaticResource MinusOneToEmptyStringConverter}}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <TextBox Width="Auto">
-                                <TextBox.Text>
+                            <ninactrl:HintTextBox Width="Auto" HintText="(Camera)" IsEnabled="False">
+                                <ninactrl:HintTextBox.Text>
                                     <Binding
                                         Converter="{StaticResource MinusOneToEmptyStringConverter}"
                                         Path="Gain"
@@ -477,25 +473,36 @@
                                             <rules:NullableIntegerRule />
                                         </Binding.ValidationRules>
                                     </Binding>
-                                </TextBox.Text>
-                            </TextBox>
+                                </ninactrl:HintTextBox.Text>
+                            </ninactrl:HintTextBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ninactrl:HintTextBox Width="Auto" HintText="(Camera)">
+                                <ninactrl:HintTextBox.Text>
+                                    <Binding
+                                        Converter="{StaticResource MinusOneToEmptyStringConverter}"
+                                        Path="Gain"
+                                        UpdateSourceTrigger="LostFocus">
+                                        <Binding.ValidationRules>
+                                            <rules:NullableIntegerRule />
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </ninactrl:HintTextBox.Text>
+                            </ninactrl:HintTextBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
 
                 <DataGridTemplateColumn Width="*" CanUserSort="False">
                     <DataGridTemplateColumn.Header>
-                        <TextBlock Text="Offset" ToolTip="Camera offset, leave blank for default" />
+                        <TextBlock Text="Offset" ToolTip="Camera offset, leave blank for camera default" />
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Width="Auto" Text="{Binding Offset, Converter={StaticResource MinusOneToEmptyStringConverter}}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <TextBox Width="Auto">
-                                <TextBox.Text>
+                            <ninactrl:HintTextBox Width="Auto" HintText="(Camera)" IsEnabled="False">
+                                <ninactrl:HintTextBox.Text>
                                     <Binding
                                         Converter="{StaticResource MinusOneToEmptyStringConverter}"
                                         Path="Offset"
@@ -504,8 +511,24 @@
                                             <rules:NullableIntegerRule />
                                         </Binding.ValidationRules>
                                     </Binding>
-                                </TextBox.Text>
-                            </TextBox>
+                                </ninactrl:HintTextBox.Text>
+                            </ninactrl:HintTextBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ninactrl:HintTextBox Width="Auto" HintText="(Camera)">
+                                <ninactrl:HintTextBox.Text>
+                                    <Binding
+                                        Converter="{StaticResource MinusOneToEmptyStringConverter}"
+                                        Path="Offset"
+                                        UpdateSourceTrigger="LostFocus">
+                                        <Binding.ValidationRules>
+                                            <rules:NullableIntegerRule />
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </ninactrl:HintTextBox.Text>
+                            </ninactrl:HintTextBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
@@ -528,17 +551,12 @@
 
                 <DataGridTemplateColumn Width="*" CanUserSort="False">
                     <DataGridTemplateColumn.Header>
-                        <TextBlock Text="Readout" ToolTip="Camera readout mode, leave blank for default" />
+                        <TextBlock Text="Readout" ToolTip="Camera readout mode, leave blank for camera default" />
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Width="Auto" Text="{Binding ReadoutMode, Converter={StaticResource MinusOneToEmptyStringConverter}}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <TextBox Width="Auto">
-                                <TextBox.Text>
+                            <ninactrl:HintTextBox Width="Auto" HintText="(Camera)" IsEnabled="False">
+                                <ninactrl:HintTextBox.Text>
                                     <Binding
                                         Converter="{StaticResource MinusOneToEmptyStringConverter}"
                                         Path="ReadoutMode"
@@ -547,8 +565,24 @@
                                             <rules:NullableIntegerRule />
                                         </Binding.ValidationRules>
                                     </Binding>
-                                </TextBox.Text>
-                            </TextBox>
+                                </ninactrl:HintTextBox.Text>
+                            </ninactrl:HintTextBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ninactrl:HintTextBox Width="Auto" HintText="(Camera)">
+                                <ninactrl:HintTextBox.Text>
+                                    <Binding
+                                        Converter="{StaticResource MinusOneToEmptyStringConverter}"
+                                        Path="ReadoutMode"
+                                        UpdateSourceTrigger="LostFocus">
+                                        <Binding.ValidationRules>
+                                            <rules:NullableIntegerRule />
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </ninactrl:HintTextBox.Text>
+                            </ninactrl:HintTextBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
