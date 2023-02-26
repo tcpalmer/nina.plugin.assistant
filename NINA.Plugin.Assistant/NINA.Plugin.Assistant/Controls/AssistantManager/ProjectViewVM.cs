@@ -1,10 +1,12 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Util;
+using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
@@ -164,8 +166,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private void Delete(object obj) {
             string message = $"Delete project '{ProjectProxy.Project.Name}' and any associated targets?  This cannot be undone.";
-            ConfirmationMessageBox messageBox = new ConfirmationMessageBox(message, "Delete");
-            if (messageBox.Show()) {
+            if (MyMessageBox.Show(message, "Delete Project?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
                 managerVM.DeleteProject(ProjectProxy.Proxy);
             }
         }

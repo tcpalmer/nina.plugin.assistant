@@ -2,6 +2,7 @@
 using NINA.Astrometry;
 using NINA.Core.Enum;
 using NINA.Core.Model.Equipment;
+using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
 using NINA.Profile.Interfaces;
@@ -11,6 +12,7 @@ using NINA.WPF.Base.ViewModel;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
@@ -234,8 +236,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private void Delete(object obj) {
             string message = $"Delete target '{TargetProxy.Target.Name}'?  This cannot be undone.";
-            ConfirmationMessageBox messageBox = new ConfirmationMessageBox(message, "Delete");
-            if (messageBox.Show()) {
+            if (MyMessageBox.Show(message, "Delete Target?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
                 managerVM.DeleteTarget(TargetProxy.Proxy);
             }
         }
@@ -262,8 +263,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ExposurePlan exposurePlan = TargetProxy.Original.ExposurePlans.Where(p => p.Id == item.Id).FirstOrDefault();
             if (exposurePlan != null) {
                 string message = $"Delete exposure plan for '{exposurePlan.FilterName}' filter?  This cannot be undone.";
-                ConfirmationMessageBox messageBox = new ConfirmationMessageBox(message, "Delete");
-                if (messageBox.Show()) {
+                if (MyMessageBox.Show(message, "Delete Exposure Plan?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
                     Target updatedTarget = managerVM.DeleteExposurePlan(TargetProxy.Original, exposurePlan);
                     if (updatedTarget != null) {
                         TargetProxy = new TargetProxy(updatedTarget);
