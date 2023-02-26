@@ -7,13 +7,13 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("TBD ...")]
 [assembly: AssemblyCompany("Tom Palmer @tcpalmer")]
 [assembly: AssemblyProduct("Assistant.NINAPlugin")]
-[assembly: AssemblyCopyright("Copyright © 2022")]
+[assembly: AssemblyCopyright("Copyright © 2023")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: AssemblyVersion("0.0.0.2")]
-[assembly: AssemblyFileVersion("0.0.0.2")]
+[assembly: AssemblyVersion("0.0.0.3")]
+[assembly: AssemblyFileVersion("0.0.0.3")]
 
 // The minimum Version of N.I.N.A. that this plugin is compatible with
 [assembly: AssemblyMetadata("MinimumApplicationVersion", "2.1.0.9001")]

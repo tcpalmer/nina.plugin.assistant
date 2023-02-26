@@ -23,6 +23,10 @@ namespace Assistant.NINAPlugin {
 
         private IPluginOptionsAccessor pluginSettings;
         private IProfileService profileService;
+        private IApplicationMediator applicationMediator;
+        private IFramingAssistantVM framingAssistantVM;
+        private IDeepSkyObjectSearchVM deepSkyObjectSearchVM;
+        private IPlanetariumFactory planetariumFactory;
 
         [ImportingConstructor]
         public AssistantPlugin(IProfileService profileService,
@@ -39,6 +43,11 @@ namespace Assistant.NINAPlugin {
 
             this.pluginSettings = new PluginOptionsAccessor(profileService, Guid.Parse(this.Identifier));
             this.profileService = profileService;
+            this.applicationMediator = applicationMediator;
+            this.framingAssistantVM = framingAssistantVM;
+            this.deepSkyObjectSearchVM = deepSkyObjectSearchVM;
+            this.planetariumFactory = planetariumFactory;
+
             profileService.ProfileChanged += ProfileService_ProfileChanged;
 
             InitPluginHome();
@@ -73,9 +82,8 @@ namespace Assistant.NINAPlugin {
         }
 
         private void ProfileService_ProfileChanged(object sender, EventArgs e) {
-
-            // TODO: fix
-            //RaisePropertyChanged(nameof(PROPERTY_THAT_IS_SAVED_IN_PROFILE));
+            AssistantManagerVM = new AssistantManagerVM(profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory);
+            RaisePropertyChanged(nameof(AssistantManagerVM));
 
             if (profileService.ActiveProfile != null) {
                 profileService.ActiveProfile.AstrometrySettings.PropertyChanged -= ProfileService_ProfileChanged;
