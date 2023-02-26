@@ -309,6 +309,10 @@
     <Compile Include="Controls\AssistantManager\AssistantTreeViewVM.cs" />
     <Compile Include="Controls\AssistantManager\BindingHelper.cs" />
     <Compile Include="Controls\AssistantManager\ConfirmationMessageBox.cs" />
+    <Compile Include="Controls\AssistantManager\DocumentationLink.xaml.cs">
+      <DependentUpon>DocumentationLink.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AssistantManager\DocumentationLinkVM.cs" />
     <Compile Include="Controls\AssistantManager\EnumBindingSourceExtension.cs" />
     <Compile Include="Controls\AssistantManager\FilterPrefView.xaml.cs">
       <DependentUpon>FilterPrefView.xaml</DependentUpon>
@@ -409,6 +413,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\AssistantManager\AssistantTreeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\AssistantManager\DocumentationLink.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
