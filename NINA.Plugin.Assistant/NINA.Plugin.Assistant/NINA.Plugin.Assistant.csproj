@@ -333,6 +333,7 @@
     <Compile Include="Controls\AssistantManager\ProjectViewVM.cs" />
     <Compile Include="Controls\Converters\AllowEmptyConverter.cs" />
     <Compile Include="Controls\Converters\AltitudeChoicesConverter.cs" />
+    <Compile Include="Controls\Converters\PercentDisplayConverter.cs" />
     <Compile Include="Controls\Converters\DegreesDisplayConverter.cs" />
     <Compile Include="Controls\Converters\ImagingMinutesConverter.cs" />
     <Compile Include="Controls\Converters\StatusConverter.cs" />

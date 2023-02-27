@@ -11,6 +11,7 @@
     <nc:InverseBooleanToVisibilityCollapsedConverter x:Key="InverseBooleanToVisibilityCollapsedConverter" />
     <nc:MinusOneToEmptyStringConverter x:Key="MinusOneToEmptyStringConverter" />
     <ac:DegreesDisplayConverter x:Key="DegreesDisplayConverter" />
+    <ac:PercentDisplayConverter x:Key="PercentDisplayConverter" />
     <ac:MinutesToHMConverter x:Key="MinutesToHMConverter" />
     <ac:StatusConverter x:Key="StatusConverter" />
     <ac:StatusMarkColorConverter x:Key="StatusMarkColorConverter" />
