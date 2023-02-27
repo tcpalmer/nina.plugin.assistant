@@ -254,8 +254,14 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                             TreeDataItem targetItem = new TreeDataItem(TreeDataType.Target, target.Name, target, projectItem);
                             projectItem.Items.Add(targetItem);
                         }
+
+                        projectItem.SortChildren();
                     }
+
+                    profileItem.SortChildren();
                 }
+
+                profilesFolder.SortChildren();
             }
 
             return rootList;
@@ -280,6 +286,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         profileItem.Items.Add(filterPrefItem);
                     }
                 }
+
+                profilesFolder.SortChildren();
             }
 
             return rootList;
@@ -324,7 +332,10 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             using (var context = new AssistantDatabaseInteraction().GetContext()) {
                 if (context.SaveProject(project) != null) {
                     activeTreeDataItem.Data = project;
-                    activeTreeDataItem.Header = project.Name;
+                    if (activeTreeDataItem.Header.ToString() != project.Name) {
+                        activeTreeDataItem.Header = project.Name;
+                        activeTreeDataItem.SortName = project.Name;
+                    }
                 }
                 else {
                     Notification.ShowError("Failed to save Assistant Project (see log for details)");
@@ -396,7 +407,10 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             using (var context = new AssistantDatabaseInteraction().GetContext()) {
                 if (context.SaveTarget(target) != null) {
                     activeTreeDataItem.Data = target;
-                    activeTreeDataItem.Header = target.Name;
+                    if (activeTreeDataItem.Header.ToString() != target.Name) {
+                        activeTreeDataItem.Header = target.Name;
+                        activeTreeDataItem.SortName = target.Name;
+                    }
 
                     // Refresh the parent project
                     TreeDataItem parentItem = activeTreeDataItem.TreeParent;
@@ -490,10 +504,11 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         ProjectRoot, FilterPrefRoot, ProjectProfile, FilterPrefProfile, Project, Target, FilterPref
     }
 
-    public class TreeDataItem : TreeViewItem {
+    public class TreeDataItem : TreeViewItem, IComparable {
 
         public TreeDataType Type { get; }
         public TreeDataItem TreeParent { get; }
+        public string SortName { get; set; }
         public object Data { get; set; }
 
         public TreeDataItem(TreeDataType type, string name, TreeDataItem parent) : this(type, name, null, parent) { }
@@ -502,6 +517,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             Type = type;
             TreeParent = parent;
             Data = data;
+            SortName = name;
             Header = name;
         }
 
@@ -512,6 +528,35 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
 
             return item;
+        }
+
+        public int CompareTo(object obj) {
+            if (obj == null) {
+                return 1;
+            }
+
+            TreeDataItem other = obj as TreeDataItem;
+            return SortName.CompareTo(other.SortName);
+        }
+
+        public void SortChildren() {
+            if (Items?.Count == 0) {
+                return;
+            }
+
+            // This approach works to sort the tree initially.  However, it doesn't when trying to use it to resort
+            // when a new item is added or item is renamed.  I think because rebuilding the list this way horks
+            // the collection for subsequent view access.  I tried to go down the road of getting the ItemCollection
+            // and playing nice with sorting via SortDescriptions but that didn't seem to work for TreeView.
+
+            List<TreeDataItem> list = new List<TreeDataItem>(Items.Count);
+            foreach (TreeDataItem item in Items) {
+                list.Add(item);
+            }
+
+            list.Sort();
+            Items.Clear();
+            list.ForEach(i => Items.Add(i));
         }
 
         public static void VisitAll(TreeDataItem item, Action<TreeDataItem> action) {
