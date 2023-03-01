@@ -6,18 +6,42 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:ninactrl="clr-namespace:NINACustomControlLibrary;assembly=NINACustomControlLibrary"
     xmlns:ns="clr-namespace:NINA.Core.Locale;assembly=NINA.Core"
-    xmlns:oxy="http://oxyplot.org/wpf"
     xmlns:rules="clr-namespace:NINA.Core.Utility.ValidationRules;assembly=NINA.Core"
-    xmlns:uc="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
+    xmlns:am="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
+    xmlns:ai="clr-namespace:Assistant.NINAPlugin.Controls.AcquiredImages"
     xmlns:util="clr-namespace:NINA.Core.Utility;assembly=NINA.Core">
 
     <DataTemplate x:Key="Sequence Assistant_Options">
         <StackPanel DataContext="{Binding}" Orientation="Vertical">
-            <TextBlock
-                Margin="0,0,0,10"
-                VerticalAlignment="Center"
-                Text="Manage the Assistant database of projects, targets, and exposure plans." />
-            <uc:AssistantManagerView DataContext="{Binding AssistantManagerVM}" />
+
+            <Expander
+                Margin="0,10,0,10"
+                ExpandDirection="Down"
+                IsExpanded="False">
+                <Expander.Header>
+                    <TextBlock
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Text="Manage Projects Database"
+                        ToolTip="Manage your projects, targets, and exposure plans" />
+                </Expander.Header>
+                <am:AssistantManagerView DataContext="{Binding AssistantManagerVM}" />
+            </Expander>
+
+            <Expander
+                Margin="0,0,0,20"
+                ExpandDirection="Down"
+                IsExpanded="False">
+                <Expander.Header>
+                    <TextBlock
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Text="View Acquired Image Information"
+                        ToolTip="View details on acquired images" />
+                </Expander.Header>
+                <ai:AcquiredImagesManagerView DataContext="{Binding AcquiredImagesManagerViewVM}"/>
+            </Expander>
+
         </StackPanel>
     </DataTemplate>
 </ResourceDictionary>

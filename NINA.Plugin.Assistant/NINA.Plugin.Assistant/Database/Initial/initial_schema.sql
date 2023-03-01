@@ -69,15 +69,26 @@ CREATE TABLE IF NOT EXISTS `ruleweight` (
 	`name`			TEXT NOT NULL,
     `weight`		REAL NOT NULL,
 	`projectid`		INTEGER,
-	FOREIGN KEY(`projectId`) REFERENCES `project`(`Id`)
+	FOREIGN KEY(`projectId`) REFERENCES `project`(`Id`),
 	PRIMARY KEY(`Id`)
 );
 
 CREATE TABLE IF NOT EXISTS `acquiredimage` (
 	`Id`			INTEGER NOT NULL,
+	`projectId`		INTEGER NOT NULL,
 	`targetId`		INTEGER NOT NULL,
 	`acquireddate`	INTEGER,
 	`filtername`	TEXT NOT NULL,
+	`accepted`		INTEGER NOT NULL,
     `metadata`		TEXT NOT NULL,
+	PRIMARY KEY(`Id`)
+);
+
+CREATE TABLE IF NOT EXISTS `imagedata` (
+	`Id`			INTEGER NOT NULL,
+	`tag`			TEXT,
+	`imagedata`		BLOB,
+	`acquiredimageid`	INTEGER,
+	FOREIGN KEY(`acquiredImageId`) REFERENCES `acquiredimage`(`Id`),
 	PRIMARY KEY(`Id`)
 );

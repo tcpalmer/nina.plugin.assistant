@@ -96,6 +96,12 @@
     <Reference Include="K4os.Compression.LZ4, Version=1.2.16.0, Culture=neutral, PublicKeyToken=2186fa9121ef231d, processorArchitecture=MSIL">
       <HintPath>..\packages\K4os.Compression.LZ4.1.2.16\lib\net46\K4os.Compression.LZ4.dll</HintPath>
     </Reference>
+    <Reference Include="LinqKit, Version=1.2.3.0, Culture=neutral, PublicKeyToken=bc217f8844052a91, processorArchitecture=MSIL">
+      <HintPath>..\packages\LinqKit.1.2.3\lib\net45\LinqKit.dll</HintPath>
+    </Reference>
+    <Reference Include="LinqKit.Core, Version=1.2.3.0, Culture=neutral, PublicKeyToken=bc217f8844052a91, processorArchitecture=MSIL">
+      <HintPath>..\packages\LinqKit.Core.1.2.3\lib\net45\LinqKit.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.6.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
@@ -293,6 +299,10 @@
     <Compile Include="Astrometry\DSORiseAndSet.cs" />
     <Compile Include="Astrometry\HorizonDefinition.cs" />
     <Compile Include="Astrometry\HorizontalCoordinate.cs" />
+    <Compile Include="Controls\AcquiredImages\AcquiredImagesManagerView.xaml.cs">
+      <DependentUpon>AcquiredImagesManagerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AcquiredImages\AcquiredImagesManagerViewVM.cs" />
     <Compile Include="Controls\AssistantManager\ActionMenuBar.xaml.cs">
       <DependentUpon>ActionMenuBar.xaml</DependentUpon>
     </Compile>
@@ -352,6 +362,7 @@
       <DependentUpon>SQL.resx</DependentUpon>
     </Compile>
     <Compile Include="Database\Schema\AcquiredImage.cs" />
+    <Compile Include="Database\Schema\ImageData.cs" />
     <Compile Include="Database\Schema\ExposurePlan.cs" />
     <Compile Include="Database\Schema\FilterPreference.cs" />
     <Compile Include="Database\Schema\ImageMetadata.cs" />
@@ -401,6 +412,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Controls\AcquiredImages\AcquiredImagesManagerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\AssistantManager\ActionMenuBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -506,6 +521,8 @@
 
       echo "Copying $(PlatformName) $(TargetFileName)"
       xcopy "$(TargetPath)" "%25localappdata%25\NINA\Plugins\$(TargetName)" /h/i/c/k/e/r/y
+      xcopy "$(TargetDir)LinqKit.Core.dll" "%25localappdata%25\NINA\Plugins\$(TargetName)" /h/i/c/k/e/r/y
+      xcopy "$(TargetDir)LinqKit.dll" "%25localappdata%25\NINA\Plugins\$(TargetName)" /h/i/c/k/e/r/y
 
 </PostBuildEvent>
   </PropertyGroup>
