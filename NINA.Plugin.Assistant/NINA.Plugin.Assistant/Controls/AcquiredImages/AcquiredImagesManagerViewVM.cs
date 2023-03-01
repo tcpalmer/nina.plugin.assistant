@@ -214,27 +214,6 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
         public AcquiredImageVM(AcquiredImage acquiredImage) {
             this.acquiredImage = acquiredImage;
-            this.acquiredImage.Metadata = new ImageMetadata {
-                FileName = @"c:\foooo\baaar\baaaaas\fooster\yoydyne.fits",
-                ExposureDuration = 180,
-                Gain = 10,
-                Offset = 121,
-                Binning = "2x2",
-                DetectedStars = 567,
-                HFR = 2.345678901,
-                HFRStDev = 0.1234567,
-                ADUMin = 34,
-                ADUMax = 65536,
-                ADUMean = 12345,
-                ADUMedian = 12398,
-                ADUStDev = 1.2345678901,
-                GuidingRMS = 3.4567890123,
-                GuidingRMSArcSec = 4.5678901234,
-                GuidingRMSRA = 5.6789012345,
-                GuidingRMSRAArcSec = 6.7890123456,
-                GuidingRMSDEC = 7.678901234567,
-                GuidingRMSDECArcSec = 8.789012345678,
-            };
 
             AssistantDatabaseInteraction database = new AssistantDatabaseInteraction();
             using (var context = database.GetContext()) {
