@@ -52,9 +52,6 @@ namespace Assistant.NINAPlugin {
             profileService.ProfileChanged += ProfileService_ProfileChanged;
 
             InitPluginHome();
-
-            AssistantManagerVM = new AssistantManagerVM(profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory);
-            AcquiredImagesManagerViewVM = new AcquiredImagesManagerViewVM(profileService);
         }
 
         private void InitPluginHome() {
@@ -66,12 +63,46 @@ namespace Assistant.NINAPlugin {
         }
 
         private AssistantManagerVM assistantManagerVM;
-        public AssistantManagerVM AssistantManagerVM { get => assistantManagerVM; set => assistantManagerVM = value; }
+        public AssistantManagerVM AssistantManagerVM {
+            get => assistantManagerVM;
+            set {
+                assistantManagerVM = value;
+                RaisePropertyChanged(nameof(AssistantManagerVM));
+            }
+        }
 
         private AcquiredImagesManagerViewVM acquiredImagesManagerViewVM;
-        public AcquiredImagesManagerViewVM AcquiredImagesManagerViewVM { get => acquiredImagesManagerViewVM; set => acquiredImagesManagerViewVM = value; }
+        public AcquiredImagesManagerViewVM AcquiredImagesManagerViewVM {
+            get => acquiredImagesManagerViewVM;
+            set {
+                acquiredImagesManagerViewVM = value;
+                RaisePropertyChanged(nameof(AcquiredImagesManagerViewVM));
+            }
+        }
 
-        private void ProcessExited(object sender, System.EventArgs e) {
+        private bool assistantManagerIsExpanded = false;
+        public bool AssistantManagerIsExpanded {
+            get { return assistantManagerIsExpanded; }
+            set {
+                assistantManagerIsExpanded = value;
+                if (value && AssistantManagerVM == null) {
+                    AssistantManagerVM = new AssistantManagerVM(profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory);
+                }
+            }
+        }
+
+        private bool acquiredImagesManagerIsExpanded = false;
+        public bool AcquiredImagesManagerIsExpanded {
+            get { return acquiredImagesManagerIsExpanded; }
+            set {
+                acquiredImagesManagerIsExpanded = value;
+                if (value && AcquiredImagesManagerViewVM == null) {
+                    AcquiredImagesManagerViewVM = new AcquiredImagesManagerViewVM(profileService);
+                }
+            }
+        }
+
+        private void ProcessExited(object sender, EventArgs e) {
             Logger.Warning($"process exited");
         }
 

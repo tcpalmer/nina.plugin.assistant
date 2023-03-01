@@ -150,38 +150,44 @@
                 <DataTemplate>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Padding="5">
+                        <Border Grid.Column="0" Padding="10">
                             <StackPanel Orientation="Vertical">
                                 <TextBlock
                                     Margin="0,3,0,0"
                                     VerticalAlignment="Center"
-                                    Text="Acquired: " />
+                                    Text="Acquired" />
                                 <TextBlock
                                     Margin="0,3,0,0"
                                     VerticalAlignment="Center"
-                                    Text="Project: " />
+                                    Text="Project" />
                                 <TextBlock
                                     Margin="0,3,0,0"
                                     VerticalAlignment="Center"
-                                    Text="Target: " />
+                                    Text="Target" />
                                 <TextBlock
                                     Margin="0,3,0,0"
                                     VerticalAlignment="Center"
-                                    Text="Filter: " />
+                                    Text="Exposure (secs)" />
                                 <TextBlock
                                     Margin="0,3,0,0"
                                     VerticalAlignment="Center"
-                                    Text="Star Count: " />
-                                <TextBlock
-                                    Margin="0,3,0,0"
-                                    VerticalAlignment="Center"
-                                    Text="HFR: " />
+                                    Text="Image File" />
                             </StackPanel>
                         </Border>
-                        <Border Grid.Column="1" Padding="5">
+                        <Border
+                            Grid.Column="1"
+                            Padding="10"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="0,0,2,0">
                             <StackPanel Orientation="Vertical">
                                 <TextBlock
                                     Margin="0,3,0,0"
@@ -198,7 +204,65 @@
                                 <TextBlock
                                     Margin="0,3,0,0"
                                     VerticalAlignment="Center"
+                                    Text="{Binding ExposureDuration}" />
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden">
+                                    <TextBlock
+                                        Margin="0,3,0,0"
+                                        VerticalAlignment="Center"
+                                        Text="{Binding FileName}" />
+                                </ScrollViewer>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Padding="10">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="Filter" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="Gain" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="Offset" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="Binning" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="Stars" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="HFR" />
+                            </StackPanel>
+                        </Border>
+                        <Border
+                            Grid.Column="3"
+                            Padding="10"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="0,0,2,0">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
                                     Text="{Binding FilterName}" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding Gain}" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding Offset}" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding Binning}" />
                                 <TextBlock
                                     Margin="0,3,0,0"
                                     VerticalAlignment="Center"
@@ -207,6 +271,118 @@
                                     Margin="0,3,0,0"
                                     VerticalAlignment="Center"
                                     Text="{Binding HFR}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="4" Padding="10">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="ADU Min" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="ADU Max" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="ADU Mean" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="ADU Median" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="ADU Std Dev" />
+                            </StackPanel>
+                        </Border>
+                        <Border
+                            Grid.Column="5"
+                            Padding="10"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="0,0,2,0">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding ADUMin}" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding ADUMax}" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding ADUMean}" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding ADUMedian}" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding ADUStDev}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="6" Padding="10">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="Guiding RMS" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="Guiding RMS &quot;" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="Guiding RMS RA" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="Guiding RMS RA &quot;" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="Guiding RMS Dec" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="Guiding RMS Dec &quot;" />
+                            </StackPanel>
+                        </Border>
+                        <Border
+                            Grid.Column="7"
+                            Padding="10"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="0,0,2,0">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding GuidingRMS}" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding GuidingRMSArcSec}" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding GuidingRMSRA}" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding GuidingRMSRAArcSec}" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding GuidingRMSDEC}" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding GuidingRMSDECArcSec}" />
                             </StackPanel>
                         </Border>
                     </Grid>
