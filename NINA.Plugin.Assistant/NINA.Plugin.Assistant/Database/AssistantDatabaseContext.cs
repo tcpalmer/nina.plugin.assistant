@@ -20,6 +20,7 @@ namespace Assistant.NINAPlugin.Database {
         public DbSet<ExposurePlan> ExposurePlanSet { get; set; }
         public DbSet<FilterPreference> FilterPreferenceSet { get; set; }
         public DbSet<AcquiredImage> AcquiredImageSet { get; set; }
+        public DbSet<ImageData> ImageDataSet { get; set; }
 
         public AssistantDatabaseContext(string connectionString) : base(new SQLiteConnection() { ConnectionString = connectionString }, true) {
             Configuration.LazyLoadingEnabled = false;
@@ -99,6 +100,16 @@ namespace Assistant.NINAPlugin.Database {
                 p.FilterName == filterName)
               .OrderByDescending(p => p.acquiredDate);
             return images.ToList();
+        }
+
+        public ImageData GetImageData(int acquiredImageId) {
+            return ImageDataSet.Where(d => d.AcquiredImageId == acquiredImageId).FirstOrDefault();
+        }
+
+        public ImageData GetImageData(int acquiredImageId, string tag) {
+            return ImageDataSet.Where(d =>
+                d.AcquiredImageId == acquiredImageId &&
+                d.tag == tag).FirstOrDefault();
         }
 
         public Project AddNewProject(Project project) {

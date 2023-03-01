@@ -1,4 +1,5 @@
-﻿using Assistant.NINAPlugin.Controls.AssistantManager;
+﻿using Assistant.NINAPlugin.Controls.AcquiredImages;
+using Assistant.NINAPlugin.Controls.AssistantManager;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
 using NINA.Plugin;
@@ -51,8 +52,6 @@ namespace Assistant.NINAPlugin {
             profileService.ProfileChanged += ProfileService_ProfileChanged;
 
             InitPluginHome();
-
-            AssistantManagerVM = new AssistantManagerVM(profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory);
         }
 
         private void InitPluginHome() {
@@ -64,9 +63,46 @@ namespace Assistant.NINAPlugin {
         }
 
         private AssistantManagerVM assistantManagerVM;
-        public AssistantManagerVM AssistantManagerVM { get => assistantManagerVM; set => assistantManagerVM = value; }
+        public AssistantManagerVM AssistantManagerVM {
+            get => assistantManagerVM;
+            set {
+                assistantManagerVM = value;
+                RaisePropertyChanged(nameof(AssistantManagerVM));
+            }
+        }
 
-        private void ProcessExited(object sender, System.EventArgs e) {
+        private AcquiredImagesManagerViewVM acquiredImagesManagerViewVM;
+        public AcquiredImagesManagerViewVM AcquiredImagesManagerViewVM {
+            get => acquiredImagesManagerViewVM;
+            set {
+                acquiredImagesManagerViewVM = value;
+                RaisePropertyChanged(nameof(AcquiredImagesManagerViewVM));
+            }
+        }
+
+        private bool assistantManagerIsExpanded = false;
+        public bool AssistantManagerIsExpanded {
+            get { return assistantManagerIsExpanded; }
+            set {
+                assistantManagerIsExpanded = value;
+                if (value && AssistantManagerVM == null) {
+                    AssistantManagerVM = new AssistantManagerVM(profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory);
+                }
+            }
+        }
+
+        private bool acquiredImagesManagerIsExpanded = false;
+        public bool AcquiredImagesManagerIsExpanded {
+            get { return acquiredImagesManagerIsExpanded; }
+            set {
+                acquiredImagesManagerIsExpanded = value;
+                if (value && AcquiredImagesManagerViewVM == null) {
+                    AcquiredImagesManagerViewVM = new AcquiredImagesManagerViewVM(profileService);
+                }
+            }
+        }
+
+        private void ProcessExited(object sender, EventArgs e) {
             Logger.Warning($"process exited");
         }
 
@@ -83,7 +119,10 @@ namespace Assistant.NINAPlugin {
 
         private void ProfileService_ProfileChanged(object sender, EventArgs e) {
             AssistantManagerVM = new AssistantManagerVM(profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory);
+            AcquiredImagesManagerViewVM = new AcquiredImagesManagerViewVM(profileService);
+
             RaisePropertyChanged(nameof(AssistantManagerVM));
+            RaisePropertyChanged(nameof(AcquiredImagesManagerViewVM));
 
             if (profileService.ActiveProfile != null) {
                 profileService.ActiveProfile.AstrometrySettings.PropertyChanged -= ProfileService_ProfileChanged;

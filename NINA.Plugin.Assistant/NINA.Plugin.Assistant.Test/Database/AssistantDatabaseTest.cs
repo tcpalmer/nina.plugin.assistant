@@ -142,10 +142,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 context.GetAcquiredImages(1, "nada").Count.Should().Be(0);
 
                 ImageSavedEventArgs msg = PlanMocks.GetImageSavedEventArgs(markDate.AddDays(1), "Ha");
-                context.AcquiredImageSet.Add(new AcquiredImage(1, markDate.AddDays(1), "Ha", new ImageMetadata(msg)));
-                context.AcquiredImageSet.Add(new AcquiredImage(1, markDate.AddDays(1).AddMinutes(1), "Ha", new ImageMetadata(msg)));
-                context.AcquiredImageSet.Add(new AcquiredImage(1, markDate.AddDays(1).AddMinutes(2), "Ha", new ImageMetadata(msg)));
-                context.AcquiredImageSet.Add(new AcquiredImage(1, markDate.AddDays(1).AddMinutes(3), "Ha", new ImageMetadata(msg)));
+                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1), "Ha", true, new ImageMetadata(msg)));
+                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1).AddMinutes(1), "Ha", true, new ImageMetadata(msg)));
+                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1).AddMinutes(2), "Ha", true, new ImageMetadata(msg)));
+                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1).AddMinutes(3), "Ha", true, new ImageMetadata(msg)));
                 context.SaveChanges();
 
                 List<AcquiredImage> ai = context.GetAcquiredImages(1, "Ha");
@@ -160,6 +160,33 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 ai[1].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(2).TimeOfDay);
                 ai[2].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(1).TimeOfDay);
                 ai[3].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(0).TimeOfDay);
+
+                // Associated image data
+                byte[] data1 = new byte[] { 0x21, 0x22, 0x23, 0x24, 0x25 };
+                byte[] data2 = new byte[] { 0x26, 0x27, 0x28, 0x29, 0x2a };
+                byte[] data3 = new byte[] { 0x2b, 0x2c, 0x2d, 0x2e, 0x2f };
+                context.ImageDataSet.Add(new ImageData("tag1", data1, ai[0].Id));
+                context.ImageDataSet.Add(new ImageData("tag2", data2, ai[0].Id));
+                context.ImageDataSet.Add(new ImageData("tag1", data3, ai[1].Id));
+                context.SaveChanges();
+
+                ImageData id = context.GetImageData(ai[0].Id, "tag1");
+                id.Tag.Should().Be("tag1");
+                string s = Encoding.Default.GetString(id.Data);
+                s.Should().Be("!\"#$%");
+
+                id = context.GetImageData(ai[0].Id, "tag2");
+                id.Tag.Should().Be("tag2");
+                s = Encoding.Default.GetString(id.Data);
+                s.Should().Be("&'()*");
+
+                id = context.GetImageData(ai[1].Id, "tag1");
+                id.Tag.Should().Be("tag1");
+                s = Encoding.Default.GetString(id.Data);
+                s.Should().Be("+,-./");
+
+                context.GetImageData(ai[1].Id, "tag2").Should().BeNull();
+                context.GetImageData(ai[2].Id, "tag1").Should().BeNull();
             }
         }
 

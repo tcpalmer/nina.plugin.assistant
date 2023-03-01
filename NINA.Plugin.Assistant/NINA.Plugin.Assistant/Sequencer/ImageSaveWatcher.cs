@@ -63,7 +63,13 @@ namespace Assistant.NINAPlugin.Sequencer {
                         context.ExposurePlanSet.AddOrUpdate(exposurePlan);
 
                         // Save the acquired image record
-                        AcquiredImage acquiredImage = new AcquiredImage(planTarget.DatabaseId, msg.MetaData.Image.ExposureStart, filterName, new ImageMetadata(msg));
+                        AcquiredImage acquiredImage = new AcquiredImage(
+                            planTarget.Project.DatabaseId,
+                            planTarget.DatabaseId,
+                            msg.MetaData.Image.ExposureStart,
+                            filterName,
+                            accepted,
+                            new ImageMetadata(msg));
                         context.AcquiredImageSet.Add(acquiredImage);
 
                         context.SaveChanges();

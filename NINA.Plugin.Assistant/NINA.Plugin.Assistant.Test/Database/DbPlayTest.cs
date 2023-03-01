@@ -6,7 +6,6 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity.Validation;
-using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -17,11 +16,68 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
         private AssistantDatabaseInteraction db;
 
+        /*
         [SetUp]
         public void SetUp() {
             var testDbPath = Path.Combine(TestContext.CurrentContext.TestDirectory, @"assistantdb.sqlite");
             TestContext.WriteLine($"DB PATH: {testDbPath}");
             db = new AssistantDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
+        }*/
+
+        //[Test]
+        public void AddAcquiredImages() {
+
+            // BEWARE! THIS WILL UPDATE ACTUAL DATABASE USED BY THE PLUGIN
+            var testDbPath = @"C:\Users\Tom\AppData\Local\NINA\AssistantPlugin\assistantdb.sqlite";
+            db = new AssistantDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
+
+            string profileId = "395fdf35-4ca8-479b-bd5a-ff24ca2b2a91";
+            using (var context = db.GetContext()) {
+
+                DateTime expTime = DateTime.Now.Date.AddDays(-10);
+                for (int i = 0; i < 30; i++) {
+                    context.AcquiredImageSet.Add(new AcquiredImage(1, 1, expTime, "L", IsAccepted(), GetIMD("L", expTime, 120)));
+                    expTime = expTime.AddMinutes(2);
+                    context.AcquiredImageSet.Add(new AcquiredImage(1, 1, expTime, "R", IsAccepted(), GetIMD("R", expTime, 120)));
+                    expTime = expTime.AddMinutes(2);
+                    context.AcquiredImageSet.Add(new AcquiredImage(1, 1, expTime, "G", IsAccepted(), GetIMD("G", expTime, 120)));
+                    expTime = expTime.AddMinutes(2);
+                    context.AcquiredImageSet.Add(new AcquiredImage(1, 1, expTime, "B", IsAccepted(), GetIMD("B", expTime, 120)));
+                    expTime = expTime.AddMinutes(2);
+                }
+
+                expTime = DateTime.Now.Date.AddDays(-5);
+                for (int i = 0; i < 20; i++) {
+                    context.AcquiredImageSet.Add(new AcquiredImage(2, 2, expTime, "Ha", IsAccepted(), GetIMD("Ha", expTime, 180)));
+                    expTime = expTime.AddMinutes(3);
+                }
+
+                for (int i = 0; i < 20; i++) {
+                    context.AcquiredImageSet.Add(new AcquiredImage(2, 2, expTime, "OIII", IsAccepted(), GetIMD("OIII", expTime, 180)));
+                    expTime = expTime.AddMinutes(3);
+                }
+
+                for (int i = 0; i < 20; i++) {
+                    context.AcquiredImageSet.Add(new AcquiredImage(2, 2, expTime, "SII", IsAccepted(), GetIMD("SII", expTime, 180)));
+                    expTime = expTime.AddMinutes(3);
+                }
+
+                context.SaveChanges();
+            }
+        }
+
+        private static Random rand = new Random();
+        private bool IsAccepted() {
+            return rand.NextDouble() < .2;
+        }
+
+        private ImageMetadata GetIMD(string filterName, DateTime startTime, double duration) {
+            ImageMetadata metadata = new ImageMetadata();
+            metadata.FileName = @"C:\foo\bar\img.fits";
+            metadata.FilterName = filterName;
+            metadata.ExposureStartTime = startTime;
+            metadata.ExposureDuration = duration;
+            return metadata;
         }
 
         //[Test]
