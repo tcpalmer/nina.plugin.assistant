@@ -192,7 +192,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                             throw ex;
                         }
 
-                        Logger.Error($"Assistant: exception executing plan: {ex.StackTrace}");
+                        Logger.Error($"Assistant: exception executing plan: {ex}");
                         throw new SequenceEntityFailedException($"Assistant: exception executing plan: {ex.Message}", ex);
                     }
                     finally {

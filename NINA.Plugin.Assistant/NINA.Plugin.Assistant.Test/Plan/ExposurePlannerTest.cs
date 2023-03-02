@@ -191,7 +191,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
         private void AssertPlan(List<IPlanInstruction> expectedPlan, List<IPlanInstruction> actualPlan) {
 
-            /*
             TestContext.WriteLine("EXPECTED:");
             for (int i = 0; i < expectedPlan.Count; i++) {
                 TestContext.WriteLine($"{expectedPlan[i]}");
@@ -200,7 +199,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             TestContext.WriteLine("\nACTUAL:");
             for (int i = 0; i < actualPlan.Count; i++) {
                 TestContext.WriteLine($"{actualPlan[i]}");
-            }*/
+            }
 
             Assert.AreEqual(expectedPlan.Count, actualPlan.Count);
 
@@ -217,6 +216,11 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
                 if (expected is PlanSwitchFilter) {
                     Assert.AreEqual(expected.planFilter.FilterName, actual.planFilter.FilterName);
+                    continue;
+                }
+
+                if (expected is PlanSetReadoutMode) {
+                    Assert.AreEqual(expected.planFilter.ReadoutMode, actual.planFilter.ReadoutMode);
                     continue;
                 }
 
@@ -372,6 +376,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
         private void AddActualExposures(List<IPlanInstruction> actual, IPlanExposure planFilter, int count) {
             actual.Add(new PlanSwitchFilter(planFilter));
+            actual.Add(new PlanSetReadoutMode(planFilter));
             for (int i = 0; i < count; i++) {
                 actual.Add(new PlanTakeExposure(planFilter));
             }

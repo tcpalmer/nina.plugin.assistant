@@ -11,6 +11,7 @@ using NINA.PlateSolving.Interfaces;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
+using NINA.Sequencer.SequenceItem.Camera;
 using NINA.Sequencer.SequenceItem.FilterWheel;
 using NINA.Sequencer.SequenceItem.Imaging;
 using NINA.Sequencer.SequenceItem.Platesolving;
@@ -28,6 +29,8 @@ using System.Threading.Tasks;
 namespace Assistant.NINAPlugin.Sequencer {
 
     public class AssistantTargetContainer : SequentialContainer, IDeepSkyObjectContainer {
+
+        public readonly static string INSTRUCTION_CATEGORY = "Assistant";
 
         private readonly AssistantInstruction parentInstruction;
         private readonly IProfileService profileService;
@@ -191,6 +194,11 @@ namespace Assistant.NINAPlugin.Sequencer {
                     continue;
                 }
 
+                if (instruction is PlanSetReadoutMode) {
+                    AddSetReadoutMode(instruction.planFilter);
+                    continue;
+                }
+
                 if (instruction is PlanTakeExposure) {
                     AddTakeExposure(instruction.planFilter);
                     continue;
@@ -231,7 +239,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 (slewCenter as SlewScopeToRaDec).Coordinates = new InputCoordinates(planTarget.Coordinates);
             }
 
-            slewCenter.Category = "Assistant";
+            slewCenter.Category = INSTRUCTION_CATEGORY;
             slewCenter.Description = "";
             slewCenter.ErrorBehavior = this.ErrorBehavior;
             slewCenter.Attempts = this.Attempts;
@@ -243,7 +251,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator);
             switchFilter.Name = nameof(SwitchFilter);
-            switchFilter.Category = "Assistant";
+            switchFilter.Category = INSTRUCTION_CATEGORY;
             switchFilter.Description = "";
             switchFilter.ErrorBehavior = this.ErrorBehavior;
             switchFilter.Attempts = this.Attempts;
@@ -252,12 +260,29 @@ namespace Assistant.NINAPlugin.Sequencer {
             Add(new InstructionWrapper(monitor, planFilter.PlanId, switchFilter));
         }
 
+        private void AddSetReadoutMode(IPlanExposure planFilter) {
+            int? readoutMode = planFilter.ReadoutMode;
+            readoutMode = (readoutMode == null || readoutMode < 0) ? 0 : readoutMode;
+
+            Logger.Info($"Assistant: adding set readout mode: {readoutMode}");
+            SetReadoutMode setReadoutMode = new SetReadoutMode(cameraMediator);
+            setReadoutMode.Name = nameof(SetReadoutMode);
+            setReadoutMode.Category = INSTRUCTION_CATEGORY;
+            setReadoutMode.Description = "";
+            setReadoutMode.ErrorBehavior = this.ErrorBehavior;
+            setReadoutMode.Attempts = this.Attempts;
+
+            setReadoutMode.Mode = (short)readoutMode;
+
+            Add(new InstructionWrapper(monitor, planFilter.PlanId, setReadoutMode));
+        }
+
         private void AddTakeExposure(IPlanExposure planFilter) {
             Logger.Info($"Assistant: adding take exposure: {planFilter.FilterName}");
 
             TakeExposure takeExposure = new TakeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM);
             takeExposure.Name = nameof(TakeExposure);
-            takeExposure.Category = "Assistant";
+            takeExposure.Category = INSTRUCTION_CATEGORY;
             takeExposure.Description = "";
             takeExposure.ErrorBehavior = this.ErrorBehavior;
             takeExposure.Attempts = this.Attempts;
@@ -316,7 +341,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.Instruction = instruction;
 
             this.Name = $"{instruction.Name}";
-            this.Category = "Assistant";
+            this.Category = AssistantTargetContainer.INSTRUCTION_CATEGORY;
             this.Description = "Wrapper";
             this.ErrorBehavior = instruction.ErrorBehavior;
             this.Attempts = instruction.Attempts;

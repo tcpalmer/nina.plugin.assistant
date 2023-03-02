@@ -45,10 +45,16 @@ namespace Assistant.NINAPlugin.Plan {
 
             IPlanProject planProject = new PlanProjectEmulator();
             planProject.Name = "P01";
+            planProject.UseCustomHorizon = false;
+            planProject.MinimumAltitude = 10;
+            planProject.DitherEvery = 0;
+            planProject.EnableGrader = false;
+
             IPlanTarget planTarget = GetBasePlanTarget("T01", planProject, Cp5n5);
             planTarget.EndTime = endTime;
 
             IPlanExposure lum = GetPlanFilter("Lum", 8, null, null, 3);
+            lum.ReadoutMode = 1;
             IPlanExposure red = GetPlanFilter("R", 8, null, null, 3);
             IPlanExposure grn = GetPlanFilter("G", 8, null, null, 3);
             IPlanExposure blu = GetPlanFilter("B", 8, null, null, 3);
@@ -59,6 +65,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             instructions.Add(new PlanMessage("planner emulator: Plan1"));
+            instructions.Add(new PlanSetReadoutMode(lum));
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
             instructions.Add(new PlanSwitchFilter(red));
@@ -79,6 +86,7 @@ namespace Assistant.NINAPlugin.Plan {
             planFilter.ExposureLength = exposure;
             planFilter.Gain = gain;
             planFilter.Offset = offset;
+            planFilter.ReadoutMode = 0;
             planFilter.BinningMode = new BinningMode(1, 1);
             planFilter.Desired = desired;
             return planFilter;
@@ -100,6 +108,10 @@ namespace Assistant.NINAPlugin.Plan {
 
         public string PlanId { get; set; }
         public string Name { get; set; }
+        public bool UseCustomHorizon { get; set; }
+        public double MinimumAltitude { get; set; }
+        public int DitherEvery { get; set; }
+        public bool EnableGrader { get; set; }
 
         public int DatabaseId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string Description { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -117,12 +129,8 @@ namespace Assistant.NINAPlugin.Plan {
         ProjectState IPlanProject.State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         ProjectPriority IPlanProject.Priority { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public int MinimumTime { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public double MinimumAltitude { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public bool UseCustomHorizon { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public double HorizonOffset { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public int FilterSwitchFrequency { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public int DitherEvery { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public bool EnableGrader { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public Dictionary<string, double> RuleWeights { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         /*
             pp.SetDefaults();

@@ -38,11 +38,10 @@ namespace Assistant.NINAPlugin.Plan {
         public AssistantPlan GetPlan(IPlanTarget previousPlanTarget) {
             Logger.Debug($"Assistant: getting current plan for {atTime}");
 
-            /*
             if (true) {
                 // HACK!
                 return new PlannerEmulator(atTime, activeProfile).GetPlan(previousPlanTarget);
-            }*/
+            }
 
             using (MyStopWatch.Measure("Assistant Plan Generation")) {
                 try {

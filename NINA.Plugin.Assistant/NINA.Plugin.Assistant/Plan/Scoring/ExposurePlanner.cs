@@ -117,6 +117,9 @@ namespace Assistant.NINAPlugin.Plan {
                         lastFilter = planFilter.FilterName;
                     }
 
+                    // Since we don't know what readout mode the camera might have been left in, we have to always set it
+                    instructions.Add(new PlanSetReadoutMode(planFilter));
+
                     // filterSwitchFrequency = zero -> take as many as possible per filter before switching
                     if (filterSwitchFrequency == 0) {
                         while (!IsPlanFilterComplete(planFilter)) {
@@ -269,6 +272,14 @@ namespace Assistant.NINAPlugin.Plan {
 
         public override string ToString() {
             return $"SwitchFilter: {planFilter.FilterName}";
+        }
+    }
+
+    public class PlanSetReadoutMode : PlanInstruction {
+        public PlanSetReadoutMode(IPlanExposure planFilter) : base(planFilter) { }
+
+        public override string ToString() {
+            return $"Set readoutmode: mode={planFilter.ReadoutMode}";
         }
     }
 
