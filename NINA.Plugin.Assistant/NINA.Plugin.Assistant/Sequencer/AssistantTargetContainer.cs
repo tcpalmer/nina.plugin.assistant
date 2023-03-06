@@ -351,7 +351,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             try {
                 Monitor.ItemStart(PlanItemId, Name);
                 Instruction.Execute(progress, token).Wait();
-                Monitor.ItemFinsh(PlanItemId, Name);
+                Monitor.ItemFinish(PlanItemId, Name);
             }
             catch (Exception ex) {
                 throw ex;

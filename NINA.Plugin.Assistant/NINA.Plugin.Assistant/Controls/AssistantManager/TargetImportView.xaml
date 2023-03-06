@@ -45,6 +45,27 @@
             <TextBlock
                 Margin="0,0,0,10"
                 FontWeight="Bold"
+                Text="Framing Assistant" />
+            <Button
+                Width="25"
+                Height="25"
+                Margin="0,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Command="{Binding FramingAssistantImportCommand}"
+                Style="{StaticResource BackgroundButton}"
+                ToolTip="Import from Framing Assistant">
+                <Grid>
+                    <Path
+                        Margin="5"
+                        Data="{StaticResource FocusAssistantSVG}"
+                        Fill="{StaticResource ButtonForegroundBrush}"
+                        Stretch="Uniform" />
+                </Grid>
+            </Button>
+            <TextBlock
+                Margin="0,0,0,10"
+                FontWeight="Bold"
                 Text="Planetarium" />
             <Button
                 Width="25"

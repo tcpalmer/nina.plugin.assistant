@@ -85,10 +85,18 @@
                                     CanContentScroll="True"
                                     HorizontalScrollBarVisibility="Auto"
                                     VerticalScrollBarVisibility="Visible">
-                                    <TextBlock
-                                        Margin="3,3,3,3"
-                                        FontFamily="Courier New"
-                                        Text="{Binding MonitorContent}" />
+                                    <ListView ItemsSource="{Binding TargetStatusList}">
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Expander
+                                                    ExpandDirection="Down"
+                                                    Header="{Binding Name}"
+                                                    IsExpanded="True">
+                                                    <TextBlock Text="{Binding Name}" TextWrapping="Wrap" />
+                                                </Expander>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
                                 </ScrollViewer>
                             </Border>
                         </StackPanel>

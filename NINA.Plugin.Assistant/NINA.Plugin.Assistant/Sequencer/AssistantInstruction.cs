@@ -158,7 +158,10 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
             Logger.Debug("Assistant: execute instruction");
+
             IPlanTarget previousPlanTarget = null;
+            //StatusMonitor = new AssistantStatusMonitor();
+            StatusMonitor.PropertyChanged += StatusMonitor_PropertyChanged;
 
             while (true) {
                 DateTime atTime = DateTime.Now;
@@ -178,12 +181,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                         IPlanTarget planTarget = plan.PlanTarget;
                         Logger.Info($"Assistant: starting execution of plan target: {planTarget.Name}");
                         SetTarget(atTime, planTarget);
-
-                        AssistantStatusMonitor monitor = new AssistantStatusMonitor(planTarget);
-                        monitor.PropertyChanged += Monitor_PropertyChanged;
+                        StatusMonitor.BeginTarget(planTarget);
 
                         // Create a container for this target, add the instructions, and execute
-                        AssistantTargetContainer targetContainer = GetTargetContainer(previousPlanTarget, plan, monitor);
+                        AssistantTargetContainer targetContainer = GetTargetContainer(previousPlanTarget, plan, StatusMonitor);
                         targetContainer.Execute(progress, token).Wait();
                         previousPlanTarget = planTarget;
                     }
@@ -197,6 +198,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
                     finally {
                         ClearTarget();
+                        StatusMonitor.EndTarget();
                     }
                 }
             }
@@ -218,6 +220,19 @@ namespace Assistant.NINAPlugin.Sequencer {
                 imageHistoryVM, filterWheelMediator, domeMediator, domeFollower,
                 plateSolverFactory, windowServiceFactory, previousPlanTarget, plan, monitor);
             return targetContainer;
+        }
+
+        private AssistantStatusMonitor statusMonitor = new AssistantStatusMonitor();
+        public AssistantStatusMonitor StatusMonitor {
+            get => statusMonitor;
+            set {
+                statusMonitor = value;
+                RaisePropertyChanged(nameof(StatusMonitor));
+            }
+        }
+
+        public List<TargetStatus> TargetStatusList {
+            get => StatusMonitor.TargetStatusList;
         }
 
         private IList<string> issues = new List<string>();
@@ -270,14 +285,12 @@ namespace Assistant.NINAPlugin.Sequencer {
             ProjectTargetDisplay = "";
             CoordinatesDisplay = "";
             StopAtDisplay = "";
-            MonitorContent = "";
 
             RaisePropertyChanged(nameof(ProjectTargetDisplay));
             RaisePropertyChanged(nameof(CoordinatesDisplay));
             RaisePropertyChanged(nameof(StopAtDisplay));
             RaisePropertyChanged(nameof(NighttimeData));
             RaisePropertyChanged(nameof(Target));
-            RaisePropertyChanged(nameof(MonitorContent));
         }
 
         private DeepSkyObject GetDeepSkyObject(DateTime referenceDate, IProfile activeProfile, IPlanTarget planTarget, CustomHorizon customHorizon) {
@@ -294,9 +307,14 @@ namespace Assistant.NINAPlugin.Sequencer {
             return customHorizon;
         }
 
-        private void Monitor_PropertyChanged(object sender, PropertyChangedEventArgs e) {
-            MonitorContent = ((AssistantStatusMonitor)sender).History;
-            RaisePropertyChanged(nameof(MonitorContent));
+        /* I made TargetStatusList a first class property on this but still not showing in UI.
+         * Maybe hardcode a list just to see if the xaml is actually working
+         */
+
+        private void StatusMonitor_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+            Logger.Debug($"StatusMonitor_PropertyChanged: {e?.PropertyName}");
+            RaisePropertyChanged(nameof(StatusMonitor));
+            RaisePropertyChanged(nameof(TargetStatusList));
         }
 
         public InputTarget Target { get; private set; }
@@ -304,6 +322,5 @@ namespace Assistant.NINAPlugin.Sequencer {
         public string ProjectTargetDisplay { get; private set; }
         public string CoordinatesDisplay { get; private set; }
         public string StopAtDisplay { get; private set; }
-        public string MonitorContent { get; private set; }
     }
 }

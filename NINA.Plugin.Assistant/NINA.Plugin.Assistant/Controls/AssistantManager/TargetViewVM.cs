@@ -55,7 +55,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 return await framingAssistantVM.SetCoordinates(TargetDSO);
             });
 
-            TargetImportVM = new TargetImportVM(deepSkyObjectSearchVM, planetariumFactory);
+            TargetImportVM = new TargetImportVM(deepSkyObjectSearchVM, framingAssistantVM, planetariumFactory);
             TargetImportVM.PropertyChanged += ImportTarget_PropertyChanged;
         }
 
@@ -182,6 +182,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
 
             TargetProxy.Proxy.Coordinates = TargetImportVM.Target.Coordinates;
+            TargetProxy.Proxy.Rotation = TargetImportVM.Target.Rotation;
             RaisePropertyChanged(nameof(TargetProxy.Proxy));
         }
 
