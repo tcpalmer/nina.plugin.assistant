@@ -31,12 +31,12 @@ namespace Assistant.NINAPlugin.Plan {
             };
 
             if (AstrometryUtils.IsAbovePolarCircle(observerInfo)) {
-                throw new Exception("Assistant: observer location is above a polar circle - not supported");
+                throw new Exception("Scheduler: observer location is above a polar circle - not supported");
             }
         }
 
         public AssistantPlan GetPlan(IPlanTarget previousPlanTarget) {
-            Logger.Debug($"Assistant: getting current plan for {atTime}");
+            Logger.Debug($"Scheduler: getting current plan for {atTime}");
 
             if (true) {
                 // HACK!
@@ -50,13 +50,13 @@ namespace Assistant.NINAPlugin.Plan {
                     }
 
                     projects = FilterForIncomplete(projects);
-                    //Logger.Trace($"Assistant: GetPlan after FilterForIncomplete:\n{PlanProject.ListToString(projects)}");
+                    //Logger.Trace($"Scheduler: GetPlan after FilterForIncomplete:\n{PlanProject.ListToString(projects)}");
 
                     projects = FilterForVisibility(projects);
-                    //Logger.Trace($"Assistant: GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
+                    //Logger.Trace($"Scheduler: GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
 
                     projects = FilterForMoonAvoidance(projects);
-                    //Logger.Trace($"Assistant: GetPlan after FilterForMoonAvoidance:\n{PlanProject.ListToString(projects)}");
+                    //Logger.Trace($"Scheduler: GetPlan after FilterForMoonAvoidance:\n{PlanProject.ListToString(projects)}");
 
                     DateTime? waitForVisibleNow = CheckForVisibleNow(projects);
                     if (waitForVisibleNow != null) {
@@ -68,13 +68,13 @@ namespace Assistant.NINAPlugin.Plan {
                     IPlanTarget planTarget = SelectTargetByScore(projects, scoringEngine);
 
                     if (planTarget != null) {
-                        Logger.Debug($"Assistant: GetPlan highest scoring target:\n{planTarget}");
+                        Logger.Debug($"Scheduler: GetPlan highest scoring target:\n{planTarget}");
                         TimeInterval targetWindow = GetTargetTimeWindow(atTime, planTarget);
                         List<IPlanInstruction> planInstructions = PlanInstructions(planTarget, previousPlanTarget, targetWindow);
                         return new AssistantPlan(planTarget, targetWindow, planInstructions);
                     }
                     else {
-                        Logger.Debug("Assistant: GetPlan no target selected");
+                        Logger.Debug("Scheduler: GetPlan no target selected");
                         return null;
                     }
                 }
@@ -83,8 +83,8 @@ namespace Assistant.NINAPlugin.Plan {
                         throw ex;
                     }
 
-                    Logger.Error($"Assistant: exception generating plan: {ex.StackTrace}");
-                    throw new SequenceEntityFailedException($"Assistant: exception generating plan: {ex.Message}", ex);
+                    Logger.Error($"Scheduler: exception generating plan: {ex.StackTrace}");
+                    throw new SequenceEntityFailedException($"Scheduler: exception generating plan: {ex.Message}", ex);
                 }
             }
         }
@@ -186,7 +186,7 @@ namespace Assistant.NINAPlugin.Plan {
                     if (planTarget.Rejected) { continue; }
 
                     if (!AstrometryUtils.RisesAtLocation(observerInfo, planTarget.Coordinates)) {
-                        Logger.Warning($"Assistant: target {planProject.Name}/{planTarget.Name} never rises at location - skipping");
+                        Logger.Warning($"Scheduler: target {planProject.Name}/{planTarget.Name} never rises at location - skipping");
                         SetRejected(planTarget, Reasons.TargetNeverRises);
                         continue;
                     }
@@ -299,7 +299,7 @@ namespace Assistant.NINAPlugin.Plan {
                 foreach (IPlanTarget planTarget in planProject.Targets) {
                     if (planTarget.Rejected) { continue; }
 
-                    Logger.Debug($"Assistant: running scoring engine for project/target {planProject.Name}/{planTarget.Name}");
+                    Logger.Debug($"Scheduler: running scoring engine for project/target {planProject.Name}/{planTarget.Name}");
                     double score = scoringEngine.ScoreTarget(planTarget);
                     if (score > highScore) {
                         highScoreTarget = planTarget;
@@ -462,7 +462,7 @@ namespace Assistant.NINAPlugin.Plan {
             double moonSeparation = AstrometryUtils.GetMoonSeparationAngle(observerInfo, midPointTime, planTarget.Coordinates);
             double moonAvoidanceSeparation = AstrometryUtils.GetMoonAvoidanceLorentzianSeparation(moonAge,
                 planFilter.MoonAvoidanceSeparation, planFilter.MoonAvoidanceWidth);
-            Logger.Debug($"Assistant: moon avoidance {planTarget.Name}/{planFilter.FilterName} midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
+            Logger.Debug($"Scheduler: moon avoidance {planTarget.Name}/{planFilter.FilterName} midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
 
             return moonSeparation < moonAvoidanceSeparation;
         }
@@ -475,8 +475,8 @@ namespace Assistant.NINAPlugin.Plan {
                 return loader.LoadActiveProjects(database.GetContext(), activeProfile, atTime);
             }
             catch (Exception ex) {
-                Logger.Error($"Assistant: exception reading database: {ex.StackTrace}");
-                throw new SequenceEntityFailedException($"Assistant: exception reading database: {ex.Message}", ex);
+                Logger.Error($"Scheduler: exception reading database: {ex.StackTrace}");
+                throw new SequenceEntityFailedException($"Scheduler: exception reading database: {ex.Message}", ex);
             }
         }
 

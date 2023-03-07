@@ -7,7 +7,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public bool GradeImage(IPlanTarget planTarget, ImageSavedEventArgs msg) {
             // TODO: implement
-            //Logger.Debug($"Assistant: image grade: DEFAULTING TO ACCEPT, FIX");
+            //Logger.Debug($"Scheduler: image grade: DEFAULTING TO ACCEPT, FIX");
             return true;
         }
 

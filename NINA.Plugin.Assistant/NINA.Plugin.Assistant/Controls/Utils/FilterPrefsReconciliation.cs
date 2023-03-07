@@ -54,7 +54,7 @@ namespace Assistant.NINAPlugin.Controls.Util {
 
                     if (list != null) {
                         list.ForEach(filterName => {
-                            Logger.Debug($"Assistant: filter pref missing for filter '{filterName}' in profile '{profileId}', adding default");
+                            Logger.Debug($"Scheduler: filter pref missing for filter '{filterName}' in profile '{profileId}', adding default");
                             missingFilterPreferences.Add(new FilterPreference(profileId, filterName));
                         });
                     }

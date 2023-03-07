@@ -127,7 +127,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override void Initialize() {
-            Logger.Debug("Assistant: Initialize");
+            Logger.Debug("Scheduler: Initialize");
 
             if (StatusMonitor != null) {
                 StatusMonitor.Reset();
@@ -154,7 +154,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Debug("Assistant: Execute");
+            Logger.Debug("Scheduler: Execute");
 
             IPlanTarget previousPlanTarget = null;
 
@@ -163,18 +163,18 @@ namespace Assistant.NINAPlugin.Sequencer {
                 AssistantPlan plan = new Planner(atTime, profileService).GetPlan(previousPlanTarget);
 
                 if (plan == null) {
-                    Logger.Info("Assistant: planner returned empty plan, done");
+                    Logger.Info("Scheduler: planner returned empty plan, done");
                     return Task.CompletedTask;
                 }
 
                 if (plan.WaitForNextTargetTime != null) {
-                    Logger.Info("Assistant: planner waiting for next target to become available");
+                    Logger.Info("Scheduler: planner waiting for next target to become available");
                     WaitForNextTarget(plan.WaitForNextTargetTime, progress, token);
                 }
                 else {
                     try {
                         IPlanTarget planTarget = plan.PlanTarget;
-                        Logger.Info($"Assistant: starting execution of plan target: {planTarget.Name}");
+                        Logger.Info($"Scheduler: starting execution of plan target: {planTarget.Name}");
                         SetTarget(atTime, planTarget);
                         StatusMonitor.BeginTarget(planTarget);
 
@@ -188,8 +188,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                             throw ex;
                         }
 
-                        Logger.Error($"Assistant: exception executing plan: {ex}");
-                        throw new SequenceEntityFailedException($"Assistant: exception executing plan: {ex.Message}", ex);
+                        Logger.Error($"Scheduler: exception executing plan: {ex}");
+                        throw new SequenceEntityFailedException($"Scheduler: exception executing plan: {ex.Message}", ex);
                     }
                     finally {
                         ClearTarget();
@@ -200,13 +200,13 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void WaitForNextTarget(DateTime? waitForNextTargetTime, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Info($"Assistant: stopping guiding/tracking, then waiting for next target to be available at {Utils.FormatDateTimeFull(waitForNextTargetTime)}");
+            Logger.Info($"Scheduler: stopping guiding/tracking, then waiting for next target to be available at {Utils.FormatDateTimeFull(waitForNextTargetTime)}");
             SequenceCommands.StopGuiding(guiderMediator, token);
             SequenceCommands.SetTelescopeTracking(telescopeMediator, TrackingMode.Stopped, token);
 
             TimeSpan duration = ((DateTime)waitForNextTargetTime) - DateTime.Now;
             CoreUtil.Wait(duration, token, progress).Wait(token);
-            Logger.Debug("Assistant: done waiting for next target");
+            Logger.Debug("Scheduler: done waiting for next target");
         }
 
         private AssistantTargetContainer GetTargetContainer(IPlanTarget previousPlanTarget, AssistantPlan plan, AssistantStatusMonitor monitor) {

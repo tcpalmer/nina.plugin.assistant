@@ -494,7 +494,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 return ProfileLoader.Load(profileService, profileMeta);
             }
 
-            Logger.Error($"Assistant: failed to load profile, id = {profileId}");
+            Logger.Error($"Scheduler: failed to load profile, id = {profileId}");
             return null;
         }
 

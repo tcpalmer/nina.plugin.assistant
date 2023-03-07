@@ -312,7 +312,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     filterPrefs = context.GetFilterPreferences(profileId);
                 }
                 catch (Exception ex) {
-                    TestContext.WriteLine($"Assistant: exception accessing Assistant: {ex}");
+                    TestContext.WriteLine($"Scheduler: exception accessing Scheduler: {ex}");
                 }
             }
 

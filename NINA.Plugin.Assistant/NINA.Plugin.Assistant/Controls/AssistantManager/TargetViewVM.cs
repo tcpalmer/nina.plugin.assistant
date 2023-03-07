@@ -273,7 +273,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 }
             }
             else {
-                Logger.Error($"Assistant: failed to find original exposure plan: {item.Id}");
+                Logger.Error($"Scheduler: failed to find original exposure plan: {item.Id}");
             }
         }
 
