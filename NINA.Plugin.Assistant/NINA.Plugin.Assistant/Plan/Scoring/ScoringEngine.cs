@@ -40,7 +40,7 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
                 double weight = RuleWeights[rule.Name] / ScoringRule.WEIGHT_SCALE;
                 double score = rule.Score(this, planTarget);
                 totalScore += weight * score;
-                Logger.Debug($"Assistant: scoring rule {rule.Name}: raw score={score}, weight={weight * ScoringRule.WEIGHT_SCALE}, new total={totalScore}");
+                Logger.Debug($"Scheduler: scoring rule {rule.Name}: raw score={score}, weight={weight * ScoringRule.WEIGHT_SCALE}, new total={totalScore}");
             }
 
             return totalScore;

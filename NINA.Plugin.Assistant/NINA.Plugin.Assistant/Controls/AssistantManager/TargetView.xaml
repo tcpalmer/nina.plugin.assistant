@@ -52,7 +52,7 @@
                     <Grid>
                         <Path
                             Margin="5"
-                            Data="{StaticResource ImportSVG}"
+                            Data="{StaticResource SS_ImportSVG}"
                             Fill="{StaticResource ButtonForegroundBrush}"
                             Stretch="Uniform" />
                     </Grid>
@@ -344,7 +344,7 @@
             <Grid>
                 <Path
                     Margin="5"
-                    Data="{StaticResource NewSVG}"
+                    Data="{StaticResource SS_NewSVG}"
                     Fill="{StaticResource ButtonForegroundBrush}"
                     Stretch="Uniform" />
             </Grid>
@@ -681,7 +681,7 @@
                                 <Grid>
                                     <Path
                                         Margin="5"
-                                        Data="{StaticResource DeleteSVG}"
+                                        Data="{StaticResource SS_DeleteSVG}"
                                         Fill="{StaticResource ButtonForegroundBrush}"
                                         Stretch="Uniform" />
                                 </Grid>

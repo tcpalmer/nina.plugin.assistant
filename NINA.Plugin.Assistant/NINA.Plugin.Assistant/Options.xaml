@@ -6,7 +6,7 @@
     xmlns:am="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors">
 
-    <DataTemplate x:Key="Sequence Assistant_Options">
+    <DataTemplate x:Key="Sequence Scheduler_Options">
         <StackPanel DataContext="{Binding}" Orientation="Vertical">
 
             <Expander

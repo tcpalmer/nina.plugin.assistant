@@ -28,7 +28,7 @@ namespace Assistant.NINAPlugin.Database {
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder) {
             base.OnModelCreating(modelBuilder);
-            Logger.Debug("Assistant database: OnModelCreating");
+            Logger.Debug("Scheduler database: OnModelCreating");
 
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
             modelBuilder.Configurations.Add(new ProjectConfiguration());
@@ -121,7 +121,7 @@ namespace Assistant.NINAPlugin.Database {
                     return GetProject(project.Id);
                 }
                 catch (Exception e) {
-                    Logger.Error($"Assistant: error adding new project: {e.Message} {e.StackTrace}");
+                    Logger.Error($"Scheduler: error adding new project: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
                 }
@@ -129,7 +129,7 @@ namespace Assistant.NINAPlugin.Database {
         }
 
         public Project SaveProject(Project project) {
-            Logger.Debug($"Assistant: saving Project Id={project.Id} Name={project.Name}");
+            Logger.Debug($"Scheduler: saving Project Id={project.Id} Name={project.Name}");
             using (var transaction = Database.BeginTransaction()) {
                 try {
                     ProjectSet.AddOrUpdate(project);
@@ -139,7 +139,7 @@ namespace Assistant.NINAPlugin.Database {
                     return GetProject(project.Id);
                 }
                 catch (Exception e) {
-                    Logger.Error($"Assistant: error persisting Project: {e.Message} {e.StackTrace}");
+                    Logger.Error($"Scheduler: error persisting Project: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
                 }
@@ -156,7 +156,7 @@ namespace Assistant.NINAPlugin.Database {
                     return GetProject(project.Id);
                 }
                 catch (Exception e) {
-                    Logger.Error($"Assistant: error pasting project: {e.Message} {e.StackTrace}");
+                    Logger.Error($"Scheduler: error pasting project: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
                 }
@@ -173,7 +173,7 @@ namespace Assistant.NINAPlugin.Database {
                     return true;
                 }
                 catch (Exception e) {
-                    Logger.Error($"Assistant: error deleting project: {e.Message} {e.StackTrace}");
+                    Logger.Error($"Scheduler: error deleting project: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return false;
                 }
@@ -190,7 +190,7 @@ namespace Assistant.NINAPlugin.Database {
                     return GetTarget(target.Project.Id, target.Id);
                 }
                 catch (Exception e) {
-                    Logger.Error($"Assistant: error adding new target: {e.Message} {e.StackTrace}");
+                    Logger.Error($"Scheduler: error adding new target: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
                 }
@@ -198,7 +198,7 @@ namespace Assistant.NINAPlugin.Database {
         }
 
         public Target SaveTarget(Target target) {
-            Logger.Debug($"Assistant: saving Target Id={target.Id} Name={target.Name}");
+            Logger.Debug($"Scheduler: saving Target Id={target.Id} Name={target.Name}");
             using (var transaction = Database.BeginTransaction()) {
                 try {
                     TargetSet.AddOrUpdate(target);
@@ -209,7 +209,7 @@ namespace Assistant.NINAPlugin.Database {
                     return GetTarget(target.Project.Id, target.Id);
                 }
                 catch (Exception e) {
-                    Logger.Error($"Assistant: error persisting Target: {e.Message} {e.StackTrace}");
+                    Logger.Error($"Scheduler: error persisting Target: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
                 }
@@ -227,7 +227,7 @@ namespace Assistant.NINAPlugin.Database {
                     return GetTarget(project.Id, target.Id);
                 }
                 catch (Exception e) {
-                    Logger.Error($"Assistant: error pasting target: {e.Message} {e.StackTrace}");
+                    Logger.Error($"Scheduler: error pasting target: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
                 }
@@ -244,7 +244,7 @@ namespace Assistant.NINAPlugin.Database {
                     return true;
                 }
                 catch (Exception e) {
-                    Logger.Error($"Assistant: error deleting target: {e.Message} {e.StackTrace}");
+                    Logger.Error($"Scheduler: error deleting target: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return false;
                 }
@@ -252,7 +252,7 @@ namespace Assistant.NINAPlugin.Database {
         }
 
         public bool SaveExposurePlan(ExposurePlan exposurePlan) {
-            Logger.Debug($"Assistant: saving Exposure Plan Id={exposurePlan.Id} Name={exposurePlan.FilterName}");
+            Logger.Debug($"Scheduler: saving Exposure Plan Id={exposurePlan.Id} Name={exposurePlan.FilterName}");
             using (var transaction = Database.BeginTransaction()) {
                 try {
                     ExposurePlanSet.AddOrUpdate(exposurePlan);
@@ -261,7 +261,7 @@ namespace Assistant.NINAPlugin.Database {
                     return true;
                 }
                 catch (Exception e) {
-                    Logger.Error($"Assistant: error persisting Exposure Plan: {e.Message} {e.StackTrace}");
+                    Logger.Error($"Scheduler: error persisting Exposure Plan: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return false;
                 }
@@ -278,7 +278,7 @@ namespace Assistant.NINAPlugin.Database {
                     return GetTargetByProject(target.ProjectId, target.Id);
                 }
                 catch (Exception e) {
-                    Logger.Error($"Assistant: error deleting Filter Plan: {e.Message} {e.StackTrace}");
+                    Logger.Error($"Scheduler: error deleting Filter Plan: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
                 }
@@ -286,7 +286,7 @@ namespace Assistant.NINAPlugin.Database {
         }
 
         public bool SaveFilterPreference(FilterPreference filterPreference) {
-            Logger.Debug($"Assistant: saving Filter Preferences Id={filterPreference.Id} Name={filterPreference.FilterName}");
+            Logger.Debug($"Scheduler: saving Filter Preferences Id={filterPreference.Id} Name={filterPreference.FilterName}");
             using (var transaction = Database.BeginTransaction()) {
                 try {
                     FilterPreferenceSet.AddOrUpdate(filterPreference);
@@ -295,7 +295,7 @@ namespace Assistant.NINAPlugin.Database {
                     return true;
                 }
                 catch (Exception e) {
-                    Logger.Error($"Assistant: error persisting Filter Preferences: {e.Message} {e.StackTrace}");
+                    Logger.Error($"Scheduler: error persisting Filter Preferences: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return false;
                 }
@@ -313,7 +313,7 @@ namespace Assistant.NINAPlugin.Database {
                     transaction.Commit();
                 }
                 catch (Exception e) {
-                    Logger.Error($"Assistant: error persisting Filter Preferences: {e.Message} {e.StackTrace}");
+                    Logger.Error($"Scheduler: error persisting Filter Preferences: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                 }
             }
@@ -329,11 +329,11 @@ namespace Assistant.NINAPlugin.Database {
 
         private static void RollbackTransaction(DbContextTransaction transaction) {
             try {
-                Logger.Warning("Assistant: rolling back database changes");
+                Logger.Warning("Scheduler: rolling back database changes");
                 transaction.Rollback();
             }
             catch (Exception e) {
-                Logger.Error($"Assistant: error executing transaction rollback: {e.Message} {e.StackTrace}");
+                Logger.Error($"Scheduler: error executing transaction rollback: {e.Message} {e.StackTrace}");
             }
         }
 
@@ -343,14 +343,14 @@ namespace Assistant.NINAPlugin.Database {
             void IDatabaseInitializer<TContext>.InitializeDatabase(TContext context) {
 
                 if (!DatabaseExists(context)) {
-                    Logger.Debug("Assistant database: creating database schema");
+                    Logger.Debug("Scheduler database: creating database schema");
                     using (var transaction = context.Database.BeginTransaction()) {
                         try {
                             context.Database.ExecuteSqlCommand(GetInitialSQL());
                             transaction.Commit();
                         }
                         catch (Exception e) {
-                            Logger.Error($"Assistant: error creating or initializing database: {e.Message} {e.StackTrace}");
+                            Logger.Error($"Scheduler: error creating or initializing database: {e.Message} {e.StackTrace}");
                             RollbackTransaction(transaction);
                         }
                     }
@@ -368,7 +368,7 @@ namespace Assistant.NINAPlugin.Database {
                     return (string)rm.GetObject("initial_schema");
                 }
                 catch (Exception ex) {
-                    Logger.Error($"failed to load Assistant database initial SQL: {ex.Message}");
+                    Logger.Error($"failed to load Scheduler database initial SQL: {ex.Message}");
                     throw ex;
                 }
             }

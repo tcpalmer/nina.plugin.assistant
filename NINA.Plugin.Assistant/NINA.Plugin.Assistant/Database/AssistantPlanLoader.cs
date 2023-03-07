@@ -25,7 +25,7 @@ namespace Assistant.NINAPlugin.Database {
             }
 
             if (projects == null || projects.Count == 0) {
-                Logger.Warning("Assistant: no projects are active and within start/end dates at planning time");
+                Logger.Warning("Scheduler: no projects are active and within start/end dates at planning time");
                 return null;
             }
 

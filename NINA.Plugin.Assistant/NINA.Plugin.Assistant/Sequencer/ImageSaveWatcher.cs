@@ -20,11 +20,11 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.enableGrader = planTarget.Project.EnableGrader;
 
             imageSaveMediator.ImageSaved += ImageSaved;
-            Logger.Debug($"Assistant: start watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
+            Logger.Debug($"Scheduler: start watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
         }
 
         public void Stop() {
-            Logger.Debug($"Assistant: stop watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
+            Logger.Debug($"Scheduler: stop watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
             imageSaveMediator.ImageSaved -= ImageSaved;
         }
 
@@ -37,7 +37,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             // https://markheath.net/post/starting-threads-in-dotnet
 
             bool accepted = enableGrader ? new ImageGrader().GradeImage(planTarget, msg) : false;
-            Logger.Debug($"Assistant: image save for {planTarget.Project.Name}/{planTarget.Name}, filter={msg.Filter}, grader enabled={enableGrader}, accepted={accepted}");
+            Logger.Debug($"Scheduler: image save for {planTarget.Project.Name}/{planTarget.Name}, filter={msg.Filter}, grader enabled={enableGrader}, accepted={accepted}");
 
             // HACK
             accepted = true;
@@ -76,7 +76,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         transaction.Commit();
                     }
                     catch (Exception e) {
-                        Logger.Error($"Assistant: exception updating database for saved image: {e.Message}\n{e.StackTrace}");
+                        Logger.Error($"Scheduler: exception updating database for saved image: {e.Message}\n{e.StackTrace}");
                     }
                 }
             }

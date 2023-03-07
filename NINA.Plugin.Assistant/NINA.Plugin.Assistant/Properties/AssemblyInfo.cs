@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("B4541BA9-7B07-4D71-B8E1-6C73D4933EA0")]
 
-[assembly: AssemblyTitle("Sequence Assistant")]
+[assembly: AssemblyTitle("Sequence Scheduler")]
 [assembly: AssemblyDescription("TBD ...")]
 [assembly: AssemblyCompany("Tom Palmer @tcpalmer")]
 [assembly: AssemblyProduct("Assistant.NINAPlugin")]
@@ -12,8 +12,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: AssemblyVersion("0.0.0.3")]
-[assembly: AssemblyFileVersion("0.0.0.3")]
+[assembly: AssemblyVersion("0.1.0.0")]
+[assembly: AssemblyFileVersion("0.1.0.0")]
 
 // The minimum Version of N.I.N.A. that this plugin is compatible with
 [assembly: AssemblyMetadata("MinimumApplicationVersion", "2.1.0.9001")]
@@ -25,7 +25,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyMetadata("ScreenshotURL", "https://raw.githubusercontent.com/tcpalmer/nina.plugin.assistant/main/nina.plugin.assistant/assets/screenshot1.png?raw=true")]
 [assembly: AssemblyMetadata("AltScreenshotURL", "https://raw.githubusercontent.com/tcpalmer/nina.plugin.assistant/main/nina.plugin.assistant/assets/screenshot2.png?raw=true")]
 
-[assembly: AssemblyMetadata("LongDescription", @"Sequence Assistant is ...
+[assembly: AssemblyMetadata("LongDescription", @"The Scheduler Plugin is designed to provide a higher level of automation than is typically achievable today with NINA. Specifically, it maintains a database of imaging projects describing DSO targets and associated exposure plans. Based on various criteria and preferences, it can decide at any given time what project/target should be actively imaging. A user will enter the desired projects, targets, and preferences into a UI exposed by the plugin. At runtime, a single new instruction for the NINA Advanced Sequencer will interact with the planning engine to determine the best target for imaging at each point throughout a night. The instruction will manage the slew/center to the target, switching filters, taking exposures, and dithering - all while transparently interacting with the surrounding NINA triggers and conditions.
 
 ## Acknowledgements ##
 * 
@@ -35,7 +35,7 @@ using System.Runtime.InteropServices;
 * [Plugin source code](https://github.com/tcpalmer/nina.plugin.assistant)
 * [Change log](https://github.com/tcpalmer/nina.plugin.assistant/blob/main/CHANGELOG.md)
 
-The Assistant plugin is provided 'as is' under the terms of the [Mozilla Public License 2.0](https://github.com/tcpalmer/nina.plugin.assistant/blob/main/LICENSE.txt)
+The Sequence Scheduler plugin is provided 'as is' under the terms of the [Mozilla Public License 2.0](https://github.com/tcpalmer/nina.plugin.assistant/blob/main/LICENSE.txt)
 ")]
 
 [assembly: ComVisible(false)]

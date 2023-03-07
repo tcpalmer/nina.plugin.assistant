@@ -20,7 +20,7 @@ namespace Assistant.NINAPlugin {
     [Export(typeof(IPluginManifest))]
     public class AssistantPlugin : PluginBase, INotifyPropertyChanged {
 
-        public static string PLUGIN_HOME = Path.Combine(CoreUtil.APPLICATIONTEMPPATH, "AssistantPlugin");
+        public static string PLUGIN_HOME = Path.Combine(CoreUtil.APPLICATIONTEMPPATH, "SchedulerPlugin");
 
         private IPluginOptionsAccessor pluginSettings;
         private IProfileService profileService;

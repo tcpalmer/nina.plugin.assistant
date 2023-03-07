@@ -103,7 +103,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Debug("Assistant: executing target container");
+            Logger.Debug("Scheduler: executing target container");
             ImageSaveWatcher imageSaveWatcher = null;
 
             try {
@@ -143,7 +143,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 Items.Clear();
                 Triggers.Clear();
-                Logger.Debug("Assistant: done executing target container");
+                Logger.Debug("Scheduler: done executing target container");
             }
 
             return Task.CompletedTask;
@@ -155,14 +155,14 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void AddEndTimeTrigger(IPlanTarget planTarget) {
-            Logger.Info($"Assistant: adding target end time trigger, run until: {Utils.FormatDateTimeFull(planTarget.EndTime)}");
+            Logger.Info($"Scheduler: adding target end time trigger, run until: {Utils.FormatDateTimeFull(planTarget.EndTime)}");
             Add(new AssistantTargetEndTimeTrigger(planTarget.EndTime));
         }
 
         private void AddDitherTrigger(IPlanTarget planTarget) {
             int ditherEvery = planTarget.Project.DitherEvery;
             if (ditherEvery > 0) {
-                Logger.Info($"Assistant: adding dither trigger: every {ditherEvery} exposures");
+                Logger.Info($"Scheduler: adding dither trigger: every {ditherEvery} exposures");
                 DitherAfterExposures ditherTrigger = new DitherAfterExposures(guiderMediator, imageHistoryVM, profileService);
                 ditherTrigger.AfterExposures = ditherEvery;
                 Add(ditherTrigger);
@@ -215,7 +215,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private void AddSlew(PlanSlew instruction, IPlanTarget planTarget) {
             string with = instruction.center ? "with" : "without";
-            Logger.Info($"Assistant: slew ({with} center): {Utils.FormatCoordinates(planTarget.Coordinates)}");
+            Logger.Info($"Scheduler: slew ({with} center): {Utils.FormatCoordinates(planTarget.Coordinates)}");
 
             bool isPlateSolve = instruction.center || planTarget.Rotation != 0;
             SequenceItem slewCenter;
@@ -247,7 +247,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void AddSwitchFilter(IPlanExposure planFilter) {
-            Logger.Info($"Assistant: adding switch filter: {planFilter.FilterName}");
+            Logger.Info($"Scheduler: adding switch filter: {planFilter.FilterName}");
 
             SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator);
             switchFilter.Name = nameof(SwitchFilter);
@@ -264,7 +264,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             int? readoutMode = planFilter.ReadoutMode;
             readoutMode = (readoutMode == null || readoutMode < 0) ? 0 : readoutMode;
 
-            Logger.Info($"Assistant: adding set readout mode: {readoutMode}");
+            Logger.Info($"Scheduler: adding set readout mode: {readoutMode}");
             SetReadoutMode setReadoutMode = new SetReadoutMode(cameraMediator);
             setReadoutMode.Name = nameof(SetReadoutMode);
             setReadoutMode.Category = INSTRUCTION_CATEGORY;
@@ -278,7 +278,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void AddTakeExposure(IPlanExposure planFilter) {
-            Logger.Info($"Assistant: adding take exposure: {planFilter.FilterName}");
+            Logger.Info($"Scheduler: adding take exposure: {planFilter.FilterName}");
 
             TakeExposure takeExposure = new TakeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM);
             takeExposure.Name = nameof(TakeExposure);

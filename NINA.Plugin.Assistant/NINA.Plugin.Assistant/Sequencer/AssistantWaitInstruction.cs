@@ -22,13 +22,13 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Info($"Assistant: stopping guiding/tracking, then waiting for {Utils.FormatDateTimeFull(waitUntil)}");
+            Logger.Info($"Scheduler: stopping guiding/tracking, then waiting for {Utils.FormatDateTimeFull(waitUntil)}");
             SequenceCommands.StopGuiding(guiderMediator, token);
             SequenceCommands.SetTelescopeTracking(telescopeMediator, TrackingMode.Stopped, token);
 
             TimeSpan duration = ((DateTime)waitUntil) - DateTime.Now;
             CoreUtil.Wait(duration, token, progress).Wait(token);
-            Logger.Debug("Assistant: done waiting");
+            Logger.Debug("Scheduler: done waiting");
 
             return Task.CompletedTask;
         }

@@ -1,4 +1,4 @@
-# Assistant NINA Plugin
+# Scheduler NINA Plugin
 
 
 ## Acknowledgements ##

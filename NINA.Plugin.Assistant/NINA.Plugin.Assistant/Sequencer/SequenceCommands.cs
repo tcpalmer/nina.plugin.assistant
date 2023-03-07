@@ -12,41 +12,41 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public static void StopGuiding(IGuiderMediator guiderMediator, CancellationToken token) {
             if (guiderMediator.GetInfo().Connected) {
-                Logger.Info("Assistant: stopping guiding");
+                Logger.Info("Scheduler: stopping guiding");
                 var stoppedGuiding = Task.Run(async () => {
                     await guiderMediator.StopGuiding(token);
                 });
             }
             else {
-                Logger.Warning("Assistant: no guider connected, skipping StopGuiding");
+                Logger.Warning("Scheduler: no guider connected, skipping StopGuiding");
             }
         }
 
         public static void StartGuiding(IGuiderMediator guiderMediator, IProgress<ApplicationStatus> progress, CancellationToken token) {
             if (guiderMediator.GetInfo().Connected) {
-                Logger.Info("Assistant: starting guiding");
+                Logger.Info("Scheduler: starting guiding");
                 var stoppedGuiding = Task.Run(async () => {
                     await guiderMediator.StartGuiding(false, progress, token);
                 });
             }
             else {
-                Logger.Warning("Assistant: no guider connected, skipping StartGuiding");
+                Logger.Warning("Scheduler: no guider connected, skipping StartGuiding");
             }
         }
 
         public static void SetTelescopeTracking(ITelescopeMediator telescopeMediator, TrackingMode trackingMode, CancellationToken token) {
             if (telescopeMediator.GetInfo().Connected) {
-                Logger.Info($"Assistant: set mount tracking to {trackingMode}");
+                Logger.Info($"Scheduler: set mount tracking to {trackingMode}");
                 telescopeMediator.SetTrackingMode(trackingMode);
             }
             else {
-                Logger.Warning("Assistant: no mount connected, skipping SetTelescopeTracking");
+                Logger.Warning("Scheduler: no mount connected, skipping SetTelescopeTracking");
             }
         }
 
         public static async Task ParkTelescope(ITelescopeMediator telescopeMediator, IGuiderMediator guiderMediator, IProgress<ApplicationStatus> progress, CancellationToken token) {
             if (telescopeMediator.GetInfo().Connected) {
-                Logger.Info($"Assistant: parking telescope");
+                Logger.Info($"Scheduler: parking telescope");
                 StopGuiding(guiderMediator, token);
                 await guiderMediator.StopGuiding(token);
                 if (!await telescopeMediator.ParkTelescope(progress, token)) {
@@ -54,32 +54,32 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
             }
             else {
-                Logger.Warning("Assistant: no mount connected, skipping ParkTelescope");
+                Logger.Warning("Scheduler: no mount connected, skipping ParkTelescope");
             }
         }
 
         public static async Task UnparkTelescope(ITelescopeMediator telescopeMediator, IProgress<ApplicationStatus> progress, CancellationToken token) {
             if (telescopeMediator.GetInfo().Connected) {
-                Logger.Info($"Assistant: unparking telescope");
+                Logger.Info($"Scheduler: unparking telescope");
                 bool success = await telescopeMediator.UnparkTelescope(progress, token);
                 if (!success) {
                     throw new SequenceEntityFailedException();
                 }
             }
             else {
-                Logger.Warning("Assistant: no mount connected, skipping UnparkTelescope");
+                Logger.Warning("Scheduler: no mount connected, skipping UnparkTelescope");
             }
         }
 
         public static async Task ParkDome(IDomeMediator domeMediator, CancellationToken token) {
             if (domeMediator.GetInfo().Connected) {
-                Logger.Info($"Assistant: parking dome");
+                Logger.Info($"Scheduler: parking dome");
                 if (!await domeMediator.Park(token)) {
                     throw new SequenceEntityFailedException();
                 }
             }
             else {
-                Logger.Warning("Assistant: no dome connected, skipping ParkDome");
+                Logger.Warning("Scheduler: no dome connected, skipping ParkDome");
             }
         }
 
