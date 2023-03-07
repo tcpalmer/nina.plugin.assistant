@@ -30,7 +30,8 @@ namespace Assistant.NINAPlugin.Plan {
 
             switch (CallNumber) {
                 case 1: return Plan1();
-                case 2: return Plan2();
+                case 2: return WaitForTime(DateTime.Now.AddSeconds(10));
+                case 3: return Plan2();
                 default: return null;
             }
         }
@@ -53,11 +54,11 @@ namespace Assistant.NINAPlugin.Plan {
             IPlanTarget planTarget = GetBasePlanTarget("T01", planProject, Cp5n5);
             planTarget.EndTime = endTime;
 
-            IPlanExposure lum = GetPlanFilter("Lum", 8, null, null, 3);
+            IPlanExposure lum = GetPlanFilter("Lum", 4, null, null, 3);
             lum.ReadoutMode = 1;
-            IPlanExposure red = GetPlanFilter("R", 8, null, null, 3);
-            IPlanExposure grn = GetPlanFilter("G", 8, null, null, 3);
-            IPlanExposure blu = GetPlanFilter("B", 8, null, null, 3);
+            IPlanExposure red = GetPlanFilter("R", 4, null, null, 3);
+            IPlanExposure grn = GetPlanFilter("G", 4, null, null, 3);
+            IPlanExposure blu = GetPlanFilter("B", 4, null, null, 3);
             planTarget.ExposurePlans.Add(lum);
             planTarget.ExposurePlans.Add(red);
             planTarget.ExposurePlans.Add(grn);
@@ -72,10 +73,10 @@ namespace Assistant.NINAPlugin.Plan {
             instructions.Add(new PlanTakeExposure(red));
             instructions.Add(new PlanSwitchFilter(grn));
             instructions.Add(new PlanTakeExposure(grn));
-            instructions.Add(new PlanSwitchFilter(blu));
-            instructions.Add(new PlanTakeExposure(blu));
-            instructions.Add(new PlanSwitchFilter(lum));
-            instructions.Add(new PlanTakeExposure(lum));
+            //instructions.Add(new PlanSwitchFilter(blu));
+            //instructions.Add(new PlanTakeExposure(blu));
+            //instructions.Add(new PlanSwitchFilter(lum));
+            //instructions.Add(new PlanTakeExposure(lum));
 
             return new AssistantPlan(planTarget, timeInterval, instructions);
         }
@@ -94,11 +95,11 @@ namespace Assistant.NINAPlugin.Plan {
             IPlanTarget planTarget = GetBasePlanTarget("T02", planProject, Cp1525);
             planTarget.EndTime = endTime;
 
-            IPlanExposure lum = GetPlanFilter("Lum", 8, null, null, 3);
+            IPlanExposure lum = GetPlanFilter("Lum", 4, null, null, 3);
             lum.ReadoutMode = 1;
-            IPlanExposure red = GetPlanFilter("R", 8, null, null, 3);
-            IPlanExposure grn = GetPlanFilter("G", 8, null, null, 3);
-            IPlanExposure blu = GetPlanFilter("B", 8, null, null, 3);
+            IPlanExposure red = GetPlanFilter("R", 4, null, null, 3);
+            IPlanExposure grn = GetPlanFilter("G", 4, null, null, 3);
+            IPlanExposure blu = GetPlanFilter("B", 4, null, null, 3);
             planTarget.ExposurePlans.Add(lum);
             planTarget.ExposurePlans.Add(red);
             planTarget.ExposurePlans.Add(grn);

@@ -1,36 +1,49 @@
 ﻿using Assistant.NINAPlugin.Plan;
 using NINA.Core.Utility;
 using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
     public class AssistantStatusMonitor : BaseINPC {
 
-        public AssistantStatusMonitor() { }
+        public AssistantStatusMonitor() {
+            TargetStatusList.CollectionChanged += TargetStatusList_CollectionChanged;
+        }
 
-        private List<TargetStatus> targetStatusList = new List<TargetStatus>();
-        public List<TargetStatus> TargetStatusList {
+        private void TargetStatusList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+            RaisePropertyChanged(nameof(TargetStatusList));
+        }
+
+        private AsyncObservableCollection<TargetStatus> targetStatusList = new AsyncObservableCollection<TargetStatus>();
+        public AsyncObservableCollection<TargetStatus> TargetStatusList {
             get => targetStatusList;
             set {
                 targetStatusList = value;
             }
         }
 
-        TargetStatus currentTargetStatus;
+        public void Reset() {
+            TargetStatusList.Clear();
+        }
+
+        private TargetStatus currentTargetStatus;
         public TargetStatus CurrentTargetStatus {
             get => currentTargetStatus;
             set {
                 currentTargetStatus = value;
                 RaisePropertyChanged(nameof(CurrentTargetStatus));
+                RaisePropertyChanged(nameof(Summary));
             }
+        }
+
+        public string Summary {
+            get { return currentTargetStatus != null ? currentTargetStatus.Name : ""; }
         }
 
         public void BeginTarget(IPlanTarget planTarget) {
             TargetStatus targetStatus = new TargetStatus(planTarget);
             TargetStatusList.Add(targetStatus);
-            RaisePropertyChanged(nameof(TargetStatusList));
             CurrentTargetStatus = targetStatus;
         }
 
@@ -81,9 +94,14 @@ namespace Assistant.NINAPlugin.Sequencer {
         private InstructionStatus activeInstruction;
         private StringBuilder completedHistory;
 
+        private string history;
         public string History {
             get {
-                return activeInstruction != null ? completedHistory.ToString() + activeInstruction.ToString() : completedHistory.ToString();
+                return history;
+            }
+            set {
+                history = value;
+                RaisePropertyChanged(nameof(History));
             }
         }
 
@@ -92,15 +110,18 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.completedHistory = new StringBuilder();
         }
 
-        public string Name { get { return PlanTarget.Name; } }
+        // TODO: get start (and later end) times into the Name too
+        public string Name { get { return $"{PlanTarget.Project.Name} / {PlanTarget.Name}"; } }
 
         public void StartInstruction(InstructionStatus instructionStatus) {
             activeInstruction = instructionStatus;
+            History = completedHistory.ToString() + activeInstruction.ToString();
         }
 
         public void EndInstruction(DateTime endTime) {
             activeInstruction.End(endTime);
             completedHistory.AppendLine(activeInstruction.ToString());
+            History = completedHistory.ToString();
             activeInstruction = null;
         }
     }
