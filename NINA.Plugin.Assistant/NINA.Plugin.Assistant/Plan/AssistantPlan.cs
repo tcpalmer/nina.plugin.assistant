@@ -78,6 +78,7 @@ namespace Assistant.NINAPlugin.Plan {
         double MinimumAltitude { get; set; }
         bool UseCustomHorizon { get; set; }
         double HorizonOffset { get; set; }
+        int MeridianWindow { get; set; }
         int FilterSwitchFrequency { get; set; }
         int DitherEvery { get; set; }
         bool EnableGrader { get; set; }
@@ -109,6 +110,7 @@ namespace Assistant.NINAPlugin.Plan {
         public double MinimumAltitude { get; set; }
         public bool UseCustomHorizon { get; set; }
         public double HorizonOffset { get; set; }
+        public int MeridianWindow { get; set; }
         public int FilterSwitchFrequency { get; set; }
         public int DitherEvery { get; set; }
         public bool EnableGrader { get; set; }
@@ -137,6 +139,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.MinimumAltitude = project.MinimumAltitude;
             this.UseCustomHorizon = project.UseCustomHorizon;
             this.HorizonOffset = project.HorizonOffset;
+            this.MeridianWindow = project.MeridianWindow;
             this.FilterSwitchFrequency = project.FilterSwitchFrequency;
             this.DitherEvery = project.DitherEvery;
             this.EnableGrader = project.EnableGrader;
@@ -174,6 +177,7 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"MinimumAltitude: {MinimumAltitude}");
             sb.AppendLine($"UseCustomHorizon: {UseCustomHorizon}");
             sb.AppendLine($"HorizonOffset: {HorizonOffset}");
+            sb.AppendLine($"MeridianWindow: {MeridianWindow}");
             sb.AppendLine($"FilterSwitchFrequency: {FilterSwitchFrequency}");
             sb.AppendLine($"DitherEvery: {DitherEvery}");
             sb.AppendLine($"EnableGrader: {EnableGrader}");

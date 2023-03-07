@@ -24,6 +24,7 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
             p1.MinimumAltitude = 10;
             p1.MinimumTime = 90;
             p1.UseCustomHorizon = true;
+            p1.MeridianWindow = 60;
 
             p1.RuleWeights = new List<RuleWeight> {
                         {new RuleWeight("a", .1) },
@@ -47,6 +48,7 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
             p2.MinimumAltitude.Should().Be(10);
             p2.MinimumTime.Should().Be(90);
             p2.UseCustomHorizon.Should().Be(true);
+            p2.MeridianWindow.Should().Be(60);
             p2.RuleWeights.Count.Should().Be(2);
             p2.RuleWeights[0].Weight.Should().Be(.1);
             p2.RuleWeights[1].Weight.Should().Be(.2);

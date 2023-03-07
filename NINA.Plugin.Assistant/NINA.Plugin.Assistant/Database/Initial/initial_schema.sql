@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `project` (
 	`minimumaltitude`	REAL,
 	`usecustomhorizon`	INTEGER,
 	`horizonoffset`	REAL,
+	`meridianwindow`	INTEGER,
 	`filterswitchfrequency`	INTEGER,
 	`ditherevery`	INTEGER,
 	`enablegrader`	INTEGER,

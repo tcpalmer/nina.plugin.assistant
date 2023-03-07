@@ -37,6 +37,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public double minimumAltitude { get; set; }
         public int useCustomHorizon { get; set; }
         public double horizonOffset { get; set; }
+        public int meridianWindow { get; set; }
         public int filterSwitchFrequency { get; set; }
         public int ditherEvery { get; set; }
         public int enableGrader { get; set; }
@@ -56,6 +57,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             MinimumAltitude = 0;
             UseCustomHorizon = false;
             HorizonOffset = 0;
+            MeridianWindow = 0;
             FilterSwitchFrequency = 0;
             DitherEvery = 0;
             EnableGrader = true;
@@ -190,6 +192,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
+        public int MeridianWindow {
+            get => meridianWindow;
+            set {
+                meridianWindow = value;
+                RaisePropertyChanged(nameof(MeridianWindow));
+            }
+        }
+
+        [NotMapped]
         public int FilterSwitchFrequency {
             get => filterSwitchFrequency;
             set {
@@ -263,6 +274,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             project.minimumAltitude = minimumAltitude;
             project.useCustomHorizon = useCustomHorizon;
             project.horizonOffset = horizonOffset;
+            project.meridianWindow = meridianWindow;
             project.filterSwitchFrequency = filterSwitchFrequency;
             project.ditherEvery = ditherEvery;
             project.enableGrader = enableGrader;
@@ -302,6 +314,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"MinimumAltitude: {MinimumAltitude}");
             sb.AppendLine($"UseCustomHorizon: {UseCustomHorizon}");
             sb.AppendLine($"HorizonOffset: {HorizonOffset}");
+            sb.AppendLine($"MeridianWindow: {MeridianWindow}");
             sb.AppendLine($"FilterSwitchFrequency: {FilterSwitchFrequency}");
             sb.AppendLine($"DitherEvery: {DitherEvery}");
             sb.AppendLine($"EnableGrader: {EnableGrader}");

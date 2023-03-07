@@ -173,6 +173,7 @@ namespace Assistant.NINAPlugin.Plan {
         ProjectPriority IPlanProject.Priority { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public int MinimumTime { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public double HorizonOffset { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public int MeridianWindow { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public int FilterSwitchFrequency { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public Dictionary<string, double> RuleWeights { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         /*

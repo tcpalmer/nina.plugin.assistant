@@ -43,6 +43,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pp.SetupProperty(m => m.MinimumAltitude, 0);
             pp.SetupProperty(m => m.UseCustomHorizon, false);
             pp.SetupProperty(m => m.HorizonOffset, 0);
+            pp.SetupProperty(m => m.MeridianWindow, 0);
             pp.SetupProperty(m => m.FilterSwitchFrequency, 0);
             pp.SetupProperty(m => m.DitherEvery, 0);
             pp.SetupProperty(m => m.EnableGrader, false);
