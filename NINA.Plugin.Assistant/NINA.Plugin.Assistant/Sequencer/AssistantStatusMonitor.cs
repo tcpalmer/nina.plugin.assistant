@@ -1,30 +1,62 @@
 ﻿using Assistant.NINAPlugin.Plan;
+using NINA.Core.Utility;
 using System;
-using System.ComponentModel;
 using System.Text;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
-    public class AssistantStatusMonitor : INotifyPropertyChanged {
+    public class AssistantStatusMonitor : BaseINPC {
 
-        private IPlanTarget planTarget;
-        private InstructionStatus activeInstruction;
-        private StringBuilder completedHistory { get; set; }
+        public AssistantStatusMonitor() {
+            TargetStatusList.CollectionChanged += TargetStatusList_CollectionChanged;
+        }
 
-        public string History {
-            get {
-                return activeInstruction != null ? completedHistory.ToString() + activeInstruction.ToString() : completedHistory.ToString();
+        private void TargetStatusList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+            RaisePropertyChanged(nameof(TargetStatusList));
+        }
+
+        private AsyncObservableCollection<TargetStatus> targetStatusList = new AsyncObservableCollection<TargetStatus>();
+        public AsyncObservableCollection<TargetStatus> TargetStatusList {
+            get => targetStatusList;
+            set {
+                targetStatusList = value;
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public void Reset() {
+            TargetStatusList.Clear();
+        }
 
-        public AssistantStatusMonitor(IPlanTarget planTarget) {
-            this.planTarget = planTarget;
-            this.completedHistory = new StringBuilder();
+        private TargetStatus currentTargetStatus;
+        public TargetStatus CurrentTargetStatus {
+            get => currentTargetStatus;
+            set {
+                currentTargetStatus = value;
+                RaisePropertyChanged(nameof(CurrentTargetStatus));
+                RaisePropertyChanged(nameof(Summary));
+            }
+        }
+
+        public string Summary {
+            get { return currentTargetStatus != null ? currentTargetStatus.Name : ""; }
+        }
+
+        public void BeginTarget(IPlanTarget planTarget) {
+            TargetStatus targetStatus = new TargetStatus(planTarget);
+            TargetStatusList.Add(targetStatus);
+            CurrentTargetStatus = targetStatus;
+        }
+
+        public void EndTarget() {
+            CurrentTargetStatus = null;
         }
 
         public string GetFilterName(string planItemId) {
+            if (CurrentTargetStatus == null) {
+                throw new Exception("currentTargetStatus is unexpectedly null");
+            }
+
+            IPlanTarget planTarget = CurrentTargetStatus.PlanTarget;
             if (planTarget.PlanId == planItemId) {
                 return "";
             }
@@ -39,19 +71,58 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public void ItemStart(string itemId, string sequenceItemName) {
-            activeInstruction = new InstructionStatus(sequenceItemName, GetFilterName(itemId)).Start(DateTime.Now);
-            OnPropertyChanged();
+            if (CurrentTargetStatus == null) {
+                throw new Exception("currentTargetStatus is unexpectedly null");
+            }
+
+            CurrentTargetStatus.StartInstruction(new InstructionStatus(sequenceItemName, GetFilterName(itemId)).Start(DateTime.Now));
+            RaisePropertyChanged(nameof(CurrentTargetStatus));
         }
 
-        public void ItemFinsh(string itemId, string sequenceItemName) {
-            activeInstruction.End(DateTime.Now);
+        public void ItemFinish(string itemId, string sequenceItemName) {
+            if (CurrentTargetStatus == null) {
+                throw new Exception("currentTargetStatus is unexpectedly null");
+            }
+
+            CurrentTargetStatus.EndInstruction(DateTime.Now);
+            RaisePropertyChanged(nameof(CurrentTargetStatus));
+        }
+    }
+
+    public class TargetStatus : BaseINPC {
+        public IPlanTarget PlanTarget { get; private set; }
+        private InstructionStatus activeInstruction;
+        private StringBuilder completedHistory;
+
+        private string history;
+        public string History {
+            get {
+                return history;
+            }
+            set {
+                history = value;
+                RaisePropertyChanged(nameof(History));
+            }
+        }
+
+        public TargetStatus(IPlanTarget planTarget) {
+            this.PlanTarget = planTarget;
+            this.completedHistory = new StringBuilder();
+        }
+
+        // TODO: get start (and later end) times into the Name too
+        public string Name { get { return $"{PlanTarget.Project.Name} / {PlanTarget.Name}"; } }
+
+        public void StartInstruction(InstructionStatus instructionStatus) {
+            activeInstruction = instructionStatus;
+            History = completedHistory.ToString() + activeInstruction.ToString();
+        }
+
+        public void EndInstruction(DateTime endTime) {
+            activeInstruction.End(endTime);
             completedHistory.AppendLine(activeInstruction.ToString());
+            History = completedHistory.ToString();
             activeInstruction = null;
-            OnPropertyChanged();
-        }
-
-        protected void OnPropertyChanged() {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("MonitorHistory"));
         }
     }
 

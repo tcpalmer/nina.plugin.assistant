@@ -28,11 +28,12 @@ namespace Assistant.NINAPlugin.Plan {
         public AssistantPlan GetPlan(IPlanTarget previousPlanTarget) {
             CallNumber++;
 
-            if (CallNumber == 2) {
-                return null;
+            switch (CallNumber) {
+                case 1: return Plan1();
+                case 2: return WaitForTime(DateTime.Now.AddSeconds(10));
+                case 3: return Plan2();
+                default: return null;
             }
-
-            return Plan1();
         }
 
         private AssistantPlan WaitForTime(DateTime waitFor) {
@@ -53,11 +54,11 @@ namespace Assistant.NINAPlugin.Plan {
             IPlanTarget planTarget = GetBasePlanTarget("T01", planProject, Cp5n5);
             planTarget.EndTime = endTime;
 
-            IPlanExposure lum = GetPlanFilter("Lum", 8, null, null, 3);
+            IPlanExposure lum = GetPlanFilter("Lum", 4, null, null, 3);
             lum.ReadoutMode = 1;
-            IPlanExposure red = GetPlanFilter("R", 8, null, null, 3);
-            IPlanExposure grn = GetPlanFilter("G", 8, null, null, 3);
-            IPlanExposure blu = GetPlanFilter("B", 8, null, null, 3);
+            IPlanExposure red = GetPlanFilter("R", 4, null, null, 3);
+            IPlanExposure grn = GetPlanFilter("G", 4, null, null, 3);
+            IPlanExposure blu = GetPlanFilter("B", 4, null, null, 3);
             planTarget.ExposurePlans.Add(lum);
             planTarget.ExposurePlans.Add(red);
             planTarget.ExposurePlans.Add(grn);
@@ -65,6 +66,47 @@ namespace Assistant.NINAPlugin.Plan {
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             instructions.Add(new PlanMessage("planner emulator: Plan1"));
+            instructions.Add(new PlanSetReadoutMode(lum));
+            instructions.Add(new PlanSwitchFilter(lum));
+            instructions.Add(new PlanTakeExposure(lum));
+            instructions.Add(new PlanSwitchFilter(red));
+            instructions.Add(new PlanTakeExposure(red));
+            instructions.Add(new PlanSwitchFilter(grn));
+            instructions.Add(new PlanTakeExposure(grn));
+            //instructions.Add(new PlanSwitchFilter(blu));
+            //instructions.Add(new PlanTakeExposure(blu));
+            //instructions.Add(new PlanSwitchFilter(lum));
+            //instructions.Add(new PlanTakeExposure(lum));
+
+            return new AssistantPlan(planTarget, timeInterval, instructions);
+        }
+
+        private AssistantPlan Plan2() {
+            DateTime endTime = atTime.AddMinutes(5);
+            TimeInterval timeInterval = new TimeInterval(atTime, endTime);
+
+            IPlanProject planProject = new PlanProjectEmulator();
+            planProject.Name = "P01";
+            planProject.UseCustomHorizon = false;
+            planProject.MinimumAltitude = 10;
+            planProject.DitherEvery = 0;
+            planProject.EnableGrader = false;
+
+            IPlanTarget planTarget = GetBasePlanTarget("T02", planProject, Cp1525);
+            planTarget.EndTime = endTime;
+
+            IPlanExposure lum = GetPlanFilter("Lum", 4, null, null, 3);
+            lum.ReadoutMode = 1;
+            IPlanExposure red = GetPlanFilter("R", 4, null, null, 3);
+            IPlanExposure grn = GetPlanFilter("G", 4, null, null, 3);
+            IPlanExposure blu = GetPlanFilter("B", 4, null, null, 3);
+            planTarget.ExposurePlans.Add(lum);
+            planTarget.ExposurePlans.Add(red);
+            planTarget.ExposurePlans.Add(grn);
+            planTarget.ExposurePlans.Add(blu);
+
+            List<IPlanInstruction> instructions = new List<IPlanInstruction>();
+            instructions.Add(new PlanMessage("planner emulator: Plan2"));
             instructions.Add(new PlanSetReadoutMode(lum));
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
@@ -102,6 +144,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         public static readonly Coordinates Cp5n5 = new Coordinates(AstroUtil.HMSToDegrees("5:0:0"), AstroUtil.DMSToDegrees("-5:0:0"), Epoch.J2000, Coordinates.RAType.Degrees);
+        public static readonly Coordinates Cp1525 = new Coordinates(AstroUtil.HMSToDegrees("15:0:0"), AstroUtil.DMSToDegrees("25:0:0"), Epoch.J2000, Coordinates.RAType.Degrees);
     }
 
     class PlanProjectEmulator : IPlanProject {

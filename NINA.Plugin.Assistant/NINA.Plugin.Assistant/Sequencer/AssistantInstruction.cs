@@ -35,21 +35,6 @@ namespace Assistant.NINAPlugin.Sequencer {
     [JsonObject(MemberSerialization.OptIn)]
     public class AssistantInstruction : SequenceItem, IValidatable {
 
-        /*
-         * Check out some methods on the parent:
-         * - override GetEstimatedDuration: estimate of how long this will take
-         */
-
-        /*
-         * Lifecycle:
-         * - construct/clone: when added to a sequence
-         * - initialize: when the sequence is started (not when execution starts)
-         * - execute: when the instruction is started
-         * - teardown: when the instruction has completed or canceled
-         * 
-         * A cancel has to be handled, e.g. remove any instructions added to the sequence under the hood and clear the plan
-         */
-
         private readonly IProfileService profileService;
         private readonly IList<IDateTimeProvider> dateTimeProviders;
         private readonly ITelescopeMediator telescopeMediator;
@@ -67,13 +52,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IWindowServiceFactory windowServiceFactory;
 
         public int TotalExposureCount { get; set; }
-
-        [OnDeserializing]
-        public void OnDeserializing(StreamingContext context) {
-            //this.Items.Clear();
-            //this.Conditions.Clear();
-            //this.Triggers.Clear();
-        }
 
         [ImportingConstructor]
         public AssistantInstruction(
@@ -144,12 +122,31 @@ namespace Assistant.NINAPlugin.Sequencer {
             return new AssistantInstruction(this) { };
         }
 
+        [OnDeserializing]
+        public void OnDeserializing(StreamingContext context) {
+        }
+
         public override void Initialize() {
-            Logger.Trace("Assistant initialize");
+            Logger.Debug("Assistant: Initialize");
+
+            if (StatusMonitor != null) {
+                StatusMonitor.Reset();
+                StatusMonitor.PropertyChanged -= StatusMonitor_PropertyChanged;
+            }
+
+            StatusMonitor = new AssistantStatusMonitor();
+            StatusMonitor.PropertyChanged += StatusMonitor_PropertyChanged;
+        }
+
+        public override void ResetProgress() {
+            Logger.Debug("Assistant ResetProgress");
+            StatusMonitor.Reset();
+            base.ResetProgress();
         }
 
         public override void Teardown() {
-            Logger.Trace("Assistant teardown");
+            Logger.Debug("Assistant Teardown");
+            base.Teardown();
         }
 
         public override string ToString() {
@@ -157,7 +154,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Debug("Assistant: execute instruction");
+            Logger.Debug("Assistant: Execute");
+
             IPlanTarget previousPlanTarget = null;
 
             while (true) {
@@ -178,12 +176,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                         IPlanTarget planTarget = plan.PlanTarget;
                         Logger.Info($"Assistant: starting execution of plan target: {planTarget.Name}");
                         SetTarget(atTime, planTarget);
-
-                        AssistantStatusMonitor monitor = new AssistantStatusMonitor(planTarget);
-                        monitor.PropertyChanged += Monitor_PropertyChanged;
+                        StatusMonitor.BeginTarget(planTarget);
 
                         // Create a container for this target, add the instructions, and execute
-                        AssistantTargetContainer targetContainer = GetTargetContainer(previousPlanTarget, plan, monitor);
+                        AssistantTargetContainer targetContainer = GetTargetContainer(previousPlanTarget, plan, StatusMonitor);
                         targetContainer.Execute(progress, token).Wait();
                         previousPlanTarget = planTarget;
                     }
@@ -197,6 +193,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
                     finally {
                         ClearTarget();
+                        StatusMonitor.EndTarget();
                     }
                 }
             }
@@ -218,6 +215,23 @@ namespace Assistant.NINAPlugin.Sequencer {
                 imageHistoryVM, filterWheelMediator, domeMediator, domeFollower,
                 plateSolverFactory, windowServiceFactory, previousPlanTarget, plan, monitor);
             return targetContainer;
+        }
+
+        private AssistantStatusMonitor statusMonitor;
+        public AssistantStatusMonitor StatusMonitor {
+            get => statusMonitor;
+            set {
+                statusMonitor = value;
+                RaisePropertyChanged(nameof(StatusMonitor));
+            }
+        }
+
+        public AsyncObservableCollection<TargetStatus> TargetStatusList {
+            get => StatusMonitor.TargetStatusList;
+        }
+
+        public string Summary {
+            get { return StatusMonitor.Summary; }
         }
 
         private IList<string> issues = new List<string>();
@@ -270,14 +284,12 @@ namespace Assistant.NINAPlugin.Sequencer {
             ProjectTargetDisplay = "";
             CoordinatesDisplay = "";
             StopAtDisplay = "";
-            MonitorContent = "";
 
             RaisePropertyChanged(nameof(ProjectTargetDisplay));
             RaisePropertyChanged(nameof(CoordinatesDisplay));
             RaisePropertyChanged(nameof(StopAtDisplay));
             RaisePropertyChanged(nameof(NighttimeData));
             RaisePropertyChanged(nameof(Target));
-            RaisePropertyChanged(nameof(MonitorContent));
         }
 
         private DeepSkyObject GetDeepSkyObject(DateTime referenceDate, IProfile activeProfile, IPlanTarget planTarget, CustomHorizon customHorizon) {
@@ -294,9 +306,9 @@ namespace Assistant.NINAPlugin.Sequencer {
             return customHorizon;
         }
 
-        private void Monitor_PropertyChanged(object sender, PropertyChangedEventArgs e) {
-            MonitorContent = ((AssistantStatusMonitor)sender).History;
-            RaisePropertyChanged(nameof(MonitorContent));
+        private void StatusMonitor_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+            RaisePropertyChanged(nameof(StatusMonitor));
+            RaisePropertyChanged(nameof(TargetStatusList));
         }
 
         public InputTarget Target { get; private set; }
@@ -304,6 +316,5 @@ namespace Assistant.NINAPlugin.Sequencer {
         public string ProjectTargetDisplay { get; private set; }
         public string CoordinatesDisplay { get; private set; }
         public string StopAtDisplay { get; private set; }
-        public string MonitorContent { get; private set; }
     }
 }

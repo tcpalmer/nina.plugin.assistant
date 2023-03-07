@@ -12,11 +12,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class TargetImportVM : BaseINPC {
 
+        private IFramingAssistantVM framingAssistantVM;
         private IPlanetariumFactory planetariumFactory;
 
-        public TargetImportVM(IDeepSkyObjectSearchVM deepSkyObjectSearchVM, IPlanetariumFactory planetariumFactory) {
+        public TargetImportVM(IDeepSkyObjectSearchVM deepSkyObjectSearchVM, IFramingAssistantVM framingAssistantVM, IPlanetariumFactory planetariumFactory) {
             DeepSkyObjectSearchVM = deepSkyObjectSearchVM;
             DeepSkyObjectSearchVM.PropertyChanged += DeepSkyObjectSearchVM_PropertyChanged;
+
+            this.framingAssistantVM = framingAssistantVM;
+            FramingAssistantImportCommand = new RelayCommand(FramingAssistantImport);
 
             this.planetariumFactory = planetariumFactory;
             PlanetariumImportCommand = new RelayCommand(PlanetariumImport);
@@ -41,6 +45,31 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 target.Name = DeepSkyObjectSearchVM.TargetName;
                 Target = target;
             }
+        }
+
+        public ICommand FramingAssistantImportCommand { get; private set; }
+
+        private void FramingAssistantImport(object obj) {
+
+            Target target = new Target();
+            target.Coordinates = GetFramingAssistantCoordinates();
+            target.Name = framingAssistantVM.DSO.Name;
+            target.Rotation = framingAssistantVM.Rectangle.TotalRotation;
+
+            Target = target;
+        }
+
+        private Coordinates GetFramingAssistantCoordinates() {
+            int raHours = framingAssistantVM.RAHours;
+            int raMinutes = framingAssistantVM.RAMinutes;
+            double raSeconds = framingAssistantVM.RASeconds;
+            int decDegrees = framingAssistantVM.DecDegrees;
+            int decMinutes = framingAssistantVM.DecMinutes;
+            double decSeconds = framingAssistantVM.DecSeconds;
+
+            string hms = string.Format("{0:00}:{1:00}:{2:00}", raHours, raMinutes, raSeconds);
+            string dms = string.Format("{0:00}:{1:00}:{2:00}", decDegrees, decMinutes, decSeconds);
+            return new Coordinates(AstroUtil.HMSToDegrees(hms), AstroUtil.DMSToDegrees(dms), Epoch.J2000, Coordinates.RAType.Degrees);
         }
 
         public ICommand PlanetariumImportCommand { get; private set; }

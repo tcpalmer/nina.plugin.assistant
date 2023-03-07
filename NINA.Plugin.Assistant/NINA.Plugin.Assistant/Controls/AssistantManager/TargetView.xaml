@@ -258,7 +258,7 @@
                 Orientation="Horizontal"
                 Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox
-                    Width="30"
+                    Width="45"
                     MaxHeight="20"
                     HorizontalAlignment="Left">
                     <TextBox.Text>

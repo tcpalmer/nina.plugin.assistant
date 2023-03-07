@@ -78,19 +78,76 @@
                                 DataContext="{Binding Target.DeepSkyObject}"
                                 NighttimeData="{Binding Source={StaticResource nighttimeProxy}, Path=Data}" />
 
-                            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,1,1,0">
-                                <ScrollViewer
-                                    Height="200"
-                                    Margin="0,0,0,10"
-                                    CanContentScroll="True"
-                                    HorizontalScrollBarVisibility="Auto"
-                                    VerticalScrollBarVisibility="Visible">
-                                    <TextBlock
-                                        Margin="3,3,3,3"
-                                        FontFamily="Courier New"
-                                        Text="{Binding MonitorContent}" />
-                                </ScrollViewer>
-                            </Border>
+                            <DataGrid
+                                Height="190"
+                                Margin="0,0,0,0"
+                                AutoGenerateColumns="False"
+                                BorderThickness="0"
+                                CanUserAddRows="false"
+                                HeadersVisibility="None"
+                                HorizontalScrollBarVisibility="Disabled"
+                                ItemsSource="{Binding TargetStatusList}"
+                                VerticalScrollBarVisibility="Auto">
+
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+                                        <Setter Property="BorderThickness" Value="0" />
+                                        <Setter Property="MinHeight" Value="22" />
+                                        <Setter Property="Margin" Value="5,3,5,3" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource ButtonBackgroundBrush}" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="False">
+                                                <Setter Property="Background" Value="Transparent" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.CellStyle>
+
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="MinHeight" Value="22" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource SecondaryBackgroundBrush}" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="False">
+                                                <Setter Property="Background" Value="Transparent" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.RowStyle>
+
+                                <DataGrid.Columns>
+
+                                    <DataGridTemplateColumn
+                                        Width="*"
+                                        CanUserReorder="False"
+                                        CanUserSort="False"
+                                        IsReadOnly="True">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Expander
+                                                    ExpandDirection="Down"
+                                                    Header="{Binding Name}"
+                                                    IsExpanded="False">
+                                                    <TextBlock
+                                                        Margin="3,3,3,3"
+                                                        FontFamily="Courier New"
+                                                        Text="{Binding History}"
+                                                        TextWrapping="Wrap" />
+                                                </Expander>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                </DataGrid.Columns>
+                            </DataGrid>
+
                         </StackPanel>
                     </Grid>
 
@@ -103,7 +160,7 @@
         <mini:MiniSequenceItem>
             <mini:MiniSequenceItem.SequenceItemContent>
                 <StackPanel Orientation="Horizontal">
-                    <TextBox Text="mini placeholder" />
+                    <TextBlock VerticalAlignment="Center" Text="{Binding Summary}"/>
                 </StackPanel>
             </mini:MiniSequenceItem.SequenceItemContent>
         </mini:MiniSequenceItem>
