@@ -27,7 +27,7 @@
             <Grid>
                 <Path
                     Margin="5"
-                    Data="{StaticResource EditSVG}"
+                    Data="{StaticResource SS_EditSVG}"
                     Fill="{StaticResource ButtonForegroundBrush}"
                     Stretch="Uniform" />
             </Grid>
@@ -46,7 +46,7 @@
             <Grid>
                 <Path
                     Margin="5"
-                    Data="{StaticResource CopySVG}"
+                    Data="{StaticResource SS_CopySVG}"
                     Fill="{StaticResource ButtonForegroundBrush}"
                     Stretch="Uniform" />
             </Grid>
@@ -65,7 +65,7 @@
             <Grid>
                 <Path
                     Margin="5"
-                    Data="{StaticResource DeleteSVG}"
+                    Data="{StaticResource SS_DeleteSVG}"
                     Fill="{StaticResource ButtonForegroundBrush}"
                     Stretch="Uniform" />
             </Grid>
@@ -84,7 +84,7 @@
             <Grid>
                 <Path
                     Margin="5"
-                    Data="{StaticResource SaveSVG}"
+                    Data="{StaticResource SS_SaveSVG}"
                     Fill="{StaticResource ButtonForegroundBrush}"
                     Stretch="Uniform" />
             </Grid>
@@ -103,7 +103,7 @@
             <Grid>
                 <Path
                     Margin="5"
-                    Data="{StaticResource CancelSVG}"
+                    Data="{StaticResource SS_CancelSVG}"
                     Fill="{StaticResource ButtonForegroundBrush}"
                     Stretch="Uniform" />
             </Grid>

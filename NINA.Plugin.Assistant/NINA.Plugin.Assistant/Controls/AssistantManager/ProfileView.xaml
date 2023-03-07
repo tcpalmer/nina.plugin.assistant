@@ -43,7 +43,7 @@
                 <Grid>
                     <Path
                         Margin="5"
-                        Data="{StaticResource NewSVG}"
+                        Data="{StaticResource SS_NewSVG}"
                         Fill="{StaticResource ButtonForegroundBrush}"
                         Stretch="Uniform" />
                 </Grid>
@@ -62,7 +62,7 @@
                 <Grid>
                     <Path
                         Margin="5"
-                        Data="{StaticResource PasteSVG}"
+                        Data="{StaticResource SS_PasteSVG}"
                         Fill="{StaticResource ButtonForegroundBrush}"
                         Stretch="Uniform" />
                 </Grid>
@@ -150,7 +150,7 @@
                                     ToolTip="View/edit project details">
                                     <Grid>
                                         <Path
-                                            Data="{StaticResource SettingsSVG}"
+                                            Data="{StaticResource SS_SettingsSVG}"
                                             Fill="{StaticResource ButtonForegroundBrush}"
                                             Stretch="Uniform" />
                                     </Grid>
@@ -173,7 +173,7 @@
                                     ToolTip="Copy project">
                                     <Grid>
                                         <Path
-                                            Data="{StaticResource CopySVG}"
+                                            Data="{StaticResource SS_CopySVG}"
                                             Fill="{StaticResource ButtonForegroundBrush}"
                                             Stretch="Uniform" />
                                     </Grid>

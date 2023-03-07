@@ -43,7 +43,7 @@
                             <Grid>
                                 <Path
                                     Margin="5"
-                                    Data="{StaticResource CollapseAllSVG}"
+                                    Data="{StaticResource SS_CollapseAllSVG}"
                                     Fill="{StaticResource ButtonForegroundBrush}"
                                     Stretch="Uniform" />
                             </Grid>
@@ -59,7 +59,7 @@
                             <Grid>
                                 <Path
                                     Margin="5"
-                                    Data="{StaticResource ExpandAllSVG}"
+                                    Data="{StaticResource SS_ExpandAllSVG}"
                                     Fill="{StaticResource ButtonForegroundBrush}"
                                     Stretch="Uniform" />
                             </Grid>
