@@ -21,7 +21,7 @@
             BorderThickness="1">
             <StackPanel Orientation="Vertical">
                 <local:AssistantTreeView DataContext="{Binding ProjectsTreeViewVM}" />
-                <local:AssistantTreeView DataContext="{Binding FilterPrefsTreeViewVM}" />
+                <local:AssistantTreeView DataContext="{Binding ExposureTemplatesTreeViewVM}" />
             </StackPanel>
         </Border>
         <Border
@@ -55,9 +55,9 @@
             Height="600"
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1"
-            Visibility="{Binding ShowFilterPrefView}">
+            Visibility="{Binding ShowExposureTemplateView}">
             <StackPanel>
-                <local:FilterPrefView DataContext="{Binding FilterPrefViewVM}" />
+                <local:ExposureTemplateView DataContext="{Binding ExposureTemplateViewVM}" />
             </StackPanel>
         </Border>
     </StackPanel>

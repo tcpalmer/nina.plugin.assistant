@@ -59,8 +59,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             get => new AssistantTreeViewVM(this, profileService, "Projects", RootProjectsList, 350);
         }
 
-        public AssistantTreeViewVM FilterPrefsTreeViewVM {
-            get => new AssistantTreeViewVM(this, profileService, "Filter Preferences", RootFilterPrefsList, 180);
+        public AssistantTreeViewVM ExposureTemplateTreeViewVM {
+            get => new AssistantTreeViewVM(this, profileService, "Filter Preferences", RootExposureTemplateList, 180);
         }
 
         private ProfileViewVM profileViewVM;
@@ -108,21 +108,21 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        private Visibility showFilterPrefView = Visibility.Hidden;
-        public Visibility ShowFilterPrefView {
-            get => showFilterPrefView;
+        private Visibility showExposureTemplateView = Visibility.Hidden;
+        public Visibility ShowExposureTemplateView {
+            get => showExposureTemplateView;
             set {
-                showFilterPrefView = value;
-                RaisePropertyChanged(nameof(ShowFilterPrefView));
+                showExposureTemplateView = value;
+                RaisePropertyChanged(nameof(ShowExposureTemplateView));
             }
         }
 
-        private FilterPrefViewVM filterPrefViewVM;
-        public FilterPrefViewVM FilterPrefViewVM {
-            get => filterPrefViewVM;
+        private ExposureTemplateViewVM exposureTemplateViewVM;
+        public ExposureTemplateViewVM ExposureTemplateViewVM {
+            get => exposureTemplateViewVM;
             set {
-                filterPrefViewVM = value;
-                RaisePropertyChanged(nameof(FilterPrefViewVM));
+                exposureTemplateViewVM = value;
+                RaisePropertyChanged(nameof(ExposureTemplateViewVM));
             }
         }
 
@@ -141,7 +141,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         ProfileViewVM = new ProfileViewVM(this, profileService, item);
                         ShowTargetView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
-                        ShowFilterPrefView = Visibility.Collapsed;
+                        ShowExposureTemplateView = Visibility.Collapsed;
                         ShowProfileView = Visibility.Visible;
                         break;
 
@@ -151,7 +151,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         ProjectViewVM = new ProjectViewVM(this, profileService, project);
                         ShowProfileView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
-                        ShowFilterPrefView = Visibility.Collapsed;
+                        ShowExposureTemplateView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Visible;
                         break;
 
@@ -161,18 +161,18 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         TargetViewVM = new TargetViewVM(this, profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory, target);
                         ShowProfileView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
-                        ShowFilterPrefView = Visibility.Collapsed;
+                        ShowExposureTemplateView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Visible;
                         break;
 
-                    case TreeDataType.FilterPref:
+                    case TreeDataType.ExposureTemplate:
                         activeTreeDataItem = item;
-                        FilterPreference filterPreference = (FilterPreference)item.Data;
-                        FilterPrefViewVM = new FilterPrefViewVM(this, profileService, filterPreference);
+                        ExposureTemplate exposureTemplate = (ExposureTemplate)item.Data;
+                        ExposureTemplateViewVM = new ExposureTemplateViewVM(this, profileService, exposureTemplate);
                         ShowProfileView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
-                        ShowFilterPrefView = Visibility.Visible;
+                        ShowExposureTemplateView = Visibility.Visible;
                         break;
 
                     default:
@@ -180,7 +180,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         ShowProfileView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
-                        ShowFilterPrefView = Visibility.Collapsed;
+                        ShowExposureTemplateView = Visibility.Collapsed;
                         break;
                 }
             }
@@ -212,15 +212,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        List<TreeDataItem> rootFilterPrefsList;
-        public List<TreeDataItem> RootFilterPrefsList {
+        List<TreeDataItem> rootExposureTemplateList;
+        public List<TreeDataItem> RootExposureTemplateList {
             get {
-                rootFilterPrefsList = LoadFilterPrefsTree();
-                return rootFilterPrefsList;
+                rootExposureTemplateList = LoadExposureTemplateTree();
+                return rootExposureTemplateList;
             }
             set {
-                rootFilterPrefsList = value;
-                RaisePropertyChanged(nameof(RootFilterPrefsList));
+                rootExposureTemplateList = value;
+                RaisePropertyChanged(nameof(RootExposureTemplateList));
             }
         }
 
@@ -267,23 +267,23 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             return rootList;
         }
 
-        private List<TreeDataItem> LoadFilterPrefsTree() {
+        private List<TreeDataItem> LoadExposureTemplateTree() {
 
-            FilterPrefsReconciliation.ReconcileProfileFilterPrefs(profileService);
+            ExposureTemplatesReconciliation.ReconcileProfileExposureTemplate(profileService);
 
             List<TreeDataItem> rootList = new List<TreeDataItem>();
-            TreeDataItem profilesFolder = new TreeDataItem(TreeDataType.FilterPrefRoot, "Profiles", null);
+            TreeDataItem profilesFolder = new TreeDataItem(TreeDataType.ExposureTemplateRoot, "Profiles", null);
             rootList.Add(profilesFolder);
 
             using (var context = database.GetContext()) {
                 foreach (ProfileMeta profile in profileService.Profiles) {
-                    TreeDataItem profileItem = new TreeDataItem(TreeDataType.FilterPrefProfile, profile.Name, profile, profilesFolder);
+                    TreeDataItem profileItem = new TreeDataItem(TreeDataType.ExposureTemplateProfile, profile.Name, profile, profilesFolder);
                     profilesFolder.Items.Add(profileItem);
 
-                    List<FilterPreference> filterPrefs = context.GetFilterPreferences(profile.Id.ToString());
-                    foreach (FilterPreference filterPreference in filterPrefs) {
-                        TreeDataItem filterPrefItem = new TreeDataItem(TreeDataType.FilterPref, filterPreference.FilterName, filterPreference, profileItem);
-                        profileItem.Items.Add(filterPrefItem);
+                    List<ExposureTemplate> exposureTemplates = context.GetExposureTemplates(profile.Id.ToString());
+                    foreach (ExposureTemplate exposureTemplate in exposureTemplates) {
+                        TreeDataItem exposureTemplateItem = new TreeDataItem(TreeDataType.ExposureTemplate, exposureTemplate.FilterName, exposureTemplate, profileItem);
+                        profileItem.Items.Add(exposureTemplateItem);
                     }
                 }
 
@@ -323,7 +323,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     parentItem.IsExpanded = true;
                 }
                 else {
-                    Notification.ShowError("Failed to save new Assistant Project (see log for details)");
+                    Notification.ShowError("Failed to save new Scheduler Project (see log for details)");
                 }
             }
         }
@@ -338,7 +338,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     }
                 }
                 else {
-                    Notification.ShowError("Failed to save Assistant Project (see log for details)");
+                    Notification.ShowError("Failed to save Scheduler Project (see log for details)");
                 }
             }
         }
@@ -366,7 +366,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     });
                 }
                 else {
-                    Notification.ShowError("Failed to paste new Assistant Project (see log for details)");
+                    Notification.ShowError("Failed to paste new Scheduler Project (see log for details)");
                 }
             }
         }
@@ -379,7 +379,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     parentItem.IsSelected = true;
                 }
                 else {
-                    Notification.ShowError("Failed to delete Assistant Project (see log for details)");
+                    Notification.ShowError("Failed to delete Scheduler Project (see log for details)");
                 }
             }
         }
@@ -398,7 +398,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     parentItem.IsExpanded = true;
                 }
                 else {
-                    Notification.ShowError("Failed to add new Assistant Target (see log for details)");
+                    Notification.ShowError("Failed to add new Scheduler Target (see log for details)");
                 }
             }
         }
@@ -417,7 +417,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     parentItem.Data = context.GetProject(target.ProjectId);
                 }
                 else {
-                    Notification.ShowError("Failed to save Assistant Target (see log for details)");
+                    Notification.ShowError("Failed to save Scheduler Target (see log for details)");
                 }
             }
         }
@@ -440,7 +440,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     parentItem.IsExpanded = true;
                 }
                 else {
-                    Notification.ShowError("Failed to paste new Assistant Project (see log for details)");
+                    Notification.ShowError("Failed to paste new Scheduler Project (see log for details)");
                 }
             }
         }
@@ -453,19 +453,19 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     parentItem.IsSelected = true;
                 }
                 else {
-                    Notification.ShowError("Failed to delete Assistant Target (see log for details)");
+                    Notification.ShowError("Failed to delete Scheduler Target (see log for details)");
                 }
             }
         }
 
-        public void SaveFilterPreference(FilterPreference filterPreference) {
+        public void SaveExposureTemplate(ExposureTemplate exposureTemplate) {
             using (var context = new AssistantDatabaseInteraction().GetContext()) {
-                if (context.SaveFilterPreference(filterPreference)) {
-                    activeTreeDataItem.Data = filterPreference;
-                    activeTreeDataItem.Header = filterPreference.FilterName;
+                if (context.SaveExposureTemplate(exposureTemplate)) {
+                    activeTreeDataItem.Data = exposureTemplate;
+                    activeTreeDataItem.Header = exposureTemplate.FilterName;
                 }
                 else {
-                    Notification.ShowError("Failed to save Assistant Filter Preference (see log for details)");
+                    Notification.ShowError("Failed to save Scheduler Exposure Template (see log for details)");
                 }
             }
         }
@@ -477,7 +477,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     activeTreeDataItem.Data = updatedTarget;
                 }
                 else {
-                    Notification.ShowError("Failed to delete Assistant Exposure Plan (see log for details)");
+                    Notification.ShowError("Failed to delete Scheduler Exposure Plan (see log for details)");
                 }
 
                 return updatedTarget;
@@ -501,7 +501,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
     }
 
     public enum TreeDataType {
-        ProjectRoot, FilterPrefRoot, ProjectProfile, FilterPrefProfile, Project, Target, FilterPref
+        ProjectRoot, ExposureTemplateRoot, ProjectProfile, ExposureTemplateProfile, Project, Target, ExposureTemplate
     }
 
     public class TreeDataItem : TreeViewItem, IComparable {

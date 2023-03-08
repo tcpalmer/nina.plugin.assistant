@@ -1,5 +1,5 @@
 ﻿<UserControl
-    x:Class="Assistant.NINAPlugin.Controls.AssistantManager.FilterPrefView"
+    x:Class="Assistant.NINAPlugin.Controls.AssistantManager.ExposureTemplateView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:astro="clr-namespace:Assistant.NINAPlugin.Astrometry"
@@ -16,7 +16,7 @@
     </UserControl.Resources>
 
     <StackPanel
-        Name="FilterPrefViewPanel"
+        Name="ExposureTemplateViewPanel"
         Width="700"
         Margin="20,10,0,0"
         Orientation="Vertical">
@@ -28,7 +28,7 @@
                 FontWeight="Bold" />
             <Label
                 Margin="0,0,0,6"
-                Content="{Binding FilterPreferenceProxy.FilterPreference.FilterName}"
+                Content="{Binding ExposureTemplateProxy.ExposureTemplate.FilterName}"
                 FontSize="18" />
         </StackPanel>
         <StackPanel Margin="0,0,0,16" Orientation="Horizontal">
@@ -108,7 +108,7 @@
             <TextBlock
                 MaxHeight="20"
                 Margin="3,3,0,0"
-                Text="{Binding FilterPreferenceProxy.FilterPreference.FilterName}" />
+                Text="{Binding ExposureTemplateProxy.ExposureTemplate.FilterName}" />
 
             <TextBlock
                 VerticalAlignment="Center"
@@ -118,12 +118,12 @@
             <ComboBox
                 MaxHeight="20"
                 ItemsSource="{Binding Source={local:EnumBindingSource {x:Type astro:TwilightLevel}}}"
-                SelectedValue="{Binding FilterPreferenceProxy.FilterPreference.TwilightLevel}"
+                SelectedValue="{Binding ExposureTemplateProxy.ExposureTemplate.TwilightLevel}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
             <TextBlock
                 MaxHeight="20"
                 Margin="3,3,0,0"
-                Text="{Binding FilterPreferenceProxy.FilterPreference.TwilightLevel}"
+                Text="{Binding ExposureTemplateProxy.ExposureTemplate.TwilightLevel}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
             <TextBlock
@@ -134,27 +134,27 @@
             <CheckBox
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                IsChecked="{Binding Path=FilterPreferenceProxy.FilterPreference.MoonAvoidanceEnabled, Mode=TwoWay}"
+                IsChecked="{Binding Path=ExposureTemplateProxy.ExposureTemplate.MoonAvoidanceEnabled, Mode=TwoWay}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
             <TextBlock
                 MaxHeight="20"
                 Margin="3,3,0,0"
-                Text="{Binding FilterPreferenceProxy.FilterPreference.MoonAvoidanceEnabled}"
+                Text="{Binding ExposureTemplateProxy.ExposureTemplate.MoonAvoidanceEnabled}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
             <TextBlock
                 VerticalAlignment="Center"
                 FontWeight="Bold"
-                IsEnabled="{Binding FilterPreferenceProxy.FilterPreference.MoonAvoidanceEnabled}"
+                IsEnabled="{Binding ExposureTemplateProxy.ExposureTemplate.MoonAvoidanceEnabled}"
                 Text="Avoidance Separation"
                 ToolTip="Moon avoidance separation"
                 ToolTipService.ShowOnDisabled="True" />
             <TextBox
                 MaxHeight="20"
-                IsEnabled="{Binding FilterPreferenceProxy.FilterPreference.MoonAvoidanceEnabled}"
+                IsEnabled="{Binding ExposureTemplateProxy.ExposureTemplate.MoonAvoidanceEnabled}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox.Text>
-                    <Binding Path="FilterPreferenceProxy.FilterPreference.MoonAvoidanceSeparation" UpdateSourceTrigger="LostFocus">
+                    <Binding Path="ExposureTemplateProxy.ExposureTemplate.MoonAvoidanceSeparation" UpdateSourceTrigger="LostFocus">
                         <Binding.ValidationRules>
                             <rules:DoubleRangeRule>
                                 <rules:DoubleRangeRule.ValidRange>
@@ -168,23 +168,23 @@
             <TextBlock
                 MaxHeight="20"
                 Margin="3,3,0,0"
-                IsEnabled="{Binding FilterPreferenceProxy.FilterPreference.MoonAvoidanceEnabled}"
-                Text="{Binding FilterPreferenceProxy.FilterPreference.MoonAvoidanceSeparation, Converter={StaticResource DegreesDisplayConverter}}"
+                IsEnabled="{Binding ExposureTemplateProxy.ExposureTemplate.MoonAvoidanceEnabled}"
+                Text="{Binding ExposureTemplateProxy.ExposureTemplate.MoonAvoidanceSeparation, Converter={StaticResource DegreesDisplayConverter}}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
             <TextBlock
                 VerticalAlignment="Center"
                 FontWeight="Bold"
-                IsEnabled="{Binding FilterPreferenceProxy.FilterPreference.MoonAvoidanceEnabled}"
+                IsEnabled="{Binding ExposureTemplateProxy.ExposureTemplate.MoonAvoidanceEnabled}"
                 Text="Avoidance Width"
                 ToolTip="Moon avoidance width"
                 ToolTipService.ShowOnDisabled="True" />
             <TextBox
                 MaxHeight="20"
-                IsEnabled="{Binding FilterPreferenceProxy.FilterPreference.MoonAvoidanceEnabled}"
+                IsEnabled="{Binding ExposureTemplateProxy.ExposureTemplate.MoonAvoidanceEnabled}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox.Text>
-                    <Binding Path="FilterPreferenceProxy.FilterPreference.MoonAvoidanceWidth" UpdateSourceTrigger="LostFocus">
+                    <Binding Path="ExposureTemplateProxy.ExposureTemplate.MoonAvoidanceWidth" UpdateSourceTrigger="LostFocus">
                         <Binding.ValidationRules>
                             <rules:IntRangeRule>
                                 <rules:IntRangeRule.ValidRange>
@@ -198,8 +198,8 @@
             <TextBlock
                 MaxHeight="20"
                 Margin="3,3,0,0"
-                IsEnabled="{Binding FilterPreferenceProxy.FilterPreference.MoonAvoidanceEnabled}"
-                Text="{Binding FilterPreferenceProxy.FilterPreference.MoonAvoidanceWidth}"
+                IsEnabled="{Binding ExposureTemplateProxy.ExposureTemplate.MoonAvoidanceEnabled}"
+                Text="{Binding ExposureTemplateProxy.ExposureTemplate.MoonAvoidanceWidth}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
             <TextBlock
@@ -213,7 +213,7 @@
                 MaxHeight="20"
                 Margin="3,3,0,0"
                 IsEnabled="False"
-                Text="{Binding FilterPreferenceProxy.FilterPreference.MaximumHumidity}" />
+                Text="{Binding ExposureTemplateProxy.ExposureTemplate.MaximumHumidity}" />
 
         </UniformGrid>
 

@@ -38,25 +38,27 @@ CREATE TABLE IF NOT EXISTS `target` (
 
 CREATE TABLE IF NOT EXISTS `exposureplan` (
 	`Id`			INTEGER NOT NULL,
-	`filtername`	TEXT NOT NULL,
 	`profileId`		TEXT NOT NULL,
 	`exposure`		REAL NOT NULL,
-	`gain`			INTEGER,
-	`offset`		INTEGER,
-	`bin`			INTEGER,
-	`readoutmode`	INTEGER,
 	`desired`		INTEGER,
 	`acquired`		INTEGER,
 	`accepted`		INTEGER,
 	`targetid`		INTEGER,
+	`exposureTemplateId`	INTEGER,
 	FOREIGN KEY(`targetId`) REFERENCES `target`(`Id`),
+	FOREIGN KEY(`exposureTemplateId`) REFERENCES `exposuretemplate`(`Id`),
 	PRIMARY KEY(`Id`)
 );
 
-CREATE TABLE IF NOT EXISTS `filterpreference` (
+CREATE TABLE IF NOT EXISTS `exposuretemplate` (
 	`Id`			INTEGER NOT NULL,
     `profileId`		TEXT NOT NULL,
+    `name`			TEXT NOT NULL,
     `filtername`	TEXT NOT NULL,
+	`gain`			INTEGER,
+	`offset`		INTEGER,
+	`bin`			INTEGER,
+	`readoutmode`	INTEGER,
 	`twilightlevel` INTEGER,
 	`moonavoidanceenabled`	INTEGER,
 	`moonavoidanceseparation`	REAL,

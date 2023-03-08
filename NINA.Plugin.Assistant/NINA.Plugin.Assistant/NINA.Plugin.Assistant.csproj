@@ -320,10 +320,10 @@
     </Compile>
     <Compile Include="Controls\AssistantManager\DocumentationLinkVM.cs" />
     <Compile Include="Controls\AssistantManager\EnumBindingSourceExtension.cs" />
-    <Compile Include="Controls\AssistantManager\FilterPrefView.xaml.cs">
-      <DependentUpon>FilterPrefView.xaml</DependentUpon>
+    <Compile Include="Controls\AssistantManager\ExposureTemplateView.xaml.cs">
+      <DependentUpon>ExposureTemplateView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\AssistantManager\FilterPrefViewVM.cs" />
+    <Compile Include="Controls\AssistantManager\ExposureTemplateViewVM.cs" />
     <Compile Include="Controls\AssistantManager\ProfileView.xaml.cs">
       <DependentUpon>ProfileView.xaml</DependentUpon>
     </Compile>
@@ -351,7 +351,7 @@
     <Compile Include="Controls\Resources\SVGDictionary.xaml.cs">
       <DependentUpon>SVGDictionary.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Utils\FilterPrefsReconciliation.cs" />
+    <Compile Include="Controls\Utils\ExposureTemplateReconciliation.cs" />
     <Compile Include="Controls\ValidationRules\ValidationRules.cs" />
     <Compile Include="Database\AssistantDatabaseInteraction.cs" />
     <Compile Include="Database\AssistantDatabaseContext.cs" />
@@ -364,7 +364,7 @@
     <Compile Include="Database\Schema\AcquiredImage.cs" />
     <Compile Include="Database\Schema\ImageData.cs" />
     <Compile Include="Database\Schema\ExposurePlan.cs" />
-    <Compile Include="Database\Schema\FilterPreference.cs" />
+    <Compile Include="Database\Schema\ExposureTemplate.cs" />
     <Compile Include="Database\Schema\ImageMetadata.cs" />
     <Compile Include="Database\Schema\Project.cs" />
     <Compile Include="Database\Schema\RuleWeight.cs" />
@@ -432,7 +432,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\AssistantManager\FilterPrefView.xaml">
+    <Page Include="Controls\AssistantManager\ExposureTemplateView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -9,16 +9,16 @@ using System.Linq;
 
 namespace Assistant.NINAPlugin.Controls.Util {
 
-    public class FilterPrefsReconciliation {
+    public class ExposureTemplatesReconciliation {
 
         /// <summary>
-        /// Ensure that we have a FilterPreference for each defined filter on all profiles.
+        /// Ensure that we have a ExposureTemplate for each defined filter on all profiles.
         /// </summary>
         /// <param name="profileService"></param>
-        public static void ReconcileProfileFilterPrefs(IProfileService profileService) {
+        public static void ReconcileProfileExposureTemplate(IProfileService profileService) {
 
-            // TODO: do we also remove filter pref records that no longer have a cooresponding filter in the profile?
-            // TODO: find and remove FilterPreference records that are orphaned: original profile was removed?
+            // TODO: do we also remove ExposureTemplate records that no longer have a cooresponding filter in the profile?
+            // TODO: find and remove ExposureTemplate records that are orphaned: original profile was removed?
 
             Dictionary<string, List<string>> missing = new Dictionary<string, List<string>>();
 
@@ -28,11 +28,11 @@ namespace Assistant.NINAPlugin.Controls.Util {
                     string profileId = profile.Id.ToString();
 
                     List<FilterInfo> filterInfos = profile.FilterWheelSettings.FilterWheelFilters.ToList();
-                    List<FilterPreference> filterPreferences = context.GetFilterPreferences(profileId);
+                    List<ExposureTemplate> exposureTemplates = context.GetExposureTemplates(profileId);
 
                     foreach (FilterInfo filterInfo in filterInfos) {
-                        FilterPreference filterPreference = filterPreferences.Where(f => f.FilterName == filterInfo.Name).FirstOrDefault();
-                        if (filterPreference == null) {
+                        ExposureTemplate exposureTemplate = exposureTemplates.Where(f => f.FilterName == filterInfo.Name).FirstOrDefault();
+                        if (exposureTemplate == null) {
                             List<string> list;
                             if (missing.ContainsKey(profileId)) {
                                 list = missing[profileId];
@@ -48,23 +48,24 @@ namespace Assistant.NINAPlugin.Controls.Util {
                 }
 
                 foreach (KeyValuePair<string, List<string>> entry in missing) {
-                    List<FilterPreference> missingFilterPreferences = new List<FilterPreference>();
+                    List<ExposureTemplate> missingExposureTemplates = new List<ExposureTemplate>();
                     string profileId = entry.Key;
                     List<string> list = entry.Value;
 
                     if (list != null) {
                         list.ForEach(filterName => {
-                            Logger.Debug($"Scheduler: filter pref missing for filter '{filterName}' in profile '{profileId}', adding default");
-                            missingFilterPreferences.Add(new FilterPreference(profileId, filterName));
+                            Logger.Debug($"Scheduler: ExposureTemplate missing for filter '{filterName}' in profile '{profileId}', adding default");
+                            string name = $"{filterName} Default";
+                            missingExposureTemplates.Add(new ExposureTemplate(profileId, name, filterName));
                         });
                     }
 
-                    context.AddFilterPreferences(missingFilterPreferences);
+                    context.AddExposureTemplates(missingExposureTemplates);
                 }
             }
         }
 
-        private FilterPrefsReconciliation() { }
+        private ExposureTemplatesReconciliation() { }
     }
 
 }

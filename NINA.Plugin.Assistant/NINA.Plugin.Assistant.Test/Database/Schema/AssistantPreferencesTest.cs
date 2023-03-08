@@ -21,15 +21,24 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
         }
 
         [Test]
-        public void TestFilterPreferencesOrder() {
+        public void TestExposureTemplatesOrder() {
             Assert.IsTrue(TwilightLevel.Nighttime < TwilightLevel.Astronomical);
             Assert.IsTrue(TwilightLevel.Astronomical < TwilightLevel.Nautical);
             Assert.IsTrue(TwilightLevel.Nautical < TwilightLevel.Civil);
         }
 
         [Test]
-        public void TestFilterPreferencesDefaults() {
-            var sut = new FilterPreference("123", "L");
+        public void TestExposureTemplatesDefaults() {
+            var sut = new ExposureTemplate("123", "Lum", "L");
+            sut.Name.Should().Be("Lum");
+            sut.FilterName.Should().Be("L");
+
+            sut.Gain.Should().Be(-1);
+            sut.Offset.Should().Be(-1);
+            sut.BinningMode.X.Should().Be(1);
+            sut.BinningMode.Y.Should().Be(1);
+            sut.ReadoutMode.Should().Be(-1);
+
             sut.TwilightLevel.Should().Be(TwilightLevel.Nighttime);
             sut.MoonAvoidanceEnabled.Should().BeFalse();
             sut.MoonAvoidanceSeparation.Should().BeApproximately(60, 0.0001);
@@ -38,8 +47,8 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
         }
 
         [Test]
-        public void TestFilterPreferencesTwilightChecks() {
-            var sut = new FilterPreference("123", "L");
+        public void TestExposureTemplateTwilightChecks() {
+            var sut = new ExposureTemplate("123", "L", "L");
 
             sut.TwilightLevel = TwilightLevel.Nighttime;
             sut.IsTwilightNightOnly().Should().BeTrue();

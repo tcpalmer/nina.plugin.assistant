@@ -11,7 +11,6 @@ using NINA.WPF.Base.Interfaces.ViewModel;
 using NINA.WPF.Base.ViewModel;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
@@ -243,6 +242,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private void AddExposurePlan(object obj) {
+            MyMessageBox.Show("AddExposurePlan TBD", "Oops", MessageBoxButton.YesNo, MessageBoxResult.No);
+            /*
             string filterName = GetFilterNamesForProfile().FirstOrDefault();
             if (filterName == null) {
                 filterName = "unknown";
@@ -251,15 +252,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             Target proxy = TargetProxy.Proxy;
             ExposurePlan exposurePlan = new ExposurePlan(profile.Id.ToString(), filterName);
             exposurePlan.TargetId = proxy.Id;
-            exposurePlan.Gain = -1;
-            exposurePlan.Offset = -1;
-            exposurePlan.ReadoutMode = -1;
 
             proxy.ExposurePlans.Add(exposurePlan);
             InitializeExposurePlans(proxy);
+            */
         }
 
         private void DeleteExposurePlan(object obj) {
+            MyMessageBox.Show("DeleteExposurePlan TBD", "Oops", MessageBoxButton.YesNo, MessageBoxResult.No);
+            /*
             ExposurePlan item = obj as ExposurePlan;
             ExposurePlan exposurePlan = TargetProxy.Original.ExposurePlans.Where(p => p.Id == item.Id).FirstOrDefault();
             if (exposurePlan != null) {
@@ -274,7 +275,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
             else {
                 Logger.Error($"Scheduler: failed to find original exposure plan: {item.Id}");
-            }
+            }*/
         }
 
     }

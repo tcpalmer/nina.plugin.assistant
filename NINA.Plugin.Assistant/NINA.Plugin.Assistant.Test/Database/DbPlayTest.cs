@@ -1,12 +1,9 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using NINA.Astrometry;
-using NINA.Core.Utility;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using System.Data.Entity.Validation;
-using System.Linq;
 using System.Text;
 
 namespace NINA.Plugin.Assistant.Test.Database {
@@ -97,15 +94,29 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     //p1Prefs.AddRuleWeight(ProjectPriorityRule.RULE_NAME, ProjectPriorityRule.DEFAULT_WEIGHT);
                     //p1.preferences = new ProjectPreferenceOLD(p1Prefs);
 
+                    ExposureTemplate etHa = new ExposureTemplate(profileId, "Ha", "Ha");
+                    ExposureTemplate etOIII = new ExposureTemplate(profileId, "OIII", "OIII");
+                    ExposureTemplate etSII = new ExposureTemplate(profileId, "SII", "SII");
+                    ExposureTemplate etR = new ExposureTemplate(profileId, "R", "R");
+                    ExposureTemplate etG = new ExposureTemplate(profileId, "G", "G");
+                    ExposureTemplate etB = new ExposureTemplate(profileId, "G", "B");
+
+                    context.ExposureTemplateSet.Add(etHa);
+                    context.ExposureTemplateSet.Add(etOIII);
+                    context.ExposureTemplateSet.Add(etSII);
+                    context.ExposureTemplateSet.Add(etR);
+                    context.ExposureTemplateSet.Add(etG);
+                    context.ExposureTemplateSet.Add(etB);
+
                     Target t1 = new Target();
                     t1.Name = "M 42";
                     t1.ra = AstroUtil.HMSToDegrees("5:35:17");
                     t1.dec = AstroUtil.DMSToDegrees("-5:23:28");
                     p1.Targets.Add(t1);
 
-                    t1.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, FilterName = "Ha", Desired = 5 });
-                    t1.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, FilterName = "OIII", Desired = 5 });
-                    t1.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, FilterName = "SII", Desired = 5 });
+                    t1.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, ExposureTemplate = etHa, Desired = 5 });
+                    t1.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, ExposureTemplate = etOIII, Desired = 5 });
+                    t1.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, ExposureTemplate = etSII, Desired = 5 });
 
                     context.ProjectSet.Add(p1);
 
@@ -129,20 +140,13 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t2.dec = AstroUtil.DMSToDegrees("28:5:0");
                     p2.Targets.Add(t2);
 
-                    t2.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, FilterName = "R", Desired = 5 });
-                    t2.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, FilterName = "G", Desired = 5 });
-                    t2.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, FilterName = "B", Desired = 5 });
+                    t2.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, ExposureTemplate = etR, Desired = 5 });
+                    t2.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, ExposureTemplate = etG, Desired = 5 });
+                    t2.ExposurePlans.Add(new ExposurePlan { ProfileId = profileId, ExposureTemplate = etB, Desired = 5 });
 
                     context.ProjectSet.Add(p2);
 
                     ///
-
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Ha"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "OIII"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "SII"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "R"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "G"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "B"));
 
                     context.SaveChanges();
                 }
@@ -163,6 +167,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
         }
 
         //[Test]
+        /*
         public void testPlay() {
 
             Logger.SetLogLevel(Core.Enum.LogLevelEnum.TRACE);
@@ -210,12 +215,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     context.ProjectSet.Add(p);
 
-                    //AssistantFilterPreferences ap = new AssistantFilterPreferencesOLD();
-                    //ap.MoonAvoidanceEnabled = true;
-                    //ap.MoonAvoidanceSeparation = 55;
-                    //ap.MoonAvoidanceWidth = 7;
-                    FilterPreference fpref = new FilterPreference(Guid.NewGuid().ToString(), "Ha");
-                    context.FilterPreferenceSet.Add(fpref);
+                    ExposureTemplate expTemplate = new ExposureTemplate(Guid.NewGuid().ToString(), "Ha");
+                    context.ExposureTemplateSet.Add(expTemplate);
 
                     p.EnableGrader = true;
                     p.MinimumAltitude = 22;
@@ -252,8 +253,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
                         }
                     }
 
-                    List<FilterPreference> filterPreferences = context.FilterPreferenceSet.ToList();
-                    foreach (FilterPreference preference in filterPreferences) {
+                    List<ExposureTemplate> exposureTemplates = context.ExposureTemplateSet.ToList();
+                    foreach (ExposureTemplate preference in exposureTemplates) {
                         TestContext.WriteLine($"filter pref:\n{preference}");
                     }
 
@@ -292,7 +293,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     TestContext.WriteLine($"OTHER EXCEPTION: {e.Message}\n{e.ToString()}");
                 }
             }
-        }
+        }*/
 
     }
 }

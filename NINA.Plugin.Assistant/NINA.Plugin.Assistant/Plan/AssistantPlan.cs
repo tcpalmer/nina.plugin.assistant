@@ -121,7 +121,7 @@ namespace Assistant.NINAPlugin.Plan {
         public bool Rejected { get; set; }
         public string RejectedReason { get; set; }
 
-        public PlanProject(IProfile profile, Project project, Dictionary<string, FilterPreference> filterPreference) {
+        public PlanProject(IProfile profile, Project project, Dictionary<string, ExposureTemplate> exposureTemplate) {
 
             this.PlanId = Guid.NewGuid().ToString();
             this.DatabaseId = project.Id;
@@ -150,7 +150,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             Targets = new List<IPlanTarget>();
             foreach (Target target in project.Targets) {
-                Targets.Add(new PlanTarget(this, target, filterPreference));
+                Targets.Add(new PlanTarget(this, target, exposureTemplate));
             }
         }
 
@@ -258,7 +258,7 @@ namespace Assistant.NINAPlugin.Plan {
         public DateTime EndTime { get; set; }
         public DateTime CulminationTime { get; set; }
 
-        public PlanTarget(IPlanProject planProject, Target target, Dictionary<string, FilterPreference> filterPreference) {
+        public PlanTarget(IPlanProject planProject, Target target, Dictionary<string, ExposureTemplate> exposureTemplate) {
             this.PlanId = Guid.NewGuid().ToString();
             this.DatabaseId = target.Id;
             this.Name = target.Name;
@@ -271,8 +271,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             this.ExposurePlans = new List<IPlanExposure>();
             foreach (ExposurePlan plan in target.ExposurePlans) {
-                FilterPreference filterPrefs = filterPreference[plan.FilterName];
-                PlanExposure planExposure = new PlanExposure(this, plan, filterPrefs);
+                PlanExposure planExposure = new PlanExposure(this, plan, plan.ExposureTemplate);
 
                 // add only if the plan is incomplete
                 if (planExposure.IsIncomplete()) {
@@ -386,25 +385,25 @@ namespace Assistant.NINAPlugin.Plan {
 
         public int PlannedExposures { get; set; }
 
-        public PlanExposure(IPlanTarget planTarget, ExposurePlan exposurePlan, FilterPreference filterPrefs) {
+        public PlanExposure(IPlanTarget planTarget, ExposurePlan exposurePlan, ExposureTemplate exposureTemplate) {
             this.PlanId = Guid.NewGuid().ToString();
             this.DatabaseId = exposurePlan.Id;
-            this.FilterName = exposurePlan.FilterName;
+            this.FilterName = exposureTemplate.FilterName;
             this.ExposureLength = exposurePlan.Exposure;
-            this.Gain = GetNullableIntValue(exposurePlan.Gain);
-            this.Offset = GetNullableIntValue(exposurePlan.Offset);
-            this.BinningMode = exposurePlan.BinningMode;
-            this.ReadoutMode = GetNullableIntValue(exposurePlan.ReadoutMode);
+            this.Gain = GetNullableIntValue(exposureTemplate.Gain);
+            this.Offset = GetNullableIntValue(exposureTemplate.Offset);
+            this.BinningMode = exposureTemplate.BinningMode;
+            this.ReadoutMode = GetNullableIntValue(exposureTemplate.ReadoutMode);
             this.Desired = exposurePlan.Desired;
             this.Acquired = exposurePlan.Acquired;
             this.Accepted = exposurePlan.Accepted;
             this.PlanTarget = planTarget;
 
-            this.TwilightLevel = filterPrefs.TwilightLevel;
-            this.MoonAvoidanceEnabled = filterPrefs.MoonAvoidanceEnabled;
-            this.MoonAvoidanceSeparation = filterPrefs.MoonAvoidanceSeparation;
-            this.MoonAvoidanceWidth = filterPrefs.MoonAvoidanceWidth;
-            this.MaximumHumidity = filterPrefs.MaximumHumidity;
+            this.TwilightLevel = exposureTemplate.TwilightLevel;
+            this.MoonAvoidanceEnabled = exposureTemplate.MoonAvoidanceEnabled;
+            this.MoonAvoidanceSeparation = exposureTemplate.MoonAvoidanceSeparation;
+            this.MoonAvoidanceWidth = exposureTemplate.MoonAvoidanceWidth;
+            this.MaximumHumidity = exposureTemplate.MaximumHumidity;
 
             this.Rejected = false;
             this.PlannedExposures = 0;

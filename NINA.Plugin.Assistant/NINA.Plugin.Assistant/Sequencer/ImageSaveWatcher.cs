@@ -1,10 +1,6 @@
-﻿using Assistant.NINAPlugin.Database;
-using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.Plan;
+﻿using Assistant.NINAPlugin.Plan;
 using NINA.Core.Utility;
 using NINA.WPF.Base.Interfaces.Mediator;
-using System;
-using System.Data.Entity.Migrations;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
@@ -46,6 +42,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             //Update(planTarget, msg.Filter, accepted, msg);
         }
 
+        /* TODO: can't do this until we figure out how to find the EP applicable for this so it can be updated ...
         private void Update(IPlanTarget planTarget, string filterName, bool accepted, ImageSavedEventArgs msg) {
 
             using (var context = new AssistantDatabaseInteraction().GetContext()) {
@@ -80,7 +77,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
                 }
             }
-        }
+        }*/
     }
 }
 

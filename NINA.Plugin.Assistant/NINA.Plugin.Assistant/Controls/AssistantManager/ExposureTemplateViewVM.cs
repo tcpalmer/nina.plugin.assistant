@@ -7,34 +7,34 @@ using System.Windows.Input;
 
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
-    public class FilterPrefViewVM : BaseVM {
+    public class ExposureTemplateViewVM : BaseVM {
 
         private AssistantManagerVM managerVM;
 
-        public FilterPrefViewVM(AssistantManagerVM managerVM, IProfileService profileService, FilterPreference filterPreference) : base(profileService) {
+        public ExposureTemplateViewVM(AssistantManagerVM managerVM, IProfileService profileService, ExposureTemplate exposureTemplate) : base(profileService) {
             this.managerVM = managerVM;
-            FilterPreferenceProxy = new FilterPreferenceProxy(filterPreference);
+            ExposureTemplateProxy = new ExposureTemplateProxy(exposureTemplate);
 
             EditCommand = new RelayCommand(Edit);
             SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(Cancel);
         }
 
-        private FilterPreferenceProxy filterPreferenceProxy;
-        public FilterPreferenceProxy FilterPreferenceProxy {
-            get => filterPreferenceProxy;
+        private ExposureTemplateProxy exposureTemplateProxy;
+        public ExposureTemplateProxy ExposureTemplateProxy {
+            get => exposureTemplateProxy;
             set {
-                filterPreferenceProxy = value;
-                RaisePropertyChanged(nameof(FilterPreferenceProxy));
+                exposureTemplateProxy = value;
+                RaisePropertyChanged(nameof(ExposureTemplateProxy));
             }
         }
 
-        private void FilterPreferenceProxy_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+        private void ExposureTemplateProxy_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             if (e?.PropertyName != nameof(TargetProxy.Proxy)) {
                 ItemEdited = true;
             }
             else {
-                RaisePropertyChanged(nameof(FilterPreferenceProxy));
+                RaisePropertyChanged(nameof(ExposureTemplateProxy));
             }
         }
 
@@ -61,24 +61,24 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand CancelCommand { get; private set; }
 
         private void Edit(object obj) {
-            FilterPreferenceProxy.PropertyChanged += FilterPreferenceProxy_PropertyChanged;
+            ExposureTemplateProxy.PropertyChanged += ExposureTemplateProxy_PropertyChanged;
             managerVM.SetEditMode(true);
             ShowEditView = true;
             ItemEdited = false;
         }
 
         private void Save(object obj) {
-            managerVM.SaveFilterPreference(FilterPreferenceProxy.Proxy);
-            FilterPreferenceProxy.OnSave();
-            FilterPreferenceProxy.PropertyChanged -= FilterPreferenceProxy_PropertyChanged;
+            managerVM.SaveExposureTemplate(ExposureTemplateProxy.Proxy);
+            ExposureTemplateProxy.OnSave();
+            ExposureTemplateProxy.PropertyChanged -= ExposureTemplateProxy_PropertyChanged;
             ShowEditView = false;
             ItemEdited = false;
             managerVM.SetEditMode(false);
         }
 
         private void Cancel(object obj) {
-            FilterPreferenceProxy.OnCancel();
-            FilterPreferenceProxy.PropertyChanged -= FilterPreferenceProxy_PropertyChanged;
+            ExposureTemplateProxy.OnCancel();
+            ExposureTemplateProxy.PropertyChanged -= ExposureTemplateProxy_PropertyChanged;
             ShowEditView = false;
             ItemEdited = false;
             managerVM.SetEditMode(false);
