@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("B4541BA9-7B07-4D71-B8E1-6C73D4933EA0")]
 
-[assembly: AssemblyTitle("Sequence Scheduler")]
+[assembly: AssemblyTitle("Target Scheduler")]
 [assembly: AssemblyDescription("TBD ...")]
 [assembly: AssemblyCompany("Tom Palmer @tcpalmer")]
 [assembly: AssemblyProduct("Assistant.NINAPlugin")]
@@ -25,7 +25,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyMetadata("ScreenshotURL", "https://raw.githubusercontent.com/tcpalmer/nina.plugin.assistant/main/nina.plugin.assistant/assets/screenshot1.png?raw=true")]
 [assembly: AssemblyMetadata("AltScreenshotURL", "https://raw.githubusercontent.com/tcpalmer/nina.plugin.assistant/main/nina.plugin.assistant/assets/screenshot2.png?raw=true")]
 
-[assembly: AssemblyMetadata("LongDescription", @"The Scheduler Plugin is designed to provide a higher level of automation than is typically achievable today with NINA. Specifically, it maintains a database of imaging projects describing DSO targets and associated exposure plans. Based on various criteria and preferences, it can decide at any given time what project/target should be actively imaging. A user will enter the desired projects, targets, and preferences into a UI exposed by the plugin. At runtime, a single new instruction for the NINA Advanced Sequencer will interact with the planning engine to determine the best target for imaging at each point throughout a night. The instruction will manage the slew/center to the target, switching filters, taking exposures, and dithering - all while transparently interacting with the surrounding NINA triggers and conditions.
+[assembly: AssemblyMetadata("LongDescription", @"The Target Scheduler Plugin is designed to provide a higher level of automation than is typically achievable today with NINA. Specifically, it maintains a database of imaging projects describing DSO targets and associated exposure plans. Based on various criteria and preferences, it can decide at any given time what project/target should be actively imaging. A user will enter the desired projects, targets, and preferences into a UI exposed by the plugin. At runtime, a single new instruction for the NINA Advanced Sequencer will interact with the planning engine to determine the best target for imaging at each point throughout a night. The instruction will manage the slew/center to the target, switching filters, taking exposures, and dithering - all while transparently interacting with the surrounding NINA triggers and conditions.
 
 ## Acknowledgements ##
 * 

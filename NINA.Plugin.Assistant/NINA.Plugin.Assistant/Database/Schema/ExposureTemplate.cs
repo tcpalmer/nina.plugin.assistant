@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
+using Assistant.NINAPlugin.Util;
 using NINA.Core.Model.Equipment;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -154,13 +155,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
             MaximumHumidity = 0;
         }
 
-        /* TODO: do we need a GetPasteCopy for this?  If so, following came from Exp Plan:
-            exposurePlan.gain = gain;
-            exposurePlan.offset = offset;
-            exposurePlan.bin = bin;
-            exposurePlan.readoutMode = readoutMode;
-         */
-
         public bool IsTwilightNightOnly() {
             return TwilightLevel == TwilightLevel.Nighttime;
         }
@@ -175,6 +169,22 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public bool IsTwilightCivil() {
             return TwilightLevel == TwilightLevel.Civil;
+        }
+
+        public ExposureTemplate GetPasteCopy(string newProfileId) {
+            ExposureTemplate copy = new ExposureTemplate(newProfileId, Utils.CopiedItemName(name), filterName);
+
+            copy.Gain = Gain;
+            copy.Offset = Offset;
+            copy.BinningMode = BinningMode;
+            copy.ReadoutMode = ReadoutMode;
+            copy.TwilightLevel = TwilightLevel;
+            copy.MoonAvoidanceEnabled = MoonAvoidanceEnabled;
+            copy.MoonAvoidanceSeparation = MoonAvoidanceSeparation;
+            copy.MoonAvoidanceWidth = MoonAvoidanceWidth;
+            copy.MaximumHumidity = MaximumHumidity;
+
+            return copy;
         }
 
         public override string ToString() {

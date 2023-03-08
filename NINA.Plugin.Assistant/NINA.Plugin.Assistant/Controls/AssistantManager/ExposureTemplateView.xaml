@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ninactrl="clr-namespace:NINACustomControlLibrary;assembly=NINACustomControlLibrary"
     xmlns:rules="clr-namespace:Assistant.NINAPlugin.Controls.ValidationRules"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -23,12 +24,12 @@
         <StackPanel Orientation="Horizontal">
             <Label
                 Margin="0,0,0,6"
-                Content="Filter Preferences:"
+                Content="Exposure Template:"
                 FontSize="18"
                 FontWeight="Bold" />
             <Label
                 Margin="0,0,0,6"
-                Content="{Binding ExposureTemplateProxy.ExposureTemplate.FilterName}"
+                Content="{Binding ExposureTemplateProxy.ExposureTemplate.Name}"
                 FontSize="18" />
         </StackPanel>
         <StackPanel Margin="0,0,0,16" Orientation="Horizontal">
@@ -93,22 +94,130 @@
 
         <UniformGrid
             Width="280"
-            Height="160"
+            Height="270"
             Margin="12,0,0,6"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Columns="2"
-            Rows="6">
+            Rows="11">
 
             <TextBlock
                 VerticalAlignment="Center"
                 FontWeight="Bold"
                 Text="Name"
-                ToolTip="Filter name" />
+                ToolTip="Template name" />
+            <TextBox MaxHeight="20" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                <TextBox.Text>
+                    <Binding Path="ExposureTemplateProxy.ExposureTemplate.Name" UpdateSourceTrigger="LostFocus">
+                        <Binding.ValidationRules>
+                            <rules:RequiredFieldValidationRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
             <TextBlock
                 MaxHeight="20"
                 Margin="3,3,0,0"
-                Text="{Binding ExposureTemplateProxy.ExposureTemplate.FilterName}" />
+                Text="{Binding ExposureTemplateProxy.ExposureTemplate.Name}"
+                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Filter"
+                ToolTip="Filter (in Filter Wheel for this profile)" />
+            <ComboBox
+                MaxHeight="20"
+                ItemsSource="{Binding FilterNameChoices}"
+                SelectedValue="{Binding ExposureTemplateProxy.ExposureTemplate.FilterName, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ExposureTemplateProxy.ExposureTemplate.FilterName}"
+                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Gain"
+                ToolTip="Camera gain, leave blank for camera default" />
+            <ninactrl:HintTextBox
+                Width="Auto"
+                VerticalAlignment="Center"
+                HintText="(Camera)"
+                IsEnabled="{Binding ShowEditView}">
+                <ninactrl:HintTextBox.Text>
+                    <Binding
+                        Converter="{StaticResource MinusOneToEmptyStringConverter}"
+                        Path="ExposureTemplateProxy.ExposureTemplate.Gain"
+                        UpdateSourceTrigger="LostFocus">
+                        <Binding.ValidationRules>
+                            <rules:NullableIntegerRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </ninactrl:HintTextBox.Text>
+            </ninactrl:HintTextBox>
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Offset"
+                ToolTip="Camera offset, leave blank for camera default" />
+            <ninactrl:HintTextBox
+                Width="Auto"
+                VerticalAlignment="Center"
+                HintText="(Camera)"
+                IsEnabled="{Binding ShowEditView}">
+                <ninactrl:HintTextBox.Text>
+                    <Binding
+                        Converter="{StaticResource MinusOneToEmptyStringConverter}"
+                        Path="ExposureTemplateProxy.ExposureTemplate.Offset"
+                        UpdateSourceTrigger="LostFocus">
+                        <Binding.ValidationRules>
+                            <rules:NullableIntegerRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </ninactrl:HintTextBox.Text>
+            </ninactrl:HintTextBox>
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Binning"
+                ToolTip="Binning mode" />
+            <ComboBox
+                MaxHeight="20"
+                ItemsSource="{Binding BinningModeChoices}"
+                SelectedValue="{Binding ExposureTemplateProxy.ExposureTemplate.BinningMode, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ExposureTemplateProxy.ExposureTemplate.BinningMode}"
+                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Readout Mode"
+                ToolTip="Camera readout mode, leave blank for camera default" />
+            <ninactrl:HintTextBox
+                Width="Auto"
+                VerticalAlignment="Center"
+                HintText="(Camera)"
+                IsEnabled="{Binding ShowEditView}">
+                <ninactrl:HintTextBox.Text>
+                    <Binding
+                        Converter="{StaticResource MinusOneToEmptyStringConverter}"
+                        Path="ExposureTemplateProxy.ExposureTemplate.ReadoutMode"
+                        UpdateSourceTrigger="LostFocus">
+                        <Binding.ValidationRules>
+                            <rules:NullableIntegerRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </ninactrl:HintTextBox.Text>
+            </ninactrl:HintTextBox>
 
             <TextBlock
                 VerticalAlignment="Center"

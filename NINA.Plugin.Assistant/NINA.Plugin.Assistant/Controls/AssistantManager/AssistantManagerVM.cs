@@ -59,8 +59,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             get => new AssistantTreeViewVM(this, profileService, "Projects", RootProjectsList, 350);
         }
 
-        public AssistantTreeViewVM ExposureTemplateTreeViewVM {
-            get => new AssistantTreeViewVM(this, profileService, "Filter Preferences", RootExposureTemplateList, 180);
+        public AssistantTreeViewVM ExposureTemplatesTreeViewVM {
+            get => new AssistantTreeViewVM(this, profileService, "Exposure Templates", RootExposureTemplateList, 180);
         }
 
         private ProfileViewVM profileViewVM;
@@ -282,7 +282,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
                     List<ExposureTemplate> exposureTemplates = context.GetExposureTemplates(profile.Id.ToString());
                     foreach (ExposureTemplate exposureTemplate in exposureTemplates) {
-                        TreeDataItem exposureTemplateItem = new TreeDataItem(TreeDataType.ExposureTemplate, exposureTemplate.FilterName, exposureTemplate, profileItem);
+                        TreeDataItem exposureTemplateItem = new TreeDataItem(TreeDataType.ExposureTemplate, exposureTemplate.Name, exposureTemplate, profileItem);
                         profileItem.Items.Add(exposureTemplateItem);
                     }
                 }
@@ -462,7 +462,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             using (var context = new AssistantDatabaseInteraction().GetContext()) {
                 if (context.SaveExposureTemplate(exposureTemplate)) {
                     activeTreeDataItem.Data = exposureTemplate;
-                    activeTreeDataItem.Header = exposureTemplate.FilterName;
+                    activeTreeDataItem.Header = exposureTemplate.Name;
                 }
                 else {
                     Notification.ShowError("Failed to save Scheduler Exposure Template (see log for details)");

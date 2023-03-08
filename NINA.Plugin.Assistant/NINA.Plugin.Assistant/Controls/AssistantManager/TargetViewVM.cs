@@ -1,7 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using NINA.Astrometry;
 using NINA.Core.Enum;
-using NINA.Core.Model.Equipment;
 using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
@@ -35,7 +34,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
             profile = managerVM.GetProfile(target.Project.ProfileId);
 
-            InitializeCombos();
             InitializeExposurePlans(TargetProxy.Proxy);
 
             EditCommand = new RelayCommand(Edit);
@@ -56,27 +54,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
             TargetImportVM = new TargetImportVM(deepSkyObjectSearchVM, framingAssistantVM, planetariumFactory);
             TargetImportVM.PropertyChanged += ImportTarget_PropertyChanged;
-        }
-
-        private void InitializeCombos() {
-            FilterNameChoices = GetFilterNamesForProfile();
-
-            BinningModeChoices = new List<BinningMode> {
-                    new BinningMode(1,1),
-                    new BinningMode(2,2),
-                    new BinningMode(3,3),
-                    new BinningMode(4,4),
-            };
-        }
-
-        private List<string> GetFilterNamesForProfile() {
-            var filterNames = new List<string>();
-
-            foreach (FilterInfo filterInfo in profile?.FilterWheelSettings?.FilterWheelFilters) {
-                filterNames.Add(filterInfo.Name);
-            }
-
-            return filterNames;
         }
 
         private TargetProxy targetProxy;
@@ -103,24 +80,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 DeepSkyObject dso = new DeepSkyObject(string.Empty, target.Coordinates, profileService.ActiveProfile.ApplicationSettings.SkyAtlasImageRepository, profileService.ActiveProfile.AstrometrySettings.Horizon);
                 dso.Name = target.Name;
                 return dso;
-            }
-        }
-
-        private List<string> _filterNameChoices;
-        public List<string> FilterNameChoices {
-            get => _filterNameChoices;
-            set {
-                _filterNameChoices = value;
-                RaisePropertyChanged(nameof(FilterNameChoices));
-            }
-        }
-
-        private List<BinningMode> _binningModeChoices;
-        public List<BinningMode> BinningModeChoices {
-            get => _binningModeChoices;
-            set {
-                _binningModeChoices = value;
-                RaisePropertyChanged(nameof(BinningModeChoices));
             }
         }
 

@@ -27,10 +27,10 @@ using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
-    [ExportMetadata("Name", "Assistant")]
-    [ExportMetadata("Description", "Run the Sequencer Assistant")]
+    [ExportMetadata("Name", "Scheduler")]
+    [ExportMetadata("Description", "Run the Target Scheduler")]
     [ExportMetadata("Icon", "Assistant.AssistantSVG")]
-    [ExportMetadata("Category", "Sequencer Assistant")]
+    [ExportMetadata("Category", "Target Scheduler")]
     [Export(typeof(ISequenceItem))]
     [JsonObject(MemberSerialization.OptIn)]
     public class AssistantInstruction : SequenceItem, IValidatable {
