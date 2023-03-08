@@ -97,6 +97,10 @@ namespace Assistant.NINAPlugin.Database {
                 .FirstOrDefault();
         }*/
 
+        public ExposureTemplate GetExposureTemplate(int id) {
+            return ExposureTemplateSet.Where(e => e.Id == id).FirstOrDefault();
+        }
+
         public List<AcquiredImage> GetAcquiredImages(int targetId, string filterName) {
             var images = AcquiredImageSet.Where(p =>
                 p.TargetId == targetId &&
@@ -288,19 +292,36 @@ namespace Assistant.NINAPlugin.Database {
             }
         }
 
-        public bool SaveExposureTemplate(ExposureTemplate exposureTemplate) {
+        public ExposureTemplate SaveExposureTemplate(ExposureTemplate exposureTemplate) {
             Logger.Debug($"Scheduler: saving Exposure Template Id={exposureTemplate.Id} Name={exposureTemplate.Name}");
             using (var transaction = Database.BeginTransaction()) {
                 try {
                     ExposureTemplateSet.AddOrUpdate(exposureTemplate);
                     SaveChanges();
                     transaction.Commit();
-                    return true;
+                    return GetExposureTemplate(exposureTemplate.Id);
                 }
                 catch (Exception e) {
                     Logger.Error($"Scheduler: error persisting Exposure Template: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
-                    return false;
+                    return null;
+                }
+            }
+        }
+
+        public ExposureTemplate PasteExposureTemplate(string profileId, ExposureTemplate source) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    ExposureTemplate exposureTemplate = source.GetPasteCopy(profileId);
+                    ExposureTemplateSet.Add(exposureTemplate);
+                    SaveChanges();
+                    transaction.Commit();
+                    return GetExposureTemplate(exposureTemplate.Id);
+                }
+                catch (Exception e) {
+                    Logger.Error($"Scheduler: error pasting exposure template: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
                 }
             }
         }

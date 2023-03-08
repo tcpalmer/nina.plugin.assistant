@@ -55,6 +55,15 @@
             Height="600"
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1"
+            Visibility="{Binding ShowExposureTemplateProfileView}">
+            <StackPanel>
+                <local:ExposureTemplateProfileView DataContext="{Binding ExposureTemplateProfileViewVM}" />
+            </StackPanel>
+        </Border>
+        <Border
+            Height="600"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
             Visibility="{Binding ShowExposureTemplateView}">
             <StackPanel>
                 <local:ExposureTemplateView DataContext="{Binding ExposureTemplateViewVM}" />
