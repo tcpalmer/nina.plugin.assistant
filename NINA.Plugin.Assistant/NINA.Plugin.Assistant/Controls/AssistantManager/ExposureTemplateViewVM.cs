@@ -1,10 +1,12 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using NINA.Core.Model.Equipment;
+using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
@@ -23,6 +25,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             EditCommand = new RelayCommand(Edit);
             SaveCommand = new RelayCommand(Save);
             CancelCommand = new RelayCommand(Cancel);
+            CopyCommand = new RelayCommand(Copy);
+            DeleteCommand = new RelayCommand(Delete);
 
             InitializeCombos();
         }
@@ -105,6 +109,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand EditCommand { get; private set; }
         public ICommand SaveCommand { get; private set; }
         public ICommand CancelCommand { get; private set; }
+        public ICommand CopyCommand { get; private set; }
+        public ICommand DeleteCommand { get; private set; }
 
         private void Edit(object obj) {
             ExposureTemplateProxy.PropertyChanged += ExposureTemplateProxy_PropertyChanged;
@@ -130,5 +136,19 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             managerVM.SetEditMode(false);
         }
 
+        private void Copy(object obj) {
+            managerVM.CopyItem();
+        }
+
+        private void Delete(object obj) {
+            int count = managerVM.ExposureTemplateUsage(ExposureTemplateProxy.ExposureTemplate.Id);
+            string msg = count > 0
+                ? $"Are you sure?  '{ExposureTemplateProxy.ExposureTemplate.Name}' is in use by {count} exposure plan(s).  If those exposure plans are still active, deleting may cause problems later.  This cannot be undone."
+                : $"Delete exposure template '{ExposureTemplateProxy.ExposureTemplate.Name}'?  This cannot be undone.";
+
+            if (MyMessageBox.Show(msg, "Delete Exposure Template?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
+                managerVM.DeleteExposureTemplate(ExposureTemplateProxy.Proxy);
+            }
+        }
     }
 }

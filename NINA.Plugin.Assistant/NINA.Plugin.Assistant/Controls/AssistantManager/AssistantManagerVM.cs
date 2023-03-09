@@ -303,8 +303,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private List<TreeDataItem> LoadExposureTemplateTree() {
 
-            ExposureTemplatesReconciliation.ReconcileProfileExposureTemplate(profileService);
-
             List<TreeDataItem> rootList = new List<TreeDataItem>();
             TreeDataItem profilesFolder = new TreeDataItem(TreeDataType.ExposureTemplateRoot, "Profiles", null);
             rootList.Add(profilesFolder);
@@ -319,6 +317,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         TreeDataItem exposureTemplateItem = new TreeDataItem(TreeDataType.ExposureTemplate, exposureTemplate.Name, exposureTemplate, profileItem);
                         profileItem.Items.Add(exposureTemplateItem);
                     }
+
+                    // We could sort ETs into filter -> filter wheel order
                 }
 
                 profilesFolder.SortChildren();
@@ -492,6 +492,20 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        public Target DeleteExposurePlan(Target target, ExposurePlan exposurePlan) {
+            using (var context = new AssistantDatabaseInteraction().GetContext()) {
+                Target updatedTarget = context.DeleteExposurePlan(target, exposurePlan);
+                if (updatedTarget != null) {
+                    activeTreeDataItem.Data = updatedTarget;
+                }
+                else {
+                    Notification.ShowError("Failed to delete Scheduler Exposure Plan (see log for details)");
+                }
+
+                return updatedTarget;
+            }
+        }
+
         public void AddNewExposureTemplate(TreeDataItem parentItem) {
             ProfileMeta profileMeta = (ProfileMeta)parentItem.Data;
 
@@ -555,17 +569,22 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        public Target DeleteExposurePlan(Target target, ExposurePlan exposurePlan) {
+        public void DeleteExposureTemplate(ExposureTemplate exposureTemplate) {
             using (var context = new AssistantDatabaseInteraction().GetContext()) {
-                Target updatedTarget = context.DeleteExposurePlan(target, exposurePlan);
-                if (updatedTarget != null) {
-                    activeTreeDataItem.Data = updatedTarget;
+                if (context.DeleteExposureTemplate(exposureTemplate)) {
+                    TreeDataItem parentItem = activeTreeDataItem.TreeParent;
+                    parentItem.Items.Remove(activeTreeDataItem);
+                    parentItem.IsSelected = true;
                 }
                 else {
-                    Notification.ShowError("Failed to delete Scheduler Exposure Plan (see log for details)");
+                    Notification.ShowError("Failed to delete Scheduler Exposure Template (see log for details)");
                 }
+            }
+        }
 
-                return updatedTarget;
+        public int ExposureTemplateUsage(int exposureTemplateId) {
+            using (var context = new AssistantDatabaseInteraction().GetContext()) {
+                return context.ExposurePlanSet.Where(ep => ep.ExposureTemplateId == exposureTemplateId).ToList().Count;
             }
         }
 
@@ -582,6 +601,19 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             Logger.Error($"Scheduler: failed to load profile, id = {profileId}");
             return null;
         }
+
+        public List<ExposureTemplate> GetExposureTemplates(IProfile profile) {
+            using (var context = new AssistantDatabaseInteraction().GetContext()) {
+                return context.GetExposureTemplates(profile.Id.ToString());
+            }
+        }
+
+        public ExposureTemplate GetDefaultExposureTemplate(IProfile profile) {
+            using (var context = new AssistantDatabaseInteraction().GetContext()) {
+                return context.GetExposureTemplates(profile.Id.ToString()).FirstOrDefault();
+            }
+        }
+
     }
 
     public enum TreeDataType {

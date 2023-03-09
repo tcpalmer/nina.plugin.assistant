@@ -123,6 +123,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             source.ExposurePlans.ForEach(plan => {
                 plan.PropertyChanged -= ProxyPropertyChanged;
                 ExposurePlan copyExposurePlan = base.CopyEntity(plan);
+                copyExposurePlan.ExposureTemplate = plan.ExposureTemplate;
+                Logger.Debug($"TP CE ep et={copyExposurePlan.ExposureTemplate?.Name}");
                 copyExposurePlan.PropertyChanged += ProxyPropertyChanged;
                 copy.ExposurePlans.Add(copyExposurePlan);
             });

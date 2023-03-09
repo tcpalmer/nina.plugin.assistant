@@ -414,6 +414,26 @@
 
                 <DataGridTemplateColumn Width="*" CanUserSort="False">
                     <DataGridTemplateColumn.Header>
+                        <TextBlock Text="Template" ToolTip="Exposure template" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Width="Auto" Text="{Binding ExposureTemplate.Name}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox
+                                DisplayMemberPath="Value"
+                                ItemsSource="{Binding ElementName=TargetViewPanel, Path=DataContext.ExposureTemplateChoices}"
+                                SelectedValue="{Binding ExposureTemplateId}"
+                                SelectedValuePath="Key" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Width="*" CanUserSort="False">
+                    <DataGridTemplateColumn.Header>
                         <TextBlock Text="Exposure" ToolTip="Exposure time in seconds" />
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>

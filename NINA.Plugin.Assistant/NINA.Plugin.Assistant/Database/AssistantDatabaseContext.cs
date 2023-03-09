@@ -28,12 +28,11 @@ namespace Assistant.NINAPlugin.Database {
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder) {
             base.OnModelCreating(modelBuilder);
-            Logger.Debug("Assistant database: OnModelCreating");
+            Logger.Debug("Scheduler database: OnModelCreating");
 
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
             modelBuilder.Configurations.Add(new ProjectConfiguration());
             modelBuilder.Configurations.Add(new TargetConfiguration());
-            modelBuilder.Configurations.Add(new ExposurePlanConfiguration());
             modelBuilder.Configurations.Add(new ExposureTemplateConfiguration());
             modelBuilder.Configurations.Add(new AcquiredImageConfiguration());
 
@@ -52,7 +51,10 @@ namespace Assistant.NINAPlugin.Database {
 
         public List<Project> GetActiveProjects(string profileId, DateTime atTime) {
             long secs = DateTimeToUnixSeconds(atTime);
-            var projects = ProjectSet.Include("targets.exposureplans.exposuretemplate").Include("ruleweights").Where(p =>
+            var projects = ProjectSet
+                .Include("targets.exposureplans.exposuretemplate")
+                .Include("ruleweights")
+                .Where(p =>
                 p.ProfileId.Equals(profileId) &&
                 p.state_col == (int)ProjectState.Active &&
                 p.startDate <= secs && secs <= p.endDate);
@@ -85,6 +87,7 @@ namespace Assistant.NINAPlugin.Database {
 
         public ExposurePlan GetExposurePlan(int id) {
             return ExposurePlanSet
+                .Include("exposuretemplate")
                 .Where(p => p.Id == id)
                 .FirstOrDefault();
         }
@@ -209,7 +212,11 @@ namespace Assistant.NINAPlugin.Database {
             using (var transaction = Database.BeginTransaction()) {
                 try {
                     TargetSet.AddOrUpdate(target);
-                    target.ExposurePlans.ForEach(plan => { ExposurePlanSet.AddOrUpdate(plan); });
+                    target.ExposurePlans.ForEach(plan => {
+                        plan.ExposureTemplate = null; // clear this (ExposureTemplateId handles the relation)
+                        ExposurePlanSet.AddOrUpdate(plan);
+                        plan.ExposureTemplate = GetExposureTemplate(plan.ExposureTemplateId); // add back for UI
+                    });
 
                     SaveChanges();
                     transaction.Commit();
@@ -322,6 +329,23 @@ namespace Assistant.NINAPlugin.Database {
                     Logger.Error($"Scheduler: error pasting exposure template: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
+                }
+            }
+        }
+
+        public bool DeleteExposureTemplate(ExposureTemplate exposureTemplate) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    exposureTemplate = GetExposureTemplate(exposureTemplate.Id);
+                    ExposureTemplateSet.Remove(exposureTemplate);
+                    SaveChanges();
+                    transaction.Commit();
+                    return true;
+                }
+                catch (Exception e) {
+                    Logger.Error($"Scheduler: error deleting exposure template: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return false;
                 }
             }
         }

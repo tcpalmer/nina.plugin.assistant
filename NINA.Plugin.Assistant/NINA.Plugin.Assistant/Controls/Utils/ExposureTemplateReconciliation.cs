@@ -17,7 +17,12 @@ namespace Assistant.NINAPlugin.Controls.Util {
         /// <param name="profileService"></param>
         public static void ReconcileProfileExposureTemplate(IProfileService profileService) {
 
-            // TODO: do we also remove ExposureTemplate records that no longer have a cooresponding filter in the profile?
+            /* NOTE - not currently used
+             * - It was causing problems to automatically keep running this.
+             * - For now, user is forced to create ETs before EPs can be added.
+             * - May revisit later.
+             */
+
             // TODO: find and remove ExposureTemplate records that are orphaned: original profile was removed?
 
             Dictionary<string, List<string>> missing = new Dictionary<string, List<string>>();

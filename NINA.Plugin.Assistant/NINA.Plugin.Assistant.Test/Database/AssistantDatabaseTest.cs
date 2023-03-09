@@ -107,30 +107,20 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 t1p2.ExposurePlans[2].ExposureTemplate.FilterName.Should().Be("SII");
 
                 context.GetExposureTemplates("").Count.Should().Be(0);
-                List<ExposureTemplate> fPrefs = context.GetExposureTemplates(profileId);
-                fPrefs.Count.Should().Be(3);
-                fPrefs[0].FilterName.Should().Be("Ha");
-                fPrefs[1].FilterName.Should().Be("OIII");
-                fPrefs[2].FilterName.Should().Be("SII");
-                fPrefs[0].MoonAvoidanceEnabled.Should().BeFalse();
-                fPrefs[1].MoonAvoidanceEnabled.Should().BeFalse();
-                fPrefs[2].MoonAvoidanceEnabled.Should().BeFalse();
+                List<ExposureTemplate> ets = context.GetExposureTemplates(profileId);
+                ets.Count.Should().Be(3);
+                ets[0].FilterName.Should().Be("Ha");
+                ets[1].FilterName.Should().Be("OIII");
+                ets[2].FilterName.Should().Be("SII");
+                ets[0].MoonAvoidanceEnabled.Should().BeFalse();
+                ets[1].MoonAvoidanceEnabled.Should().BeFalse();
+                ets[2].MoonAvoidanceEnabled.Should().BeFalse();
 
                 // Test GetActiveProjects
                 projects = context.GetActiveProjects(profileId, markDate);
                 projects.Count.Should().Be(1);
                 p1 = projects[0];
                 p1.Name.Should().Be("Project: M42");
-
-                // Test GetExposurePlan
-                /* TODO: can no longer be done ...
-                AssertExposurePlan(context.GetExposurePlan(t1p1.Id, "Ha"), "Ha", 20, 3);
-                AssertExposurePlan(context.GetExposurePlan(t1p1.Id, "OIII"), "OIII", 20, 3);
-                AssertExposurePlan(context.GetExposurePlan(t1p1.Id, "SII"), "SII", 20, 3);
-                AssertExposurePlan(context.GetExposurePlan(t1p2.Id, "Ha"), "Ha", 20, 5);
-                AssertExposurePlan(context.GetExposurePlan(t1p2.Id, "OIII"), "OIII", 20, 5);
-                AssertExposurePlan(context.GetExposurePlan(t1p2.Id, "SII"), "SII", 20, 5);
-                */
             }
         }
 
@@ -252,12 +242,23 @@ namespace NINA.Plugin.Assistant.Test.Database {
             }
         }
 
-        private void AssertExposurePlan(ExposurePlan exposurePlan, string filterName, int exp, int desired) {
-            exposurePlan.ExposureTemplate.FilterName.Should().Be(filterName);
-            exposurePlan.Exposure.Should().Be(exp);
-            exposurePlan.Desired.Should().Be(desired);
-            exposurePlan.Acquired.Should().Be(0);
-            exposurePlan.Accepted.Should().Be(0);
+        [Test, Order(6)]
+        [NonParallelizable]
+        public void TestNewExposurePlan() {
+            using (var context = db.GetContext()) {
+
+                ExposureTemplate et = context.GetExposureTemplate(1);
+                ExposurePlan ep = new ExposurePlan(et.profileId);
+                ep.ExposureTemplateId = et.Id;
+                ep.Exposure = 120;
+                ep.Desired = 10;
+
+                List<Project> projects = context.GetAllProjects(profileId);
+                Target p2t1 = projects[1].Targets[0];
+                p2t1.ExposurePlans.Add(ep);
+
+                context.SaveTarget(p2t1);
+            }
         }
 
         private void LoadTestDatabase() {
@@ -290,6 +291,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     context.ExposureTemplateSet.Add(etHa);
                     context.ExposureTemplateSet.Add(etOIII);
                     context.ExposureTemplateSet.Add(etSII);
+                    context.SaveChanges();
 
                     Target t1 = new Target();
                     t1.Name = "M42";
@@ -297,21 +299,23 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t1.dec = TestUtil.M42.Dec;
                     p1.Targets.Add(t1);
 
-                    ExposurePlan ep = new ExposurePlan(profileId, etHa);
+                    ExposurePlan ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etHa.Id;
                     ep.Desired = 3;
                     ep.Exposure = 20;
                     t1.ExposurePlans.Add(ep);
 
-                    ep = new ExposurePlan(profileId, etOIII);
+                    ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etOIII.Id;
                     ep.Desired = 3;
                     ep.Exposure = 20;
                     t1.ExposurePlans.Add(ep);
 
-                    ep = new ExposurePlan(profileId, etSII);
+                    ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etSII.Id;
                     ep.Desired = 3;
                     ep.Exposure = 20;
                     t1.ExposurePlans.Add(ep);
-
                     context.ProjectSet.Add(p1);
 
                     Project p2 = new Project(profileId);
@@ -341,21 +345,23 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t2.dec = TestUtil.IC1805.Dec;
                     p2.Targets.Add(t2);
 
-                    ep = new ExposurePlan(profileId, etHa);
+                    ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etHa.Id;
                     ep.Desired = 5;
                     ep.Exposure = 20;
                     t2.ExposurePlans.Add(ep);
 
-                    ep = new ExposurePlan(profileId, etOIII);
+                    ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etOIII.Id;
                     ep.Desired = 5;
                     ep.Exposure = 20;
                     t2.ExposurePlans.Add(ep);
 
-                    ep = new ExposurePlan(profileId, etSII);
+                    ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etSII.Id;
                     ep.Desired = 5;
                     ep.Exposure = 20;
                     t2.ExposurePlans.Add(ep);
-
                     context.ProjectSet.Add(p2);
 
                     context.SaveChanges();
@@ -368,11 +374,11 @@ namespace NINA.Plugin.Assistant.Test.Database {
                         }
                     }
 
-                    TestContext.WriteLine($"DB VALIDATION EXCEPTION: {sb.ToString()}");
+                    TestContext.Error.WriteLine($"DB VALIDATION EXCEPTION: {sb}");
                     throw e;
                 }
                 catch (Exception e) {
-                    TestContext.WriteLine($"OTHER EXCEPTION: {e.Message}\n{e.ToString()}");
+                    TestContext.Error.WriteLine($"OTHER EXCEPTION: {e.Message}\n{e}");
                     throw e;
                 }
             }

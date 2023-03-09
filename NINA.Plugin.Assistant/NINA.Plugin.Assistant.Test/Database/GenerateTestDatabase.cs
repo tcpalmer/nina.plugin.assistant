@@ -60,15 +60,20 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t1.dec = TestUtil.M42.Dec;
                     p1.Targets.Add(t1);
 
-                    ExposurePlan ep = new ExposurePlan(profileId, etHa);
+                    ExposurePlan ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etHa.Id;
                     ep.Desired = 3;
                     ep.Exposure = 20;
                     t1.ExposurePlans.Add(ep);
-                    ep = new ExposurePlan(profileId, etOIII);
+
+                    ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etOIII.Id;
                     ep.Desired = 3;
                     ep.Exposure = 20;
                     t1.ExposurePlans.Add(ep);
-                    ep = new ExposurePlan(profileId, etSII);
+
+                    ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etSII.Id;
                     ep.Desired = 3;
                     ep.Exposure = 20;
                     t1.ExposurePlans.Add(ep);
@@ -83,30 +88,26 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p2.StartDate = p2.ActiveDate;
                     p2.EndDate = new DateTime(2023, 2, 1);
 
-                    // TODO: set new project prefs here
-                    /*
-                    AssistantProjectPreferencesOLD p2Prefs = new AssistantProjectPreferencesOLD();
-                    p2Prefs.SetDefaults();
-                    p2Prefs.MinimumAltitude = 10;
-                    SetDefaultRuleWeights(p2Prefs);
-                    p2.preferences = new ProjectPreferenceOLD(p2Prefs);
-                    */
-
                     Target t2 = new Target();
                     t2.Name = "IC1805";
                     t2.ra = TestUtil.IC1805.RADegrees;
                     t2.dec = TestUtil.IC1805.Dec;
                     p2.Targets.Add(t2);
 
-                    ep = new ExposurePlan(profileId, etHa);
+                    ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etHa.Id;
                     ep.Desired = 5;
                     ep.Exposure = 20;
                     t2.ExposurePlans.Add(ep);
-                    ep = new ExposurePlan(profileId, etOIII);
+
+                    ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etOIII.Id;
                     ep.Desired = 5;
                     ep.Exposure = 20;
                     t2.ExposurePlans.Add(ep);
-                    ep = new ExposurePlan(profileId, etSII);
+
+                    ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etSII.Id;
                     ep.Desired = 5;
                     ep.Exposure = 20;
                     t2.ExposurePlans.Add(ep);
@@ -293,7 +294,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
         }
 
         private ExposurePlan GetExposurePlan(string profileId, ExposureTemplate exposureTemplate, int desired, int accepted, int exposure) {
-            ExposurePlan ep = new ExposurePlan(profileId, exposureTemplate);
+            ExposurePlan ep = new ExposurePlan(profileId);
+            ep.ExposureTemplateId = exposureTemplate.Id;
             ep.Desired = desired;
             ep.Accepted = accepted;
             ep.Exposure = exposure;

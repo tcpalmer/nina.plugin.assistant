@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Data.Entity.ModelConfiguration;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -12,12 +11,12 @@ namespace Assistant.NINAPlugin.Database.Schema {
         [Key] public int Id { get; set; }
         [Required] public string profileId { get; set; }
         [Required] public double exposure { get; set; }
-        public int exposureTemplateId { get; set; }
 
         public int desired { get; set; }
         public int acquired { get; set; }
         public int accepted { get; set; }
 
+        [ForeignKey("ExposureTemplate")] public int ExposureTemplateId { get; set; }
         public virtual ExposureTemplate ExposureTemplate { get; set; }
 
         [ForeignKey("Target")] public int TargetId { get; set; }
@@ -70,9 +69,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public ExposurePlan() { }
 
-        public ExposurePlan(string profileId, ExposureTemplate exposureTemplate) {
-            this.ProfileId = profileId;
-            this.ExposureTemplate = exposureTemplate;
+        public ExposurePlan(string profileId) {
+            ProfileId = profileId;
             Exposure = 60;
             Desired = 1;
             Acquired = 0;
@@ -107,17 +105,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"Accepted: {Accepted}");
 
             return sb.ToString();
-        }
-    }
-
-    internal class ExposurePlanConfiguration : EntityTypeConfiguration<ExposurePlan> {
-
-        public ExposurePlanConfiguration() {
-            HasKey(e => new { e.Id });
-            HasRequired(e => e.ExposureTemplate)
-                .WithMany()
-                .HasForeignKey(e => e.exposureTemplateId);
-
         }
     }
 }
