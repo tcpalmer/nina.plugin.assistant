@@ -92,16 +92,5 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
     }
 
-    public class Fooster : IImageSaveWatcher {
-        public int PlanExposureDatabaseId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        public void Start() {
-            throw new NotImplementedException();
-        }
-
-        public void Stop() {
-            throw new NotImplementedException();
-        }
-    }
 }
 
