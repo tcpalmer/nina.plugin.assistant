@@ -400,6 +400,7 @@
     <Compile Include="Sequencer\AssistantTargetEndTimeTrigger.cs" />
     <Compile Include="Plan\Scoring\ExposurePlanner.cs" />
     <Compile Include="Sequencer\AssistantWaitInstruction.cs" />
+    <Compile Include="Sequencer\IImageSaveWatcher.cs" />
     <Compile Include="Sequencer\ImageGrader.cs" />
     <Compile Include="Sequencer\ImageSaveWatcher.cs" />
     <Compile Include="Sequencer\SequenceCommands.cs" />

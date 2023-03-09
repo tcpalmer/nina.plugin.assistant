@@ -43,7 +43,7 @@ namespace Assistant.NINAPlugin.Plan {
                 return new PlannerEmulator(atTime, activeProfile).GetPlan(previousPlanTarget);
             }
 
-            using (MyStopWatch.Measure("Assistant Plan Generation")) {
+            using (MyStopWatch.Measure("Scheduler Plan Generation")) {
                 try {
                     if (projects == null) {
                         projects = GetProjects(atTime);
@@ -130,11 +130,11 @@ namespace Assistant.NINAPlugin.Plan {
                 foreach (IPlanTarget planTarget in planProject.Targets) {
                     planTarget.Rejected = false;
                     planTarget.RejectedReason = null;
-                    foreach (IPlanExposure planFilter in planTarget.ExposurePlans) {
-                        planFilter.Accepted += planFilter.PlannedExposures;
-                        planFilter.PlannedExposures = 0;
-                        planFilter.Rejected = false;
-                        planFilter.RejectedReason = null;
+                    foreach (IPlanExposure planExposure in planTarget.ExposurePlans) {
+                        planExposure.Accepted += planExposure.PlannedExposures;
+                        planExposure.PlannedExposures = 0;
+                        planExposure.Rejected = false;
+                        planExposure.RejectedReason = null;
                     }
                 }
             }
@@ -237,10 +237,10 @@ namespace Assistant.NINAPlugin.Plan {
                 foreach (IPlanTarget planTarget in planProject.Targets) {
                     if (planTarget.Rejected) { continue; }
 
-                    foreach (IPlanExposure planFilter in planTarget.ExposurePlans) {
-                        if (planFilter.IsIncomplete() && planFilter.MoonAvoidanceEnabled) {
-                            if (RejectForMoonAvoidance(planTarget, planFilter)) {
-                                SetRejected(planFilter, Reasons.FilterMoonAvoidance);
+                    foreach (IPlanExposure planExposure in planTarget.ExposurePlans) {
+                        if (planExposure.IsIncomplete() && planExposure.MoonAvoidanceEnabled) {
+                            if (RejectForMoonAvoidance(planTarget, planExposure)) {
+                                SetRejected(planExposure, Reasons.FilterMoonAvoidance);
                             }
                         }
                     }
@@ -385,9 +385,9 @@ namespace Assistant.NINAPlugin.Plan {
             planTarget.RejectedReason = reason;
         }
 
-        private void SetRejected(IPlanExposure planFilter, string reason) {
-            planFilter.Rejected = true;
-            planFilter.RejectedReason = reason;
+        private void SetRejected(IPlanExposure planExposure, string reason) {
+            planExposure.Rejected = true;
+            planExposure.RejectedReason = reason;
         }
 
         private List<IPlanProject> PropagateRejections(List<IPlanProject> projects) {
@@ -403,8 +403,8 @@ namespace Assistant.NINAPlugin.Plan {
                     if (planTarget.Rejected) { continue; }
                     bool targetRejected = true;
 
-                    foreach (IPlanExposure planFilter in planTarget.ExposurePlans) {
-                        if (!planFilter.Rejected) {
+                    foreach (IPlanExposure planExposure in planTarget.ExposurePlans) {
+                        if (!planExposure.Rejected) {
                             targetRejected = false;
                             break;
                         }
@@ -431,12 +431,12 @@ namespace Assistant.NINAPlugin.Plan {
         private bool ProjectIsInComplete(IPlanProject planProject) {
             bool incomplete = false;
             foreach (IPlanTarget target in planProject.Targets) {
-                foreach (IPlanExposure planFilter in target.ExposurePlans) {
-                    if (planFilter.IsIncomplete()) {
+                foreach (IPlanExposure planExposure in target.ExposurePlans) {
+                    if (planExposure.IsIncomplete()) {
                         incomplete = true;
                     }
                     else {
-                        SetRejected(planFilter, Reasons.FilterComplete);
+                        SetRejected(planExposure, Reasons.FilterComplete);
                     }
                 }
             }
@@ -446,23 +446,23 @@ namespace Assistant.NINAPlugin.Plan {
 
         private TwilightLevel GetOverallTwilight(IPlanTarget planTarget) {
             TwilightLevel twilightLevel = TwilightLevel.Nighttime;
-            foreach (IPlanExposure planFilter in planTarget.ExposurePlans) {
+            foreach (IPlanExposure planExposure in planTarget.ExposurePlans) {
                 // find most permissive (brightest) twilight over all incomplete plans
-                if (planFilter.IsIncomplete() && planFilter.TwilightLevel > twilightLevel) {
-                    twilightLevel = planFilter.TwilightLevel;
+                if (planExposure.IsIncomplete() && planExposure.TwilightLevel > twilightLevel) {
+                    twilightLevel = planExposure.TwilightLevel;
                 }
             }
 
             return twilightLevel;
         }
 
-        private bool RejectForMoonAvoidance(IPlanTarget planTarget, IPlanExposure planFilter) {
+        private bool RejectForMoonAvoidance(IPlanTarget planTarget, IPlanExposure planExposure) {
             DateTime midPointTime = Utils.GetMidpointTime(planTarget.StartTime, planTarget.EndTime);
             double moonAge = AstrometryUtils.GetMoonAge(midPointTime);
             double moonSeparation = AstrometryUtils.GetMoonSeparationAngle(observerInfo, midPointTime, planTarget.Coordinates);
             double moonAvoidanceSeparation = AstrometryUtils.GetMoonAvoidanceLorentzianSeparation(moonAge,
-                planFilter.MoonAvoidanceSeparation, planFilter.MoonAvoidanceWidth);
-            Logger.Debug($"Scheduler: moon avoidance {planTarget.Name}/{planFilter.FilterName} midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
+                planExposure.MoonAvoidanceSeparation, planExposure.MoonAvoidanceWidth);
+            Logger.Debug($"Scheduler: moon avoidance {planTarget.Name}/{planExposure.FilterName} midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
 
             return moonSeparation < moonAvoidanceSeparation;
         }

@@ -16,6 +16,7 @@ namespace Assistant.NINAPlugin.Plan {
         public IPlanTarget PlanTarget { get; private set; }
         public List<IPlanInstruction> PlanInstructions { get; private set; }
         public DateTime? WaitForNextTargetTime { get; private set; }
+        public bool IsEmulator { get; set; }
 
         public AssistantPlan(IPlanTarget planTarget, TimeInterval timeInterval, List<IPlanInstruction> planInstructions) {
             this.PlanId = Guid.NewGuid().ToString();

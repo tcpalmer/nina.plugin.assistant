@@ -227,7 +227,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public AsyncObservableCollection<TargetStatus> TargetStatusList {
-            get => StatusMonitor.TargetStatusList;
+            get => StatusMonitor?.TargetStatusList;
         }
 
         public string Summary {
