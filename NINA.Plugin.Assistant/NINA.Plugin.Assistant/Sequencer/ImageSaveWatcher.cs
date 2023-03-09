@@ -8,7 +8,7 @@ using System.Data.Entity.Migrations;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
-    public class ImageSaveWatcher {
+    public class ImageSaveWatcher : IImageSaveWatcher {
 
         private IImageSaveMediator imageSaveMediator;
         private IPlanTarget planTarget;
@@ -18,7 +18,11 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.imageSaveMediator = imageSaveMediator;
             this.planTarget = planTarget;
             this.enableGrader = planTarget.Project.EnableGrader;
+        }
 
+        public int PlanExposureDatabaseId { get; set; }
+
+        public void Start() {
             imageSaveMediator.ImageSaved += ImageSaved;
             Logger.Debug($"Scheduler: start watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
         }
@@ -33,17 +37,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                 return;
             }
 
-            // TODO: work here needs to be async
-            // https://markheath.net/post/starting-threads-in-dotnet
-
             bool accepted = enableGrader ? new ImageGrader().GradeImage(planTarget, msg) : false;
             Logger.Debug($"Scheduler: image save for {planTarget.Project.Name}/{planTarget.Name}, filter={msg.Filter}, grader enabled={enableGrader}, accepted={accepted}");
 
-            // HACK
-            accepted = true;
-            // TODO: Need a way to NOT do this for the emulator
-            // TODO: But for a 'perfect plan' we do need to update proxy exposure plans so it thinks it's making progress
-            //Update(planTarget, msg.Filter, accepted, msg);
+            Update(planTarget, msg.Filter, accepted, msg);
         }
 
         private void Update(IPlanTarget planTarget, string filterName, bool accepted, ImageSavedEventArgs msg) {
@@ -52,8 +49,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 using (var transaction = context.Database.BeginTransaction()) {
 
                     try {
-                        // Update the filter plan record
-                        ExposurePlan exposurePlan = context.GetExposurePlan(planTarget.DatabaseId, filterName);
+                        // Update the exposure plan record
+                        ExposurePlan exposurePlan = context.GetExposurePlan(PlanExposureDatabaseId);
                         exposurePlan.Acquired++;
 
                         if (accepted) {
@@ -80,6 +77,30 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
                 }
             }
+        }
+    }
+
+    public class ImageSaveWatcherEmulator : IImageSaveWatcher {
+        public int PlanExposureDatabaseId { get; set; }
+
+        public void Start() {
+            Logger.Debug("Scheduler ImageSaveWatcherEmulator Start");
+        }
+
+        public void Stop() {
+            Logger.Debug("Scheduler ImageSaveWatcherEmulator Stop");
+        }
+    }
+
+    public class Fooster : IImageSaveWatcher {
+        public int PlanExposureDatabaseId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public void Start() {
+            throw new NotImplementedException();
+        }
+
+        public void Stop() {
+            throw new NotImplementedException();
         }
     }
 }

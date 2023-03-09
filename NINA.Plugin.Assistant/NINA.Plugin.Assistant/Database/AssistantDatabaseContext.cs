@@ -18,7 +18,7 @@ namespace Assistant.NINAPlugin.Database {
         public DbSet<RuleWeight> RuleWeightSet { get; set; }
         public DbSet<Target> TargetSet { get; set; }
         public DbSet<ExposurePlan> ExposurePlanSet { get; set; }
-        public DbSet<FilterPreference> FilterPreferenceSet { get; set; }
+        public DbSet<ExposureTemplate> ExposureTemplateSet { get; set; }
         public DbSet<AcquiredImage> AcquiredImageSet { get; set; }
         public DbSet<ImageData> ImageDataSet { get; set; }
 
@@ -33,7 +33,7 @@ namespace Assistant.NINAPlugin.Database {
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
             modelBuilder.Configurations.Add(new ProjectConfiguration());
             modelBuilder.Configurations.Add(new TargetConfiguration());
-            modelBuilder.Configurations.Add(new FilterPreferenceConfiguration());
+            modelBuilder.Configurations.Add(new ExposureTemplateConfiguration());
             modelBuilder.Configurations.Add(new AcquiredImageConfiguration());
 
             var sqi = new CreateOrMigrateDatabaseInitializer<AssistantDatabaseContext>();
@@ -42,7 +42,7 @@ namespace Assistant.NINAPlugin.Database {
 
         public List<Project> GetAllProjects(string profileId) {
             return ProjectSet
-                .Include("targets.exposureplans")
+                .Include("targets.exposureplans.exposuretemplate")
                 .Include("ruleweights")
                 .Where(p => p.ProfileId
                 .Equals(profileId))
@@ -51,20 +51,23 @@ namespace Assistant.NINAPlugin.Database {
 
         public List<Project> GetActiveProjects(string profileId, DateTime atTime) {
             long secs = DateTimeToUnixSeconds(atTime);
-            var projects = ProjectSet.Include("targets.exposureplans").Include("ruleweights").Where(p =>
+            var projects = ProjectSet
+                .Include("targets.exposureplans.exposuretemplate")
+                .Include("ruleweights")
+                .Where(p =>
                 p.ProfileId.Equals(profileId) &&
                 p.state_col == (int)ProjectState.Active &&
                 p.startDate <= secs && secs <= p.endDate);
             return projects.ToList();
         }
 
-        public List<FilterPreference> GetFilterPreferences(string profileId) {
-            return FilterPreferenceSet.Where(p => p.profileId == profileId).ToList();
+        public List<ExposureTemplate> GetExposureTemplates(string profileId) {
+            return ExposureTemplateSet.Where(p => p.profileId == profileId).ToList();
         }
 
         public Project GetProject(int projectId) {
             return ProjectSet
-                .Include("targets.exposureplans")
+                .Include("targets.exposureplans.exposuretemplate")
                 .Include("ruleweights")
                 .Where(p => p.Id == projectId)
                 .FirstOrDefault();
@@ -72,7 +75,7 @@ namespace Assistant.NINAPlugin.Database {
 
         public Target GetTarget(int projectId, int targetId) {
             return TargetSet
-                .Include("exposureplans")
+                .Include("exposureplans.exposuretemplate")
                 .Where(t => t.Project.Id == projectId && t.Id == targetId)
                 .FirstOrDefault();
         }
@@ -84,14 +87,21 @@ namespace Assistant.NINAPlugin.Database {
 
         public ExposurePlan GetExposurePlan(int id) {
             return ExposurePlanSet
+                .Include("exposuretemplate")
                 .Where(p => p.Id == id)
                 .FirstOrDefault();
         }
 
+        /* TODO: this can't be done anymore since filterName is no longer on EP AND multiple ETs could have same filter name
+         * This is called from ImageSaveWatcher Update() ...
         public ExposurePlan GetExposurePlan(int targetId, string filterName) {
             return ExposurePlanSet
                 .Where(e => e.TargetId == targetId && e.filterName == filterName)
                 .FirstOrDefault();
+        }*/
+
+        public ExposureTemplate GetExposureTemplate(int id) {
+            return ExposureTemplateSet.Where(e => e.Id == id).FirstOrDefault();
         }
 
         public List<AcquiredImage> GetAcquiredImages(int targetId, string filterName) {
@@ -202,7 +212,11 @@ namespace Assistant.NINAPlugin.Database {
             using (var transaction = Database.BeginTransaction()) {
                 try {
                     TargetSet.AddOrUpdate(target);
-                    target.ExposurePlans.ForEach(plan => { ExposurePlanSet.AddOrUpdate(plan); });
+                    target.ExposurePlans.ForEach(plan => {
+                        plan.ExposureTemplate = null; // clear this (ExposureTemplateId handles the relation)
+                        ExposurePlanSet.AddOrUpdate(plan);
+                        plan.ExposureTemplate = GetExposureTemplate(plan.ExposureTemplateId); // add back for UI
+                    });
 
                     SaveChanges();
                     transaction.Commit();
@@ -252,7 +266,7 @@ namespace Assistant.NINAPlugin.Database {
         }
 
         public bool SaveExposurePlan(ExposurePlan exposurePlan) {
-            Logger.Debug($"Scheduler: saving Exposure Plan Id={exposurePlan.Id} Name={exposurePlan.FilterName}");
+            Logger.Debug($"Scheduler: saving Exposure Plan Id={exposurePlan.Id}");
             using (var transaction = Database.BeginTransaction()) {
                 try {
                     ExposurePlanSet.AddOrUpdate(exposurePlan);
@@ -285,28 +299,62 @@ namespace Assistant.NINAPlugin.Database {
             }
         }
 
-        public bool SaveFilterPreference(FilterPreference filterPreference) {
-            Logger.Debug($"Scheduler: saving Filter Preferences Id={filterPreference.Id} Name={filterPreference.FilterName}");
+        public ExposureTemplate SaveExposureTemplate(ExposureTemplate exposureTemplate) {
+            Logger.Debug($"Scheduler: saving Exposure Template Id={exposureTemplate.Id} Name={exposureTemplate.Name}");
             using (var transaction = Database.BeginTransaction()) {
                 try {
-                    FilterPreferenceSet.AddOrUpdate(filterPreference);
+                    ExposureTemplateSet.AddOrUpdate(exposureTemplate);
+                    SaveChanges();
+                    transaction.Commit();
+                    return GetExposureTemplate(exposureTemplate.Id);
+                }
+                catch (Exception e) {
+                    Logger.Error($"Scheduler: error persisting Exposure Template: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
+                }
+            }
+        }
+
+        public ExposureTemplate PasteExposureTemplate(string profileId, ExposureTemplate source) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    ExposureTemplate exposureTemplate = source.GetPasteCopy(profileId);
+                    ExposureTemplateSet.Add(exposureTemplate);
+                    SaveChanges();
+                    transaction.Commit();
+                    return GetExposureTemplate(exposureTemplate.Id);
+                }
+                catch (Exception e) {
+                    Logger.Error($"Scheduler: error pasting exposure template: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
+                }
+            }
+        }
+
+        public bool DeleteExposureTemplate(ExposureTemplate exposureTemplate) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    exposureTemplate = GetExposureTemplate(exposureTemplate.Id);
+                    ExposureTemplateSet.Remove(exposureTemplate);
                     SaveChanges();
                     transaction.Commit();
                     return true;
                 }
                 catch (Exception e) {
-                    Logger.Error($"Scheduler: error persisting Filter Preferences: {e.Message} {e.StackTrace}");
+                    Logger.Error($"Scheduler: error deleting exposure template: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return false;
                 }
             }
         }
 
-        public void AddFilterPreferences(List<FilterPreference> filterPreferences) {
+        public void AddExposureTemplates(List<ExposureTemplate> exposureTemplates) {
             using (var transaction = Database.BeginTransaction()) {
                 try {
-                    filterPreferences.ForEach(filterPreference => {
-                        FilterPreferenceSet.AddOrUpdate(filterPreference);
+                    exposureTemplates.ForEach(exposureTemplate => {
+                        ExposureTemplateSet.AddOrUpdate(exposureTemplate);
                     });
 
                     SaveChanges();
@@ -343,7 +391,7 @@ namespace Assistant.NINAPlugin.Database {
             void IDatabaseInitializer<TContext>.InitializeDatabase(TContext context) {
 
                 if (!DatabaseExists(context)) {
-                    Logger.Debug("Scheduler database: creating database schema");
+                    Logger.Debug("Assistant database: creating database schema");
                     using (var transaction = context.Database.BeginTransaction()) {
                         try {
                             context.Database.ExecuteSqlCommand(GetInitialSQL());

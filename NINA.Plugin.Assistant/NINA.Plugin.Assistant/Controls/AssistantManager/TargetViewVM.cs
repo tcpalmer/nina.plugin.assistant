@@ -1,7 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using NINA.Astrometry;
 using NINA.Core.Enum;
-using NINA.Core.Model.Equipment;
 using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
@@ -28,16 +27,16 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             IFramingAssistantVM framingAssistantVM,
             IDeepSkyObjectSearchVM deepSkyObjectSearchVM,
             IPlanetariumFactory planetariumFactory,
-            Target target)
-            : base(profileService) {
+            Target target) : base(profileService) {
 
             this.managerVM = managerVM;
             TargetProxy = new TargetProxy(target);
 
             profile = managerVM.GetProfile(target.Project.ProfileId);
+            profileService.ProfileChanged += ProfileService_ProfileChanged;
 
-            InitializeCombos();
             InitializeExposurePlans(TargetProxy.Proxy);
+            InitializeExposureTemplateList(profile);
 
             EditCommand = new RelayCommand(Edit);
             SaveCommand = new RelayCommand(Save);
@@ -46,38 +45,17 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             DeleteCommand = new RelayCommand(Delete);
 
             ShowTargetImportViewCommand = new RelayCommand(ShowTargetImportViewCmd);
-
             AddExposurePlanCommand = new RelayCommand(AddExposurePlan);
             DeleteExposurePlanCommand = new RelayCommand(DeleteExposurePlan);
 
             SendCoordinatesToFramingAssistantCommand = new AsyncCommand<bool>(async () => {
                 applicationMediator.ChangeTab(ApplicationTab.FRAMINGASSISTANT);
+                // Note that IFramingAssistantVM doesn't expose any properties to set the rotation, although they are on the impl
                 return await framingAssistantVM.SetCoordinates(TargetDSO);
             });
 
             TargetImportVM = new TargetImportVM(deepSkyObjectSearchVM, framingAssistantVM, planetariumFactory);
             TargetImportVM.PropertyChanged += ImportTarget_PropertyChanged;
-        }
-
-        private void InitializeCombos() {
-            FilterNameChoices = GetFilterNamesForProfile();
-
-            BinningModeChoices = new List<BinningMode> {
-                    new BinningMode(1,1),
-                    new BinningMode(2,2),
-                    new BinningMode(3,3),
-                    new BinningMode(4,4),
-            };
-        }
-
-        private List<string> GetFilterNamesForProfile() {
-            var filterNames = new List<string>();
-
-            foreach (FilterInfo filterInfo in profile?.FilterWheelSettings?.FilterWheelFilters) {
-                filterNames.Add(filterInfo.Name);
-            }
-
-            return filterNames;
         }
 
         private TargetProxy targetProxy;
@@ -107,24 +85,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        private List<string> _filterNameChoices;
-        public List<string> FilterNameChoices {
-            get => _filterNameChoices;
-            set {
-                _filterNameChoices = value;
-                RaisePropertyChanged(nameof(FilterNameChoices));
-            }
-        }
-
-        private List<BinningMode> _binningModeChoices;
-        public List<BinningMode> BinningModeChoices {
-            get => _binningModeChoices;
-            set {
-                _binningModeChoices = value;
-                RaisePropertyChanged(nameof(BinningModeChoices));
-            }
-        }
-
         private void InitializeExposurePlans(Target target) {
             List<ExposurePlan> exposurePlans = new List<ExposurePlan>();
 
@@ -143,6 +103,30 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             set {
                 exposurePlans = value;
                 RaisePropertyChanged(nameof(ExposurePlans));
+            }
+        }
+
+        private void ProfileService_ProfileChanged(object sender, System.EventArgs e) {
+            InitializeExposureTemplateList(profile);
+        }
+
+        private void InitializeExposureTemplateList(IProfile profile) {
+            List<ExposureTemplate> exposureTemplates = managerVM.GetExposureTemplates(profile);
+            ExposureTemplateChoices = new AsyncObservableCollection<KeyValuePair<int, string>>();
+            exposureTemplates.ForEach(et => {
+                ExposureTemplateChoices.Add(new KeyValuePair<int, string>(et.Id, et.Name));
+            });
+
+            RaisePropertyChanged(nameof(ExposureTemplateChoices));
+        }
+
+        private AsyncObservableCollection<KeyValuePair<int, string>> exposureTemplateChoices;
+        public AsyncObservableCollection<KeyValuePair<int, string>> ExposureTemplateChoices {
+            get {
+                return exposureTemplateChoices;
+            }
+            set {
+                exposureTemplateChoices = value;
             }
         }
 
@@ -243,27 +227,28 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private void AddExposurePlan(object obj) {
-            string filterName = GetFilterNamesForProfile().FirstOrDefault();
-            if (filterName == null) {
-                filterName = "unknown";
+            ExposureTemplate exposureTemplate = managerVM.GetDefaultExposureTemplate(profile);
+            if (exposureTemplate == null) {
+                MyMessageBox.Show("Can't find a default Exposure Template.  You must create some Exposure Templates for this profile before creating an Exposure Plan.", "Oops");
+                return;
             }
 
             Target proxy = TargetProxy.Proxy;
-            ExposurePlan exposurePlan = new ExposurePlan(profile.Id.ToString(), filterName);
+            ExposurePlan exposurePlan = new ExposurePlan(profile.Id.ToString());
+            exposurePlan.ExposureTemplate = exposureTemplate;
+            exposurePlan.ExposureTemplateId = exposureTemplate.Id;
             exposurePlan.TargetId = proxy.Id;
-            exposurePlan.Gain = -1;
-            exposurePlan.Offset = -1;
-            exposurePlan.ReadoutMode = -1;
 
             proxy.ExposurePlans.Add(exposurePlan);
             InitializeExposurePlans(proxy);
+            ItemEdited = true;
         }
 
         private void DeleteExposurePlan(object obj) {
             ExposurePlan item = obj as ExposurePlan;
-            ExposurePlan exposurePlan = TargetProxy.Original.ExposurePlans.Where(p => p.Id == item.Id).FirstOrDefault();
+            ExposurePlan exposurePlan = TargetProxy.Original.ExposurePlans.Where(ep => ep.Id == item.Id).FirstOrDefault();
             if (exposurePlan != null) {
-                string message = $"Delete exposure plan for '{exposurePlan.FilterName}' filter?  This cannot be undone.";
+                string message = $"Delete exposure plan using template '{exposurePlan.ExposureTemplate?.Name}'?  This cannot be undone.";
                 if (MyMessageBox.Show(message, "Delete Exposure Plan?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
                     Target updatedTarget = managerVM.DeleteExposurePlan(TargetProxy.Original, exposurePlan);
                     if (updatedTarget != null) {

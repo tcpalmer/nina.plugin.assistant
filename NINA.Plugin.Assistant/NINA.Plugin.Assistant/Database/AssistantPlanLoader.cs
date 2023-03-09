@@ -11,13 +11,13 @@ namespace Assistant.NINAPlugin.Database {
 
         public List<IPlanProject> LoadActiveProjects(AssistantDatabaseContext context, IProfile activeProfile, DateTime atTime) {
             List<Project> projects = null;
-            List<FilterPreference> filterPrefs = null;
+            List<ExposureTemplate> exposureTemplates = null;
             string profileId = activeProfile.Id.ToString();
 
             using (context) {
                 try {
                     projects = context.GetActiveProjects(profileId, atTime);
-                    filterPrefs = context.GetFilterPreferences(profileId);
+                    exposureTemplates = context.GetExposureTemplates(profileId);
                 }
                 catch (Exception ex) {
                     throw ex; // let the caller decide how to handle
@@ -25,26 +25,26 @@ namespace Assistant.NINAPlugin.Database {
             }
 
             if (projects == null || projects.Count == 0) {
-                Logger.Warning("Scheduler: no projects are active and within start/end dates at planning time");
+                Logger.Warning("Assistant: no projects are active and within start/end dates at planning time");
                 return null;
             }
 
             List<IPlanProject> planProjects = new List<IPlanProject>();
-            Dictionary<string, FilterPreference> filterPrefsDictionary = GetFilterPrefDictionary(filterPrefs);
+            Dictionary<string, ExposureTemplate> exposureTemplatesDictionary = GetExposureTemplateDictionary(exposureTemplates);
 
             foreach (Project project in projects) {
-                PlanProject planProject = new PlanProject(activeProfile, project, filterPrefsDictionary);
+                PlanProject planProject = new PlanProject(activeProfile, project, exposureTemplatesDictionary);
                 planProjects.Add(planProject);
             }
 
             return planProjects;
         }
 
-        private Dictionary<string, FilterPreference> GetFilterPrefDictionary(List<FilterPreference> filterPrefs) {
-            Dictionary<string, FilterPreference> dict = new Dictionary<string, FilterPreference>();
+        private Dictionary<string, ExposureTemplate> GetExposureTemplateDictionary(List<ExposureTemplate> exposureTemplates) {
+            Dictionary<string, ExposureTemplate> dict = new Dictionary<string, ExposureTemplate>();
 
-            foreach (FilterPreference filterPref in filterPrefs) {
-                dict.Add(filterPref.FilterName, filterPref);
+            foreach (ExposureTemplate exposureTemplate in exposureTemplates) {
+                dict.Add(exposureTemplate.FilterName, exposureTemplate);
             }
 
             return dict;

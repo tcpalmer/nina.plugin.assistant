@@ -15,10 +15,10 @@ using System.Windows.Shapes;
 
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
     /// <summary>
-    /// Interaction logic for FilterPrefView.xaml
+    /// Interaction logic for ExposureTemplateProfileView.xaml
     /// </summary>
-    public partial class FilterPrefView : UserControl {
-        public FilterPrefView() {
+    public partial class ExposureTemplateProfileView : UserControl {
+        public ExposureTemplateProfileView() {
             InitializeComponent();
         }
     }

@@ -123,6 +123,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             source.ExposurePlans.ForEach(plan => {
                 plan.PropertyChanged -= ProxyPropertyChanged;
                 ExposurePlan copyExposurePlan = base.CopyEntity(plan);
+                copyExposurePlan.ExposureTemplate = plan.ExposureTemplate;
+                Logger.Debug($"TP CE ep et={copyExposurePlan.ExposureTemplate?.Name}");
                 copyExposurePlan.PropertyChanged += ProxyPropertyChanged;
                 copy.ExposurePlans.Add(copyExposurePlan);
             });
@@ -131,11 +133,11 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
     }
 
-    public class FilterPreferenceProxy : TemporaryProxy<FilterPreference> {
+    public class ExposureTemplateProxy : TemporaryProxy<ExposureTemplate> {
 
-        public FilterPreferenceProxy(FilterPreference filterPreference) : base(filterPreference) { }
+        public ExposureTemplateProxy(ExposureTemplate exposureTemplate) : base(exposureTemplate) { }
 
-        public FilterPreference FilterPreference {
+        public ExposureTemplate ExposureTemplate {
             get => Proxy;
             set {
                 Proxy = value;

@@ -14,7 +14,7 @@ namespace Assistant.NINAPlugin.Plan {
     /// a potential delay at the start as well as an end time that reflects when we either must stop
     /// (due to horizon, meridian or twilight) or we want to stop to let the full planner run again.
     /// Although it may cover periods of twilight, we're guaranteed that the window is appropriate for
-    /// some planFilter in the planTarget.
+    /// some planExposure in the planTarget.
     /// 
     /// At high latitudes near the summer solstice, you can lose true nighttime, astronomical twilight,
     /// and perhaps even nautical twilight.  We handle all cases for locations below the polar circle -
@@ -84,8 +84,8 @@ namespace Assistant.NINAPlugin.Plan {
             if (twilightWindow != null) {
                 TimeInterval overlap = twilightWindow.Overlap(planInterval);
                 if (overlap != null && overlap.Duration > 0) {
-                    List<IPlanExposure> planFilters = GetPlanFiltersForTwilightLevel(twilightLevel);
-                    List<IPlanInstruction> added = GetPlanInstructions(planFilters, overlap);
+                    List<IPlanExposure> planExposures = GetPlanExposuresForTwilightLevel(twilightLevel);
+                    List<IPlanInstruction> added = GetPlanInstructions(planExposures, overlap);
 
                     if (HasActionableInstructions(added)) {
                         instructions.AddRange(added);
@@ -100,44 +100,44 @@ namespace Assistant.NINAPlugin.Plan {
             return instructions;
         }
 
-        private List<IPlanInstruction> GetPlanInstructions(List<IPlanExposure> planFilters, TimeInterval timeWindow) {
+        private List<IPlanInstruction> GetPlanInstructions(List<IPlanExposure> planExposures, TimeInterval timeWindow) {
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             long timeRemaining = timeWindow.Duration;
             string lastFilter = null;
 
             while (timeRemaining > 0) {
-                if (AllPlanFiltersAreComplete(planFilters)) { break; }
+                if (AllPlanExposuresAreComplete(planExposures)) { break; }
 
-                foreach (IPlanExposure planFilter in planFilters) {
+                foreach (IPlanExposure planExposure in planExposures) {
 
-                    if (IsPlanFilterComplete(planFilter)) { continue; }
+                    if (IsPlanExposureComplete(planExposure)) { continue; }
 
-                    if (planFilter.FilterName != lastFilter) {
-                        instructions.Add(new PlanSwitchFilter(planFilter));
-                        lastFilter = planFilter.FilterName;
+                    if (planExposure.FilterName != lastFilter) {
+                        instructions.Add(new PlanSwitchFilter(planExposure));
+                        lastFilter = planExposure.FilterName;
                     }
 
                     // Since we don't know what readout mode the camera might have been left in, we have to always set it
-                    instructions.Add(new PlanSetReadoutMode(planFilter));
+                    instructions.Add(new PlanSetReadoutMode(planExposure));
 
                     // filterSwitchFrequency = zero -> take as many as possible per filter before switching
                     if (filterSwitchFrequency == 0) {
-                        while (!IsPlanFilterComplete(planFilter)) {
-                            timeRemaining -= (long)planFilter.ExposureLength;
+                        while (!IsPlanExposureComplete(planExposure)) {
+                            timeRemaining -= (long)planExposure.ExposureLength;
                             if (timeRemaining <= 0) { break; }
-                            instructions.Add(new PlanTakeExposure(planFilter));
-                            planFilter.PlannedExposures++;
+                            instructions.Add(new PlanTakeExposure(planExposure));
+                            planExposure.PlannedExposures++;
                         }
                     }
                     else {
                         // otherwise, take filterSwitchFrequency of this filter before switching
                         for (int i = 0; i < filterSwitchFrequency; i++) {
-                            timeRemaining -= (long)planFilter.ExposureLength;
+                            timeRemaining -= (long)planExposure.ExposureLength;
                             if (timeRemaining <= 0) { break; }
-                            instructions.Add(new PlanTakeExposure(planFilter));
-                            planFilter.PlannedExposures++;
+                            instructions.Add(new PlanTakeExposure(planExposure));
+                            planExposure.PlannedExposures++;
 
-                            if (IsPlanFilterComplete(planFilter)) { break; }
+                            if (IsPlanExposureComplete(planExposure)) { break; }
                         }
                     }
 
@@ -167,9 +167,9 @@ namespace Assistant.NINAPlugin.Plan {
             return false;
         }
 
-        private bool AllPlanFiltersAreComplete(List<IPlanExposure> planFilters) {
-            foreach (IPlanExposure planFilter in planFilters) {
-                if (!IsPlanFilterComplete(planFilter)) {
+        private bool AllPlanExposuresAreComplete(List<IPlanExposure> planExposures) {
+            foreach (IPlanExposure planExposure in planExposures) {
+                if (!IsPlanExposureComplete(planExposure)) {
                     return false;
                 }
             }
@@ -177,34 +177,34 @@ namespace Assistant.NINAPlugin.Plan {
             return true;
         }
 
-        private bool IsPlanFilterComplete(IPlanExposure planFilter) {
-            return planFilter.NeededExposures() <= planFilter.PlannedExposures;
+        private bool IsPlanExposureComplete(IPlanExposure planExposure) {
+            return planExposure.NeededExposures() <= planExposure.PlannedExposures;
         }
 
-        private List<IPlanExposure> GetPlanFiltersForTwilightLevel(TwilightLevel twilightLevel) {
+        private List<IPlanExposure> GetPlanExposuresForTwilightLevel(TwilightLevel twilightLevel) {
             return NightPrioritize(planTarget.ExposurePlans.Where(f => f.TwilightLevel >= twilightLevel).ToList(), twilightLevel);
         }
 
-        private List<IPlanExposure> NightPrioritize(List<IPlanExposure> planFilters, TwilightLevel twilightLevel) {
+        private List<IPlanExposure> NightPrioritize(List<IPlanExposure> planExposures, TwilightLevel twilightLevel) {
 
             // If the twilight level is nighttime, order the filters to prioritize those for nighttime only.
             // Assuming there are also filters for brighter twilights, the nighttime only should be done first,
             // allowing the others to be done during (presumed future) brighter twilight levels.
             return twilightLevel == TwilightLevel.Nighttime ?
-                planFilters.OrderBy(p => p.TwilightLevel).ToList() :
-                planFilters;
+                planExposures.OrderBy(p => p.TwilightLevel).ToList() :
+                planExposures;
         }
     }
 
     public interface IPlanInstruction {
-        IPlanExposure planFilter { get; set; }
+        IPlanExposure planExposure { get; set; }
     }
 
     public class PlanInstruction : IPlanInstruction {
-        public IPlanExposure planFilter { get; set; }
+        public IPlanExposure planExposure { get; set; }
 
-        public PlanInstruction(IPlanExposure planFilter) {
-            this.planFilter = planFilter;
+        public PlanInstruction(IPlanExposure planExposure) {
+            this.planExposure = planExposure;
         }
 
         public static string InstructionsSummary(List<IPlanInstruction> instructions) {
@@ -216,7 +216,7 @@ namespace Assistant.NINAPlugin.Plan {
             StringBuilder order = new StringBuilder();
             foreach (IPlanInstruction instruction in instructions) {
                 if (instruction is PlanTakeExposure) {
-                    string filterName = instruction.planFilter.FilterName;
+                    string filterName = instruction.planExposure.FilterName;
                     order.Append(filterName);
                     if (exposures.ContainsKey(filterName)) {
                         exposures[filterName]++;
@@ -268,26 +268,26 @@ namespace Assistant.NINAPlugin.Plan {
     }
 
     public class PlanSwitchFilter : PlanInstruction {
-        public PlanSwitchFilter(IPlanExposure planFilter) : base(planFilter) { }
+        public PlanSwitchFilter(IPlanExposure planExposure) : base(planExposure) { }
 
         public override string ToString() {
-            return $"SwitchFilter: {planFilter.FilterName}";
+            return $"SwitchFilter: {planExposure.FilterName}";
         }
     }
 
     public class PlanSetReadoutMode : PlanInstruction {
-        public PlanSetReadoutMode(IPlanExposure planFilter) : base(planFilter) { }
+        public PlanSetReadoutMode(IPlanExposure planExposure) : base(planExposure) { }
 
         public override string ToString() {
-            return $"Set readoutmode: mode={planFilter.ReadoutMode}";
+            return $"Set readoutmode: mode={planExposure.ReadoutMode}";
         }
     }
 
     public class PlanTakeExposure : PlanInstruction {
-        public PlanTakeExposure(IPlanExposure planFilter) : base(planFilter) { }
+        public PlanTakeExposure(IPlanExposure planExposure) : base(planExposure) { }
 
         public override string ToString() {
-            return $"TakeExposure: {planFilter.FilterName} {planFilter.ExposureLength}";
+            return $"TakeExposure: {planExposure.FilterName} {planExposure.ExposureLength}";
         }
     }
 

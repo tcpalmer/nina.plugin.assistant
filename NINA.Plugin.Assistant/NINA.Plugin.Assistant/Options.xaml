@@ -3,10 +3,9 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ai="clr-namespace:Assistant.NINAPlugin.Controls.AcquiredImages"
-    xmlns:am="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
-    xmlns:i="http://schemas.microsoft.com/xaml/behaviors">
+    xmlns:am="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager">
 
-    <DataTemplate x:Key="Sequence Scheduler_Options">
+    <DataTemplate x:Key="Target Scheduler_Options">
         <StackPanel DataContext="{Binding}" Orientation="Vertical">
 
             <Expander

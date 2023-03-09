@@ -53,6 +53,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IProfile activeProfile;
         private AssistantStatusMonitor monitor;
 
+        private IImageSaveWatcher ImageSaveWatcher;
+
         public AssistantTargetContainer(
                 AssistantInstruction parentInstruction,
                 IProfileService profileService,
@@ -104,9 +106,13 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
             Logger.Debug("Scheduler: executing target container");
-            ImageSaveWatcher imageSaveWatcher = null;
 
             try {
+                if (!plan.IsEmulator)
+                    ImageSaveWatcher = new ImageSaveWatcher(imageSaveMediator, plan.PlanTarget);
+                else
+                    ImageSaveWatcher = new ImageSaveWatcherEmulator();
+
                 AddEndTimeTrigger(plan.PlanTarget);
                 AddDitherTrigger(plan.PlanTarget);
 
@@ -121,7 +127,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 // Add the planned exposures
                 AddInstructions(plan);
 
-                imageSaveWatcher = new ImageSaveWatcher(imageSaveMediator, plan.PlanTarget);
+                ImageSaveWatcher.Start();
                 base.Execute(progress, token).Wait();
             }
             catch (Exception ex) {
@@ -131,7 +137,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 // TODO: we also need to wait for the ImageSaveWatcher to be done with the last image.
                 // This will ensure that the DB is updated with the last grading operation before the planner is called again.
                 // Pete on Discord was dealing with something similar (2/5/23) - ask him what he ended up doing.
-                imageSaveWatcher?.Stop();
+                ImageSaveWatcher?.Stop();
 
                 foreach (var item in Items) {
                     item.AttachNewParent(null);
@@ -190,17 +196,17 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 if (instruction is PlanSwitchFilter) {
-                    AddSwitchFilter(instruction.planFilter);
+                    AddSwitchFilter(instruction.planExposure);
                     continue;
                 }
 
                 if (instruction is PlanSetReadoutMode) {
-                    AddSetReadoutMode(instruction.planFilter);
+                    AddSetReadoutMode(instruction.planExposure);
                     continue;
                 }
 
                 if (instruction is PlanTakeExposure) {
-                    AddTakeExposure(instruction.planFilter);
+                    AddTakeExposure(instruction.planExposure);
                     continue;
                 }
 
@@ -246,8 +252,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             Add(new InstructionWrapper(monitor, planTarget.PlanId, slewCenter));
         }
 
-        private void AddSwitchFilter(IPlanExposure planFilter) {
-            Logger.Info($"Scheduler: adding switch filter: {planFilter.FilterName}");
+        private void AddSwitchFilter(IPlanExposure planExposure) {
+            Logger.Info($"Scheduler: adding switch filter: {planExposure.FilterName}");
 
             SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator);
             switchFilter.Name = nameof(SwitchFilter);
@@ -256,12 +262,12 @@ namespace Assistant.NINAPlugin.Sequencer {
             switchFilter.ErrorBehavior = this.ErrorBehavior;
             switchFilter.Attempts = this.Attempts;
 
-            switchFilter.Filter = LookupFilter(planFilter.FilterName);
-            Add(new InstructionWrapper(monitor, planFilter.PlanId, switchFilter));
+            switchFilter.Filter = LookupFilter(planExposure.FilterName);
+            Add(new InstructionWrapper(monitor, planExposure.PlanId, switchFilter));
         }
 
-        private void AddSetReadoutMode(IPlanExposure planFilter) {
-            int? readoutMode = planFilter.ReadoutMode;
+        private void AddSetReadoutMode(IPlanExposure planExposure) {
+            int? readoutMode = planExposure.ReadoutMode;
             readoutMode = (readoutMode == null || readoutMode < 0) ? 0 : readoutMode;
 
             Logger.Info($"Scheduler: adding set readout mode: {readoutMode}");
@@ -274,11 +280,11 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             setReadoutMode.Mode = (short)readoutMode;
 
-            Add(new InstructionWrapper(monitor, planFilter.PlanId, setReadoutMode));
+            Add(new InstructionWrapper(monitor, planExposure.PlanId, setReadoutMode));
         }
 
-        private void AddTakeExposure(IPlanExposure planFilter) {
-            Logger.Info($"Scheduler: adding take exposure: {planFilter.FilterName}");
+        private void AddTakeExposure(IPlanExposure planExposure) {
+            Logger.Info($"Scheduler: adding take exposure: {planExposure.FilterName}");
 
             TakeExposure takeExposure = new TakeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM);
             takeExposure.Name = nameof(TakeExposure);
@@ -288,12 +294,12 @@ namespace Assistant.NINAPlugin.Sequencer {
             takeExposure.Attempts = this.Attempts;
             takeExposure.ExposureCount = GetExposureCount();
 
-            takeExposure.ExposureTime = planFilter.ExposureLength;
-            takeExposure.Gain = GetGain(planFilter.Gain);
-            takeExposure.Offset = GetOffset(planFilter.Offset);
-            takeExposure.Binning = planFilter.BinningMode;
+            takeExposure.ExposureTime = planExposure.ExposureLength;
+            takeExposure.Gain = GetGain(planExposure.Gain);
+            takeExposure.Offset = GetOffset(planExposure.Offset);
+            takeExposure.Binning = planExposure.BinningMode;
 
-            Add(new InstructionWrapper(monitor, planFilter.PlanId, takeExposure));
+            Add(new InstructionWrapper(monitor, ImageSaveWatcher, planExposure, takeExposure));
         }
 
         private void AddWait(DateTime waitForTime, IPlanTarget planTarget) {
@@ -326,7 +332,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         // IDeepSkyObjectContainer behavior, defer to parent
         public InputTarget Target { get => parentInstruction.Target; set { } }
         public NighttimeData NighttimeData => parentInstruction.NighttimeData;
-
     }
 
     public class InstructionWrapper : SequenceItem {
@@ -334,6 +339,16 @@ namespace Assistant.NINAPlugin.Sequencer {
         private AssistantStatusMonitor Monitor;
         private string PlanItemId;
         private SequenceItem Instruction;
+
+        private IImageSaveWatcher ImageSaveWatcher;
+        private int PlanExposureDatabaseId;
+
+        public InstructionWrapper(AssistantStatusMonitor monitor, IImageSaveWatcher imageSaveWatcher, IPlanExposure planExposure, SequenceItem instruction)
+            : this(monitor, planExposure.PlanId, instruction) {
+
+            ImageSaveWatcher = imageSaveWatcher;
+            PlanExposureDatabaseId = planExposure.DatabaseId;
+        }
 
         public InstructionWrapper(AssistantStatusMonitor monitor, string planItemId, SequenceItem instruction) {
             this.Monitor = monitor;
@@ -349,6 +364,10 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
             try {
+                if (ImageSaveWatcher != null) {
+                    ImageSaveWatcher.PlanExposureDatabaseId = PlanExposureDatabaseId;
+                }
+
                 Monitor.ItemStart(PlanItemId, Name);
                 Instruction.Execute(progress, token).Wait();
                 Monitor.ItemFinish(PlanItemId, Name);

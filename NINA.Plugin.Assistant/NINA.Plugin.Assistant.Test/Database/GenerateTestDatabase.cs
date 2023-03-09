@@ -47,30 +47,36 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p1.preferences = new ProjectPreferenceOLD(p1Prefs);
                     */
 
+                    ExposureTemplate etHa = new ExposureTemplate(profileId, "Ha", "Ha");
+                    ExposureTemplate etOIII = new ExposureTemplate(profileId, "OIII", "OIII");
+                    ExposureTemplate etSII = new ExposureTemplate(profileId, "SII", "SII");
+                    context.ExposureTemplateSet.Add(etHa);
+                    context.ExposureTemplateSet.Add(etOIII);
+                    context.ExposureTemplateSet.Add(etSII);
+
                     Target t1 = new Target();
                     t1.Name = "M42";
                     t1.ra = TestUtil.M42.RADegrees;
                     t1.dec = TestUtil.M42.Dec;
                     p1.Targets.Add(t1);
 
-                    ExposurePlan fp = new ExposurePlan(profileId, "Ha");
-                    fp.Desired = 3;
-                    fp.Exposure = 20;
-                    fp.Gain = 100;
-                    fp.Offset = 10;
-                    t1.ExposurePlans.Add(fp);
-                    fp = new ExposurePlan(profileId, "OIII");
-                    fp.Desired = 3;
-                    fp.Exposure = 20;
-                    fp.Gain = 100;
-                    fp.Offset = 10;
-                    t1.ExposurePlans.Add(fp);
-                    fp = new ExposurePlan(profileId, "SII");
-                    fp.Desired = 3;
-                    fp.Exposure = 20;
-                    fp.Gain = 100;
-                    fp.Offset = 10;
-                    t1.ExposurePlans.Add(fp);
+                    ExposurePlan ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etHa.Id;
+                    ep.Desired = 3;
+                    ep.Exposure = 20;
+                    t1.ExposurePlans.Add(ep);
+
+                    ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etOIII.Id;
+                    ep.Desired = 3;
+                    ep.Exposure = 20;
+                    t1.ExposurePlans.Add(ep);
+
+                    ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etSII.Id;
+                    ep.Desired = 3;
+                    ep.Exposure = 20;
+                    t1.ExposurePlans.Add(ep);
 
                     context.ProjectSet.Add(p1);
 
@@ -82,45 +88,31 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p2.StartDate = p2.ActiveDate;
                     p2.EndDate = new DateTime(2023, 2, 1);
 
-                    // TODO: set new project prefs here
-                    /*
-                    AssistantProjectPreferencesOLD p2Prefs = new AssistantProjectPreferencesOLD();
-                    p2Prefs.SetDefaults();
-                    p2Prefs.MinimumAltitude = 10;
-                    SetDefaultRuleWeights(p2Prefs);
-                    p2.preferences = new ProjectPreferenceOLD(p2Prefs);
-                    */
-
                     Target t2 = new Target();
                     t2.Name = "IC1805";
                     t2.ra = TestUtil.IC1805.RADegrees;
                     t2.dec = TestUtil.IC1805.Dec;
                     p2.Targets.Add(t2);
 
-                    fp = new ExposurePlan(profileId, "Ha");
-                    fp.Desired = 5;
-                    fp.Exposure = 20;
-                    fp.Gain = 100;
-                    fp.Offset = 10;
-                    t2.ExposurePlans.Add(fp);
-                    fp = new ExposurePlan(profileId, "OIII");
-                    fp.Desired = 5;
-                    fp.Exposure = 20;
-                    fp.Gain = 100;
-                    fp.Offset = 10;
-                    t2.ExposurePlans.Add(fp);
-                    fp = new ExposurePlan(profileId, "SII");
-                    fp.Desired = 5;
-                    fp.Exposure = 20;
-                    fp.Gain = 100;
-                    fp.Offset = 10;
-                    t2.ExposurePlans.Add(fp);
+                    ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etHa.Id;
+                    ep.Desired = 5;
+                    ep.Exposure = 20;
+                    t2.ExposurePlans.Add(ep);
+
+                    ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etOIII.Id;
+                    ep.Desired = 5;
+                    ep.Exposure = 20;
+                    t2.ExposurePlans.Add(ep);
+
+                    ep = new ExposurePlan(profileId);
+                    ep.ExposureTemplateId = etSII.Id;
+                    ep.Desired = 5;
+                    ep.Exposure = 20;
+                    t2.ExposurePlans.Add(ep);
 
                     context.ProjectSet.Add(p2);
-
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Ha"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "OIII"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "SII"));
 
                     //ImageMetadata imd = new ImageMetadata(PlanMocks.GetImageSavedEventArgs(DateTime.Now, "Ha"));
                     //AcquiredImage ai = new AcquiredImage(1, DateTime.Now, "Ha", imd);
@@ -173,16 +165,31 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p1.DitherEvery = 2;
                     SetDefaultRuleWeights(p1);
 
+                    ExposureTemplate etHa = new ExposureTemplate(profileId, "Ha", "Ha");
+                    ExposureTemplate etOIII = new ExposureTemplate(profileId, "OIII", "OIII");
+                    ExposureTemplate etSII = new ExposureTemplate(profileId, "SII", "SII");
+                    ExposureTemplate etLum = new ExposureTemplate(profileId, "Lum", "Lum");
+                    ExposureTemplate etRed = new ExposureTemplate(profileId, "Red", "Red");
+                    ExposureTemplate etGrn = new ExposureTemplate(profileId, "Green", "Green");
+                    ExposureTemplate etBlu = new ExposureTemplate(profileId, "Blue", "Blue");
+                    context.ExposureTemplateSet.Add(etHa);
+                    context.ExposureTemplateSet.Add(etOIII);
+                    context.ExposureTemplateSet.Add(etSII);
+                    context.ExposureTemplateSet.Add(etLum);
+                    context.ExposureTemplateSet.Add(etRed);
+                    context.ExposureTemplateSet.Add(etGrn);
+                    context.ExposureTemplateSet.Add(etBlu);
+
                     Target t1 = new Target();
                     t1.Name = "C00";
                     t1.ra = TestUtil.C00.RA;
                     t1.dec = TestUtil.C00.Dec;
                     p1.Targets.Add(t1);
 
-                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "Lum", 5, 0, 60));
-                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "Red", 5, 0, 60));
-                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "Green", 5, 0, 60));
-                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "Blue", 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, etLum, 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, etRed, 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, etGrn, 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, etBlu, 5, 0, 60));
 
                     Project p2 = new Project(profileId);
                     p2.Name = "Project: C90";
@@ -200,20 +207,12 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     t2.dec = TestUtil.C90.Dec;
                     p2.Targets.Add(t2);
 
-                    t2.ExposurePlans.Add(GetExposurePlan(profileId, "Ha", 5, 0, 90));
-                    t2.ExposurePlans.Add(GetExposurePlan(profileId, "OIII", 5, 0, 90));
-                    t2.ExposurePlans.Add(GetExposurePlan(profileId, "SII", 5, 0, 90));
+                    t2.ExposurePlans.Add(GetExposurePlan(profileId, etHa, 5, 0, 90));
+                    t2.ExposurePlans.Add(GetExposurePlan(profileId, etOIII, 5, 0, 90));
+                    t2.ExposurePlans.Add(GetExposurePlan(profileId, etSII, 5, 0, 90));
 
                     context.ProjectSet.Add(p1);
                     context.ProjectSet.Add(p2);
-
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Lum"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Red"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Green"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Blue"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "Ha"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "OIII"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "SII"));
 
                     context.SaveChanges();
                 }
@@ -249,23 +248,27 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p1.DitherEvery = 0;
                     p1.EnableGrader = true;
 
+                    ExposureTemplate etLum = new ExposureTemplate(profileId, "L", "L");
+                    ExposureTemplate etRed = new ExposureTemplate(profileId, "R", "R");
+                    ExposureTemplate etGrn = new ExposureTemplate(profileId, "G", "G");
+                    ExposureTemplate etBlu = new ExposureTemplate(profileId, "B", "B");
+                    context.ExposureTemplateSet.Add(etLum);
+                    context.ExposureTemplateSet.Add(etRed);
+                    context.ExposureTemplateSet.Add(etGrn);
+                    context.ExposureTemplateSet.Add(etBlu);
+
                     Target t1 = new Target();
                     t1.Name = "C00";
                     t1.ra = TestUtil.C00.RA;
                     t1.dec = TestUtil.C00.Dec;
                     p1.Targets.Add(t1);
 
-                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "L", 5, 0, 60));
-                    t1.ExposurePlans.Add(GetExposurePlan(profileId, "R", 5, 0, 60));
-                    //t1.ExposurePlans.Add(GetExposurePlan(profileId, "G", 5, 0, 60));
-                    //t1.ExposurePlans.Add(GetExposurePlan(profileId, "B", 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, etLum, 5, 0, 60));
+                    t1.ExposurePlans.Add(GetExposurePlan(profileId, etRed, 5, 0, 60));
+                    //t1.ExposurePlans.Add(GetExposurePlan(profileId, etGrn, 5, 0, 60));
+                    //t1.ExposurePlans.Add(GetExposurePlan(profileId, etBlu, 5, 0, 60));
 
                     context.ProjectSet.Add(p1);
-
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "L"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "R"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "G"));
-                    context.FilterPreferenceSet.Add(new FilterPreference(profileId, "B"));
 
                     context.SaveChanges();
                 }
@@ -290,29 +293,28 @@ namespace NINA.Plugin.Assistant.Test.Database {
             return new AssistantDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
         }
 
-        private ExposurePlan GetExposurePlan(string profileId, string filterName, int desired, int accepted, int exposure) {
-            ExposurePlan fp = new ExposurePlan(profileId, filterName);
-            fp.Desired = desired;
-            fp.Accepted = accepted;
-            fp.Exposure = exposure;
-            fp.Gain = 100;
-            fp.Offset = 10;
-            return fp;
+        private ExposurePlan GetExposurePlan(string profileId, ExposureTemplate exposureTemplate, int desired, int accepted, int exposure) {
+            ExposurePlan ep = new ExposurePlan(profileId);
+            ep.ExposureTemplateId = exposureTemplate.Id;
+            ep.Desired = desired;
+            ep.Accepted = accepted;
+            ep.Exposure = exposure;
+            return ep;
         }
 
         private List<IPlanProject> ReadAndDump(string profileId, DateTime atTime) {
 
             List<Project> projects = null;
-            List<FilterPreference> filterPrefs = null;
+            List<ExposureTemplate> exposureTemplates = null;
 
             AssistantDatabaseInteraction database = GetDatabase();
             using (var context = database.GetContext()) {
                 try {
                     projects = context.GetActiveProjects(profileId, atTime);
-                    filterPrefs = context.GetFilterPreferences(profileId);
+                    exposureTemplates = context.GetExposureTemplates(profileId);
                 }
                 catch (Exception ex) {
-                    TestContext.WriteLine($"Scheduler: exception accessing Scheduler: {ex}");
+                    TestContext.WriteLine($"Assistant: exception accessing Assistant: {ex}");
                 }
             }
 
@@ -324,14 +326,14 @@ namespace NINA.Plugin.Assistant.Test.Database {
             profileMock.SetupProperty(m => m.ActiveProfile.Id, new Guid(profileId));
             List<IPlanProject> planProjects = new List<IPlanProject>();
 
-            Dictionary<string, FilterPreference> dict = new Dictionary<string, FilterPreference>();
-            foreach (FilterPreference filterPref in filterPrefs) {
-                dict.Add(filterPref.FilterName, filterPref);
+            Dictionary<string, ExposureTemplate> dict = new Dictionary<string, ExposureTemplate>();
+            foreach (ExposureTemplate exposureTemplate in exposureTemplates) {
+                dict.Add(exposureTemplate.FilterName, exposureTemplate);
             }
-            Dictionary<string, FilterPreference> filterPrefsDictionary = dict;
+            Dictionary<string, ExposureTemplate> exposureTemplatesDictionary = dict;
 
             foreach (Project project in projects) {
-                PlanProject planProject = new PlanProject(profileMock.Object.ActiveProfile, project, filterPrefsDictionary);
+                PlanProject planProject = new PlanProject(profileMock.Object.ActiveProfile, project, exposureTemplatesDictionary);
                 planProjects.Add(planProject);
                 TestContext.WriteLine($"PROJECT:\n{planProject}");
             }

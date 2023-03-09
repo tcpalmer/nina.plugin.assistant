@@ -215,17 +215,17 @@ namespace NINA.Plugin.Assistant.Test.Plan {
                 }
 
                 if (expected is PlanSwitchFilter) {
-                    Assert.AreEqual(expected.planFilter.FilterName, actual.planFilter.FilterName);
+                    Assert.AreEqual(expected.planExposure.FilterName, actual.planExposure.FilterName);
                     continue;
                 }
 
                 if (expected is PlanSetReadoutMode) {
-                    Assert.AreEqual(expected.planFilter.ReadoutMode, actual.planFilter.ReadoutMode);
+                    Assert.AreEqual(expected.planExposure.ReadoutMode, actual.planExposure.ReadoutMode);
                     continue;
                 }
 
                 if (expected is PlanTakeExposure) {
-                    Assert.AreEqual(expected.planFilter.FilterName, actual.planFilter.FilterName);
+                    Assert.AreEqual(expected.planExposure.FilterName, actual.planExposure.FilterName);
                     continue;
                 }
 

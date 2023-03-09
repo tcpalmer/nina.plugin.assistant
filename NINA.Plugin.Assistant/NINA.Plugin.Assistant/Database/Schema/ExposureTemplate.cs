@@ -1,4 +1,6 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
+using Assistant.NINAPlugin.Util;
+using NINA.Core.Model.Equipment;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,16 +10,41 @@ using System.Text;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public class FilterPreference : INotifyPropertyChanged {
+    public class ExposureTemplate : INotifyPropertyChanged {
 
         [Key] public int Id { get; set; }
         [Required] public string profileId { get; set; }
+        [Required] public string name { get; set; }
         [Required] public string filterName { get; set; }
+
+        public int gain { get; set; }
+        public int offset { get; set; }
+        public int? bin { get; set; }
+        public int readoutMode { get; set; }
+
         public int twilightlevel_col { get; set; }
         public bool moonAvoidanceEnabled { get; set; }
         public double moonAvoidanceSeparation { get; set; }
         public int moonAvoidanceWidth { get; set; }
         public double maximumHumidity { get; set; }
+
+        [NotMapped]
+        public string ProfileId {
+            get { return profileId; }
+            set {
+                profileId = value;
+                RaisePropertyChanged(nameof(ProfileId));
+            }
+        }
+
+        [NotMapped]
+        public string Name {
+            get { return name; }
+            set {
+                name = value;
+                RaisePropertyChanged(nameof(Name));
+            }
+        }
 
         [NotMapped]
         public string FilterName {
@@ -29,11 +56,38 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
-        public string ProfileId {
-            get { return profileId; }
+        public int Gain {
+            get { return gain; }
             set {
-                profileId = value;
-                RaisePropertyChanged(nameof(ProfileId));
+                gain = value;
+                RaisePropertyChanged(nameof(Gain));
+            }
+        }
+
+        [NotMapped]
+        public int Offset {
+            get { return offset; }
+            set {
+                offset = value;
+                RaisePropertyChanged(nameof(Offset));
+            }
+        }
+
+        [NotMapped]
+        public BinningMode BinningMode {
+            get { return new BinningMode((short)bin, (short)bin); }
+            set {
+                bin = value.X;
+                RaisePropertyChanged(nameof(BinningMode));
+            }
+        }
+
+        [NotMapped]
+        public int ReadoutMode {
+            get { return readoutMode; }
+            set {
+                readoutMode = value;
+                RaisePropertyChanged(nameof(ReadoutMode));
             }
         }
 
@@ -82,11 +136,17 @@ namespace Assistant.NINAPlugin.Database.Schema {
             }
         }
 
-        public FilterPreference() { }
+        public ExposureTemplate() { }
 
-        public FilterPreference(string profileId, string filterName) {
+        public ExposureTemplate(string profileId, string name, string filterName) {
             ProfileId = profileId;
+            Name = name;
             FilterName = filterName;
+
+            Gain = -1;
+            Offset = -1;
+            BinningMode = new BinningMode(1, 1);
+            ReadoutMode = -1;
 
             TwilightLevel = TwilightLevel.Nighttime;
             MoonAvoidanceEnabled = false;
@@ -111,10 +171,31 @@ namespace Assistant.NINAPlugin.Database.Schema {
             return TwilightLevel == TwilightLevel.Civil;
         }
 
+        public ExposureTemplate GetPasteCopy(string newProfileId) {
+            ExposureTemplate copy = new ExposureTemplate(newProfileId, Utils.CopiedItemName(name), filterName);
+
+            copy.Gain = Gain;
+            copy.Offset = Offset;
+            copy.BinningMode = BinningMode;
+            copy.ReadoutMode = ReadoutMode;
+            copy.TwilightLevel = TwilightLevel;
+            copy.MoonAvoidanceEnabled = MoonAvoidanceEnabled;
+            copy.MoonAvoidanceSeparation = MoonAvoidanceSeparation;
+            copy.MoonAvoidanceWidth = MoonAvoidanceWidth;
+            copy.MaximumHumidity = MaximumHumidity;
+
+            return copy;
+        }
+
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"ProfileId: {ProfileId}");
+            sb.AppendLine($"Name: {Name}");
             sb.AppendLine($"FilterName: {FilterName}");
+            sb.AppendLine($"Gain: {Gain}");
+            sb.AppendLine($"Offset: {Offset}");
+            sb.AppendLine($"BinningMode: {BinningMode}");
+            sb.AppendLine($"ReadoutMode: {ReadoutMode}");
             sb.AppendLine($"TwilightLevel: {TwilightLevel}");
             sb.AppendLine($"MoonAvoidanceEnabled: {MoonAvoidanceEnabled}");
             sb.AppendLine($"MoonAvoidanceSeparation: {MoonAvoidanceSeparation}");
@@ -131,9 +212,9 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
     }
 
-    internal class FilterPreferenceConfiguration : EntityTypeConfiguration<FilterPreference> {
+    internal class ExposureTemplateConfiguration : EntityTypeConfiguration<ExposureTemplate> {
 
-        public FilterPreferenceConfiguration() {
+        public ExposureTemplateConfiguration() {
             HasKey(x => new { x.Id });
             Property(x => x.twilightlevel_col).HasColumnName("twilightlevel");
         }
