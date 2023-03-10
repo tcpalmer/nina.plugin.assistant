@@ -27,9 +27,9 @@ using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
-    [ExportMetadata("Name", "Scheduler")]
+    [ExportMetadata("Name", "Target Scheduler")]
     [ExportMetadata("Description", "Run the Target Scheduler")]
-    [ExportMetadata("Icon", "Assistant.AssistantSVG")]
+    [ExportMetadata("Icon", "Scheduler.SchedulerSVG")]
     [ExportMetadata("Category", "Target Scheduler")]
     [Export(typeof(ISequenceItem))]
     [JsonObject(MemberSerialization.OptIn)]
