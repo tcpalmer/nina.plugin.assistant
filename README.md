@@ -1,4 +1,4 @@
-# Scheduler NINA Plugin
+# Target Scheduler NINA Plugin
 
 
 ## Acknowledgements ##
