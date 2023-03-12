@@ -300,7 +300,7 @@
                         <Binding.ValidationRules>
                             <rules:DoubleRangeRule>
                                 <rules:DoubleRangeRule.ValidRange>
-                                    <rules:DoubleRangeChecker Maximum="1" Minimum="0.1" />
+                                    <rules:DoubleRangeChecker Maximum="100" Minimum="1" />
                                 </rules:DoubleRangeRule.ValidRange>
                             </rules:DoubleRangeRule>
                         </Binding.ValidationRules>
@@ -311,7 +311,7 @@
                 Grid.Row="3"
                 Grid.Column="1"
                 MaxHeight="20"
-                Text="{Binding TargetProxy.Target.ROI}"
+                Text="{Binding TargetProxy.Target.ROI, Converter={StaticResource PercentDisplayConverter}}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
         </Grid>
