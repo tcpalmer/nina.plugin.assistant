@@ -34,7 +34,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             dec = 0;
             epochCode = (int)Epoch.J2000;
             rotation = 0;
-            roi = 1;
+            roi = 100;
             ExposurePlans = new List<ExposurePlan>();
         }
 
