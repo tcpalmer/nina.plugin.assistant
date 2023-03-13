@@ -69,7 +69,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 t1p1.RA.Should().BeApproximately(83.82, 0.001);
                 t1p1.Dec.Should().BeApproximately(-5.391, 0.001);
                 t1p1.Rotation.Should().BeApproximately(0, 0.001);
-                t1p1.ROI.Should().BeApproximately(1, 0.001);
+                t1p1.ROI.Should().BeApproximately(100, 0.001);
 
                 t1p1.ExposurePlans.Count.Should().Be(3);
                 t1p1.ExposurePlans[0].ExposureTemplate.FilterName.Should().Be("Ha");
@@ -100,7 +100,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 t1p2.RA.Should().BeApproximately(38.175, 0.001);
                 t1p2.Dec.Should().BeApproximately(61.45, 0.001);
                 t1p2.Rotation.Should().BeApproximately(0, 0.001);
-                t1p2.ROI.Should().BeApproximately(1, 0.001);
+                t1p2.ROI.Should().BeApproximately(100, 0.001);
                 t1p2.ExposurePlans.Count.Should().Be(3);
                 t1p2.ExposurePlans[0].ExposureTemplate.FilterName.Should().Be("Ha");
                 t1p2.ExposurePlans[1].ExposureTemplate.FilterName.Should().Be("OIII");
