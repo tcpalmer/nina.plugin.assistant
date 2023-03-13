@@ -33,6 +33,7 @@
                 Margin="0,0,0,6"
                 Content="{Binding TargetProxy.Target.Name}"
                 FontSize="18" />
+            <uc:DocumentationLink URL="target-management/targets.html" />
         </StackPanel>
         <StackPanel Orientation="Horizontal">
             <uc:ActionMenuBar DataContext="{Binding}" />

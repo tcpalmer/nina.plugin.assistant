@@ -9,15 +9,24 @@
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <Style x:Key="LinkText" TargetType="TextBlock">
-            <Setter Property="FontStyle" Value="Italic" />
-        </Style>
+        <ResourceDictionary Source="../Resources/Resources.xaml" />
     </UserControl.Resources>
 
-    <TextBlock>
-        <Hyperlink NavigateUri="" RequestNavigate="Hyperlink_RequestNavigate">
-            <TextBlock Style="{StaticResource LinkText}" Text="{Binding Path=DataContext.LinkText}" />
-        </Hyperlink>
-    </TextBlock>
+    <Button
+        Width="14"
+        Height="14"
+        Margin="5,0,0,5"
+        VerticalAlignment="Center"
+        HorizontalContentAlignment="Right"
+        Click="OpenLink"
+        Style="{StaticResource BackgroundButton}"
+        ToolTip="Link to documentation">
+        <Grid>
+            <Path
+                Data="{StaticResource SS_ExternalLinkSVG}"
+                Fill="{StaticResource ButtonForegroundBrush}"
+                Stretch="Uniform" />
+        </Grid>
+    </Button>
 
 </UserControl>
