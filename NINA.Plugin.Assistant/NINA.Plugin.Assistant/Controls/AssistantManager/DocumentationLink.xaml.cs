@@ -3,20 +3,19 @@ using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Navigation;
 
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public partial class DocumentationLink : UserControl {
 
-        private static readonly string ROOT_URL = "https://tcpalmer.github.io/docs/NINA/Assistant";
+        private static readonly string ROOT_URL = "https://tcpalmer.github.io/nina-scheduler/";
 
         public DocumentationLink() {
             InitializeComponent();
             DataContext = this;
         }
 
-        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e) {
+        private void OpenLink(object sender, RoutedEventArgs e) {
             try {
                 Process.Start(URL);
             }
@@ -32,15 +31,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             set { SetValue(URIProperty, value); }
         }
 
-        public string LinkText {
-            get { return (string)GetValue(LinkTextProperty); }
-            set { SetValue(LinkTextProperty, value); }
-        }
-
         public static readonly DependencyProperty URIProperty =
             DependencyProperty.Register("URL", typeof(string), typeof(DocumentationLink), new PropertyMetadata(null));
-
-        public static readonly DependencyProperty LinkTextProperty =
-            DependencyProperty.Register("LinkText", typeof(string), typeof(DocumentationLink), new PropertyMetadata(null));
     }
 }

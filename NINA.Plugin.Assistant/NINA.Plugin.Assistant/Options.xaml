@@ -13,11 +13,14 @@
                 ExpandDirection="Down"
                 IsExpanded="{Binding AssistantManagerIsExpanded}">
                 <Expander.Header>
-                    <TextBlock
-                        FontSize="14"
-                        FontWeight="Bold"
-                        Text="Manage Projects Database"
-                        ToolTip="Manage your projects, targets, and exposure plans" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            FontSize="14"
+                            FontWeight="Bold"
+                            Text="Manage Projects Database"
+                            ToolTip="Manage your projects, targets, and exposure plans" />
+                        <am:DocumentationLink Margin="5,2,0,0" URL="target-management/index.html" />
+                    </StackPanel>
                 </Expander.Header>
                 <am:AssistantManagerView DataContext="{Binding AssistantManagerVM}" />
             </Expander>
@@ -27,11 +30,14 @@
                 ExpandDirection="Down"
                 IsExpanded="{Binding AcquiredImagesManagerIsExpanded}">
                 <Expander.Header>
-                    <TextBlock
-                        FontSize="14"
-                        FontWeight="Bold"
-                        Text="View Acquired Image Information"
-                        ToolTip="View details on acquired images" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            FontSize="14"
+                            FontWeight="Bold"
+                            Text="View Acquired Image Information"
+                            ToolTip="View details on acquired images" />
+                        <am:DocumentationLink Margin="5,2,0,0" URL="post-acquisition/acquisition-data.html" />
+                    </StackPanel>
                 </Expander.Header>
                 <ai:AcquiredImagesManagerView DataContext="{Binding AcquiredImagesManagerViewVM}" />
             </Expander>

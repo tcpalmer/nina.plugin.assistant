@@ -32,6 +32,7 @@
                 Margin="0,0,0,6"
                 Content="{Binding ExposureTemplateProxy.ExposureTemplate.Name}"
                 FontSize="18" />
+            <uc:DocumentationLink URL="target-management/exposure-templates.html" />
         </StackPanel>
 
         <StackPanel Orientation="Vertical">

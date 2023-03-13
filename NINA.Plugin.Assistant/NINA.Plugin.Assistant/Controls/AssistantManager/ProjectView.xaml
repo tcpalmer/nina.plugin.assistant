@@ -31,6 +31,7 @@
                 Margin="0,0,0,6"
                 Content="{Binding ProjectProxy.Project.Name}"
                 FontSize="18" />
+            <uc:DocumentationLink URL="target-management/projects.html" />
         </StackPanel>
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
