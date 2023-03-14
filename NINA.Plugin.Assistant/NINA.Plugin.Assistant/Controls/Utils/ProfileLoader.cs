@@ -56,7 +56,7 @@ namespace Assistant.NINAPlugin.Controls.Util {
     class ProfileCache {
 
         private static readonly TimeSpan ITEM_TIMEOUT = TimeSpan.FromHours(12);
-        private static readonly MemoryCache _cache = new MemoryCache("Assistant Profile");
+        private static readonly MemoryCache _cache = new MemoryCache("Scheduler Profile");
 
         public static IProfile Get(string cacheKey) {
             return (IProfile)_cache.Get(cacheKey);

@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ai="clr-namespace:Assistant.NINAPlugin.Controls.AcquiredImages"
+    xmlns:pp="clr-namespace:Assistant.NINAPlugin.Controls.PlanPreview"
     xmlns:am="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager">
 
     <DataTemplate x:Key="Target Scheduler_Options">
@@ -23,6 +24,23 @@
                     </StackPanel>
                 </Expander.Header>
                 <am:AssistantManagerView DataContext="{Binding AssistantManagerVM}" />
+            </Expander>
+
+            <Expander
+                Margin="0,0,0,10"
+                ExpandDirection="Down"
+                IsExpanded="{Binding PlanPreviewIsExpanded}">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            FontSize="14"
+                            FontWeight="Bold"
+                            Text="Preview Planner"
+                            ToolTip="Preview plans" />
+                        <am:DocumentationLink Margin="5,2,0,0" URL="target-management/index.html" />
+                    </StackPanel>
+                </Expander.Header>
+                <pp:PlanPreviewerView DataContext="{Binding PlanPreviewerViewVM}" />
             </Expander>
 
             <Expander

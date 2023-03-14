@@ -299,7 +299,7 @@ namespace Assistant.NINAPlugin.Astrometry {
     class NighttimeCircumstancesCache {
 
         private static readonly TimeSpan ITEM_TIMEOUT = TimeSpan.FromHours(12);
-        private static readonly MemoryCache _cache = new MemoryCache("Target Planning NighttimeCircumstances");
+        private static readonly MemoryCache _cache = new MemoryCache("Scheduler NighttimeCircumstances");
 
         public static NighttimeCircumstances Get(string cacheKey) {
             return (NighttimeCircumstances)_cache.Get(cacheKey);

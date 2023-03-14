@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Controls.AcquiredImages;
 using Assistant.NINAPlugin.Controls.AssistantManager;
+using Assistant.NINAPlugin.Controls.PlanPreview;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
 using NINA.Plugin;
@@ -71,6 +72,15 @@ namespace Assistant.NINAPlugin {
             }
         }
 
+        private PlanPreviewerViewVM planPreviewerViewVM;
+        public PlanPreviewerViewVM PlanPreviewerViewVM {
+            get => planPreviewerViewVM;
+            set {
+                planPreviewerViewVM = value;
+                RaisePropertyChanged(nameof(PlanPreviewerViewVM));
+            }
+        }
+
         private AcquiredImagesManagerViewVM acquiredImagesManagerViewVM;
         public AcquiredImagesManagerViewVM AcquiredImagesManagerViewVM {
             get => acquiredImagesManagerViewVM;
@@ -87,6 +97,17 @@ namespace Assistant.NINAPlugin {
                 assistantManagerIsExpanded = value;
                 if (value && AssistantManagerVM == null) {
                     AssistantManagerVM = new AssistantManagerVM(profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory);
+                }
+            }
+        }
+
+        private bool planPreviewIsExpanded = false;
+        public bool PlanPreviewIsExpanded {
+            get { return planPreviewIsExpanded; }
+            set {
+                planPreviewIsExpanded = value;
+                if (value && PlanPreviewerViewVM == null) {
+                    PlanPreviewerViewVM = new PlanPreviewerViewVM(profileService);
                 }
             }
         }
@@ -119,9 +140,11 @@ namespace Assistant.NINAPlugin {
 
         private void ProfileService_ProfileChanged(object sender, EventArgs e) {
             AssistantManagerVM = new AssistantManagerVM(profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory);
+            PlanPreviewerViewVM = new PlanPreviewerViewVM(profileService);
             AcquiredImagesManagerViewVM = new AcquiredImagesManagerViewVM(profileService);
 
             RaisePropertyChanged(nameof(AssistantManagerVM));
+            RaisePropertyChanged(nameof(PlanPreviewerViewVM));
             RaisePropertyChanged(nameof(AcquiredImagesManagerViewVM));
 
             if (profileService.ActiveProfile != null) {

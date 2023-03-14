@@ -36,12 +36,12 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         public AssistantPlan GetPlan(IPlanTarget previousPlanTarget) {
-            Logger.Debug($"Scheduler: getting current plan for {atTime}");
+            Logger.Debug($"Scheduler: getting current plan for {Utils.FormatDateTimeFull(atTime)}");
 
-            if (true) {
-                // HACK!
-                return new PlannerEmulator(atTime, activeProfile).GetPlan(previousPlanTarget);
-            }
+            //if (true) {
+            // HACK!
+            //    return new PlannerEmulator(atTime, activeProfile).GetPlan(previousPlanTarget);
+            //}
 
             using (MyStopWatch.Measure("Scheduler Plan Generation")) {
                 try {
@@ -68,7 +68,7 @@ namespace Assistant.NINAPlugin.Plan {
                     IPlanTarget planTarget = SelectTargetByScore(projects, scoringEngine);
 
                     if (planTarget != null) {
-                        Logger.Debug($"Scheduler: GetPlan highest scoring target:\n{planTarget}");
+                        Logger.Trace($"Scheduler: GetPlan highest scoring target:\n{planTarget}");
                         TimeInterval targetWindow = GetTargetTimeWindow(atTime, planTarget);
                         List<IPlanInstruction> planInstructions = PlanInstructions(planTarget, previousPlanTarget, targetWindow);
                         return new AssistantPlan(planTarget, targetWindow, planInstructions);

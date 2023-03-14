@@ -351,6 +351,10 @@
     <Compile Include="Controls\Converters\ImagingMinutesConverter.cs" />
     <Compile Include="Controls\Converters\StatusConverter.cs" />
     <Compile Include="Controls\Converters\MinutesToHMConverter.cs" />
+    <Compile Include="Controls\PlanPreview\PlanPreviewerView.xaml.cs">
+      <DependentUpon>PlanPreviewerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\PlanPreview\PlanPreviewerViewVM.cs" />
     <Compile Include="Controls\Resources\SVGDictionary.xaml.cs">
       <DependentUpon>SVGDictionary.xaml</DependentUpon>
     </Compile>
@@ -457,6 +461,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\AssistantManager\TargetView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\PlanPreview\PlanPreviewerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
