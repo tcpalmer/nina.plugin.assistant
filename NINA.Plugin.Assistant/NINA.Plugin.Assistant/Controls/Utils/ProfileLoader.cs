@@ -11,37 +11,47 @@ namespace Assistant.NINAPlugin.Controls.Util {
 
     public class ProfileLoader {
 
+        private static readonly ProfileLoader Instance = new ProfileLoader();
+        private static bool initialized = false;
+        private ProfileCache cache;
+
         public static IProfile Load(IProfileService profileService, ProfileMeta profileMeta) {
+
+            if (!initialized) {
+                profileService.ProfileChanged += Instance.ProfileService_ProfileChanged;
+                profileService.Profiles.CollectionChanged += Instance.ProfileService_ProfileChanged;
+                initialized = true;
+            }
 
             if (profileService.ActiveProfile.Id.ToString() == profileMeta.Id.ToString()) {
                 return profileService.ActiveProfile;
             }
 
-            string cacheKey = GetCacheKey(profileMeta.Location);
-            IProfile profile = ProfileCache.Get(cacheKey);
+            string cacheKey = Instance.GetCacheKey(profileMeta.Location);
+            IProfile profile = Instance.cache.Get(cacheKey);
             if (profile != null) {
                 return profile;
             }
 
-            FileStream fs = null;
             try {
-                fs = new FileStream(profileMeta.Location, FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
-                var serializer = new DataContractSerializer(typeof(Profile));
-                profile = (Profile)serializer.ReadObject(fs);
-                ProfileCache.Put(profile, cacheKey);
-                return profile;
+                using (FileStream fs = new FileStream(profileMeta.Location, FileMode.Open, FileAccess.ReadWrite, FileShare.Read)) {
+                    var serializer = new DataContractSerializer(typeof(Profile));
+                    profile = (Profile)serializer.ReadObject(fs);
+                    Instance.cache.Put(profile, cacheKey);
+                    return profile;
+                }
             }
             catch (Exception e) {
                 Logger.Error($"failed to read profile at {profileMeta.Location}: {e.Message} {e.StackTrace}");
-                if (fs != null) {
-                    fs.Close();
-                }
-
                 return null;
             }
         }
 
-        private static string GetCacheKey(string path) {
+        private void ProfileService_ProfileChanged(object sender, EventArgs e) {
+            cache.Clear();
+        }
+
+        private string GetCacheKey(string path) {
             DateTime lastWriteTime = File.GetLastWriteTime(path);
             StringBuilder sb = new StringBuilder();
             sb.Append($"{path}_");
@@ -49,24 +59,34 @@ namespace Assistant.NINAPlugin.Controls.Util {
             return sb.ToString();
         }
 
-        private ProfileLoader() { }
+        private ProfileLoader() {
+            cache = new ProfileCache();
+        }
 
     }
 
-    class ProfileCache {
+    internal class ProfileCache {
 
-        private static readonly TimeSpan ITEM_TIMEOUT = TimeSpan.FromHours(12);
-        private static readonly MemoryCache _cache = new MemoryCache("Scheduler Profile");
+        private static readonly TimeSpan ITEM_TIMEOUT = TimeSpan.FromHours(2);
+        private static MemoryCache _cache = new MemoryCache("Scheduler Profile");
 
-        public static IProfile Get(string cacheKey) {
+        public IProfile Get(string cacheKey) {
             return (IProfile)_cache.Get(cacheKey);
         }
 
-        public static void Put(IProfile profile, string cacheKey) {
-            _cache.Add(cacheKey, profile, DateTime.Now.Add(ITEM_TIMEOUT));
+        public void Put(IProfile profile, string cacheKey) {
+            if (!_cache.Add(cacheKey, profile, DateTime.Now.Add(ITEM_TIMEOUT))) {
+                _cache.Remove(cacheKey);
+                _cache.Add(cacheKey, profile, DateTime.Now.Add(ITEM_TIMEOUT));
+            }
         }
 
-        private ProfileCache() { }
+        public void Clear() {
+            _cache.Dispose();
+            _cache = new MemoryCache("Scheduler Profile");
+        }
+
+        internal ProfileCache() { }
     }
 
 }

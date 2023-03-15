@@ -3,12 +3,14 @@ using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using LinqKit;
+using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -21,9 +23,18 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
 
         public PlanPreviewerViewVM(IProfileService profileService) : base(profileService) {
             database = new AssistantDatabaseInteraction();
+            profileService.ProfileChanged += ProfileService_ProfileChanged;
+            profileService.Profiles.CollectionChanged += ProfileService_ProfileChanged;
+
             InitializeCriteria();
 
             PlanPreviewCommand = new RelayCommand(RunPlanPreview);
+        }
+
+        private void ProfileService_ProfileChanged(object sender, EventArgs e) {
+            instructionList.Clear();
+            SelectedProfileId = profileService.ActiveProfile.Id.ToString();
+            ProfileChoices = GetProfileChoices();
         }
 
         private void InitializeCriteria() {
@@ -116,6 +127,9 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                 if (projects == null) {
                     Logger.Debug($"no active projects for {atDateTime}, profileId={SelectedProfileId}");
                     InstructionList = list;
+
+                    string profileName = ProfileChoices.First(p => p.Key == selectedProfileId).Value;
+                    MyMessageBox.Show($"No projects/targets returned by planner for {Utils.FormatDateTimeFull(atDateTime)} and profile '{profileName}'", "Oops");
                     return;
                 }
 
@@ -131,9 +145,10 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                         continue;
                     }
 
-                    planItem.Header = GetTargetLabel(plan.PlanTarget);
+                    planItem.Header = GetTargetLabel(plan);
                     planItem.IsExpanded = true;
                     list.Add(planItem);
+                    int ditherTrigger = 0;
 
                     foreach (IPlanInstruction instruction in plan.PlanInstructions) {
                         TreeViewItem instructionItem = new TreeViewItem();
@@ -166,6 +181,14 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                         if (instruction is PlanTakeExposure) {
                             instructionItem.Header = GetTakeExposureLabel((PlanTakeExposure)instruction);
                             planItem.Items.Add(instructionItem);
+
+                            if (plan.PlanTarget.Project.DitherEvery > 0) {
+                                if (++ditherTrigger == plan.PlanTarget.Project.DitherEvery) {
+                                    planItem.Items.Add(new TreeViewItem { Header = "Dither" });
+                                    ditherTrigger = 0;
+                                }
+                            }
+
                             continue;
                         }
 
@@ -211,9 +234,9 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
             throw new Exception($"failed to get profile for ID={profileId}");
         }
 
-        private string GetTargetLabel(IPlanTarget planTarget) {
-            string label = $"{planTarget.Project.Name} / {planTarget.Name}";
-            return $"{label} - start: {Utils.FormatDateTimeFull(planTarget.StartTime)} stop: {Utils.FormatDateTimeFull(planTarget.EndTime)}";
+        private string GetTargetLabel(AssistantPlan plan) {
+            string label = $"{plan.PlanTarget.Project.Name} / {plan.PlanTarget.Name}";
+            return $"{label} - start: {Utils.FormatDateTimeFull(plan.TimeInterval.StartTime)} stop: {Utils.FormatDateTimeFull(plan.TimeInterval.EndTime)}";
         }
 
         private string GetSlewLabel(IPlanTarget planTarget, PlanSlew planSlew) {

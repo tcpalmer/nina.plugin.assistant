@@ -48,6 +48,27 @@ namespace Assistant.NINAPlugin.Astrometry {
 
         public NighttimeCircumstances() { /* support testing */ }
 
+        public static NighttimeCircumstances AdjustNighttimeCircumstances(ObserverInfo observerInfo, DateTime atTime) {
+            NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, atTime);
+            DateTime CivilTwilightStart = nighttimeCircumstances.CivilTwilightStart;
+            DateTime CivilTwilightEnd = nighttimeCircumstances.CivilTwilightEnd;
+            DateTime noon = atTime.Date.AddHours(12);
+            DateTime midnight = atTime.Date.AddHours(24);
+
+            // If atTime is between noon and civil start, return next dusk/following dawn
+            if (noon <= atTime && atTime < CivilTwilightStart) {
+                return nighttimeCircumstances;
+            }
+
+            // If atTime is between civil start/end and atTime is before midnight, return next dusk/following dawn
+            if (CivilTwilightStart <= atTime && atTime < CivilTwilightEnd && atTime < midnight) {
+                return nighttimeCircumstances;
+            }
+
+            // Otherwise, we want NighttimeCircumstances for the previous day
+            return new NighttimeCircumstances(observerInfo, atTime.AddDays(-1));
+        }
+
         public NighttimeCircumstances(ObserverInfo observerInfo, DateTime onDate) {
             this.observerInfo = observerInfo;
             this.onDate = onDate.Date.AddHours(12); // fix to noon on date
