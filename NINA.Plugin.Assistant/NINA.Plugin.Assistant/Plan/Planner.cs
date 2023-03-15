@@ -36,10 +36,10 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         public AssistantPlan GetPlan(IPlanTarget previousPlanTarget) {
-            Logger.Debug($"Scheduler: getting current plan for {atTime}");
+            Logger.Debug($"Scheduler: getting current plan for {Utils.FormatDateTimeFull(atTime)}");
 
-            if (true) {
-                // HACK!
+            bool emulatePlan = false;
+            if (emulatePlan) {
                 return new PlannerEmulator(atTime, activeProfile).GetPlan(previousPlanTarget);
             }
 
@@ -68,7 +68,7 @@ namespace Assistant.NINAPlugin.Plan {
                     IPlanTarget planTarget = SelectTargetByScore(projects, scoringEngine);
 
                     if (planTarget != null) {
-                        Logger.Debug($"Scheduler: GetPlan highest scoring target:\n{planTarget}");
+                        Logger.Trace($"Scheduler: GetPlan highest scoring target:\n{planTarget}");
                         TimeInterval targetWindow = GetTargetTimeWindow(atTime, planTarget);
                         List<IPlanInstruction> planInstructions = PlanInstructions(planTarget, previousPlanTarget, targetWindow);
                         return new AssistantPlan(planTarget, targetWindow, planInstructions);
@@ -192,7 +192,7 @@ namespace Assistant.NINAPlugin.Plan {
                     }
 
                     // Get the most inclusive twilight over all incomplete exposure plans
-                    NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, atTime);
+                    NighttimeCircumstances nighttimeCircumstances = NighttimeCircumstances.AdjustNighttimeCircumstances(observerInfo, atTime);
                     TimeInterval twilightSpan = nighttimeCircumstances.GetTwilightSpan(GetOverallTwilight(planTarget));
 
                     // Determine the potential imaging time span
@@ -370,7 +370,7 @@ namespace Assistant.NINAPlugin.Plan {
                 instructions.Add(new PlanSlew(true));
             }
 
-            NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, atTime);
+            NighttimeCircumstances nighttimeCircumstances = NighttimeCircumstances.AdjustNighttimeCircumstances(observerInfo, atTime);
             instructions.AddRange(new ExposurePlanner(planTarget, targetWindow, nighttimeCircumstances).Plan());
             return instructions;
         }

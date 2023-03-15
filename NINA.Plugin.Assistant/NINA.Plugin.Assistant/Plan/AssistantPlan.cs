@@ -122,7 +122,7 @@ namespace Assistant.NINAPlugin.Plan {
         public bool Rejected { get; set; }
         public string RejectedReason { get; set; }
 
-        public PlanProject(IProfile profile, Project project, Dictionary<string, ExposureTemplate> exposureTemplate) {
+        public PlanProject(IProfile profile, Project project) {
 
             this.PlanId = Guid.NewGuid().ToString();
             this.DatabaseId = project.Id;
@@ -151,7 +151,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             Targets = new List<IPlanTarget>();
             foreach (Target target in project.Targets) {
-                Targets.Add(new PlanTarget(this, target, exposureTemplate));
+                Targets.Add(new PlanTarget(this, target));
             }
         }
 
@@ -259,7 +259,7 @@ namespace Assistant.NINAPlugin.Plan {
         public DateTime EndTime { get; set; }
         public DateTime CulminationTime { get; set; }
 
-        public PlanTarget(IPlanProject planProject, Target target, Dictionary<string, ExposureTemplate> exposureTemplate) {
+        public PlanTarget(IPlanProject planProject, Target target) {
             this.PlanId = Guid.NewGuid().ToString();
             this.DatabaseId = target.Id;
             this.Name = target.Name;

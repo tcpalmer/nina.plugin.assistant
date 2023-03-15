@@ -71,6 +71,35 @@ namespace Assistant.NINAPlugin.Plan {
                 instructions.Clear();
             }
 
+            return Cleanup(instructions);
+        }
+
+        public static List<IPlanInstruction> Cleanup(List<IPlanInstruction> instructions) {
+
+            if (instructions is null || instructions.Count == 0) {
+                return instructions;
+            }
+
+            // The instruction planning process can add spurious instructions - remove them
+
+            for (int i = 0; i < instructions.Count - 1; i++) {
+                IPlanInstruction i1 = instructions[i];
+                IPlanInstruction i2 = instructions[i + 1];
+                if (i1.GetType() == typeof(PlanSwitchFilter) && i2.GetType() == typeof(PlanSwitchFilter)) {
+                    instructions.RemoveAt(i);
+                }
+            }
+
+            IPlanInstruction last = instructions[instructions.Count - 1];
+            if (last.GetType() == typeof(PlanSetReadoutMode)) {
+                instructions.RemoveAt(instructions.Count - 1);
+            }
+
+            last = instructions[instructions.Count - 1];
+            if (last.GetType() == typeof(PlanSwitchFilter)) {
+                instructions.RemoveAt(instructions.Count - 1);
+            }
+
             return instructions;
         }
 
@@ -144,13 +173,6 @@ namespace Assistant.NINAPlugin.Plan {
                     if (timeRemaining <= 0) { break; }
                 }
             }
-
-            /* TODO: I don't think we want to do this.  If the exposure container finishes early, just let the instruction come back to the planner.
-             * If the planner says wait then, that's fine - it will know the time to wait until.
-             * TODO: and I think we can remove PlanWait instruction if it's not needed here.
-            if (timeRemaining >= 0) {
-                instructions.Add(new PlanWait(timeWindow.EndTime));
-            }*/
 
             return instructions;
         }

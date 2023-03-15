@@ -86,7 +86,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             ExposurePlan exposurePlan = new ExposurePlan();
 
             exposurePlan.profileId = newProfileId;
-            exposurePlan.ExposureTemplate = this.ExposureTemplate;
+            exposurePlan.ExposureTemplateId = this.ExposureTemplateId;
             exposurePlan.exposure = exposure;
             exposurePlan.desired = desired;
             exposurePlan.acquired = 0;

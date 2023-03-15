@@ -84,7 +84,7 @@ namespace Assistant.NINAPlugin.Astrometry {
     class TargetCircumstancesCache {
 
         private static readonly TimeSpan ITEM_TIMEOUT = TimeSpan.FromHours(12);
-        private static readonly MemoryCache _cache = new MemoryCache("Assistant TargetCircumstances");
+        private static readonly MemoryCache _cache = new MemoryCache("Scheduler TargetCircumstances");
 
         public static TargetCircumstances GetTargetCircumstances(string cacheKey) {
             return (TargetCircumstances)_cache.Get(cacheKey);

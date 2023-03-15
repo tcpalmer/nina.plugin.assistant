@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
+using FluentAssertions;
 using Moq;
 using NINA.Plugin.Assistant.Test.Astrometry;
 using NUnit.Framework;
@@ -130,6 +131,44 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             Assert.AreEqual(18, pt.ExposurePlans[1].PlannedExposures);
             Assert.AreEqual(0, pt.ExposurePlans[2].PlannedExposures);
             Assert.AreEqual(0, pt.ExposurePlans[3].PlannedExposures);
+        }
+
+        [Test]
+        public void testCleanup() {
+            List<IPlanInstruction> list = new List<IPlanInstruction>();
+
+            ExposurePlanner.Cleanup(list).Count.Should().Be(0);
+
+            list.Add(new PlanWait(DateTime.Now));
+            list.Add(new PlanWait(DateTime.Now));
+            list.Add(new PlanWait(DateTime.Now));
+            ExposurePlanner.Cleanup(list).Count.Should().Be(3);
+
+            list.Clear();
+            list.Add(new PlanSwitchFilter(null));
+            list.Add(new PlanWait(DateTime.Now));
+            list.Add(new PlanSwitchFilter(null));
+            list.Add(new PlanWait(DateTime.Now));
+            ExposurePlanner.Cleanup(list).Count.Should().Be(4);
+
+            list.Clear();
+            list.Add(new PlanSwitchFilter(null));
+            list.Add(new PlanSwitchFilter(null));
+            list.Add(new PlanWait(DateTime.Now));
+            list.Add(new PlanSwitchFilter(null));
+            list.Add(new PlanSwitchFilter(null));
+            list.Add(new PlanWait(DateTime.Now));
+            ExposurePlanner.Cleanup(list).Count.Should().Be(4);
+
+            list.Clear();
+            list.Add(new PlanSwitchFilter(null));
+            list.Add(new PlanSwitchFilter(null));
+            list.Add(new PlanWait(DateTime.Now));
+            list.Add(new PlanSwitchFilter(null));
+            list.Add(new PlanSwitchFilter(null));
+            list.Add(new PlanWait(DateTime.Now));
+            list.Add(new PlanSwitchFilter(null));
+            ExposurePlanner.Cleanup(list).Count.Should().Be(4);
         }
 
         private Mock<IPlanProject> GetTestProject(DateTime dateTime, int filterSwitchFrequency, int nbExposures, int nbExposureLength, int wbExposures, int wbExposureLength) {
