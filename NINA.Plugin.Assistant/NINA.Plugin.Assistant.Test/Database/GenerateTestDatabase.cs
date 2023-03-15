@@ -326,14 +326,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
             profileMock.SetupProperty(m => m.ActiveProfile.Id, new Guid(profileId));
             List<IPlanProject> planProjects = new List<IPlanProject>();
 
-            Dictionary<string, ExposureTemplate> dict = new Dictionary<string, ExposureTemplate>();
-            foreach (ExposureTemplate exposureTemplate in exposureTemplates) {
-                dict.Add(exposureTemplate.FilterName, exposureTemplate);
-            }
-            Dictionary<string, ExposureTemplate> exposureTemplatesDictionary = dict;
-
             foreach (Project project in projects) {
-                PlanProject planProject = new PlanProject(profileMock.Object.ActiveProfile, project, exposureTemplatesDictionary);
+                PlanProject planProject = new PlanProject(profileMock.Object.ActiveProfile, project);
                 planProjects.Add(planProject);
                 TestContext.WriteLine($"PROJECT:\n{planProject}");
             }

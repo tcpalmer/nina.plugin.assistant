@@ -112,9 +112,9 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
 
         private void RunPlanPreview(object obj) {
             AsyncObservableCollection<TreeViewItem> list = new AsyncObservableCollection<TreeViewItem>();
+            InstructionList = list;
 
             if (PlanDate == DateTime.MinValue || SelectedProfileId == null) {
-                InstructionList = list;
                 return;
             }
 
@@ -146,7 +146,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                     }
 
                     planItem.Header = GetTargetLabel(plan);
-                    planItem.IsExpanded = true;
+                    planItem.IsExpanded = false;
                     list.Add(planItem);
                     int ditherTrigger = 0;
 
@@ -189,12 +189,6 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                                 }
                             }
 
-                            continue;
-                        }
-
-                        if (instruction is PlanWait) {
-                            instructionItem.Header = "Wait";
-                            planItem.Items.Add(instructionItem);
                             continue;
                         }
 

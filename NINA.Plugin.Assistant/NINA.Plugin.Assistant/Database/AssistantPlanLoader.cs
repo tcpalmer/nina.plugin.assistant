@@ -11,13 +11,11 @@ namespace Assistant.NINAPlugin.Database {
 
         public List<IPlanProject> LoadActiveProjects(AssistantDatabaseContext context, IProfile activeProfile, DateTime atTime) {
             List<Project> projects = null;
-            List<ExposureTemplate> exposureTemplates = null;
             string profileId = activeProfile.Id.ToString();
 
             using (context) {
                 try {
                     projects = context.GetActiveProjects(profileId, atTime);
-                    exposureTemplates = context.GetExposureTemplates(profileId);
                 }
                 catch (Exception ex) {
                     throw ex; // let the caller decide how to handle
@@ -30,24 +28,12 @@ namespace Assistant.NINAPlugin.Database {
             }
 
             List<IPlanProject> planProjects = new List<IPlanProject>();
-            Dictionary<string, ExposureTemplate> exposureTemplatesDictionary = GetExposureTemplateDictionary(exposureTemplates);
-
             foreach (Project project in projects) {
-                PlanProject planProject = new PlanProject(activeProfile, project, exposureTemplatesDictionary);
+                PlanProject planProject = new PlanProject(activeProfile, project);
                 planProjects.Add(planProject);
             }
 
             return planProjects;
-        }
-
-        private Dictionary<string, ExposureTemplate> GetExposureTemplateDictionary(List<ExposureTemplate> exposureTemplates) {
-            Dictionary<string, ExposureTemplate> dict = new Dictionary<string, ExposureTemplate>();
-
-            foreach (ExposureTemplate exposureTemplate in exposureTemplates) {
-                dict.Add(exposureTemplate.FilterName, exposureTemplate);
-            }
-
-            return dict;
         }
 
     }
