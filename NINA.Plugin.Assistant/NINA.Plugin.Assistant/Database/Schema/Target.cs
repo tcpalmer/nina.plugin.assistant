@@ -15,8 +15,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         [Key] public int Id { get; set; }
 
-        [Required]
-        public string name { get; set; }
+        [Required] public string name { get; set; }
+        [Required] public bool active { get; set; }
 
         [Required] public double ra { get; set; }
         [Required] public double dec { get; set; }
@@ -30,6 +30,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public virtual List<ExposurePlan> ExposurePlans { get; set; }
 
         public Target() {
+            active = true;
             ra = 0;
             dec = 0;
             epochCode = (int)Epoch.J2000;
@@ -44,6 +45,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 name = value;
                 RaisePropertyChanged(nameof(Name));
+            }
+        }
+
+        [NotMapped]
+        public bool Active {
+            get { return active; }
+            set {
+                active = value;
+                RaisePropertyChanged(nameof(Active));
             }
         }
 
@@ -264,6 +274,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"Name: {Name}");
+            sb.AppendLine($"Active: {Active}");
             sb.AppendLine($"RA: {RA}");
             sb.AppendLine($"Dec: {Dec}");
             sb.AppendLine($"Coords: {Coordinates}");

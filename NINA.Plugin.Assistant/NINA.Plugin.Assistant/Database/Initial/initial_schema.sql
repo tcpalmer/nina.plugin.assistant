@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS `project` (
 CREATE TABLE IF NOT EXISTS `target` (
 	`Id`			INTEGER NOT NULL,
 	`name`			TEXT NOT NULL,
+	`active`		INTEGER NOT NULL,
 	`ra`			REAL,
 	`dec`			REAL,
 	`epochcode`		INTEGER NOT NULL,
