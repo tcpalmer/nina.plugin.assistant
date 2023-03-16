@@ -129,7 +129,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                     InstructionList = list;
 
                     string profileName = ProfileChoices.First(p => p.Key == selectedProfileId).Value;
-                    MyMessageBox.Show($"No projects/targets returned by planner for {Utils.FormatDateTimeFull(atDateTime)} and profile '{profileName}'", "Oops");
+                    MyMessageBox.Show($"No active projects/targets were returned by the planner for {Utils.FormatDateTimeFull(atDateTime)} and{Environment.NewLine}profile '{profileName}' - or no active targets were found with active exposure plans.", "Oops");
                     return;
                 }
 

@@ -151,7 +151,9 @@ namespace Assistant.NINAPlugin.Plan {
 
             Targets = new List<IPlanTarget>();
             foreach (Target target in project.Targets) {
-                Targets.Add(new PlanTarget(this, target));
+                if (target.Active) {
+                    Targets.Add(new PlanTarget(this, target));
+                }
             }
         }
 

@@ -206,7 +206,7 @@
 
                     <DataGridTemplateColumn Width="50" CanUserSort="False">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="Active" ToolTip="Project state active and between dates?" />
+                            <TextBlock Text="Active" ToolTip="Project state active, date active, and has active targets?" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -214,8 +214,8 @@
                                     Width="15"
                                     Height="15"
                                     Margin="12,0,0,0"
-                                    Data="{Binding ActiveNow, Converter={StaticResource StatusConverter}}"
-                                    Fill="{Binding ActiveNow, Converter={StaticResource StatusMarkColorConverter}}"
+                                    Data="{Binding ActiveNowWithActiveTargets, Converter={StaticResource StatusConverter}}"
+                                    Fill="{Binding ActiveNowWithActiveTargets, Converter={StaticResource StatusMarkColorConverter}}"
                                     Stretch="Uniform" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

@@ -27,6 +27,28 @@ namespace Assistant.NINAPlugin.Database {
                 return null;
             }
 
+            bool haveActiveTargets = false;
+            foreach (Project project in projects) {
+                foreach (Target target in project.Targets) {
+                    if (target.Active) {
+                        foreach (ExposurePlan plan in target.ExposurePlans) {
+                            if (plan.Desired > plan.Accepted) {
+                                haveActiveTargets = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (haveActiveTargets) { break; }
+                }
+
+                if (haveActiveTargets) { break; }
+            }
+
+            if (!haveActiveTargets) {
+                Logger.Warning("Assistant: no targets with exposure plans are active for active projects at planning time");
+                return null;
+            }
+
             List<IPlanProject> planProjects = new List<IPlanProject>();
             foreach (Project project in projects) {
                 PlanProject planProject = new PlanProject(activeProfile, project);

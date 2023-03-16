@@ -61,6 +61,25 @@ namespace Assistant.NINAPlugin.Database {
             return projects.ToList();
         }
 
+        public bool HasActiveTargets(string profileId, DateTime atTime) {
+            long secs = DateTimeToUnixSeconds(atTime);
+            List<Project> projects = ProjectSet
+                .AsNoTracking()
+                .Include("targets")
+                .Where(p =>
+                p.ProfileId.Equals(profileId) &&
+                p.state_col == (int)ProjectState.Active &&
+                p.startDate <= secs && secs <= p.endDate).ToList();
+
+            foreach (Project project in projects) {
+                foreach (Target target in project.Targets) {
+                    if (target.Active) { return true; }
+                }
+            }
+
+            return false;
+        }
+
         public List<ExposureTemplate> GetExposureTemplates(string profileId) {
             return ExposureTemplateSet.Where(p => p.profileId == profileId).ToList();
         }
@@ -91,14 +110,6 @@ namespace Assistant.NINAPlugin.Database {
                 .Where(p => p.Id == id)
                 .FirstOrDefault();
         }
-
-        /* TODO: this can't be done anymore since filterName is no longer on EP AND multiple ETs could have same filter name
-         * This is called from ImageSaveWatcher Update() ...
-        public ExposurePlan GetExposurePlan(int targetId, string filterName) {
-            return ExposurePlanSet
-                .Where(e => e.TargetId == targetId && e.filterName == filterName)
-                .FirstOrDefault();
-        }*/
 
         public ExposureTemplate GetExposureTemplate(int id) {
             return ExposureTemplateSet.Where(e => e.Id == id).FirstOrDefault();

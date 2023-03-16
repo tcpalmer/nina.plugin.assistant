@@ -10,6 +10,7 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
         [Test]
         public void testCoordinatesGetSet() {
             Target sut = new Target();
+            sut.Active.Should().Be(true);
 
             sut.RAHours = 5;
             sut.RAMinutes = 10;
