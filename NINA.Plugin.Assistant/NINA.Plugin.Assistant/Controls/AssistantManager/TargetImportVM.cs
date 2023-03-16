@@ -3,6 +3,7 @@ using Assistant.NINAPlugin.Util;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using NINA.Astrometry;
 using NINA.Core.Utility;
+using NINA.Core.Utility.Notification;
 using NINA.Equipment.Interfaces;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using System;
@@ -83,32 +84,31 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand SequenceTargetImportCommand { get; private set; }
 
         private void SequenceTargetImport(object obj) {
-            string sequenceTargetsDirectory = Path.Combine(CoreUtil.APPLICATIONDIRECTORY, "Targets");
 
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
             dialog.Title = "Import Sequence Target";
             dialog.IsFolderPicker = false;
             dialog.Multiselect = false;
-            dialog.InitialDirectory = sequenceTargetsDirectory;
+            dialog.InitialDirectory = Path.Combine(CoreUtil.APPLICATIONDIRECTORY, "Targets");
 
             CommonFileDialogResult result = dialog.ShowDialog();
             if (result == CommonFileDialogResult.Ok) {
-                string fileName = dialog.FileName;
+                string pathToFile = dialog.FileName;
                 SequenceTarget sequenceTarget;
 
                 try {
-                    sequenceTarget = SequenceTargetParser.GetSequenceTarget(fileName);
+                    sequenceTarget = SequenceTargetParser.GetSequenceTarget(pathToFile);
+                    Target target = new Target();
+                    target.Coordinates = sequenceTarget.GetCoordinates();
+                    target.Name = sequenceTarget.TargetName;
+                    target.Rotation = sequenceTarget.Rotation;
+                    Target = target;
                 }
                 catch (Exception e) {
-                    Logger.Error($"failed to read sequence target at {fileName}: {e.Message} {e.StackTrace}");
+                    Logger.Error($"failed to read sequence target at {pathToFile}: {e.Message} {e.StackTrace}");
+                    Notification.ShowError($"Failed to import target from {pathToFile}");
                     return;
                 }
-
-                Target target = new Target();
-                target.Coordinates = sequenceTarget.GetCoordinates();
-                target.Name = sequenceTarget.TargetName;
-                target.Rotation = sequenceTarget.Rotation;
-                Target = target;
             }
         }
 
@@ -143,6 +143,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
             catch (Exception e) {
                 Logger.Error($"failed to get coordinates from planetarium: {e.Message}");
+                Notification.ShowError($"Failed to get coordinates from planetarium: {e.Message}");
                 return null;
             }
         }
