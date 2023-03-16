@@ -1,10 +1,13 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Util;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using NINA.Astrometry;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -24,6 +27,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
             this.planetariumFactory = planetariumFactory;
             PlanetariumImportCommand = new RelayCommand(PlanetariumImport);
+
+            SequenceTargetImportCommand = new RelayCommand(SequenceTargetImport);
         }
 
         private IDeepSkyObjectSearchVM deepSkyObjectSearchVM;
@@ -73,6 +78,39 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public ICommand PlanetariumImportCommand { get; private set; }
+
+
+        public ICommand SequenceTargetImportCommand { get; private set; }
+
+        private void SequenceTargetImport(object obj) {
+            string sequenceTargetsDirectory = Path.Combine(CoreUtil.APPLICATIONDIRECTORY, "Targets");
+
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.Title = "Import Sequence Target";
+            dialog.IsFolderPicker = false;
+            dialog.Multiselect = false;
+            dialog.InitialDirectory = sequenceTargetsDirectory;
+
+            CommonFileDialogResult result = dialog.ShowDialog();
+            if (result == CommonFileDialogResult.Ok) {
+                string fileName = dialog.FileName;
+                SequenceTarget sequenceTarget;
+
+                try {
+                    sequenceTarget = SequenceTargetParser.GetSequenceTarget(fileName);
+                }
+                catch (Exception e) {
+                    Logger.Error($"failed to read sequence target at {fileName}: {e.Message} {e.StackTrace}");
+                    return;
+                }
+
+                Target target = new Target();
+                target.Coordinates = sequenceTarget.GetCoordinates();
+                target.Name = sequenceTarget.TargetName;
+                target.Rotation = sequenceTarget.Rotation;
+                Target = target;
+            }
+        }
 
         private async void PlanetariumImport(object obj) {
             Target target = await PlanetariumImport();
