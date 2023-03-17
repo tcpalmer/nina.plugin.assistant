@@ -90,7 +90,7 @@
                                 HeadersVisibility="None"
                                 ScrollViewer.CanContentScroll="False"
                                 HorizontalScrollBarVisibility="Disabled"
-                                ItemsSource="{Binding TargetStatusList}"
+                                ItemsSource="{Binding StatusItemList}"
                                 VerticalScrollBarVisibility="Auto">
 
                                 <DataGrid.CellStyle>
