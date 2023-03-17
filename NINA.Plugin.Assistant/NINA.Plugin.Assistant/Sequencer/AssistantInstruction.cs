@@ -6,7 +6,6 @@ using NINA.Astrometry;
 using NINA.Astrometry.Interfaces;
 using NINA.Core.Model;
 using NINA.Core.Utility;
-using NINA.Core.Utility.Notification;
 using NINA.Core.Utility.WindowService;
 using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
@@ -170,8 +169,10 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 if (plan.WaitForNextTargetTime != null) {
                     Logger.Info("Scheduler: planner waiting for next target to become available");
-                    //WaitForNextTarget(plan.WaitForNextTargetTime, progress, token);
-                    Notification.ShowInformation("REMINDER: skipping wait");
+                    StatusMonitor.BeginWait((DateTime)plan.WaitForNextTargetTime);
+                    WaitForNextTarget(plan.WaitForNextTargetTime, progress, token);
+                    StatusMonitor.EndWait();
+                    //Notification.ShowInformation("REMINDER: skipping wait");
                 }
                 else {
                     try {
@@ -228,8 +229,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        public AsyncObservableCollection<TargetStatus> TargetStatusList {
-            get => StatusMonitor?.TargetStatusList;
+        public AsyncObservableCollection<IStatusItem> StatusItemList {
+            get => StatusMonitor?.StatusItemList;
         }
 
         public string Summary {
@@ -310,7 +311,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private void StatusMonitor_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             RaisePropertyChanged(nameof(StatusMonitor));
-            RaisePropertyChanged(nameof(TargetStatusList));
+            RaisePropertyChanged(nameof(StatusItemList));
         }
 
         public InputTarget Target { get; private set; }

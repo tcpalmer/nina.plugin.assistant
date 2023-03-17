@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.Util;
 using NINA.Core.Utility;
 using System;
 using System.Text;
@@ -8,23 +9,33 @@ namespace Assistant.NINAPlugin.Sequencer {
     public class AssistantStatusMonitor : BaseINPC {
 
         public AssistantStatusMonitor() {
-            TargetStatusList.CollectionChanged += TargetStatusList_CollectionChanged;
+            StatusItemList.CollectionChanged += StatusItemList_CollectionChanged;
         }
 
-        private void TargetStatusList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
-            RaisePropertyChanged(nameof(TargetStatusList));
+        private void StatusItemList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+            RaisePropertyChanged(nameof(StatusItemList));
         }
 
-        private AsyncObservableCollection<TargetStatus> targetStatusList = new AsyncObservableCollection<TargetStatus>();
-        public AsyncObservableCollection<TargetStatus> TargetStatusList {
-            get => targetStatusList;
+        private AsyncObservableCollection<IStatusItem> statusItemList = new AsyncObservableCollection<IStatusItem>();
+        public AsyncObservableCollection<IStatusItem> StatusItemList {
+            get => statusItemList;
             set {
-                targetStatusList = value;
+                statusItemList = value;
             }
         }
 
         public void Reset() {
-            TargetStatusList.Clear();
+            StatusItemList.Clear();
+        }
+
+        private WaitStatus currentWaitStatus;
+        public WaitStatus CurrentWaitStatus {
+            get => currentWaitStatus;
+            set {
+                currentWaitStatus = value;
+                RaisePropertyChanged(nameof(CurrentWaitStatus));
+                RaisePropertyChanged(nameof(Summary));
+            }
         }
 
         private TargetStatus currentTargetStatus;
@@ -41,9 +52,20 @@ namespace Assistant.NINAPlugin.Sequencer {
             get { return currentTargetStatus != null ? currentTargetStatus.Name : ""; }
         }
 
+        public void BeginWait(DateTime waitUntil) {
+            WaitStatus waitStatus = new WaitStatus($"Waiting until {Utils.FormatDateTimeFull(waitUntil)} for next target availability");
+            StatusItemList.Add(waitStatus);
+            CurrentWaitStatus = waitStatus;
+        }
+
+        public void EndWait() {
+            CurrentWaitStatus.History = CurrentWaitStatus.History + " done";
+            CurrentWaitStatus = null;
+        }
+
         public void BeginTarget(IPlanTarget planTarget) {
             TargetStatus targetStatus = new TargetStatus(planTarget);
-            TargetStatusList.Add(targetStatus);
+            StatusItemList.Add(targetStatus);
             CurrentTargetStatus = targetStatus;
         }
 
@@ -89,7 +111,33 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
     }
 
-    public class TargetStatus : BaseINPC {
+    public interface IStatusItem {
+        string Name { get; }
+        string History { get; }
+    }
+
+    public class WaitStatus : BaseINPC, IStatusItem {
+
+        public WaitStatus(string name) {
+            Name = name;
+            History = "waiting ...";
+        }
+
+        public string Name { get; set; }
+
+        private string history;
+        public string History {
+            get {
+                return history;
+            }
+            set {
+                history = value;
+                RaisePropertyChanged(nameof(History));
+            }
+        }
+    }
+
+    public class TargetStatus : BaseINPC, IStatusItem {
         public IPlanTarget PlanTarget { get; private set; }
         private InstructionStatus activeInstruction;
         private StringBuilder completedHistory;
