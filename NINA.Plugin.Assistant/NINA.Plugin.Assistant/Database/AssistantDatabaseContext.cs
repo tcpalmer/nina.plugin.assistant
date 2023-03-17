@@ -396,6 +396,14 @@ namespace Assistant.NINAPlugin.Database {
             }
         }
 
+        /* DATABASE MIGRATION NOTES
+         * - See NINA NINADbContext.Migrate()
+         * - Basically, this uses 'PRAGMA user_version' to get the version of the database.  Defaults to 0.
+         * - It delivers new updates in files named N.sql in C:\Program Files\N.I.N.A. - Nighttime Imaging 'N' Astronomy\Database\Migration\
+         * - Each of those will do whatever updates are needed and then execute 'PRAGMA user_version = N;' at the end.
+         * - Should be able to write unit tests for the migration files.
+         */
+
         private class CreateOrMigrateDatabaseInitializer<TContext> : CreateDatabaseIfNotExists<TContext>,
                 IDatabaseInitializer<TContext> where TContext : AssistantDatabaseContext {
 
