@@ -88,6 +88,7 @@
                                 BorderThickness="0"
                                 CanUserAddRows="false"
                                 HeadersVisibility="None"
+                                ScrollViewer.CanContentScroll="False"
                                 HorizontalScrollBarVisibility="Disabled"
                                 ItemsSource="{Binding TargetStatusList}"
                                 VerticalScrollBarVisibility="Auto">

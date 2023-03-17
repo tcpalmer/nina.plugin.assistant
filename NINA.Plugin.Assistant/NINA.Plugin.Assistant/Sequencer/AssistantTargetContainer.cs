@@ -30,7 +30,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
     public class AssistantTargetContainer : SequentialContainer, IDeepSkyObjectContainer {
 
-        public readonly static string INSTRUCTION_CATEGORY = "Assistant";
+        public readonly static string INSTRUCTION_CATEGORY = "Scheduler";
 
         private readonly AssistantInstruction parentInstruction;
         private readonly IProfileService profileService;
@@ -99,7 +99,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.plan = plan;
             this.activeProfile = profileService.ActiveProfile;
 
-            //SetTarget();
             Attempts = 1;
             ErrorBehavior = InstructionErrorBehavior.SkipInstructionSetOnError;
         }
@@ -115,16 +114,6 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 AddEndTimeTrigger(plan.PlanTarget);
                 AddDitherTrigger(plan.PlanTarget);
-
-                // If target is different from previous, slew/center/rotate
-                if (!plan.PlanTarget.Equals(previousPlanTarget)) {
-                    // TODO: pain to simulate
-                    //AddSlewAndCenter(plan.PlanTarget, progress, token);
-                    // TODO: just slew for garage testing
-                    //AddSlew(plan.PlanTarget, progress, token);
-                }
-
-                // Add the planned exposures
                 AddInstructions(plan);
 
                 ImageSaveWatcher.Start();
@@ -134,10 +123,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 throw ex;
             }
             finally {
-                // TODO: we also need to wait for the ImageSaveWatcher to be done with the last image.
-                // This will ensure that the DB is updated with the last grading operation before the planner is called again.
-                // Pete on Discord was dealing with something similar (2/5/23) - ask him what he ended up doing.
-                ImageSaveWatcher?.Stop();
+                ImageSaveWatcher.Stop();
 
                 foreach (var item in Items) {
                     item.AttachNewParent(null);
@@ -192,6 +178,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 if (instruction is PlanSlew) {
                     AddSlew((PlanSlew)instruction, plan.PlanTarget);
+                    //Notification.ShowInformation("REMINDER: SKIPPING SLEW");
                     continue;
                 }
 
@@ -220,29 +207,31 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void AddSlew(PlanSlew instruction, IPlanTarget planTarget) {
-            string with = instruction.center ? "with" : "without";
-            Logger.Info($"Scheduler: slew ({with} center): {Utils.FormatCoordinates(planTarget.Coordinates)}");
 
             bool isPlateSolve = instruction.center || planTarget.Rotation != 0;
+            InputCoordinates slewCoordinates = new InputCoordinates(planTarget.Coordinates);
             SequenceItem slewCenter;
+
+            string with = isPlateSolve ? "with" : "without";
+            Logger.Info($"Scheduler: slew ({with} center): {Utils.FormatCoordinates(planTarget.Coordinates)}");
 
             if (isPlateSolve) {
                 if (planTarget.Rotation == 0) {
                     slewCenter = new Center(profileService, telescopeMediator, imagingMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
                     slewCenter.Name = nameof(Center);
-                    (slewCenter as Center).Coordinates = new InputCoordinates(planTarget.Coordinates);
+                    (slewCenter as Center).Coordinates = slewCoordinates;
                 }
                 else {
                     slewCenter = new CenterAndRotate(profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
                     slewCenter.Name = nameof(CenterAndRotate);
-                    (slewCenter as Center).Coordinates = new InputCoordinates(planTarget.Coordinates);
+                    (slewCenter as Center).Coordinates = slewCoordinates;
                     (slewCenter as CenterAndRotate).Rotation = planTarget.Rotation;
                 }
             }
             else {
                 slewCenter = new SlewScopeToRaDec(telescopeMediator, guiderMediator);
                 slewCenter.Name = nameof(SlewScopeToRaDec);
-                (slewCenter as SlewScopeToRaDec).Coordinates = new InputCoordinates(planTarget.Coordinates);
+                (slewCenter as SlewScopeToRaDec).Coordinates = slewCoordinates;
             }
 
             slewCenter.Category = INSTRUCTION_CATEGORY;
@@ -286,7 +275,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private void AddTakeExposure(IPlanExposure planExposure) {
             Logger.Info($"Scheduler: adding take exposure: {planExposure.FilterName}");
 
-            TakeExposure takeExposure = new TakeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM);
+            TakeExposure takeExposure = new AssistantTakeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM, ImageSaveWatcher, planExposure.DatabaseId);
             takeExposure.Name = nameof(TakeExposure);
             takeExposure.Category = INSTRUCTION_CATEGORY;
             takeExposure.Description = "";
@@ -299,7 +288,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             takeExposure.Offset = GetOffset(planExposure.Offset);
             takeExposure.Binning = planExposure.BinningMode;
 
-            Add(new InstructionWrapper(monitor, ImageSaveWatcher, planExposure, takeExposure));
+            Add(new InstructionWrapper(monitor, planExposure.PlanId, takeExposure));
         }
 
         private void AddWait(DateTime waitForTime, IPlanTarget planTarget) {
@@ -340,16 +329,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         private string PlanItemId;
         private SequenceItem Instruction;
 
-        private IImageSaveWatcher ImageSaveWatcher;
-        private int PlanExposureDatabaseId;
-
-        public InstructionWrapper(AssistantStatusMonitor monitor, IImageSaveWatcher imageSaveWatcher, IPlanExposure planExposure, SequenceItem instruction)
-            : this(monitor, planExposure.PlanId, instruction) {
-
-            ImageSaveWatcher = imageSaveWatcher;
-            PlanExposureDatabaseId = planExposure.DatabaseId;
-        }
-
         public InstructionWrapper(AssistantStatusMonitor monitor, string planItemId, SequenceItem instruction) {
             this.Monitor = monitor;
             this.PlanItemId = planItemId;
@@ -364,10 +343,6 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
             try {
-                if (ImageSaveWatcher != null) {
-                    ImageSaveWatcher.PlanExposureDatabaseId = PlanExposureDatabaseId;
-                }
-
                 Monitor.ItemStart(PlanItemId, Name);
                 Instruction.Execute(progress, token).Wait();
                 Monitor.ItemFinish(PlanItemId, Name);

@@ -30,9 +30,9 @@ namespace Assistant.NINAPlugin.Plan {
             AssistantPlan plan;
 
             switch (CallNumber) {
-                case 1: plan = Plan1(); break;
-                case 2: plan = WaitForTime(DateTime.Now.AddSeconds(10)); break;
-                case 3: plan = Plan2(); break;
+                case 1: plan = Plan3(); break;
+                //case 2: plan = WaitForTime(DateTime.Now.AddSeconds(10)); break;
+                //case 3: plan = Plan2(); break;
                 default: return null;
             }
 
@@ -58,11 +58,11 @@ namespace Assistant.NINAPlugin.Plan {
             IPlanTarget planTarget = GetBasePlanTarget("T01", planProject, Cp5n5);
             planTarget.EndTime = endTime;
 
-            IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3);
+            IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3, 101);
             lum.ReadoutMode = 1;
-            IPlanExposure red = GetExposurePlan("R", 4, null, null, 3);
-            IPlanExposure grn = GetExposurePlan("G", 4, null, null, 3);
-            IPlanExposure blu = GetExposurePlan("B", 4, null, null, 3);
+            IPlanExposure red = GetExposurePlan("R", 4, null, null, 3, 102);
+            IPlanExposure grn = GetExposurePlan("G", 4, null, null, 3, 103);
+            IPlanExposure blu = GetExposurePlan("B", 4, null, null, 3, 104);
             planTarget.ExposurePlans.Add(lum);
             planTarget.ExposurePlans.Add(red);
             planTarget.ExposurePlans.Add(grn);
@@ -99,11 +99,11 @@ namespace Assistant.NINAPlugin.Plan {
             IPlanTarget planTarget = GetBasePlanTarget("T02", planProject, Cp1525);
             planTarget.EndTime = endTime;
 
-            IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3);
+            IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3, 101);
             lum.ReadoutMode = 1;
-            IPlanExposure red = GetExposurePlan("R", 4, null, null, 3);
-            IPlanExposure grn = GetExposurePlan("G", 4, null, null, 3);
-            IPlanExposure blu = GetExposurePlan("B", 4, null, null, 3);
+            IPlanExposure red = GetExposurePlan("R", 4, null, null, 3, 102);
+            IPlanExposure grn = GetExposurePlan("G", 4, null, null, 3, 103);
+            IPlanExposure blu = GetExposurePlan("B", 4, null, null, 3, 104);
             planTarget.ExposurePlans.Add(lum);
             planTarget.ExposurePlans.Add(red);
             planTarget.ExposurePlans.Add(grn);
@@ -126,16 +126,68 @@ namespace Assistant.NINAPlugin.Plan {
             return new AssistantPlan(planTarget, timeInterval, instructions);
         }
 
-        private IPlanExposure GetExposurePlan(string name, int exposure, int? gain, int? offset, int desired) {
-            PlanExposureEmulator planFilter = new PlanExposureEmulator();
-            planFilter.FilterName = name;
-            planFilter.ExposureLength = exposure;
-            planFilter.Gain = gain;
-            planFilter.Offset = offset;
-            planFilter.ReadoutMode = 0;
-            planFilter.BinningMode = new BinningMode(1, 1);
-            planFilter.Desired = desired;
-            return planFilter;
+        private AssistantPlan Plan3() {
+
+            DateTime endTime = atTime.AddMinutes(5);
+            TimeInterval timeInterval = new TimeInterval(atTime, endTime);
+
+            IPlanProject planProject = new PlanProjectEmulator();
+            planProject.Name = "P03";
+            planProject.UseCustomHorizon = false;
+            planProject.MinimumAltitude = 10;
+            planProject.DitherEvery = 0;
+            planProject.EnableGrader = true;
+            planProject.DatabaseId = 2;
+
+            IPlanTarget planTarget = GetBasePlanTarget("T03", planProject, Cp1525);
+            planTarget.EndTime = endTime;
+
+            IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3, 1);
+            IPlanExposure red = GetExposurePlan("R", 4, null, null, 3, 2);
+            //IPlanExposure grn = GetExposurePlan("G", 4, null, null, 3, 103);
+            //IPlanExposure blu = GetExposurePlan("B", 4, null, null, 3, 104);
+            planTarget.ExposurePlans.Add(lum);
+
+            List<IPlanInstruction> instructions = new List<IPlanInstruction>();
+            instructions.Add(new PlanMessage("planner emulator: Plan3"));
+            instructions.Add(new PlanSwitchFilter(lum));
+            instructions.Add(new PlanTakeExposure(lum));
+            instructions.Add(new PlanTakeExposure(lum));
+            //instructions.Add(new PlanTakeExposure(lum));
+            //instructions.Add(new PlanTakeExposure(lum));
+
+            instructions.Add(new PlanSwitchFilter(red));
+            instructions.Add(new PlanTakeExposure(red));
+            instructions.Add(new PlanTakeExposure(red));
+            //instructions.Add(new PlanTakeExposure(red));
+            //instructions.Add(new PlanTakeExposure(red));
+
+            ///instructions.Add(new PlanSwitchFilter(grn));
+            ///instructions.Add(new PlanTakeExposure(grn));
+            ///instructions.Add(new PlanTakeExposure(grn));
+            //instructions.Add(new PlanTakeExposure(grn));
+            //instructions.Add(new PlanTakeExposure(grn));
+
+            ///instructions.Add(new PlanSwitchFilter(blu));
+            ///instructions.Add(new PlanTakeExposure(blu));
+            ///instructions.Add(new PlanTakeExposure(blu));
+            //instructions.Add(new PlanTakeExposure(blu));
+            //instructions.Add(new PlanTakeExposure(blu));
+
+            return new AssistantPlan(planTarget, timeInterval, instructions);
+        }
+
+        private IPlanExposure GetExposurePlan(string name, int exposure, int? gain, int? offset, int desired, int databaseId) {
+            PlanExposureEmulator planExposure = new PlanExposureEmulator();
+            planExposure.DatabaseId = databaseId;
+            planExposure.FilterName = name;
+            planExposure.ExposureLength = exposure;
+            planExposure.Gain = gain;
+            planExposure.Offset = offset;
+            planExposure.ReadoutMode = 0;
+            planExposure.BinningMode = new BinningMode(1, 1);
+            planExposure.Desired = desired;
+            return planExposure;
         }
 
         private IPlanTarget GetBasePlanTarget(string name, IPlanProject planProject, Coordinates coordinates) {
@@ -154,13 +206,13 @@ namespace Assistant.NINAPlugin.Plan {
     class PlanProjectEmulator : IPlanProject {
 
         public string PlanId { get; set; }
+        public int DatabaseId { get; set; }
         public string Name { get; set; }
         public bool UseCustomHorizon { get; set; }
         public double MinimumAltitude { get; set; }
         public int DitherEvery { get; set; }
         public bool EnableGrader { get; set; }
 
-        public int DatabaseId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string Description { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public ProjectState State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public ProjectPriority Priority { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -195,6 +247,7 @@ namespace Assistant.NINAPlugin.Plan {
     class PlanTargetEmulator : IPlanTarget {
 
         public string PlanId { get; set; }
+        public int DatabaseId { get; set; }
         public string Name { get; set; }
         public IPlanProject Project { get; set; }
         public Coordinates Coordinates { get; set; }
@@ -204,7 +257,6 @@ namespace Assistant.NINAPlugin.Plan {
         public DateTime EndTime { get; set; }
         public List<IPlanExposure> ExposurePlans { get; set; }
 
-        public int DatabaseId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public Epoch Epoch { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public bool Rejected { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string RejectedReason { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }

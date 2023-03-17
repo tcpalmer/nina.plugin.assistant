@@ -5,6 +5,7 @@ using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Model;
 using NINA.Core.Utility;
+using NINA.Core.Utility.Notification;
 using NINA.Profile.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -40,6 +41,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             bool emulatePlan = false;
             if (emulatePlan) {
+                Notification.ShowInformation("REMINDER: running plan emulation");
                 return new PlannerEmulator(atTime, activeProfile).GetPlan(previousPlanTarget);
             }
 

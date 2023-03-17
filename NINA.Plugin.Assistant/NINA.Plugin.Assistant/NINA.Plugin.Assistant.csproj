@@ -367,6 +367,7 @@
       <DependentUpon>SVGDictionary.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Utils\ExposureTemplateReconciliation.cs" />
+    <Compile Include="Sequencer\AssistantTakeExposure.cs" />
     <Compile Include="Utils\SequenceTargetParser.cs" />
     <Compile Include="Controls\ValidationRules\ValidationRules.cs" />
     <Compile Include="Database\AssistantDatabaseInteraction.cs" />

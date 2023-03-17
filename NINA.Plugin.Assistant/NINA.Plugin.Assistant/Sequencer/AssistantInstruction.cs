@@ -6,6 +6,7 @@ using NINA.Astrometry;
 using NINA.Astrometry.Interfaces;
 using NINA.Core.Model;
 using NINA.Core.Utility;
+using NINA.Core.Utility.Notification;
 using NINA.Core.Utility.WindowService;
 using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
@@ -127,7 +128,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override void Initialize() {
-            Logger.Debug("Scheduler: Initialize");
+            Logger.Debug("Scheduler instruction: Initialize");
 
             if (StatusMonitor != null) {
                 StatusMonitor.Reset();
@@ -139,13 +140,13 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override void ResetProgress() {
-            Logger.Debug("Assistant ResetProgress");
+            Logger.Debug("Scheduler instruction: ResetProgress");
             StatusMonitor.Reset();
             base.ResetProgress();
         }
 
         public override void Teardown() {
-            Logger.Debug("Assistant Teardown");
+            Logger.Debug("Scheduler instruction: Teardown");
             base.Teardown();
         }
 
@@ -154,7 +155,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Debug("Scheduler: Execute");
+            Logger.Debug("Scheduler instruction: Execute");
 
             IPlanTarget previousPlanTarget = null;
 
@@ -169,7 +170,8 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 if (plan.WaitForNextTargetTime != null) {
                     Logger.Info("Scheduler: planner waiting for next target to become available");
-                    WaitForNextTarget(plan.WaitForNextTargetTime, progress, token);
+                    //WaitForNextTarget(plan.WaitForNextTargetTime, progress, token);
+                    Notification.ShowInformation("REMINDER: skipping wait");
                 }
                 else {
                     try {
