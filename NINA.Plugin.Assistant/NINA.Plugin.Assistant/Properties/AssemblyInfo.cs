@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 [assembly: Guid("B4541BA9-7B07-4D71-B8E1-6C73D4933EA0")]
 
 [assembly: AssemblyTitle("Target Scheduler")]
-[assembly: AssemblyDescription("An automated target scheduler for NINA")]
+[assembly: AssemblyDescription("An automated target scheduler for NINA *EXPERIMENTAL RELEASE*")]
 [assembly: AssemblyCompany("Tom Palmer @tcpalmer")]
 [assembly: AssemblyProduct("Assistant.NINAPlugin")]
 [assembly: AssemblyCopyright("Copyright © 2023")]

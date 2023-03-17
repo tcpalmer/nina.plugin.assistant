@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Windows.Data;
+using System.Windows.Input;
 
 namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
@@ -22,6 +23,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
             database = new AssistantDatabaseInteraction();
 
+            RefreshTableCommand = new RelayCommand(RefreshTable);
             InitializeCriteria();
             LoadRecords();
         }
@@ -136,6 +138,12 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
                 RaisePropertyChanged(nameof(SelectedTargetId));
                 LoadRecords();
             }
+        }
+
+        public ICommand RefreshTableCommand { get; private set; }
+
+        private void RefreshTable(object obj) {
+            LoadRecords();
         }
 
         /*
