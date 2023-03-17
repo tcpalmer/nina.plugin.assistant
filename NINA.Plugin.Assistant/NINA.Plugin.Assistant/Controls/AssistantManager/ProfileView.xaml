@@ -184,7 +184,7 @@
 
                     <DataGridTemplateColumn Width="180" CanUserSort="False">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="Name" />
+                            <TextBlock Text="Project Name" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

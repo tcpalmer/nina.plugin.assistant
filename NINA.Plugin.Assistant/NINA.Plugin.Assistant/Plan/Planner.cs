@@ -39,7 +39,7 @@ namespace Assistant.NINAPlugin.Plan {
         public AssistantPlan GetPlan(IPlanTarget previousPlanTarget) {
             Logger.Debug($"Scheduler: getting current plan for {Utils.FormatDateTimeFull(atTime)}");
 
-            bool emulatePlan = true;
+            bool emulatePlan = false;
             if (emulatePlan) {
                 Notification.ShowInformation("REMINDER: running plan emulation");
                 return new PlannerEmulator(atTime, activeProfile).GetPlan(previousPlanTarget);
@@ -291,8 +291,10 @@ namespace Assistant.NINAPlugin.Plan {
                 return null;
             }
 
+            // TODO: note that we run the scoring engine even if we only have a single live target ...
+
             IPlanTarget highScoreTarget = null;
-            double highScore = 0;
+            double highScore = double.MinValue;
 
             foreach (IPlanProject planProject in projects) {
                 if (planProject.Rejected) { continue; }
