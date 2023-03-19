@@ -67,6 +67,13 @@ namespace Assistant.NINAPlugin.Database.Schema {
             }
         }
 
+        [NotMapped]
+        public double PercentComplete {
+            get {
+                return Desired == 0 ? 0 : ((double)Accepted / (double)Desired) * 100;
+            }
+        }
+
         public ExposurePlan() { }
 
         public ExposurePlan(string profileId) {

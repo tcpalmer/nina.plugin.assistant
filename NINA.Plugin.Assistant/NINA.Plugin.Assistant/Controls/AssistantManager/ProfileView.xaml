@@ -140,8 +140,8 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Button
-                                    Width="18"
-                                    Height="18"
+                                    Width="15"
+                                    Height="15"
                                     VerticalAlignment="Center"
                                     HorizontalContentAlignment="Right"
                                     Command="{Binding ElementName=ProfileViewPanel, Path=DataContext.ViewProjectCommand}"
@@ -163,8 +163,8 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Button
-                                    Width="18"
-                                    Height="18"
+                                    Width="15"
+                                    Height="15"
                                     VerticalAlignment="Center"
                                     HorizontalContentAlignment="Right"
                                     Command="{Binding ElementName=ProfileViewPanel, Path=DataContext.CopyProjectCommand}"
@@ -188,7 +188,7 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Name}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Name}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -199,7 +199,10 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Width="Auto" Text="{Binding State}" />
+                                <TextBlock
+                                    Width="Auto"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding State}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -214,6 +217,7 @@
                                     Width="15"
                                     Height="15"
                                     Margin="12,0,0,0"
+                                    VerticalAlignment="Center"
                                     Data="{Binding ActiveNowWithActiveTargets, Converter={StaticResource StatusConverter}}"
                                     Fill="{Binding ActiveNowWithActiveTargets, Converter={StaticResource StatusMarkColorConverter}}"
                                     Stretch="Uniform" />
@@ -227,7 +231,7 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Path=StartDate, StringFormat='{}{0:yyyy/MM/dd}'}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Path=StartDate, StringFormat='{}{0:yyyy/MM/dd}'}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -238,7 +242,7 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Path=EndDate, StringFormat='{}{0:yyyy/MM/dd}'}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Path=EndDate, StringFormat='{}{0:yyyy/MM/dd}'}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -249,7 +253,7 @@
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Path=PercentComplete, StringFormat={}{0:0}%}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Path=PercentComplete, StringFormat={}{0:0}%}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

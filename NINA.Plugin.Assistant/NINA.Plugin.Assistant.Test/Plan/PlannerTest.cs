@@ -33,8 +33,9 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             PlanMocks.AddMockPlanFilter(pt, pf);
             PlanMocks.AddMockPlanTarget(pp2, pt);
 
-            List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object, pp2.Object);
+            Assert.IsNull(new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object).FilterForIncomplete(null));
 
+            List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object, pp2.Object);
             projects = new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object).FilterForIncomplete(projects);
             Assert.IsNotNull(projects);
             projects.Count.Should().Be(2);

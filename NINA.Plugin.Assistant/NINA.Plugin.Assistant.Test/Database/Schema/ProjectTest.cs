@@ -42,7 +42,7 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
             p2.Description.Should().Be("p1D");
             p2.ActiveDate.Should().Be(onDate);
             p2.StartDate.Should().Be(onDate.AddDays(1));
-            p2.EndDate.Should().Be(onDate.AddDays(2));
+            p2.EndDate.Should().Be(onDate.AddDays(3).AddSeconds(-1));
             p2.Priority.Should().Be(ProjectPriority.High);
             p2.State.Should().Be(ProjectState.Inactive);
             p2.MinimumAltitude.Should().Be(10);

@@ -52,13 +52,13 @@ namespace Assistant.NINAPlugin.Plan {
                     }
 
                     projects = FilterForIncomplete(projects);
-                    //Logger.Trace($"Scheduler: GetPlan after FilterForIncomplete:\n{PlanProject.ListToString(projects)}");
+                    Logger.Trace($"Scheduler: GetPlan after FilterForIncomplete:\n{PlanProject.ListToString(projects)}");
 
                     projects = FilterForVisibility(projects);
-                    //Logger.Trace($"Scheduler: GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
+                    Logger.Trace($"Scheduler: GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
 
                     projects = FilterForMoonAvoidance(projects);
-                    //Logger.Trace($"Scheduler: GetPlan after FilterForMoonAvoidance:\n{PlanProject.ListToString(projects)}");
+                    Logger.Trace($"Scheduler: GetPlan after FilterForMoonAvoidance:\n{PlanProject.ListToString(projects)}");
 
                     DateTime? waitForVisibleNow = CheckForVisibleNow(projects);
                     if (waitForVisibleNow != null) {
@@ -66,17 +66,18 @@ namespace Assistant.NINAPlugin.Plan {
                     }
 
                     ScoringEngine scoringEngine = new ScoringEngine(activeProfile, atTime, previousPlanTarget);
-
                     IPlanTarget planTarget = SelectTargetByScore(projects, scoringEngine);
 
                     if (planTarget != null) {
-                        Logger.Trace($"Scheduler: GetPlan highest scoring target:\n{planTarget}");
+                        Logger.Trace($"Scheduler Planner: highest scoring (or only) target:\n{planTarget}");
+                        Logger.Debug($"Scheduler Planner: highest scoring (or only) target: {planTarget.Name}");
+
                         TimeInterval targetWindow = GetTargetTimeWindow(atTime, planTarget);
                         List<IPlanInstruction> planInstructions = PlanInstructions(planTarget, previousPlanTarget, targetWindow);
                         return new AssistantPlan(planTarget, targetWindow, planInstructions);
                     }
                     else {
-                        Logger.Debug("Scheduler: GetPlan no target selected");
+                        Logger.Debug("Scheduler Planner: no target selected");
                         return null;
                     }
                 }
@@ -152,9 +153,7 @@ namespace Assistant.NINAPlugin.Plan {
         /// <param name="projects"></param>
         /// <returns></returns>
         public List<IPlanProject> FilterForIncomplete(List<IPlanProject> projects) {
-            if (projects?.Count == 0) {
-                return null;
-            }
+            if (NoProjects(projects)) { return null; }
 
             foreach (IPlanProject planProject in projects) {
                 if (!ProjectIsInComplete(planProject)) {
@@ -177,9 +176,7 @@ namespace Assistant.NINAPlugin.Plan {
         /// <param name="projects"></param>
         /// <returns></returns>
         public List<IPlanProject> FilterForVisibility(List<IPlanProject> projects) {
-            if (projects?.Count == 0) {
-                return null;
-            }
+            if (NoProjects(projects)) { return null; }
 
             foreach (IPlanProject planProject in projects) {
                 if (planProject.Rejected) { continue; }
@@ -229,9 +226,7 @@ namespace Assistant.NINAPlugin.Plan {
         /// <param name="projects"></param>
         /// <returns></returns>
         public List<IPlanProject> FilterForMoonAvoidance(List<IPlanProject> projects) {
-            if (projects?.Count == 0) {
-                return null;
-            }
+            if (NoProjects(projects)) { return null; }
 
             foreach (IPlanProject planProject in projects) {
                 if (planProject.Rejected) { continue; }
@@ -259,9 +254,7 @@ namespace Assistant.NINAPlugin.Plan {
         /// <param name="projects"></param>
         /// <returns></returns>
         public DateTime? CheckForVisibleNow(List<IPlanProject> projects) {
-            if (projects?.Count == 0) {
-                return null;
-            }
+            if (NoProjects(projects)) { return null; }
 
             DateTime? nextAvailableTime = DateTime.MaxValue;
 
@@ -287,11 +280,17 @@ namespace Assistant.NINAPlugin.Plan {
         /// <param name="scoringEngine"></param>
         /// <returns></returns>
         public IPlanTarget SelectTargetByScore(List<IPlanProject> projects, IScoringEngine scoringEngine) {
-            if (projects?.Count == 0) {
+
+            // If no active projects or targets, we're done
+            List<IPlanTarget> targets = GetActiveTargets(projects);
+            if (targets.Count == 0) {
                 return null;
             }
 
-            // TODO: note that we run the scoring engine even if we only have a single live target ...
+            // If only one active target, no need to run scoring engine
+            if (targets.Count == 1) {
+                return targets[0];
+            }
 
             IPlanTarget highScoreTarget = null;
             double highScore = double.MinValue;
@@ -379,6 +378,10 @@ namespace Assistant.NINAPlugin.Plan {
             return instructions;
         }
 
+        private bool NoProjects(List<IPlanProject> projects) {
+            return projects == null || projects.Count == 0;
+        }
+
         private void SetRejected(IPlanProject planProject, string reason) {
             planProject.Rejected = true;
             planProject.RejectedReason = reason;
@@ -395,9 +398,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         private List<IPlanProject> PropagateRejections(List<IPlanProject> projects) {
-            if (projects?.Count == 0) {
-                return null;
-            }
+            if (NoProjects(projects)) { return null; }
 
             foreach (IPlanProject planProject in projects) {
                 if (planProject.Rejected) { continue; }
@@ -413,6 +414,12 @@ namespace Assistant.NINAPlugin.Plan {
                             break;
                         }
                     }
+
+                    // TODO: logic here isn't quite right called from FilterForIncomplete.  If you have:
+                    // - 1 project with 2 targets
+                    //   - target 1 is really incomplete
+                    //   - target 2 has all EPs as complete
+                    // then we're not marking T2 as complete (rejected)
 
                     if (targetRejected) {
                         SetRejected(planTarget, Reasons.TargetAllExposurePlans);
@@ -471,6 +478,24 @@ namespace Assistant.NINAPlugin.Plan {
             return moonSeparation < moonAvoidanceSeparation;
         }
 
+        private List<IPlanTarget> GetActiveTargets(List<IPlanProject> projects) {
+            List<IPlanTarget> targets = new List<IPlanTarget>();
+
+            if (NoProjects(projects)) {
+                return targets;
+            }
+
+            foreach (IPlanProject planProject in projects) {
+                if (planProject.Rejected) { continue; }
+                foreach (IPlanTarget planTarget in planProject.Targets) {
+                    if (planTarget.Rejected) { continue; }
+                    targets.Add(planTarget);
+                }
+            }
+
+            return targets;
+        }
+
         private List<IPlanProject> GetProjects(DateTime atTime) {
 
             try {
@@ -483,7 +508,6 @@ namespace Assistant.NINAPlugin.Plan {
                 throw new SequenceEntityFailedException($"Scheduler: exception reading database: {ex.Message}", ex);
             }
         }
-
     }
 
 }

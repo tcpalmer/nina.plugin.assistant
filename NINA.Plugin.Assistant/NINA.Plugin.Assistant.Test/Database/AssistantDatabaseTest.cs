@@ -71,7 +71,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                 Target t1p1 = p1.Targets[0];
                 t1p1.Name.Should().Be("M42");
-                t1p1.Active.Should().BeTrue();
+                t1p1.Enabled.Should().BeTrue();
                 t1p1.RA.Should().BeApproximately(83.82, 0.001);
                 t1p1.Dec.Should().BeApproximately(-5.391, 0.001);
                 t1p1.Rotation.Should().BeApproximately(0, 0.001);
@@ -103,7 +103,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                 Target t1p2 = p2.Targets[0];
                 t1p2.Name.Should().Be("IC1805");
-                t1p2.Active.Should().BeFalse();
+                t1p2.Enabled.Should().BeFalse();
                 t1p2.RA.Should().BeApproximately(38.175, 0.001);
                 t1p2.Dec.Should().BeApproximately(61.45, 0.001);
                 t1p2.Rotation.Should().BeApproximately(0, 0.001);
@@ -348,7 +348,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     Target t2 = new Target();
                     t2.Name = "IC1805";
-                    t2.Active = false;
+                    t2.Enabled = false;
                     t2.ra = TestUtil.IC1805.RADegrees;
                     t2.dec = TestUtil.IC1805.Dec;
                     p2.Targets.Add(t2);

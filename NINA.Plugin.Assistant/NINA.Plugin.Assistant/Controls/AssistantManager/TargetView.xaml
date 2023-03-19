@@ -111,21 +111,21 @@
                 Grid.Column="0"
                 VerticalAlignment="Center"
                 FontWeight="Bold"
-                Text="Active"
-                ToolTip="Target active for acquisition" />
+                Text="Enabled"
+                ToolTip="Target enabled for acquisition" />
             <CheckBox
                 Grid.Row="1"
                 Grid.Column="1"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                IsChecked="{Binding Path=TargetProxy.Target.Active, Mode=TwoWay}"
+                IsChecked="{Binding Path=TargetProxy.Target.Enabled, Mode=TwoWay}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
             <TextBlock
                 Grid.Row="1"
                 Grid.Column="1"
                 MaxHeight="20"
                 Margin="0,0,0,0"
-                Text="{Binding TargetProxy.Target.Active}"
+                Text="{Binding TargetProxy.Target.Enabled}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
             <TextBlock
@@ -545,6 +545,17 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Width="Auto" Text="{Binding Acquired}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Width="*" CanUserSort="False">
+                    <DataGridTemplateColumn.Header>
+                        <TextBlock Text="%" ToolTip="Percent complete" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding PercentComplete, StringFormat={}{0:0}%}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

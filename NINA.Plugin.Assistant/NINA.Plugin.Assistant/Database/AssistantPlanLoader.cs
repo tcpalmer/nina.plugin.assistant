@@ -30,7 +30,7 @@ namespace Assistant.NINAPlugin.Database {
             bool haveActiveTargets = false;
             foreach (Project project in projects) {
                 foreach (Target target in project.Targets) {
-                    if (target.Active) {
+                    if (target.Enabled) {
                         foreach (ExposurePlan plan in target.ExposurePlans) {
                             if (plan.Desired > plan.Accepted) {
                                 haveActiveTargets = true;
