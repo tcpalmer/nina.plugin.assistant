@@ -133,6 +133,10 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public DateTime? StartDate {
             get { return AssistantDatabaseContext.UnixSecondsToDateTime(startDate); }
             set {
+                if (value != null) {
+                    value = ((DateTime)value).Date;
+                }
+
                 startDate = AssistantDatabaseContext.DateTimeToUnixSeconds(value);
                 RaisePropertyChanged(nameof(StartDate));
             }
@@ -142,6 +146,10 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public DateTime? EndDate {
             get { return AssistantDatabaseContext.UnixSecondsToDateTime(endDate); }
             set {
+                if (value != null) {
+                    value = ((DateTime)value).Date.AddDays(1).AddSeconds(-1);
+                }
+
                 endDate = AssistantDatabaseContext.DateTimeToUnixSeconds(value);
                 RaisePropertyChanged(nameof(EndDate));
             }
@@ -163,7 +171,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
                 }
 
                 foreach (Target target in Targets) {
-                    if (target.Active) { return true; }
+                    if (target.ActiveWithActiveExposurePlans) { return true; }
                 }
 
                 return false;

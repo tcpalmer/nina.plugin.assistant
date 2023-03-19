@@ -143,6 +143,8 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         public ICommand RefreshTableCommand { get; private set; }
 
         private void RefreshTable(object obj) {
+            SearchCriteraKey = null;
+            ItemsView = null;
             LoadRecords();
         }
 

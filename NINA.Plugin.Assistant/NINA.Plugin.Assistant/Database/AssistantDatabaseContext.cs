@@ -73,7 +73,7 @@ namespace Assistant.NINAPlugin.Database {
 
             foreach (Project project in projects) {
                 foreach (Target target in project.Targets) {
-                    if (target.Active) { return true; }
+                    if (target.Enabled) { return true; }
                 }
             }
 

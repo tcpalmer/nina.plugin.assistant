@@ -49,11 +49,40 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
-        public bool Active {
+        public bool Enabled {
             get { return active; }
             set {
                 active = value;
-                RaisePropertyChanged(nameof(Active));
+                RaisePropertyChanged(nameof(Enabled));
+            }
+        }
+
+        [NotMapped]
+        public bool ActiveWithActiveExposurePlans {
+            get {
+                if (Enabled) {
+                    foreach (ExposurePlan plan in ExposurePlans) {
+                        if (plan.Desired > plan.Accepted) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        [NotMapped]
+        public double PercentComplete {
+            get {
+                double totalDesired = 0;
+                double totalAccepted = 0;
+                foreach (ExposurePlan plan in ExposurePlans) {
+                    totalDesired += plan.Desired;
+                    totalAccepted += plan.Accepted;
+                }
+
+                return totalDesired == 0 ? 0 : (totalAccepted / totalDesired) * 100;
             }
         }
 
@@ -274,7 +303,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"Name: {Name}");
-            sb.AppendLine($"Active: {Active}");
+            sb.AppendLine($"Active: {Enabled}");
             sb.AppendLine($"RA: {RA}");
             sb.AppendLine($"Dec: {Dec}");
             sb.AppendLine($"Coords: {Coordinates}");

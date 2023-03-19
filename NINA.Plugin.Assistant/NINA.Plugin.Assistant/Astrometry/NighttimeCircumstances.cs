@@ -65,8 +65,15 @@ namespace Assistant.NINAPlugin.Astrometry {
                 return nighttimeCircumstances;
             }
 
+            // If atTime is after the previous dawn and before noon, return next dusk/following dawn
+            NighttimeCircumstances previous = new NighttimeCircumstances(observerInfo, atTime.AddDays(-1));
+            CivilTwilightEnd = previous.CivilTwilightEnd;
+            if (CivilTwilightEnd <= atTime && atTime < noon) {
+                return nighttimeCircumstances;
+            }
+
             // Otherwise, we want NighttimeCircumstances for the previous day
-            return new NighttimeCircumstances(observerInfo, atTime.AddDays(-1));
+            return previous;
         }
 
         public NighttimeCircumstances(ObserverInfo observerInfo, DateTime onDate) {
