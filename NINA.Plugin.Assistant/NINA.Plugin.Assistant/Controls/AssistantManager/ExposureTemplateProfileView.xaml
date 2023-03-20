@@ -236,7 +236,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="60" CanUserSort="False">
+                    <DataGridTemplateColumn Width="80" CanUserSort="False">
                         <DataGridTemplateColumn.Header>
                             <TextBlock Text="Twilight" />
                         </DataGridTemplateColumn.Header>

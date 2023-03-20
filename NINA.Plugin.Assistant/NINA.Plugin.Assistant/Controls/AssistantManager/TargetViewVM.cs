@@ -31,6 +31,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
             this.managerVM = managerVM;
             TargetProxy = new TargetProxy(target);
+            TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
 
             profile = managerVM.GetProfile(target.Project.ProfileId);
             profileService.ProfileChanged += ProfileService_ProfileChanged;
@@ -72,7 +73,19 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 ItemEdited = true;
             }
             else {
+                TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
                 RaisePropertyChanged(nameof(TargetProxy));
+            }
+        }
+
+        private bool targetActive;
+        public bool TargetActive {
+            get {
+                return targetActive;
+            }
+            set {
+                targetActive = value;
+                RaisePropertyChanged(nameof(TargetActive));
             }
         }
 

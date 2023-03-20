@@ -297,6 +297,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private DeepSkyObject GetDeepSkyObject(DateTime referenceDate, IProfile activeProfile, IPlanTarget planTarget, CustomHorizon customHorizon) {
             DeepSkyObject dso = new DeepSkyObject(string.Empty, planTarget.Coordinates, null, customHorizon);
+            dso.Name = planTarget.Name;
             dso.SetDateAndPosition(referenceDate, activeProfile.AstrometrySettings.Latitude, activeProfile.AstrometrySettings.Longitude);
             dso.Refresh();
             return dso;

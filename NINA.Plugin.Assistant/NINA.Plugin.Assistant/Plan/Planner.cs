@@ -39,7 +39,7 @@ namespace Assistant.NINAPlugin.Plan {
         public AssistantPlan GetPlan(IPlanTarget previousPlanTarget) {
             Logger.Debug($"Scheduler: getting current plan for {Utils.FormatDateTimeFull(atTime)}");
 
-            bool emulatePlan = false;
+            bool emulatePlan = true;
             if (emulatePlan) {
                 Notification.ShowInformation("REMINDER: running plan emulation");
                 return new PlannerEmulator(atTime, activeProfile).GetPlan(previousPlanTarget);
