@@ -4,7 +4,6 @@ using NINA.Astrometry;
 using NINA.Core.Model;
 using NINA.Core.Model.Equipment;
 using NINA.Core.Utility;
-using NINA.Core.Utility.Notification;
 using NINA.Core.Utility.WindowService;
 using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
@@ -213,8 +212,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             InputCoordinates slewCoordinates = new InputCoordinates(planTarget.Coordinates);
             SequenceItem slewCenter;
 
-            isPlateSolve = false;
-            Notification.ShowInformation("REMINDER: center is disabled for slews");
+            //isPlateSolve = false;
+            //Notification.ShowInformation("REMINDER: center is disabled for slews");
 
             string with = isPlateSolve ? "with" : "without";
             Logger.Info($"Scheduler: slew ({with} center): {Utils.FormatCoordinates(planTarget.Coordinates)}");
