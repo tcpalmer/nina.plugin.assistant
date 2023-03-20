@@ -46,7 +46,7 @@ namespace Assistant.NINAPlugin.Util {
         }
 
         public static string FormatDateTimeFull(DateTime? dateTime) {
-            return dateTime == null ? "n/a" : String.Format("{0:MM/dd/yyyy HH:mm:ss zzzz}", dateTime);
+            return dateTime == null ? "n/a" : String.Format("{0:yyyy-MM-dd HH:mm:ss zzzz}", dateTime);
         }
 
         public static string FormatCoordinates(Coordinates coordinates) {

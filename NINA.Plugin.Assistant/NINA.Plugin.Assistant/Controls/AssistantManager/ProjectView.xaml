@@ -24,13 +24,24 @@
         <StackPanel Orientation="Horizontal">
             <Label
                 Margin="0,0,0,6"
+                VerticalAlignment="Center"
                 Content="Project:"
                 FontSize="18"
                 FontWeight="Bold" />
             <Label
                 Margin="0,0,0,6"
+                VerticalAlignment="Center"
                 Content="{Binding ProjectProxy.Project.Name}"
                 FontSize="18" />
+            <Path
+                Width="15"
+                Height="15"
+                Margin="6,0,3,6"
+                VerticalAlignment="Center"
+                Data="{Binding ProjectActive, Converter={StaticResource StatusConverter}}"
+                Fill="{Binding ProjectActive, Converter={StaticResource StatusMarkColorConverter}}"
+                Stretch="Uniform"
+                ToolTip="Project active for planner?" />
             <uc:DocumentationLink URL="target-management/projects.html" />
         </StackPanel>
         <StackPanel Orientation="Vertical">
@@ -179,7 +190,7 @@
             <TextBlock
                 MaxHeight="20"
                 Margin="3,3,0,0"
-                Text="{Binding ProjectProxy.Project.StartDate}"
+                Text="{Binding ProjectProxy.Project.StartDate, StringFormat='{}{0:yyyy-MM-dd}'}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
             <TextBlock
@@ -207,7 +218,7 @@
             <TextBlock
                 MaxHeight="20"
                 Margin="3,3,0,0"
-                Text="{Binding ProjectProxy.Project.EndDate}"
+                Text="{Binding ProjectProxy.Project.EndDate, StringFormat='{}{0:yyyy-MM-dd}'}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
         </UniformGrid>

@@ -76,7 +76,8 @@ namespace Assistant.NINAPlugin.Astrometry {
             sb.Append($"{observerInfo.Elevation.ToString("0.##", CultureInfo.InvariantCulture)}_");
             sb.Append($"{coordinates.RADegrees.ToString("0.000000", CultureInfo.InvariantCulture)}_");
             sb.Append($"{coordinates.Dec.ToString("0.000000", CultureInfo.InvariantCulture)}_");
-            sb.Append($"{coordinates.Epoch.ToString()}");
+            sb.Append($"{coordinates.Epoch}_");
+            sb.Append($"{horizonDefinition.GetCacheKey()}");
             return sb.ToString();
         }
     }

@@ -16,7 +16,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
     /// <summary>
     /// Extend TakeExposure so we can establish the association between an image id and the scheduler
-    /// exposure plan that initiated the exposure.  Works in conjunction with the provided IImageSaveWatcher.
+    /// exposure plan that initiated the exposure.  We also have a reference to the InstructionWrapper
+    /// that contains this so we can handle parent relationships.  Works in conjunction with the provided
+    /// IImageSaveWatcher.
     /// 
     /// This is far from ideal.  If the core TakeExposure instruction changes, we'd be doing something different
     /// until this code was updated.  Ideally, NINA would provide a way to track some metadata or id all the way
@@ -47,6 +49,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.exposureDatabaseId = exposureDatabaseId;
         }
 
+        public InstructionWrapper Wrapper { get; set; }
+
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
 
             var capture = new CaptureSequence() {
@@ -64,7 +68,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 imageParams = new PrepareImageParameters(true, true);
             }
 
-            var target = RetrieveTarget(this.Parent);
+            var target = RetrieveTarget(Wrapper.Parent);
 
             var exposureData = await imagingMediator.CaptureImage(capture, token, progress);
 
@@ -78,7 +82,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 imageData.MetaData.Target.Rotation = target.Rotation;
             }
 
-            ISequenceContainer parent = Parent;
+            ISequenceContainer parent = Wrapper.Parent;
             while (parent != null && !(parent is SequenceRootContainer)) {
                 parent = parent.Parent;
             }
@@ -86,7 +90,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 imageData.MetaData.Sequence.Title = item.SequenceTitle;
             }
 
-            // This is the only modification to TakeExposure.Execute()
+            // This is the only modification to TakeExposure.Execute() (plus the addition of the Wrapper as parent)
             imageSaveWatcher.WaitForExposure(imageData.MetaData.Image.Id, exposureDatabaseId);
 
             await imageSaveMediator.Enqueue(imageData, prepareTask, progress, token);

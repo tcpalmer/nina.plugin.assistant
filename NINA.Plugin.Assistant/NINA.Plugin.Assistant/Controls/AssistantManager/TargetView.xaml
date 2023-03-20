@@ -26,13 +26,24 @@
         <StackPanel Orientation="Horizontal">
             <Label
                 Margin="0,0,0,6"
+                VerticalAlignment="Center"
                 Content="Target:"
                 FontSize="18"
                 FontWeight="Bold" />
             <Label
                 Margin="0,0,0,6"
+                VerticalAlignment="Center"
                 Content="{Binding TargetProxy.Target.Name}"
                 FontSize="18" />
+            <Path
+                Width="15"
+                Height="15"
+                Margin="6,0,3,6"
+                VerticalAlignment="Center"
+                Data="{Binding TargetActive, Converter={StaticResource StatusConverter}}"
+                Fill="{Binding TargetActive, Converter={StaticResource StatusMarkColorConverter}}"
+                Stretch="Uniform"
+                ToolTip="Target active for planner?" />
             <uc:DocumentationLink URL="target-management/targets.html" />
         </StackPanel>
         <StackPanel Orientation="Horizontal">

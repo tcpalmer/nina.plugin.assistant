@@ -278,7 +278,14 @@ namespace Assistant.NINAPlugin.Sequencer {
         private void AddTakeExposure(IPlanExposure planExposure) {
             Logger.Info($"Scheduler: adding take exposure: {planExposure.FilterName}");
 
-            TakeExposure takeExposure = new AssistantTakeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM, ImageSaveWatcher, planExposure.DatabaseId);
+            AssistantTakeExposure takeExposure = new AssistantTakeExposure(profileService,
+                        cameraMediator,
+                        imagingMediator,
+                        imageSaveMediator,
+                        imageHistoryVM,
+                        ImageSaveWatcher,
+                        planExposure.DatabaseId);
+
             takeExposure.Name = nameof(TakeExposure);
             takeExposure.Category = INSTRUCTION_CATEGORY;
             takeExposure.Description = "";
@@ -291,7 +298,9 @@ namespace Assistant.NINAPlugin.Sequencer {
             takeExposure.Offset = GetOffset(planExposure.Offset);
             takeExposure.Binning = planExposure.BinningMode;
 
-            Add(new InstructionWrapper(monitor, planExposure.PlanId, takeExposure));
+            InstructionWrapper wrapper = new InstructionWrapper(monitor, planExposure.PlanId, takeExposure);
+            takeExposure.Wrapper = wrapper;
+            Add(wrapper);
         }
 
         private void AddWait(DateTime waitForTime, IPlanTarget planTarget) {

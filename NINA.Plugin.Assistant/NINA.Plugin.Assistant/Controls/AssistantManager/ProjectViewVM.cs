@@ -27,6 +27,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ProjectViewVM(AssistantManagerVM managerVM, IProfileService profileService, Project project) : base(profileService) {
             this.managerVM = managerVM;
             ProjectProxy = new ProjectProxy(project);
+            ProjectActive = ProjectProxy.Project.ActiveNowWithActiveTargets;
 
             InitializeRuleWeights(ProjectProxy.Proxy);
             InitializeCombos();
@@ -57,7 +58,19 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 ItemEdited = true;
             }
             else {
+                ProjectActive = ProjectProxy.Project.ActiveNowWithActiveTargets;
                 RaisePropertyChanged(nameof(ProjectProxy));
+            }
+        }
+
+        private bool projectActive;
+        public bool ProjectActive {
+            get {
+                return projectActive;
+            }
+            set {
+                projectActive = value;
+                RaisePropertyChanged(nameof(ProjectActive));
             }
         }
 
