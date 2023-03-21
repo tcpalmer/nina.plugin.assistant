@@ -7,11 +7,15 @@ using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
@@ -23,9 +27,15 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
             database = new AssistantDatabaseInteraction();
 
-            RefreshTableCommand = new RelayCommand(RefreshTable);
+            RefreshTableCommand = new AsyncCommand<bool>(() => RefreshTable());
             InitializeCriteria();
-            LoadRecords();
+
+            AcquiredImageCollection = new AcquiredImageCollection();
+            ItemsView = CollectionViewSource.GetDefaultView(AcquiredImageCollection);
+            ItemsView.SortDescriptions.Clear();
+            ItemsView.SortDescriptions.Add(new SortDescription("AcquiredDate", ListSortDirection.Descending));
+
+            _ = LoadRecords();
         }
 
         private void InitializeCriteria() {
@@ -59,7 +69,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
             set {
                 fromDate = value.Date;
                 RaisePropertyChanged(nameof(FromDate));
-                LoadRecords();
+                _ = LoadRecords();
             }
         }
 
@@ -69,7 +79,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
             set {
                 toDate = value.AddDays(1).Date.AddSeconds(-1);
                 RaisePropertyChanged(nameof(ToDate));
-                LoadRecords();
+                _ = LoadRecords();
             }
         }
 
@@ -94,7 +104,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
                 TargetChoices = GetTargetChoices(selectedProjectId);
                 RaisePropertyChanged(nameof(SelectedProjectId));
 
-                LoadRecords();
+                _ = LoadRecords();
             }
         }
 
@@ -136,64 +146,72 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
             set {
                 selectedTargetId = value;
                 RaisePropertyChanged(nameof(SelectedTargetId));
-                LoadRecords();
+                _ = LoadRecords();
             }
         }
 
         public ICommand RefreshTableCommand { get; private set; }
 
-        private void RefreshTable(object obj) {
+        private async Task<bool> RefreshTable() {
             SearchCriteraKey = null;
-            ItemsView = null;
-            LoadRecords();
+            InitializeCriteria();
+            await LoadRecords();
+            return true;
         }
 
-        /*
-         * TODO: Need to make this async but gets twisted up with critera property setters.  Poking around,
-         * looks like implementing a DataTrigger in the XAML and using UpdateSourceTrigger=PropertyChanged,
-         * perhaps on some aggregate property representing all the search criteria.
-         * 
-         * TODO: Be nice to also show a spinner when search is happening
-         */
+        private AcquiredImageCollection acquiredImageCollection;
+        public AcquiredImageCollection AcquiredImageCollection {
+            get => acquiredImageCollection;
+            set {
+                acquiredImageCollection = value;
+                RaisePropertyChanged(nameof(AcquiredImageCollection));
+            }
+        }
 
-        private void LoadRecords() {
-            if (FromDate == DateTime.MinValue || ToDate == DateTime.MinValue) {
-                return;
+        private static Dispatcher _dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
+
+        private async Task<bool> LoadRecords() {
+
+            if (AcquiredImageCollection == null || FromDate == DateTime.MinValue || ToDate == DateTime.MinValue) {
+                return true;
             }
 
             string newSearchCriteraKey = GetSearchCriteraKey();
             if (newSearchCriteraKey == SearchCriteraKey) {
-                return;
+                return true;
             }
 
-            SearchCriteraKey = newSearchCriteraKey;
-            var predicate = PredicateBuilder.New<AcquiredImage>();
+            await _dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => {
 
-            long from = AssistantDatabaseContext.DateTimeToUnixSeconds(FromDate);
-            long to = AssistantDatabaseContext.DateTimeToUnixSeconds(ToDate);
-            predicate = predicate.And(a => a.acquiredDate >= from);
-            predicate = predicate.And(a => a.acquiredDate <= to);
+                SearchCriteraKey = newSearchCriteraKey;
+                var predicate = PredicateBuilder.New<AcquiredImage>();
 
-            if (SelectedProjectId != 0) {
-                predicate = predicate.And(a => a.ProjectId == SelectedProjectId);
-            }
+                long from = AssistantDatabaseContext.DateTimeToUnixSeconds(FromDate);
+                long to = AssistantDatabaseContext.DateTimeToUnixSeconds(ToDate);
+                predicate = predicate.And(a => a.acquiredDate >= from);
+                predicate = predicate.And(a => a.acquiredDate <= to);
 
-            if (SelectedTargetId != 0) {
-                predicate = predicate.And(a => a.TargetId == SelectedTargetId);
-            }
+                if (SelectedProjectId != 0) {
+                    predicate = predicate.And(a => a.ProjectId == SelectedProjectId);
+                }
 
-            List<AcquiredImage> acquiredImages;
-            using (var context = database.GetContext()) {
-                acquiredImages = context.AcquiredImageSet.AsNoTracking().AsExpandable().Where(predicate).ToList();
-            }
+                if (SelectedTargetId != 0) {
+                    predicate = predicate.And(a => a.TargetId == SelectedTargetId);
+                }
 
-            List<AcquiredImageVM> acquiredImagesVM = new List<AcquiredImageVM>(acquiredImages.Count);
-            acquiredImages.ForEach(a => { acquiredImagesVM.Add(new AcquiredImageVM(a)); });
+                List<AcquiredImage> acquiredImages;
+                using (var context = database.GetContext()) {
+                    acquiredImages = context.AcquiredImageSet.AsNoTracking().AsExpandable().Where(predicate).ToList();
+                }
 
-            ItemsView = CollectionViewSource.GetDefaultView(acquiredImagesVM);
-            ItemsView.SortDescriptions.Add(new SortDescription("AcquiredDate", ListSortDirection.Descending));
+                AcquiredImageCollection.Clear();
+                acquiredImages.ForEach(a => { AcquiredImageCollection.Add(new AcquiredImageVM(a)); });
 
-            RaisePropertyChanged(nameof(ItemsView));
+                RaisePropertyChanged(nameof(AcquiredImageCollection));
+                RaisePropertyChanged(nameof(ItemsView));
+            }));
+
+            return true;
         }
 
         private string SearchCriteraKey;
@@ -218,9 +236,13 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
     }
 
-    public class AcquiredImageVM {
+    public class AcquiredImageCollection : ObservableCollection<AcquiredImageVM> { }
+
+    public class AcquiredImageVM : BaseINPC {
 
         private AcquiredImage acquiredImage;
+
+        public AcquiredImageVM() { }
 
         public AcquiredImageVM(AcquiredImage acquiredImage) {
             this.acquiredImage = acquiredImage;

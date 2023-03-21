@@ -19,7 +19,7 @@
             BorderThickness="1">
             <Grid
                 Width="350"
-                Margin="5,20,5,20"
+                Margin="5,20,5,12"
                 HorizontalAlignment="Left">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100" />
@@ -98,7 +98,7 @@
                     VerticalAlignment="Center"
                     Command="{Binding RefreshTableCommand}"
                     Style="{StaticResource BackgroundButton}"
-                    ToolTip="Refresh the table to show the latest images"
+                    ToolTip="Refresh the table to reflect external changes"
                     ToolTipService.ShowOnDisabled="True">
                     <Grid>
                         <Path
@@ -111,6 +111,14 @@
             </Grid>
         </Border>
 
+        <TextBlock
+            Grid.Row="4"
+            Grid.Column="0"
+            Margin="3,3,0,10"
+            FontSize="12"
+            FontStyle="Italic"
+            Text="Click the table headers to sort, select a row to show details" />
+
         <DataGrid
             Grid.Row="0"
             Height="350"
@@ -121,6 +129,7 @@
             CanUserSortColumns="True"
             HorizontalScrollBarVisibility="Disabled"
             IsReadOnly="True"
+            IsSynchronizedWithCurrentItem="False"
             ItemsSource="{Binding ItemsView}"
             RowHeight="25"
             SelectedItem="{Binding SelectedItem}"
@@ -135,6 +144,7 @@
                     <Setter Property="Margin" Value="5,3,5,3" />
                     <Setter Property="FontWeight" Value="Bold" />
                     <Setter Property="FontSize" Value="12" />
+                    <EventSetter Event="Click" Handler="columnHeader_Click" />
                 </Style>
             </DataGrid.ColumnHeaderStyle>
 
