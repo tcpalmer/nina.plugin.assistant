@@ -105,6 +105,39 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         }
 
         [Test]
+        public void testTargetNoExposurePlans() {
+            Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
+
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
+            Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
+            Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("Ha", 10, 0);
+            PlanMocks.AddMockPlanFilter(pt, pf);
+            PlanMocks.AddMockPlanTarget(pp1, pt);
+
+            pt = PlanMocks.GetMockPlanTarget("M31", TestUtil.M31);
+            PlanMocks.AddMockPlanTarget(pp1, pt);
+
+            List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
+            projects = new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object).FilterForIncomplete(projects);
+            Assert.IsNotNull(projects);
+            projects.Count.Should().Be(1);
+
+            IPlanProject pp = projects[0];
+            pp.Name.Should().Be("pp1");
+            pp.Rejected.Should().BeFalse();
+
+            IPlanTarget pt1 = pp.Targets[0];
+            pt1.Rejected.Should().BeFalse();
+            IPlanExposure pf1 = pt1.ExposurePlans[0];
+            pf1.Rejected.Should().BeFalse();
+
+            IPlanTarget pt2 = pp.Targets[1];
+            pt2.ExposurePlans.Count.Should().Be(0);
+            pt2.Rejected.Should().BeTrue();
+            pt2.RejectedReason.Should().Be(Reasons.TargetAllExposurePlans);
+        }
+
+        [Test]
         public void testFilterForVisibilityNeverRises() {
 
             // Southern hemisphere location and IC1805
