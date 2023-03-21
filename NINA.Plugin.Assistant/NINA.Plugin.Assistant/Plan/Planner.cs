@@ -415,19 +415,12 @@ namespace Assistant.NINAPlugin.Plan {
                         }
                     }
 
-                    // TODO: logic here isn't quite right called from FilterForIncomplete.  If you have:
-                    // - 1 project with 2 targets
-                    //   - target 1 is really incomplete
-                    //   - target 2 has all EPs as complete
-                    // then we're not marking T2 as complete (rejected)
-
                     if (targetRejected) {
                         SetRejected(planTarget, Reasons.TargetAllExposurePlans);
                     }
 
                     if (!planTarget.Rejected) {
                         projectRejected = false;
-                        break;
                     }
                 }
 
