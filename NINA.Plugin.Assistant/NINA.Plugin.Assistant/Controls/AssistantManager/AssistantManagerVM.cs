@@ -234,10 +234,29 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             TreeDataItem.VisitAll(existingItemRoot, i => { i.IsSelected = false; });
         }
 
+        public List<TreeDataItem> Refresh(List<TreeDataItem> rootList) {
+            if (rootList == RootProjectsList) {
+                RootProjectsList = LoadProjectsTree();
+                TreeDataItem.VisitAll(RootProjectsList[0], i => { i.IsExpanded = false; });
+                return RootProjectsList;
+            }
+
+            if (rootList == RootExposureTemplateList) {
+                RootExposureTemplateList = LoadExposureTemplateTree();
+                TreeDataItem.VisitAll(RootExposureTemplateList[0], i => { i.IsExpanded = false; });
+                return RootExposureTemplateList;
+            }
+
+            Logger.Warning("failed to determine the root list for scheduler manager");
+            return null;
+        }
+
         List<TreeDataItem> rootProjectsList;
         public List<TreeDataItem> RootProjectsList {
             get {
-                rootProjectsList = LoadProjectsTree();
+                if (rootProjectsList == null) {
+                    rootProjectsList = LoadProjectsTree();
+                }
                 return rootProjectsList;
             }
             set {
@@ -249,7 +268,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         List<TreeDataItem> rootExposureTemplateList;
         public List<TreeDataItem> RootExposureTemplateList {
             get {
-                rootExposureTemplateList = LoadExposureTemplateTree();
+                if (rootExposureTemplateList == null) {
+                    rootExposureTemplateList = LoadExposureTemplateTree();
+                }
                 return rootExposureTemplateList;
             }
             set {

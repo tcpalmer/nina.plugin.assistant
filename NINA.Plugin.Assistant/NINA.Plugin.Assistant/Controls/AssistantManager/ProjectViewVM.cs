@@ -190,6 +190,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private void PasteTarget(object obj) {
             managerVM.PasteTarget(ProjectProxy.Proxy);
+            ProjectActive = ProjectProxy.Project.ActiveNowWithActiveTargets;
         }
 
     }
