@@ -64,6 +64,22 @@
                                     Stretch="Uniform" />
                             </Grid>
                         </Button>
+                        <Button
+                            Width="25"
+                            Height="25"
+                            VerticalAlignment="Center"
+                            Command="{Binding RefreshCommand}"
+                            Style="{StaticResource BackgroundButton}"
+                            ToolTip="Refresh the tree"
+                            ToolTipService.ShowOnDisabled="True">
+                            <Grid>
+                                <Path
+                                    Margin="5"
+                                    Data="{StaticResource SS_RefreshSVG}"
+                                    Fill="{StaticResource ButtonForegroundBrush}"
+                                    Stretch="Uniform" />
+                            </Grid>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </Border>
