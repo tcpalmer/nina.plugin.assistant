@@ -506,6 +506,20 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        public Target ReloadTarget(Target reference) {
+            using (var context = new AssistantDatabaseInteraction().GetContext()) {
+                Target reloadedTarget = context.GetTargetByProject(reference.ProjectId, reference.Id);
+                if (reloadedTarget != null) {
+                    activeTreeDataItem.Data = reloadedTarget;
+                }
+                else {
+                    Notification.ShowError("Failed to reload target (see log for details)");
+                }
+
+                return reloadedTarget;
+            }
+        }
+
         public void AddNewExposureTemplate(TreeDataItem parentItem) {
             ProfileMeta profileMeta = (ProfileMeta)parentItem.Data;
 
