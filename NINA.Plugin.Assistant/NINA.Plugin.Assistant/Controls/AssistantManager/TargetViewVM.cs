@@ -44,6 +44,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             CancelCommand = new RelayCommand(Cancel);
             CopyCommand = new RelayCommand(Copy);
             DeleteCommand = new RelayCommand(Delete);
+            RefreshCommand = new RelayCommand(Refresh);
 
             ShowTargetImportViewCommand = new RelayCommand(ShowTargetImportViewCmd);
             AddExposurePlanCommand = new RelayCommand(AddExposurePlan);
@@ -188,6 +189,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand CancelCommand { get; private set; }
         public ICommand CopyCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }
+        public ICommand RefreshCommand { get; private set; }
 
         public ICommand SendCoordinatesToFramingAssistantCommand { get; private set; }
         public ICommand ShowTargetImportViewCommand { get; private set; }
@@ -236,6 +238,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             string message = $"Delete target '{TargetProxy.Target.Name}'?  This cannot be undone.";
             if (MyMessageBox.Show(message, "Delete Target?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
                 managerVM.DeleteTarget(TargetProxy.Proxy);
+            }
+        }
+
+        private void Refresh(object obj) {
+            Target target = managerVM.ReloadTarget(TargetProxy.Proxy);
+            if (target != null) {
+                TargetProxy = new TargetProxy(target);
+                TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
+                InitializeExposurePlans(TargetProxy.Proxy);
             }
         }
 

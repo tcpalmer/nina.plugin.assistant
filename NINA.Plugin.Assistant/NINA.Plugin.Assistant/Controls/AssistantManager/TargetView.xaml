@@ -356,11 +356,32 @@
             <uc:TargetImportView DataContext="{Binding TargetImportVM}" />
         </StackPanel>
 
-        <TextBlock
-            Margin="12,14,0,6"
-            FontSize="14"
-            FontWeight="Bold"
-            Text="Exposure Plans" />
+        <StackPanel Orientation="Horizontal">
+            <TextBlock
+                Margin="12,5,0,6"
+                VerticalAlignment="Center"
+                FontSize="14"
+                FontWeight="Bold"
+                Text="Exposure Plans" />
+            <Button
+                Width="16"
+                Height="16"
+                Margin="12,5,0,6"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Right"
+                Command="{Binding RefreshCommand}"
+                IsEnabled="{Binding ShowEditView, Converter={StaticResource InverseBooleanConverter}}"
+                Style="{StaticResource BackgroundButton}"
+                ToolTip="Refresh exposure plans"
+                ToolTipService.ShowOnDisabled="True">
+                <Grid>
+                    <Path
+                        Data="{StaticResource SS_RefreshSVG}"
+                        Fill="{StaticResource ButtonForegroundBrush}"
+                        Stretch="Uniform" />
+                </Grid>
+            </Button>
+        </StackPanel>
         <Button
             Width="25"
             Height="25"
@@ -551,7 +572,7 @@
 
                 <DataGridTemplateColumn Width="*" CanUserSort="False">
                     <DataGridTemplateColumn.Header>
-                        <TextBlock Text="Acquired" ToolTip="Number of images acquired to date (cannot be edited)" />
+                        <TextBlock Text="Acquired" ToolTip="Number of images acquired to date (read only)" />
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
