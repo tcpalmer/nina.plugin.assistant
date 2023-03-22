@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Controls.AcquiredImages;
 using Assistant.NINAPlugin.Controls.AssistantManager;
 using Assistant.NINAPlugin.Controls.PlanPreview;
+using Assistant.NINAPlugin.Database;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
 using NINA.Plugin;
@@ -60,7 +61,7 @@ namespace Assistant.NINAPlugin {
                 Directory.CreateDirectory(PLUGIN_HOME);
             }
 
-            // TODO: backup database at the start of each NINA run, only keep 10 copies
+            AssistantDatabaseInteraction.BackupDatabase();
         }
 
         private AssistantManagerVM assistantManagerVM;
