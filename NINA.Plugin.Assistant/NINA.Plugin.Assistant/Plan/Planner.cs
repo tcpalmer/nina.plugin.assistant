@@ -318,6 +318,16 @@ namespace Assistant.NINAPlugin.Plan {
         /// Determine the time window for the selected target.  The start time is basically ASAP but the end time
         /// needs to be chosen carefully since that's the point at which the planner will be called again to
         /// select the next (same or different) target.
+        /// 
+        /// There are a number of future events that might be of interest in determining the stop time:
+        /// - Hard stop time for the target
+        /// - Current time plus the minimum imaging time for the target
+        /// - Twilight level change events
+        /// - The visibility (or meridian window) start time of other potential targets
+        /// 
+        /// At this point, there's no need to over-optimize this.  For now, we'll just let it use now plus minimum
+        /// imaging time.  That should work well unless people set that too high.  In fact, maybe the property
+        /// needs to be renamed so it's role here is obvious.
         /// </summary>
         /// <param name="atTime"></param>
         /// <param name="planTarget"></param>
@@ -328,21 +338,6 @@ namespace Assistant.NINAPlugin.Plan {
             // Set the stop time to the earliest of the target's hard stop time and the time when the
             // minimum time-on-target is achieved.  Rather than do a deeper analysis of which target
             // might be better to image next, we just let the planner run again and decide at that point.
-
-            // TODO: in reality, the above is probably not great.  What if another target would get w/in
-            // its meridian window before the current gets its minimum time?  Might have a hard time imaging
-            // that target if another is always before it.  But the above may work OK if the minimum time
-            // isn't too long.
-            // But, if the min time on target is longish, then you run the risk of deciding that a target
-            // can't be imaged since it can't get it's min time - when in fact it could get say 80% of it
-            // which might otherwise be wasted.
-
-            // TODO: create a set of events, sorted in order of soonest time:
-            // - upcoming hard stop for selected target (automatically = stop time if that's earliest)
-            // - upcoming twilight events
-            // - for all potentially visible other targets (omit selected): visibility begins (which would include meridian window)?
-            //    - can this be done during the visibility calc?
-            // We'll then be in a position to make a decent choice
 
             int minimumTimeOnTarget = planTarget.Project.MinimumTime;
             DateTime hardStopTime = hardStartTime.AddMinutes(minimumTimeOnTarget);
