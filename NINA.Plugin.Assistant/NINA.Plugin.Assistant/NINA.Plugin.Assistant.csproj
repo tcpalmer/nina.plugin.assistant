@@ -368,6 +368,11 @@
     </Compile>
     <Compile Include="Controls\Utils\ExposureTemplateReconciliation.cs" />
     <Compile Include="Sequencer\AssistantTakeExposure.cs" />
+    <Compile Include="Sequencer\TargetSchedulerContainer\TargetSchedulerContainer.cs" />
+    <Compile Include="Sequencer\TargetSchedulerContainer\TargetSchedulerContainerStrategy.cs" />
+    <Compile Include="Sequencer\TargetSchedulerContainer\TargetSchedulerContainerView.xaml.cs">
+      <DependentUpon>TargetSchedulerContainerView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils\SequenceTargetParser.cs" />
     <Compile Include="Controls\ValidationRules\ValidationRules.cs" />
     <Compile Include="Database\AssistantDatabaseInteraction.cs" />
@@ -500,6 +505,10 @@
       <ContainsDesignTimeResources>true</ContainsDesignTimeResources>
     </Page>
     <Page Include="Sequencer\AssistantInstructionTemplate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Sequencer\TargetSchedulerContainer\TargetSchedulerContainerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

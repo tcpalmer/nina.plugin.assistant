@@ -30,8 +30,8 @@ namespace Assistant.NINAPlugin.Plan {
             AssistantPlan plan;
 
             switch (CallNumber) {
-                //case 1: plan = WaitForTime(DateTime.Now.AddSeconds(30)); break;
-                case 1: plan = Plan1(); break;
+                case 1: plan = WaitForTime(DateTime.Now.AddSeconds(10)); break;
+                case 2: plan = Plan1(); break;
                 //case 2: plan = Plan2(); break;
                 default: return null;
             }

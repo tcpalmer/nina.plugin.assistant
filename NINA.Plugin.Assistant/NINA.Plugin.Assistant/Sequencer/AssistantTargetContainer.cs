@@ -4,6 +4,7 @@ using NINA.Astrometry;
 using NINA.Core.Model;
 using NINA.Core.Model.Equipment;
 using NINA.Core.Utility;
+using NINA.Core.Utility.Notification;
 using NINA.Core.Utility.WindowService;
 using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
@@ -32,7 +33,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public readonly static string INSTRUCTION_CATEGORY = "Scheduler";
 
-        private readonly AssistantInstruction parentInstruction;
+        private readonly AssistantInstruction TargetSchedulerInstruction;
         private readonly IProfileService profileService;
         private readonly IList<IDateTimeProvider> dateTimeProviders;
         private readonly ITelescopeMediator telescopeMediator;
@@ -78,7 +79,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             Description = "";
             Category = "Assistant";
 
-            this.parentInstruction = parentInstruction;
+            this.TargetSchedulerInstruction = parentInstruction;
             this.profileService = profileService;
             this.dateTimeProviders = dateTimeProviders;
             this.telescopeMediator = telescopeMediator;
@@ -144,6 +145,28 @@ namespace Assistant.NINAPlugin.Sequencer {
         public override Task Interrupt() {
             Logger.Warning("AssistantTargetContainer: interrupt");
             return base.Interrupt();
+        }
+
+        public static TargetSchedulerContainer RetrieveTargetSchedulerContainer(ISequenceContainer parent) {
+            if (parent != null) {
+
+                var container = parent as AssistantTargetContainer;
+                if (container != null) {
+                    return ((AssistantTargetContainer)container).TargetSchedulerInstruction.TargetSchedulerContainer;
+                }
+                /*
+                 container = parent as TargetSchedulerContainer;
+                if (container != null) {
+                    return container;
+                }*/
+                else {
+                    return RetrieveTargetSchedulerContainer(parent.Parent);
+                }
+            }
+            else {
+                Notification.ShowError("Failed to find Target Scheduler Container");
+                throw new SequenceEntityFailedException("Failed to find Target Scheduler Container");
+            }
         }
 
         private void AddEndTimeTrigger(IPlanTarget planTarget) {
@@ -308,8 +331,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private int GetExposureCount() {
-            parentInstruction.TotalExposureCount++;
-            return parentInstruction.TotalExposureCount;
+            TargetSchedulerInstruction.TotalExposureCount++;
+            return TargetSchedulerInstruction.TotalExposureCount;
         }
 
         private FilterInfo LookupFilter(string filterName) {
@@ -331,8 +354,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         // IDeepSkyObjectContainer behavior, defer to parent
-        public InputTarget Target { get => parentInstruction.Target; set { } }
-        public NighttimeData NighttimeData => parentInstruction.NighttimeData;
+        public InputTarget Target { get => TargetSchedulerInstruction.Target; set { } }
+        public NighttimeData NighttimeData => TargetSchedulerInstruction.NighttimeData;
     }
 
     public class InstructionWrapper : SequenceItem {
@@ -358,6 +381,9 @@ namespace Assistant.NINAPlugin.Sequencer {
                 Monitor.ItemStart(PlanItemId, Name);
                 Instruction.Execute(progress, token).Wait();
                 Monitor.ItemFinish(PlanItemId, Name);
+
+                TargetSchedulerContainer container = AssistantTargetContainer.RetrieveTargetSchedulerContainer(Parent);
+                container.RunTriggers();
             }
             catch (Exception ex) {
                 throw ex;

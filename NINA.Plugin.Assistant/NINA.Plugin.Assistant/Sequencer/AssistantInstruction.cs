@@ -1,11 +1,11 @@
-﻿using Assistant.NINAPlugin.Astrometry;
-using Assistant.NINAPlugin.Plan;
+﻿using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
 using NINA.Astrometry;
 using NINA.Astrometry.Interfaces;
 using NINA.Core.Model;
 using NINA.Core.Utility;
+using NINA.Core.Utility.Notification;
 using NINA.Core.Utility.WindowService;
 using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
@@ -51,6 +51,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly INighttimeCalculator nighttimeCalculator;
         private readonly IWindowServiceFactory windowServiceFactory;
 
+        public TargetSchedulerContainer TargetSchedulerContainer;
         public int TotalExposureCount { get; set; }
 
         [ImportingConstructor]
@@ -95,7 +96,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             //ErrorBehavior = InstructionErrorBehavior.SkipInstructionSetOnError;
 
             TotalExposureCount = -1;
-            ClearTarget();
         }
 
         public AssistantInstruction(AssistantInstruction cloneMe) : this(
@@ -138,6 +138,23 @@ namespace Assistant.NINAPlugin.Sequencer {
             StatusMonitor.PropertyChanged += StatusMonitor_PropertyChanged;
         }
 
+        public override void AfterParentChanged() {
+            if (Parent == null) {
+                base.AfterParentChanged();
+                return;
+            }
+
+            if (Parent.GetType() != typeof(TargetSchedulerContainer)) {
+                // Ideally we'd block the Add but not clear how
+                Notification.ShowError("Target Scheduler instruction can only be added to a Target Scheduler Container.");
+                base.AfterParentChanged();
+                return;
+            }
+
+            TargetSchedulerContainer = Parent as TargetSchedulerContainer;
+            base.AfterParentChanged();
+        }
+
         public override void ResetProgress() {
             Logger.Debug("Scheduler instruction: ResetProgress");
             StatusMonitor.Reset();
@@ -178,7 +195,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     try {
                         IPlanTarget planTarget = plan.PlanTarget;
                         Logger.Info($"Scheduler: starting execution of plan target: {planTarget.Name}");
-                        SetTarget(atTime, planTarget);
+                        TargetSchedulerContainer.SetTarget(atTime, planTarget);
                         StatusMonitor.BeginTarget(planTarget);
 
                         // Create a container for this target, add the instructions, and execute
@@ -195,7 +212,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         throw new SequenceEntityFailedException($"Scheduler: exception executing plan: {ex.Message}", ex);
                     }
                     finally {
-                        ClearTarget();
+                        TargetSchedulerContainer.ClearTarget();
                         StatusMonitor.EndTarget();
                     }
                 }
@@ -251,72 +268,14 @@ namespace Assistant.NINAPlugin.Sequencer {
             return i.Count == 0;
         }
 
-        private void SetTarget(DateTime atTime, IPlanTarget planTarget) {
-            IProfile activeProfile = profileService.ActiveProfile;
-            DateTime referenceDate = NighttimeCalculator.GetReferenceDate(atTime);
-            CustomHorizon customHorizon = GetCustomHorizon(activeProfile, planTarget.Project);
-
-            InputTarget inputTarget = new InputTarget(
-                Angle.ByDegree(activeProfile.AstrometrySettings.Latitude),
-                Angle.ByDegree(activeProfile.AstrometrySettings.Longitude),
-                customHorizon);
-
-            inputTarget.DeepSkyObject = GetDeepSkyObject(referenceDate, activeProfile, planTarget, customHorizon);
-            inputTarget.TargetName = planTarget.Name;
-            inputTarget.InputCoordinates = new InputCoordinates(planTarget.Coordinates);
-            inputTarget.Rotation = planTarget.Rotation;
-            Target = inputTarget;
-
-            ProjectTargetDisplay = $"{planTarget.Project.Name} / {planTarget.Name}";
-            CoordinatesDisplay = $"{inputTarget.InputCoordinates.RAHours}h  {inputTarget.InputCoordinates.RAMinutes}m  {inputTarget.InputCoordinates.RASeconds}s   " +
-                                $"{inputTarget.InputCoordinates.DecDegrees}°  {inputTarget.InputCoordinates.DecMinutes}'  {inputTarget.InputCoordinates.DecSeconds}\",   " +
-                                $"Rotation {planTarget.Rotation}°";
-            StopAtDisplay = $"{planTarget.EndTime:HH:mm:ss}";
-
-            Task.Run(() => NighttimeData = nighttimeCalculator.Calculate(referenceDate)).Wait();
-
-            RaisePropertyChanged(nameof(ProjectTargetDisplay));
-            RaisePropertyChanged(nameof(CoordinatesDisplay));
-            RaisePropertyChanged(nameof(StopAtDisplay));
-            RaisePropertyChanged(nameof(NighttimeData));
-            RaisePropertyChanged(nameof(Target));
-        }
-
-        private void ClearTarget() {
-            Target = null;
-            ProjectTargetDisplay = "";
-            CoordinatesDisplay = "";
-            StopAtDisplay = "";
-
-            RaisePropertyChanged(nameof(ProjectTargetDisplay));
-            RaisePropertyChanged(nameof(CoordinatesDisplay));
-            RaisePropertyChanged(nameof(StopAtDisplay));
-            RaisePropertyChanged(nameof(NighttimeData));
-            RaisePropertyChanged(nameof(Target));
-        }
-
-        private DeepSkyObject GetDeepSkyObject(DateTime referenceDate, IProfile activeProfile, IPlanTarget planTarget, CustomHorizon customHorizon) {
-            DeepSkyObject dso = new DeepSkyObject(string.Empty, planTarget.Coordinates, null, customHorizon);
-            dso.Name = planTarget.Name;
-            dso.SetDateAndPosition(referenceDate, activeProfile.AstrometrySettings.Latitude, activeProfile.AstrometrySettings.Longitude);
-            dso.Refresh();
-            return dso;
-        }
-
-        private CustomHorizon GetCustomHorizon(IProfile activeProfile, IPlanProject project) {
-            CustomHorizon customHorizon = project.UseCustomHorizon && activeProfile.AstrometrySettings.Horizon != null ?
-                activeProfile.AstrometrySettings.Horizon :
-                HorizonDefinition.GetConstantHorizon(project.MinimumAltitude);
-            return customHorizon;
-        }
-
         private void StatusMonitor_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             RaisePropertyChanged(nameof(StatusMonitor));
             RaisePropertyChanged(nameof(StatusItemList));
         }
 
-        public InputTarget Target { get; private set; }
-        public NighttimeData NighttimeData { get; private set; }
+        public InputTarget Target { get => TargetSchedulerContainer.Target; }
+        public NighttimeData NighttimeData { get => TargetSchedulerContainer.NighttimeData; }
+
         public string ProjectTargetDisplay { get; private set; }
         public string CoordinatesDisplay { get; private set; }
         public string StopAtDisplay { get; private set; }
