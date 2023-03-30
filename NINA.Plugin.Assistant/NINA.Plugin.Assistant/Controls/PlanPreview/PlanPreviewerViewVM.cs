@@ -133,9 +133,9 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                     return;
                 }
 
-                List<AssistantPlan> assistantPlans = Planner.GetPerfectPlan(atDateTime, profileService, projects);
+                List<SchedulerPlan> assistantPlans = Planner.GetPerfectPlan(atDateTime, profileService, projects);
 
-                foreach (AssistantPlan plan in assistantPlans) {
+                foreach (SchedulerPlan plan in assistantPlans) {
                     TreeViewItem planItem = new TreeViewItem();
 
                     if (plan.WaitForNextTargetTime != null) {
@@ -228,7 +228,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
             throw new Exception($"failed to get profile for ID={profileId}");
         }
 
-        private string GetTargetLabel(AssistantPlan plan) {
+        private string GetTargetLabel(SchedulerPlan plan) {
             string label = $"{plan.PlanTarget.Project.Name} / {plan.PlanTarget.Name}";
             return $"{label} - start: {Utils.FormatDateTimeFull(plan.TimeInterval.StartTime)} stop: {Utils.FormatDateTimeFull(plan.TimeInterval.EndTime)}";
         }

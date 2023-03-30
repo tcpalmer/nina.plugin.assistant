@@ -25,14 +25,14 @@ namespace Assistant.NINAPlugin.Plan {
             this.profileService = profileService;
         }
 
-        public AssistantPlan GetPlan(IPlanTarget previousPlanTarget) {
+        public SchedulerPlan GetPlan(IPlanTarget previousPlanTarget) {
             CallNumber++;
-            AssistantPlan plan;
+            SchedulerPlan plan;
 
             switch (CallNumber) {
-                //case 1: plan = WaitForTime(DateTime.Now.AddSeconds(30)); break;
-                case 1: plan = Plan1(); break;
-                //case 2: plan = Plan2(); break;
+                case 1: plan = WaitForTime(DateTime.Now.AddSeconds(10)); break;
+                case 2: plan = Plan1(); break;
+                case 3: plan = Plan2(); break;
                 default: return null;
             }
 
@@ -40,11 +40,11 @@ namespace Assistant.NINAPlugin.Plan {
             return plan;
         }
 
-        private AssistantPlan WaitForTime(DateTime waitFor) {
-            return new AssistantPlan(waitFor);
+        private SchedulerPlan WaitForTime(DateTime waitFor) {
+            return new SchedulerPlan(waitFor);
         }
 
-        private AssistantPlan Plan1() {
+        private SchedulerPlan Plan1() {
             DateTime endTime = atTime.AddMinutes(5);
             TimeInterval timeInterval = new TimeInterval(atTime, endTime);
 
@@ -58,11 +58,11 @@ namespace Assistant.NINAPlugin.Plan {
             IPlanTarget planTarget = GetBasePlanTarget("T01", planProject, Cp5n5);
             planTarget.EndTime = endTime;
 
-            IPlanExposure lum = GetExposurePlan("Lum", 8, null, null, 3, 14);
-            lum.ReadoutMode = 1;
-            IPlanExposure red = GetExposurePlan("R", 8, null, null, 3, 15);
-            IPlanExposure grn = GetExposurePlan("G", 8, null, null, 3, 16);
-            IPlanExposure blu = GetExposurePlan("B", 8, null, null, 3, 17);
+            IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3, 14);
+            lum.ReadoutMode = 0;
+            IPlanExposure red = GetExposurePlan("R", 4, null, null, 3, 15);
+            IPlanExposure grn = GetExposurePlan("G", 4, null, null, 3, 16);
+            IPlanExposure blu = GetExposurePlan("B", 4, null, null, 3, 17);
             planTarget.ExposurePlans.Add(lum);
             planTarget.ExposurePlans.Add(red);
             planTarget.ExposurePlans.Add(grn);
@@ -79,6 +79,7 @@ namespace Assistant.NINAPlugin.Plan {
             instructions.Add(new PlanTakeExposure(red));
             instructions.Add(new PlanTakeExposure(red));
             instructions.Add(new PlanTakeExposure(red));
+            /*
             instructions.Add(new PlanSwitchFilter(grn));
             instructions.Add(new PlanTakeExposure(grn));
             instructions.Add(new PlanTakeExposure(grn));
@@ -87,13 +88,15 @@ namespace Assistant.NINAPlugin.Plan {
             instructions.Add(new PlanTakeExposure(blu));
             instructions.Add(new PlanTakeExposure(blu));
             instructions.Add(new PlanTakeExposure(blu));
-            //instructions.Add(new PlanSwitchFilter(lum));
-            //instructions.Add(new PlanTakeExposure(lum));
+            instructions.Add(new PlanSwitchFilter(lum));
+            instructions.Add(new PlanTakeExposure(lum));
+            */
 
-            return new AssistantPlan(planTarget, timeInterval, instructions);
+
+            return new SchedulerPlan(planTarget, timeInterval, instructions);
         }
 
-        private AssistantPlan Plan2() {
+        private SchedulerPlan Plan2() {
             DateTime endTime = atTime.AddMinutes(5);
             TimeInterval timeInterval = new TimeInterval(atTime, endTime);
 
@@ -107,11 +110,11 @@ namespace Assistant.NINAPlugin.Plan {
             IPlanTarget planTarget = GetBasePlanTarget("T02", planProject, Cp1525);
             planTarget.EndTime = endTime;
 
-            IPlanExposure lum = GetExposurePlan("Lum", 8, null, null, 3, 101);
-            lum.ReadoutMode = 1;
-            IPlanExposure red = GetExposurePlan("R", 8, null, null, 3, 102);
-            IPlanExposure grn = GetExposurePlan("G", 8, null, null, 3, 103);
-            IPlanExposure blu = GetExposurePlan("B", 8, null, null, 3, 104);
+            IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3, 101);
+            lum.ReadoutMode = 0;
+            IPlanExposure red = GetExposurePlan("R", 4, null, null, 3, 102);
+            IPlanExposure grn = GetExposurePlan("G", 4, null, null, 3, 103);
+            IPlanExposure blu = GetExposurePlan("B", 4, null, null, 3, 104);
             planTarget.ExposurePlans.Add(lum);
             planTarget.ExposurePlans.Add(red);
             planTarget.ExposurePlans.Add(grn);
@@ -131,10 +134,10 @@ namespace Assistant.NINAPlugin.Plan {
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
 
-            return new AssistantPlan(planTarget, timeInterval, instructions);
+            return new SchedulerPlan(planTarget, timeInterval, instructions);
         }
 
-        private AssistantPlan Plan3() {
+        private SchedulerPlan Plan3() {
 
             DateTime endTime = atTime.AddMinutes(5);
             TimeInterval timeInterval = new TimeInterval(atTime, endTime);
@@ -182,7 +185,7 @@ namespace Assistant.NINAPlugin.Plan {
             //instructions.Add(new PlanTakeExposure(blu));
             //instructions.Add(new PlanTakeExposure(blu));
 
-            return new AssistantPlan(planTarget, timeInterval, instructions);
+            return new SchedulerPlan(planTarget, timeInterval, instructions);
         }
 
         private IPlanExposure GetExposurePlan(string name, int exposure, int? gain, int? offset, int desired, int databaseId) {

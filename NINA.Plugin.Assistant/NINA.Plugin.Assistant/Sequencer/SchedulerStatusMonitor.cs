@@ -6,9 +6,9 @@ using System.Text;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
-    public class AssistantStatusMonitor : BaseINPC {
+    public class SchedulerStatusMonitor : BaseINPC {
 
-        public AssistantStatusMonitor() {
+        public SchedulerStatusMonitor() {
             StatusItemList.CollectionChanged += StatusItemList_CollectionChanged;
         }
 

@@ -386,8 +386,8 @@ namespace NINA.Plugin.Assistant.Test.Plan {
                 PlanMocks.GetMockPlanProject("pp2", ProjectState.Active).Object
             };
 
-            List<AssistantPlan> plans = Planner.GetPerfectPlan(atTime, profileMock.Object, projects);
-            foreach (AssistantPlan plan in plans) {
+            List<SchedulerPlan> plans = Planner.GetPerfectPlan(atTime, profileMock.Object, projects);
+            foreach (SchedulerPlan plan in plans) {
                 TestContext.WriteLine("PLAN -----------------------------------------------------");
                 TestContext.WriteLine(plan.PlanSummary());
             }

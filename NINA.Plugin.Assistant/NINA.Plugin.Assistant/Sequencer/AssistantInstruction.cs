@@ -1,32 +1,8 @@
-﻿using Assistant.NINAPlugin.Astrometry;
-using Assistant.NINAPlugin.Plan;
-using Assistant.NINAPlugin.Util;
-using Newtonsoft.Json;
-using NINA.Astrometry;
-using NINA.Astrometry.Interfaces;
-using NINA.Core.Model;
-using NINA.Core.Utility;
-using NINA.Core.Utility.WindowService;
-using NINA.Equipment.Interfaces;
-using NINA.Equipment.Interfaces.Mediator;
-using NINA.PlateSolving.Interfaces;
-using NINA.Profile.Interfaces;
-using NINA.Sequencer.SequenceItem;
-using NINA.Sequencer.Utility.DateTimeProvider;
-using NINA.Sequencer.Validations;
-using NINA.WPF.Base.Interfaces.Mediator;
-using NINA.WPF.Base.Interfaces.ViewModel;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.ComponentModel.Composition;
-using System.Runtime.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
+﻿namespace Assistant.NINAPlugin.Sequencer {
 
-namespace Assistant.NINAPlugin.Sequencer {
+    public class AssistantInstruction { }
 
+    /*
     [ExportMetadata("Name", "Target Scheduler")]
     [ExportMetadata("Description", "Run the Target Scheduler")]
     [ExportMetadata("Icon", "Scheduler.SchedulerSVG")]
@@ -182,7 +158,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         StatusMonitor.BeginTarget(planTarget);
 
                         // Create a container for this target, add the instructions, and execute
-                        AssistantTargetContainer targetContainer = GetTargetContainer(previousPlanTarget, plan, StatusMonitor);
+                        PlanTargetContainer targetContainer = GetTargetContainer(previousPlanTarget, plan, StatusMonitor);
                         targetContainer.Execute(progress, token).Wait();
                         previousPlanTarget = planTarget;
                     }
@@ -212,8 +188,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             Logger.Debug("Scheduler: done waiting for next target");
         }
 
-        private AssistantTargetContainer GetTargetContainer(IPlanTarget previousPlanTarget, AssistantPlan plan, AssistantStatusMonitor monitor) {
-            AssistantTargetContainer targetContainer = new AssistantTargetContainer(this, profileService, dateTimeProviders, telescopeMediator,
+        private PlanTargetContainer GetTargetContainer(IPlanTarget previousPlanTarget, AssistantPlan plan, AssistantStatusMonitor monitor) {
+            PlanTargetContainer targetContainer = new PlanTargetContainer(this, profileService, dateTimeProviders, telescopeMediator,
                 rotatorMediator, guiderMediator, cameraMediator, imagingMediator, imageSaveMediator,
                 imageHistoryVM, filterWheelMediator, domeMediator, domeFollower,
                 plateSolverFactory, windowServiceFactory, previousPlanTarget, plan, monitor);
@@ -321,4 +297,5 @@ namespace Assistant.NINAPlugin.Sequencer {
         public string CoordinatesDisplay { get; private set; }
         public string StopAtDisplay { get; private set; }
     }
+    */
 }

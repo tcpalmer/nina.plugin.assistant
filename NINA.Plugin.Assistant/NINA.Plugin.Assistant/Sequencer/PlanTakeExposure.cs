@@ -24,15 +24,17 @@ namespace Assistant.NINAPlugin.Sequencer {
     /// until this code was updated.  Ideally, NINA would provide a way to track some metadata or id all the way
     /// through the image pipeline to the save operation.
     /// </summary>
-    public class AssistantTakeExposure : TakeExposure {
+    public class PlanTakeExposure : TakeExposure {
 
         private IImagingMediator imagingMediator;
         private IImageSaveMediator imageSaveMediator;
         private IImageHistoryVM imageHistoryVM;
         private IImageSaveWatcher imageSaveWatcher;
+        private IDeepSkyObjectContainer dsoContainer;
         private int exposureDatabaseId;
 
-        public AssistantTakeExposure(
+        public PlanTakeExposure(
+            IDeepSkyObjectContainer dsoContainer,
             IProfileService profileService,
             ICameraMediator cameraMediator,
             IImagingMediator imagingMediator,
@@ -41,6 +43,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             IImageSaveWatcher imageSaveWatcher,
             int exposureDatabaseId) : base(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM) {
 
+            this.dsoContainer = dsoContainer;
+
             this.imagingMediator = imagingMediator;
             this.imageSaveMediator = imageSaveMediator;
             this.imageHistoryVM = imageHistoryVM;
@@ -48,8 +52,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.imageSaveWatcher = imageSaveWatcher;
             this.exposureDatabaseId = exposureDatabaseId;
         }
-
-        public InstructionWrapper Wrapper { get; set; }
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
 
@@ -68,7 +70,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 imageParams = new PrepareImageParameters(true, true);
             }
 
-            var target = RetrieveTarget(Wrapper.Parent);
+            var target = RetrieveTarget(dsoContainer);
 
             var exposureData = await imagingMediator.CaptureImage(capture, token, progress);
 
@@ -82,7 +84,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 imageData.MetaData.Target.Rotation = target.Rotation;
             }
 
-            ISequenceContainer parent = Wrapper.Parent;
+            ISequenceContainer parent = dsoContainer.Parent;
             while (parent != null && !(parent is SequenceRootContainer)) {
                 parent = parent.Parent;
             }
