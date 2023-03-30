@@ -347,6 +347,7 @@
     <Compile Include="Plan\Scoring\Rules\PercentCompleteRuleTest.cs" />
     <Compile Include="Plan\Scoring\Rules\ProjectPriorityRuleTest.cs" />
     <Compile Include="Plan\Scoring\Rules\ScoringRuleTest.cs" />
+    <Compile Include="Plan\Scoring\Rules\SettingSoonestRuleTest.cs" />
     <Compile Include="Plan\Scoring\Rules\TargetSwitchPenaltyRuleTest.cs" />
     <Compile Include="Plan\Scoring\ScoringEngineTest.cs" />
     <Compile Include="Plan\TimeIntervalTest.cs" />

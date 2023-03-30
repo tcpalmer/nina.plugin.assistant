@@ -21,6 +21,9 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
 
             map.Should().ContainKey(PercentCompleteRule.RULE_NAME);
             map[PercentCompleteRule.RULE_NAME].Name.Should().Be(PercentCompleteRule.RULE_NAME);
+
+            map.Should().ContainKey(SettingSoonestRule.RULE_NAME);
+            map[SettingSoonestRule.RULE_NAME].Name.Should().Be(SettingSoonestRule.RULE_NAME);
         }
     }
 

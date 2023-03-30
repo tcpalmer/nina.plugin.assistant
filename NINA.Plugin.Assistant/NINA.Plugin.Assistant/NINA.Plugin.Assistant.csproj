@@ -367,6 +367,7 @@
       <DependentUpon>SVGDictionary.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Utils\ExposureTemplateReconciliation.cs" />
+    <Compile Include="Plan\Scoring\Rules\SettingSoonestRule.cs" />
     <Compile Include="Sequencer\PlanTakeExposure.cs" />
     <Compile Include="Sequencer\PlanTargetContainerStrategy.cs" />
     <Compile Include="Sequencer\SchedulerTestCondition.cs" />

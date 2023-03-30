@@ -16,7 +16,7 @@
 
     <StackPanel Margin="0,20,0,20" Orientation="Horizontal">
         <Border
-            Height="600"
+            Height="620"
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1">
             <StackPanel Orientation="Vertical">
@@ -25,7 +25,7 @@
             </StackPanel>
         </Border>
         <Border
-            Height="600"
+            Height="620"
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1"
             Visibility="{Binding ShowProfileView}">
@@ -34,7 +34,7 @@
             </StackPanel>
         </Border>
         <Border
-            Height="600"
+            Height="620"
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1"
             Visibility="{Binding ShowProjectView}">
@@ -43,7 +43,7 @@
             </StackPanel>
         </Border>
         <Border
-            Height="600"
+            Height="620"
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1"
             Visibility="{Binding ShowTargetView}">
@@ -52,7 +52,7 @@
             </StackPanel>
         </Border>
         <Border
-            Height="600"
+            Height="620"
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1"
             Visibility="{Binding ShowExposureTemplateProfileView}">
@@ -61,7 +61,7 @@
             </StackPanel>
         </Border>
         <Border
-            Height="600"
+            Height="620"
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1"
             Visibility="{Binding ShowExposureTemplateView}">
