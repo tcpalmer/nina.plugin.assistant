@@ -52,7 +52,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public AssistantTreeViewVM ExposureTemplatesTreeViewVM {
-            get => new AssistantTreeViewVM(this, profileService, "Exposure Templates", RootExposureTemplateList, 180);
+            get => new AssistantTreeViewVM(this, profileService, "Exposure Templates", RootExposureTemplateList, 210);
         }
 
         private Visibility showProfileView = Visibility.Hidden;
