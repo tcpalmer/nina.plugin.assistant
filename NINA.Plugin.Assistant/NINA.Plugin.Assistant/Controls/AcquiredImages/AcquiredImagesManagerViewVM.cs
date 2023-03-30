@@ -21,11 +21,11 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
     public class AcquiredImagesManagerViewVM : BaseVM {
 
-        private AssistantDatabaseInteraction database;
+        private SchedulerDatabaseInteraction database;
 
         public AcquiredImagesManagerViewVM(IProfileService profileService) : base(profileService) {
 
-            database = new AssistantDatabaseInteraction();
+            database = new SchedulerDatabaseInteraction();
 
             RefreshTableCommand = new AsyncCommand<bool>(() => RefreshTable());
             InitializeCriteria();
@@ -186,8 +186,8 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
                 SearchCriteraKey = newSearchCriteraKey;
                 var predicate = PredicateBuilder.New<AcquiredImage>();
 
-                long from = AssistantDatabaseContext.DateTimeToUnixSeconds(FromDate);
-                long to = AssistantDatabaseContext.DateTimeToUnixSeconds(ToDate);
+                long from = SchedulerDatabaseContext.DateTimeToUnixSeconds(FromDate);
+                long to = SchedulerDatabaseContext.DateTimeToUnixSeconds(ToDate);
                 predicate = predicate.And(a => a.acquiredDate >= from);
                 predicate = predicate.And(a => a.acquiredDate <= to);
 
@@ -247,7 +247,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         public AcquiredImageVM(AcquiredImage acquiredImage) {
             this.acquiredImage = acquiredImage;
 
-            AssistantDatabaseInteraction database = new AssistantDatabaseInteraction();
+            SchedulerDatabaseInteraction database = new SchedulerDatabaseInteraction();
             using (var context = database.GetContext()) {
                 Project project = context.ProjectSet.AsNoTracking().Where(p => p.Id == acquiredImage.ProjectId).FirstOrDefault();
                 ProjectName = project?.Name;

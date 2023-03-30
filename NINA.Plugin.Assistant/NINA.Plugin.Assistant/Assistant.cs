@@ -61,7 +61,7 @@ namespace Assistant.NINAPlugin {
                 Directory.CreateDirectory(PLUGIN_HOME);
             }
 
-            AssistantDatabaseInteraction.BackupDatabase();
+            SchedulerDatabaseInteraction.BackupDatabase();
         }
 
         private AssistantManagerVM assistantManagerVM;

@@ -27,7 +27,7 @@ namespace Assistant.NINAPlugin.Controls.Util {
 
             Dictionary<string, List<string>> missing = new Dictionary<string, List<string>>();
 
-            using (var context = new AssistantDatabaseInteraction().GetContext()) {
+            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 foreach (ProfileMeta profileMeta in profileService.Profiles) {
                     IProfile profile = ProfileLoader.Load(profileService, profileMeta);
                     string profileId = profile.Id.ToString();

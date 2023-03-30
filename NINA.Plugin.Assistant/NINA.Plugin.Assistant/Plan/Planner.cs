@@ -487,8 +487,8 @@ namespace Assistant.NINAPlugin.Plan {
         private List<IPlanProject> GetProjects(DateTime atTime) {
 
             try {
-                AssistantDatabaseInteraction database = new AssistantDatabaseInteraction();
-                AssistantPlanLoader loader = new AssistantPlanLoader();
+                SchedulerDatabaseInteraction database = new SchedulerDatabaseInteraction();
+                SchedulerPlanLoader loader = new SchedulerPlanLoader();
                 return loader.LoadActiveProjects(database.GetContext(), activeProfile, atTime);
             }
             catch (Exception ex) {

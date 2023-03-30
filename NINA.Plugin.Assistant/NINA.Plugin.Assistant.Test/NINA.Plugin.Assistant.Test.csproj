@@ -335,7 +335,7 @@
     <Compile Include="Astrometry\Solver\TestAltitudeRefiner.cs" />
     <Compile Include="Astrometry\TargetCircumstancesTest.cs" />
     <Compile Include="Astrometry\TestUtil.cs" />
-    <Compile Include="Database\AssistantDatabaseTest.cs" />
+    <Compile Include="Database\SchedulerDatabaseTest.cs" />
     <Compile Include="Database\DbPlayTest.cs" />
     <Compile Include="Database\GenerateTestDatabase.cs" />
     <Compile Include="Database\Schema\AssistantPreferencesTest.cs" />

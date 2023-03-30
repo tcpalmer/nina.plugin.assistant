@@ -20,7 +20,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
     [TestFixture]
     public class GenerateTestDatabase {
 
-        private AssistantDatabaseInteraction db;
+        private SchedulerDatabaseInteraction db;
 
         [SetUp]
         public void SetUp() {
@@ -518,10 +518,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
             }
         }
 
-        private AssistantDatabaseInteraction GetDatabase() {
+        private SchedulerDatabaseInteraction GetDatabase() {
             var testDbPath = Path.Combine(TestContext.CurrentContext.TestDirectory, @"schedulerdb.sqlite");
             TestContext.WriteLine($"DB PATH: {testDbPath}");
-            return new AssistantDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
+            return new SchedulerDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
         }
 
         private ExposurePlan GetExposurePlan(string profileId, ExposureTemplate exposureTemplate, int desired, int accepted, int exposure) {
@@ -538,7 +538,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
             List<Project> projects = null;
             List<ExposureTemplate> exposureTemplates = null;
 
-            AssistantDatabaseInteraction database = GetDatabase();
+            SchedulerDatabaseInteraction database = GetDatabase();
             using (var context = database.GetContext()) {
                 try {
                     projects = context.GetActiveProjects(profileId, atTime);

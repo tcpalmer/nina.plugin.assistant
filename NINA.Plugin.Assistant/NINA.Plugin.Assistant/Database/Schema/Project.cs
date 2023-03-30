@@ -104,53 +104,53 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         [NotMapped]
         public DateTime CreateDate {
-            get { return AssistantDatabaseContext.UnixSecondsToDateTime(createDate); }
+            get { return SchedulerDatabaseContext.UnixSecondsToDateTime(createDate); }
             set {
-                createDate = AssistantDatabaseContext.DateTimeToUnixSeconds(value);
+                createDate = SchedulerDatabaseContext.DateTimeToUnixSeconds(value);
                 RaisePropertyChanged(nameof(CreateDate));
             }
         }
 
         [NotMapped]
         public DateTime? ActiveDate {
-            get { return AssistantDatabaseContext.UnixSecondsToDateTime(activeDate); }
+            get { return SchedulerDatabaseContext.UnixSecondsToDateTime(activeDate); }
             set {
-                activeDate = AssistantDatabaseContext.DateTimeToUnixSeconds(value);
+                activeDate = SchedulerDatabaseContext.DateTimeToUnixSeconds(value);
                 RaisePropertyChanged(nameof(ActiveDate));
             }
         }
 
         [NotMapped]
         public DateTime? InactiveDate {
-            get { return AssistantDatabaseContext.UnixSecondsToDateTime(inactiveDate); }
+            get { return SchedulerDatabaseContext.UnixSecondsToDateTime(inactiveDate); }
             set {
-                inactiveDate = AssistantDatabaseContext.DateTimeToUnixSeconds(value);
+                inactiveDate = SchedulerDatabaseContext.DateTimeToUnixSeconds(value);
                 RaisePropertyChanged(nameof(InactiveDate));
             }
         }
 
         [NotMapped]
         public DateTime? StartDate {
-            get { return AssistantDatabaseContext.UnixSecondsToDateTime(startDate); }
+            get { return SchedulerDatabaseContext.UnixSecondsToDateTime(startDate); }
             set {
                 if (value != null) {
                     value = ((DateTime)value).Date;
                 }
 
-                startDate = AssistantDatabaseContext.DateTimeToUnixSeconds(value);
+                startDate = SchedulerDatabaseContext.DateTimeToUnixSeconds(value);
                 RaisePropertyChanged(nameof(StartDate));
             }
         }
 
         [NotMapped]
         public DateTime? EndDate {
-            get { return AssistantDatabaseContext.UnixSecondsToDateTime(endDate); }
+            get { return SchedulerDatabaseContext.UnixSecondsToDateTime(endDate); }
             set {
                 if (value != null) {
                     value = ((DateTime)value).Date.AddDays(1).AddSeconds(-1);
                 }
 
-                endDate = AssistantDatabaseContext.DateTimeToUnixSeconds(value);
+                endDate = SchedulerDatabaseContext.DateTimeToUnixSeconds(value);
                 RaisePropertyChanged(nameof(EndDate));
             }
         }

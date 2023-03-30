@@ -19,10 +19,10 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
 
     public class PlanPreviewerViewVM : BaseVM {
 
-        private AssistantDatabaseInteraction database;
+        private SchedulerDatabaseInteraction database;
 
         public PlanPreviewerViewVM(IProfileService profileService) : base(profileService) {
-            database = new AssistantDatabaseInteraction();
+            database = new SchedulerDatabaseInteraction();
             profileService.ProfileChanged += ProfileService_ProfileChanged;
             profileService.Profiles.CollectionChanged += ProfileService_ProfileChanged;
 
@@ -122,7 +122,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                 DateTime atDateTime = PlanDate.Date.AddHours(PlanHours).AddMinutes(PlanMinutes).AddSeconds(PlanSeconds);
                 Logger.Debug($"running plan preview for {Utils.FormatDateTimeFull(atDateTime)}, profileId={SelectedProfileId}");
 
-                List<IPlanProject> projects = new AssistantPlanLoader().LoadActiveProjects(database.GetContext(), GetProfile(SelectedProfileId), atDateTime);
+                List<IPlanProject> projects = new SchedulerPlanLoader().LoadActiveProjects(database.GetContext(), GetProfile(SelectedProfileId), atDateTime);
 
                 if (projects == null) {
                     Logger.Debug($"no active projects for {atDateTime}, profileId={SelectedProfileId}");

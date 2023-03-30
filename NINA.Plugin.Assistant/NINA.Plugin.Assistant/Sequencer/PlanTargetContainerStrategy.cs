@@ -40,7 +40,6 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             instructionMonitorQueue = new Queue<InstructionMonitor>();
             foreach (IPlanInstruction instruction in schedulerPlan.PlanInstructions) {
-                Logger.Debug($"PLAN INSTRUCTION: {instruction.GetType()}");
 
                 if (instruction is PlanMessage) {
                     continue;
@@ -130,10 +129,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        public void RunTriggers() {
-            Logger.Debug("In My Strategy: RunTriggers");
-        }
-
         private void TeardownBlock(ISequenceContainer context) {
             foreach (var item in context.GetItemsSnapshot()) {
                 item.SequenceBlockTeardown();
@@ -187,7 +182,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         private async Task RunTriggers(ISequenceContainer container, ISequenceItem previousItem, ISequenceItem nextItem, IProgress<ApplicationStatus> progress, CancellationToken token) {
 
             // Run the triggers attached here
-            Logger.Debug($"PlanTargetContainerStrategy: RunTriggers, next is {nextItem?.GetType()}");
             var triggerable = container as ITriggerable;
             if (triggerable != null) {
                 await triggerable.RunTriggers(previousItem, nextItem, progress, token);
@@ -200,7 +194,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private async Task AncestorsRunTriggers(ISequenceContainer container, ISequenceItem previousItem, ISequenceItem nextItem, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Debug($"PlanTargetContainerStrategy: AncestorsRunTriggers, next is {nextItem?.GetType()}");
             var triggerable = container as ITriggerable;
             if (triggerable != null) {
                 await triggerable.RunTriggers(previousItem, nextItem, progress, token);
@@ -214,7 +207,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         private async Task RunTriggersAfter(ISequenceContainer container, ISequenceItem previousItem, ISequenceItem nextItem, IProgress<ApplicationStatus> progress, CancellationToken token) {
 
             // Run the triggers attached here
-            Logger.Debug($"PlanTargetContainerStrategy: RunTriggersAfter, previous is {previousItem?.GetType()}");
             var triggerable = container as ITriggerable;
             if (triggerable != null) {
                 await triggerable.RunTriggersAfter(previousItem, nextItem, progress, token);
@@ -227,7 +219,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private async Task AncestorsRunTriggersAfter(ISequenceContainer container, ISequenceItem previousItem, ISequenceItem nextItem, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Debug($"PlanTargetContainerStrategy: AncestorsRunTriggersAfter, previous is {previousItem?.GetType()}");
             var triggerable = container as ITriggerable;
             if (triggerable != null) {
                 await triggerable.RunTriggersAfter(previousItem, nextItem, progress, token);

@@ -15,13 +15,13 @@ using System.Text;
 namespace NINA.Plugin.Assistant.Test.Database {
 
     [TestFixture]
-    public class AssistantDatabaseTest {
+    public class SchedulerDatabaseTest {
 
         private const string profileId = "01234567-abcd-9876-gfed-0123456abcde";
         private static DateTime markDate = DateTime.Now.Date;
 
         private string testDatabasePath;
-        private AssistantDatabaseInteraction db;
+        private SchedulerDatabaseInteraction db;
 
         [OneTimeSetUp]
         public void OneTimeSetUp() {
@@ -31,7 +31,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 File.Delete(testDatabasePath);
             }
 
-            db = new AssistantDatabaseInteraction(string.Format(@"Data Source={0};", testDatabasePath));
+            db = new SchedulerDatabaseInteraction(string.Format(@"Data Source={0};", testDatabasePath));
             Assert.NotNull(db);
             LoadTestDatabase();
         }

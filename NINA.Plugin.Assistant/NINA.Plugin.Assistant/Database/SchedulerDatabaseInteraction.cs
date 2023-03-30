@@ -7,29 +7,29 @@ using System.Linq;
 
 namespace Assistant.NINAPlugin.Database {
 
-    public class AssistantDatabaseInteraction {
+    public class SchedulerDatabaseInteraction {
 
         private static readonly string DATABASE_BASENAME = "schedulerdb";
         private static readonly string DATABASE_SUFFIX = "sqlite";
         private static readonly string DATABASE_FILENAME = $"{DATABASE_BASENAME}.{DATABASE_SUFFIX}";
         private static readonly int DATABASE_BACKUPS = 3;
 
-        static AssistantDatabaseInteraction() {
+        static SchedulerDatabaseInteraction() {
             DllLoader.LoadDll(Path.Combine("SQLite", "SQLite.Interop.dll"));
         }
 
         private string connectionString;
 
-        public AssistantDatabaseInteraction()
+        public SchedulerDatabaseInteraction()
             : this(string.Format(@"Data Source={0};", Environment.ExpandEnvironmentVariables($@"{AssistantPlugin.PLUGIN_HOME}\{DATABASE_FILENAME}"))) {
         }
 
-        public AssistantDatabaseInteraction(string connectionString) {
+        public SchedulerDatabaseInteraction(string connectionString) {
             this.connectionString = connectionString;
         }
 
-        public AssistantDatabaseContext GetContext() {
-            return new AssistantDatabaseContext(connectionString);
+        public SchedulerDatabaseContext GetContext() {
+            return new SchedulerDatabaseContext(connectionString);
         }
 
         public static void BackupDatabase() {
