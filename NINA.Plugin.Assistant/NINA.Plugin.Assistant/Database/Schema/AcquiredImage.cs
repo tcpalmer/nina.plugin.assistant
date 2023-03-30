@@ -20,8 +20,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         [NotMapped]
         public DateTime AcquiredDate {
-            get { return AssistantDatabaseContext.UnixSecondsToDateTime(acquiredDate); }
-            set { acquiredDate = AssistantDatabaseContext.DateTimeToUnixSeconds(value); }
+            get { return SchedulerDatabaseContext.UnixSecondsToDateTime(acquiredDate); }
+            set { acquiredDate = SchedulerDatabaseContext.DateTimeToUnixSeconds(value); }
         }
 
         [NotMapped]

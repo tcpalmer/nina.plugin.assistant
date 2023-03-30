@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Assistant.NINAPlugin.Plan {
 
-    public class AssistantPlan {
+    public class SchedulerPlan {
         public string PlanId { get; private set; }
         public TimeInterval TimeInterval { get; private set; }
         public IPlanTarget PlanTarget { get; private set; }
@@ -18,7 +18,7 @@ namespace Assistant.NINAPlugin.Plan {
         public DateTime? WaitForNextTargetTime { get; private set; }
         public bool IsEmulator { get; set; }
 
-        public AssistantPlan(IPlanTarget planTarget, TimeInterval timeInterval, List<IPlanInstruction> planInstructions) {
+        public SchedulerPlan(IPlanTarget planTarget, TimeInterval timeInterval, List<IPlanInstruction> planInstructions) {
             this.PlanId = Guid.NewGuid().ToString();
             this.PlanTarget = planTarget;
             this.TimeInterval = timeInterval;
@@ -26,7 +26,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.WaitForNextTargetTime = null;
         }
 
-        public AssistantPlan(DateTime waitForNextTargetTime) {
+        public SchedulerPlan(DateTime waitForNextTargetTime) {
             this.PlanId = Guid.NewGuid().ToString();
             this.WaitForNextTargetTime = waitForNextTargetTime;
         }

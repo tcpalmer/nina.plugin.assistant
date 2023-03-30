@@ -93,7 +93,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private void UpdateDatabase(IPlanTarget planTarget, string filterName, bool accepted, ImageSavedEventArgs msg, int? imageId) {
 
-            using (var context = new AssistantDatabaseInteraction().GetContext()) {
+            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 using (var transaction = context.Database.BeginTransaction()) {
 
                     try {

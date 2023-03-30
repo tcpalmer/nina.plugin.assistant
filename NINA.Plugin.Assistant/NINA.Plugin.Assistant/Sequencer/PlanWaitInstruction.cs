@@ -9,13 +9,13 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
-    public class AssistantWaitInstruction : SequenceItem {
+    public class PlanWaitInstruction : SequenceItem {
 
         private DateTime waitUntil;
         private IGuiderMediator guiderMediator;
         private ITelescopeMediator telescopeMediator;
 
-        public AssistantWaitInstruction(IGuiderMediator guiderMediator, ITelescopeMediator telescopeMediator, DateTime waitUntil) {
+        public PlanWaitInstruction(IGuiderMediator guiderMediator, ITelescopeMediator telescopeMediator, DateTime waitUntil) {
             this.waitUntil = waitUntil;
             this.guiderMediator = guiderMediator;
             this.telescopeMediator = telescopeMediator;

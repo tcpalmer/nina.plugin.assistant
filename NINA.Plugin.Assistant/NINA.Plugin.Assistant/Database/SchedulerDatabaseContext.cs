@@ -12,7 +12,7 @@ using System.Resources;
 
 namespace Assistant.NINAPlugin.Database {
 
-    public class AssistantDatabaseContext : DbContext {
+    public class SchedulerDatabaseContext : DbContext {
 
         public DbSet<Project> ProjectSet { get; set; }
         public DbSet<RuleWeight> RuleWeightSet { get; set; }
@@ -22,7 +22,7 @@ namespace Assistant.NINAPlugin.Database {
         public DbSet<AcquiredImage> AcquiredImageSet { get; set; }
         public DbSet<ImageData> ImageDataSet { get; set; }
 
-        public AssistantDatabaseContext(string connectionString) : base(new SQLiteConnection() { ConnectionString = connectionString }, true) {
+        public SchedulerDatabaseContext(string connectionString) : base(new SQLiteConnection() { ConnectionString = connectionString }, true) {
             Configuration.LazyLoadingEnabled = false;
         }
 
@@ -36,7 +36,7 @@ namespace Assistant.NINAPlugin.Database {
             modelBuilder.Configurations.Add(new ExposureTemplateConfiguration());
             modelBuilder.Configurations.Add(new AcquiredImageConfiguration());
 
-            var sqi = new CreateOrMigrateDatabaseInitializer<AssistantDatabaseContext>();
+            var sqi = new CreateOrMigrateDatabaseInitializer<SchedulerDatabaseContext>();
             System.Data.Entity.Database.SetInitializer(sqi);
         }
 
@@ -405,7 +405,7 @@ namespace Assistant.NINAPlugin.Database {
          */
 
         private class CreateOrMigrateDatabaseInitializer<TContext> : CreateDatabaseIfNotExists<TContext>,
-                IDatabaseInitializer<TContext> where TContext : AssistantDatabaseContext {
+                IDatabaseInitializer<TContext> where TContext : SchedulerDatabaseContext {
 
             void IDatabaseInitializer<TContext>.InitializeDatabase(TContext context) {
 

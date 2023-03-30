@@ -36,10 +36,10 @@ namespace Assistant.NINAPlugin.Plan {
             }
         }
 
-        public AssistantPlan GetPlan(IPlanTarget previousPlanTarget) {
+        public SchedulerPlan GetPlan(IPlanTarget previousPlanTarget) {
             Logger.Debug($"Scheduler: getting current plan for {Utils.FormatDateTimeFull(atTime)}");
 
-            bool emulatePlan = false;
+            bool emulatePlan = true;
             if (emulatePlan) {
                 Notification.ShowInformation("REMINDER: running plan emulation");
                 return new PlannerEmulator(atTime, activeProfile).GetPlan(previousPlanTarget);
@@ -62,7 +62,7 @@ namespace Assistant.NINAPlugin.Plan {
 
                     DateTime? waitForVisibleNow = CheckForVisibleNow(projects);
                     if (waitForVisibleNow != null) {
-                        return new AssistantPlan((DateTime)waitForVisibleNow);
+                        return new SchedulerPlan((DateTime)waitForVisibleNow);
                     }
 
                     ScoringEngine scoringEngine = new ScoringEngine(activeProfile, atTime, previousPlanTarget);
@@ -74,7 +74,7 @@ namespace Assistant.NINAPlugin.Plan {
 
                         TimeInterval targetWindow = GetTargetTimeWindow(atTime, planTarget);
                         List<IPlanInstruction> planInstructions = PlanInstructions(planTarget, previousPlanTarget, targetWindow);
-                        return new AssistantPlan(planTarget, targetWindow, planInstructions);
+                        return new SchedulerPlan(planTarget, targetWindow, planInstructions);
                     }
                     else {
                         Logger.Debug("Scheduler Planner: no target selected");
@@ -108,13 +108,13 @@ namespace Assistant.NINAPlugin.Plan {
         /// <param name="profileService"></param>
         /// <param name="projects"></param>
         /// <returns>list</returns>
-        public static List<AssistantPlan> GetPerfectPlan(DateTime atTime, IProfileService profileService, List<IPlanProject> projects) {
-            List<AssistantPlan> plans = new List<AssistantPlan>();
+        public static List<SchedulerPlan> GetPerfectPlan(DateTime atTime, IProfileService profileService, List<IPlanProject> projects) {
+            List<SchedulerPlan> plans = new List<SchedulerPlan>();
 
             DateTime currentTime = atTime;
             IPlanTarget previousPlanTarget = null;
 
-            AssistantPlan plan;
+            SchedulerPlan plan;
             while ((plan = new Planner(currentTime, profileService, projects).GetPlan(previousPlanTarget)) != null) {
                 plans.Add(plan);
                 previousPlanTarget = plan.WaitForNextTargetTime != null ? null : plan.PlanTarget;
@@ -125,7 +125,7 @@ namespace Assistant.NINAPlugin.Plan {
             return plans;
         }
 
-        private static void PrepForNextRun(List<IPlanProject> projects, AssistantPlan plan) {
+        private static void PrepForNextRun(List<IPlanProject> projects, SchedulerPlan plan) {
 
             foreach (IPlanProject planProject in projects) {
                 planProject.Rejected = false;
@@ -143,7 +143,7 @@ namespace Assistant.NINAPlugin.Plan {
             }
         }
 
-        public static List<AssistantPlan> GetPerfectPlan(DateTime atTime, IProfileService profileService) {
+        public static List<SchedulerPlan> GetPerfectPlan(DateTime atTime, IProfileService profileService) {
             return GetPerfectPlan(atTime, profileService, null);
         }
 
@@ -487,8 +487,8 @@ namespace Assistant.NINAPlugin.Plan {
         private List<IPlanProject> GetProjects(DateTime atTime) {
 
             try {
-                AssistantDatabaseInteraction database = new AssistantDatabaseInteraction();
-                AssistantPlanLoader loader = new AssistantPlanLoader();
+                SchedulerDatabaseInteraction database = new SchedulerDatabaseInteraction();
+                SchedulerPlanLoader loader = new SchedulerPlanLoader();
                 return loader.LoadActiveProjects(database.GetContext(), activeProfile, atTime);
             }
             catch (Exception ex) {

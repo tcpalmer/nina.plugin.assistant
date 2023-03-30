@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
-    public class AssistantTargetEndTimeTrigger : SequenceTrigger {
+    public class SchedulerTargetEndTimeTrigger : SequenceTrigger {
 
         DateTime EndTime;
 
-        public AssistantTargetEndTimeTrigger(DateTime endTime) {
-            Name = nameof(AssistantTargetEndTimeTrigger);
+        public SchedulerTargetEndTimeTrigger(DateTime endTime) {
+            Name = nameof(SchedulerTargetEndTimeTrigger);
             Category = "Assistant";
             this.EndTime = endTime;
         }

@@ -2,6 +2,7 @@
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Plan.Scoring.Rules;
+using Assistant.NINAPlugin.Util;
 using Moq;
 using NINA.Plugin.Assistant.Test.Astrometry;
 using NINA.Plugin.Assistant.Test.Plan;
@@ -11,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity.Validation;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace NINA.Plugin.Assistant.Test.Database {
@@ -18,7 +20,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
     [TestFixture]
     public class GenerateTestDatabase {
 
-        private AssistantDatabaseInteraction db;
+        private SchedulerDatabaseInteraction db;
 
         [SetUp]
         public void SetUp() {
@@ -279,6 +281,235 @@ namespace NINA.Plugin.Assistant.Test.Database {
             }
         }
 
+
+        [Test]
+        [Ignore("")]
+        public void GenMessierMarathonForChris() {
+
+            // This is currently loading from target sequence files provided by Chris W.
+            // TODO: create another version to just add all targets to one project, set EPs to just 1 per
+
+            try {
+                using (var context = db.GetContext()) {
+                    DateTime atTime = new DateTime(2023, 1, 28);
+                    string profileId = "3c160865-776f-4f72-8a05-5964225ca0fa"; // Zim
+                    //string profileId = "1f78fa60-ab20-41af-9c17-a12016553007"; // Astroimaging Redcat 51 / ASI1600mm
+
+                    ExposureTemplate lrgbL = new ExposureTemplate(profileId, "LRGB L", "L");
+                    lrgbL.Offset = 10;
+                    lrgbL.TwilightLevel = 0;
+                    lrgbL.MoonAvoidanceEnabled = true;
+                    lrgbL.MoonAvoidanceSeparation = 120;
+                    lrgbL.MoonAvoidanceWidth = 7;
+                    ExposureTemplate lrgbR = new ExposureTemplate(profileId, "LRGB R", "R");
+                    lrgbR.Offset = 10;
+                    lrgbR.TwilightLevel = 0;
+                    lrgbR.MoonAvoidanceEnabled = true;
+                    lrgbR.MoonAvoidanceSeparation = 120;
+                    lrgbR.MoonAvoidanceWidth = 7;
+                    ExposureTemplate lrgbG = new ExposureTemplate(profileId, "LRGB G", "G");
+                    lrgbG.Offset = 10;
+                    lrgbG.TwilightLevel = 0;
+                    lrgbG.MoonAvoidanceEnabled = true;
+                    lrgbG.MoonAvoidanceSeparation = 120;
+                    lrgbG.MoonAvoidanceWidth = 7;
+                    ExposureTemplate lrgbB = new ExposureTemplate(profileId, "LRGB B", "B");
+                    lrgbB.Offset = 10;
+                    lrgbB.TwilightLevel = 0;
+                    lrgbB.MoonAvoidanceEnabled = true;
+                    lrgbB.MoonAvoidanceSeparation = 120;
+                    lrgbB.MoonAvoidanceWidth = 7;
+
+                    ExposureTemplate hsoH = new ExposureTemplate(profileId, "HSO H", "Ha");
+                    hsoH.Gain = 1750;
+                    hsoH.Offset = 10;
+                    hsoH.TwilightLevel = 0;
+                    hsoH.MoonAvoidanceEnabled = true;
+                    hsoH.MoonAvoidanceSeparation = 60;
+                    hsoH.MoonAvoidanceWidth = 7;
+                    ExposureTemplate hsoS = new ExposureTemplate(profileId, "HSO S", "SII");
+                    hsoS.Gain = 1750;
+                    hsoS.Offset = 10;
+                    hsoS.TwilightLevel = 0;
+                    hsoS.MoonAvoidanceEnabled = true;
+                    hsoS.MoonAvoidanceSeparation = 60;
+                    hsoS.MoonAvoidanceWidth = 7;
+                    ExposureTemplate hsoO = new ExposureTemplate(profileId, "HSO O", "OIII");
+                    hsoO.Gain = 1750;
+                    hsoO.Offset = 10;
+                    hsoO.TwilightLevel = 0;
+                    hsoO.MoonAvoidanceEnabled = true;
+                    hsoO.MoonAvoidanceSeparation = 60;
+                    hsoO.MoonAvoidanceWidth = 7;
+
+                    ExposureTemplate nbR = new ExposureTemplate(profileId, "NB R", "R");
+                    nbR.TwilightLevel = 0;
+                    nbR.MoonAvoidanceEnabled = true;
+                    nbR.MoonAvoidanceSeparation = 40;
+                    nbR.MoonAvoidanceWidth = 7;
+                    ExposureTemplate nbG = new ExposureTemplate(profileId, "NB G", "G");
+                    nbG.TwilightLevel = 0;
+                    nbG.MoonAvoidanceEnabled = true;
+                    nbG.MoonAvoidanceSeparation = 40;
+                    nbG.MoonAvoidanceWidth = 7;
+                    ExposureTemplate nbB = new ExposureTemplate(profileId, "NB B", "B");
+                    nbB.TwilightLevel = 0;
+                    nbB.MoonAvoidanceEnabled = true;
+                    nbB.MoonAvoidanceSeparation = 40;
+                    nbB.MoonAvoidanceWidth = 7;
+
+                    context.ExposureTemplateSet.Add(lrgbL);
+                    context.ExposureTemplateSet.Add(lrgbR);
+                    context.ExposureTemplateSet.Add(lrgbG);
+                    context.ExposureTemplateSet.Add(lrgbB);
+                    context.ExposureTemplateSet.Add(hsoH);
+                    context.ExposureTemplateSet.Add(hsoS);
+                    context.ExposureTemplateSet.Add(hsoO);
+                    context.ExposureTemplateSet.Add(nbR);
+                    context.ExposureTemplateSet.Add(nbG);
+                    context.ExposureTemplateSet.Add(nbB);
+
+                    context.SaveChanges();
+
+                    Project pLRGB = new Project(profileId);
+                    pLRGB.Name = "Messier Marathon: LRGB";
+                    pLRGB.Description = "";
+                    pLRGB.State = ProjectState.Active;
+                    pLRGB.ActiveDate = atTime.AddDays(-1);
+                    pLRGB.StartDate = atTime;
+                    pLRGB.EndDate = atTime.AddYears(10);
+                    pLRGB.MinimumTime = 30;
+                    pLRGB.MinimumAltitude = 0;
+                    pLRGB.UseCustomHorizon = false;
+                    pLRGB.HorizonOffset = 0;
+                    pLRGB.FilterSwitchFrequency = 0;
+                    pLRGB.DitherEvery = 0;
+                    pLRGB.EnableGrader = true;
+
+                    string dir = @"G:\Photography\Astrophotography\Notes\Target Scheduler\Messier Targets by Type\LRGB";
+                    var files = Directory.EnumerateFiles(dir).ToList();
+                    files.Sort((a, b) => {
+                        char[] trim = { 'M', ' ' };
+                        string aFileName = Path.GetFileNameWithoutExtension(a.Split(Path.DirectorySeparatorChar).Last().TrimStart(trim));
+                        string bFileName = Path.GetFileNameWithoutExtension(b.Split(Path.DirectorySeparatorChar).Last().TrimStart(trim));
+                        int aInt = int.Parse(aFileName);
+                        int bInt = int.Parse(bFileName);
+                        return aInt.CompareTo(bInt);
+                    });
+
+                    foreach (var fileName in files) {
+                        SequenceTarget sequenceTarget = SequenceTargetParser.GetSequenceTarget(fileName);
+                        Target target = new Target();
+                        target.Coordinates = sequenceTarget.GetCoordinates();
+                        target.Name = sequenceTarget.TargetName;
+                        target.Rotation = sequenceTarget.Rotation;
+
+                        TestContext.WriteLine($"TARGET: {target.Name}");
+
+                        ExposurePlan epL = new ExposurePlan(profileId);
+                        epL.ExposureTemplateId = lrgbL.Id;
+                        epL.Exposure = 120;
+                        epL.Desired = 20;
+                        ExposurePlan epR = new ExposurePlan(profileId);
+                        epR.ExposureTemplateId = lrgbR.Id;
+                        epR.Exposure = 120;
+                        epR.Desired = 20;
+                        ExposurePlan epG = new ExposurePlan(profileId);
+                        epG.ExposureTemplateId = lrgbG.Id;
+                        epG.Exposure = 120;
+                        epG.Desired = 20;
+                        ExposurePlan epB = new ExposurePlan(profileId);
+                        epB.ExposureTemplateId = lrgbB.Id;
+                        epB.Exposure = 120;
+                        epB.Desired = 20;
+
+                        target.ExposurePlans.Add(epL);
+                        target.ExposurePlans.Add(epR);
+                        target.ExposurePlans.Add(epG);
+                        target.ExposurePlans.Add(epB);
+
+                        pLRGB.Targets.Add(target);
+                    }
+
+                    context.ProjectSet.Add(pLRGB);
+
+                    Project pNB = new Project(profileId);
+                    pNB.Name = "Messier Marathon: NB";
+                    pNB.Description = "";
+                    pNB.State = ProjectState.Active;
+                    pNB.ActiveDate = atTime.AddDays(-1);
+                    pNB.StartDate = atTime;
+                    pNB.EndDate = atTime.AddYears(10);
+                    pNB.MinimumTime = 30;
+                    pNB.MinimumAltitude = 0;
+                    pNB.UseCustomHorizon = false;
+                    pNB.HorizonOffset = 0;
+                    pNB.FilterSwitchFrequency = 0;
+                    pNB.DitherEvery = 0;
+                    pNB.EnableGrader = true;
+
+                    dir = @"G:\Photography\Astrophotography\Notes\Target Scheduler\Messier Targets by Type\NB";
+                    files = Directory.EnumerateFiles(dir).ToList();
+                    files.Sort((a, b) => {
+                        char[] trim = { 'M', ' ' };
+                        string aFileName = Path.GetFileNameWithoutExtension(a.Split(Path.DirectorySeparatorChar).Last().TrimStart(trim));
+                        string bFileName = Path.GetFileNameWithoutExtension(b.Split(Path.DirectorySeparatorChar).Last().TrimStart(trim));
+                        int aInt = int.Parse(aFileName);
+                        int bInt = int.Parse(bFileName);
+                        return aInt.CompareTo(bInt);
+                    });
+
+                    foreach (var fileName in files) {
+                        SequenceTarget sequenceTarget = SequenceTargetParser.GetSequenceTarget(fileName);
+                        Target target = new Target();
+                        target.Coordinates = sequenceTarget.GetCoordinates();
+                        target.Name = sequenceTarget.TargetName;
+                        target.Rotation = sequenceTarget.Rotation;
+
+                        TestContext.WriteLine($"TARGET: {target.Name}");
+
+                        ExposurePlan epH = new ExposurePlan(profileId);
+                        epH.ExposureTemplateId = hsoH.Id;
+                        epH.Exposure = 300;
+                        epH.Desired = 10;
+                        ExposurePlan epS = new ExposurePlan(profileId);
+                        epS.ExposureTemplateId = hsoS.Id;
+                        epS.Exposure = 300;
+                        epS.Desired = 10;
+                        ExposurePlan epO = new ExposurePlan(profileId);
+                        epO.ExposureTemplateId = hsoO.Id;
+                        epO.Exposure = 300;
+                        epO.Desired = 10;
+
+                        target.ExposurePlans.Add(epH);
+                        target.ExposurePlans.Add(epS);
+                        target.ExposurePlans.Add(epO);
+
+                        pNB.Targets.Add(target);
+                    }
+
+                    context.ProjectSet.Add(pNB);
+
+                    context.SaveChanges();
+                }
+            }
+            catch (DbEntityValidationException e) {
+                StringBuilder sb = new StringBuilder();
+                foreach (var eve in e.EntityValidationErrors) {
+                    foreach (var dbeve in eve.ValidationErrors) {
+                        sb.Append(dbeve.ErrorMessage).Append("\n");
+                    }
+                }
+
+                TestContext.Error.WriteLine($"DB VALIDATION EXCEPTION: {sb}");
+                throw e;
+            }
+            catch (Exception e) {
+                TestContext.Error.WriteLine($"OTHER EXCEPTION: {e.Message}\n{e}");
+                throw e;
+            }
+        }
+
         private void SetDefaultRuleWeights(Project project) {
             Dictionary<string, IScoringRule> rules = ScoringRule.GetAllScoringRules();
             foreach (KeyValuePair<string, IScoringRule> entry in rules) {
@@ -287,10 +518,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
             }
         }
 
-        private AssistantDatabaseInteraction GetDatabase() {
-            var testDbPath = Path.Combine(TestContext.CurrentContext.TestDirectory, @"assistantdb.sqlite");
+        private SchedulerDatabaseInteraction GetDatabase() {
+            var testDbPath = Path.Combine(TestContext.CurrentContext.TestDirectory, @"schedulerdb.sqlite");
             TestContext.WriteLine($"DB PATH: {testDbPath}");
-            return new AssistantDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
+            return new SchedulerDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
         }
 
         private ExposurePlan GetExposurePlan(string profileId, ExposureTemplate exposureTemplate, int desired, int accepted, int exposure) {
@@ -307,7 +538,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
             List<Project> projects = null;
             List<ExposureTemplate> exposureTemplates = null;
 
-            AssistantDatabaseInteraction database = GetDatabase();
+            SchedulerDatabaseInteraction database = GetDatabase();
             using (var context = database.GetContext()) {
                 try {
                     projects = context.GetActiveProjects(profileId, atTime);

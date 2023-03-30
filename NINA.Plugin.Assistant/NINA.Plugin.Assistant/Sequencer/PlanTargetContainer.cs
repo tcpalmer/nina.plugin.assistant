@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
+using NINA.Core.Enum;
 using NINA.Core.Model;
 using NINA.Core.Model.Equipment;
 using NINA.Core.Utility;
@@ -16,6 +17,7 @@ using NINA.Sequencer.SequenceItem.FilterWheel;
 using NINA.Sequencer.SequenceItem.Imaging;
 using NINA.Sequencer.SequenceItem.Platesolving;
 using NINA.Sequencer.SequenceItem.Telescope;
+using NINA.Sequencer.Trigger;
 using NINA.Sequencer.Trigger.Guider;
 using NINA.Sequencer.Utility;
 using NINA.Sequencer.Utility.DateTimeProvider;
@@ -23,16 +25,17 @@ using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
-    public class AssistantTargetContainer : SequentialContainer, IDeepSkyObjectContainer {
+    public class PlanTargetContainer : SequenceContainer, IDeepSkyObjectContainer {
 
         public readonly static string INSTRUCTION_CATEGORY = "Scheduler";
 
-        private readonly AssistantInstruction parentInstruction;
+        private readonly TargetSchedulerContainer parentContainer;
         private readonly IProfileService profileService;
         private readonly IList<IDateTimeProvider> dateTimeProviders;
         private readonly ITelescopeMediator telescopeMediator;
@@ -49,14 +52,14 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IWindowServiceFactory windowServiceFactory;
 
         private readonly IPlanTarget previousPlanTarget;
-        private readonly AssistantPlan plan;
+        private readonly SchedulerPlan plan;
         private readonly IProfile activeProfile;
-        private AssistantStatusMonitor monitor;
+        private SchedulerStatusMonitor monitor;
 
         private IImageSaveWatcher ImageSaveWatcher;
 
-        public AssistantTargetContainer(
-                AssistantInstruction parentInstruction,
+        public PlanTargetContainer(
+                TargetSchedulerContainer parentContainer,
                 IProfileService profileService,
                 IList<IDateTimeProvider> dateTimeProviders,
                 ITelescopeMediator telescopeMediator,
@@ -72,13 +75,13 @@ namespace Assistant.NINAPlugin.Sequencer {
                 IPlateSolverFactory plateSolverFactory,
                 IWindowServiceFactory windowServiceFactory,
                 IPlanTarget previousPlanTarget,
-                AssistantPlan plan,
-                AssistantStatusMonitor monitor) : base() {
-            Name = nameof(AssistantTargetContainer);
+                SchedulerPlan plan,
+                SchedulerStatusMonitor monitor) : base(new PlanTargetContainerStrategy()) {
+            Name = nameof(PlanTargetContainer);
             Description = "";
             Category = "Assistant";
 
-            this.parentInstruction = parentInstruction;
+            this.parentContainer = parentContainer;
             this.profileService = profileService;
             this.dateTimeProviders = dateTimeProviders;
             this.telescopeMediator = telescopeMediator;
@@ -99,6 +102,9 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.plan = plan;
             this.activeProfile = profileService.ActiveProfile;
 
+            PlanTargetContainerStrategy containerStrategy = Strategy as PlanTargetContainerStrategy;
+            containerStrategy.SetContext(parentContainer, plan, monitor);
+
             Attempts = 1;
             ErrorBehavior = InstructionErrorBehavior.SkipInstructionSetOnError;
         }
@@ -114,6 +120,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 AddEndTimeTrigger(plan.PlanTarget);
                 AddDitherTrigger(plan.PlanTarget);
+                AddParentTriggers();
                 AddInstructions(plan);
 
                 ImageSaveWatcher.Start();
@@ -142,13 +149,13 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override Task Interrupt() {
-            Logger.Warning("AssistantTargetContainer: interrupt");
+            Logger.Warning("PlanTargetContainer: interrupt");
             return base.Interrupt();
         }
 
         private void AddEndTimeTrigger(IPlanTarget planTarget) {
             Logger.Info($"Scheduler: adding target end time trigger, run until: {Utils.FormatDateTimeFull(planTarget.EndTime)}");
-            Add(new AssistantTargetEndTimeTrigger(planTarget.EndTime));
+            Add(new SchedulerTargetEndTimeTrigger(planTarget.EndTime));
         }
 
         private void AddDitherTrigger(IPlanTarget planTarget) {
@@ -161,7 +168,24 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        private void AddInstructions(AssistantPlan plan) {
+        private void AddParentTriggers() {
+            if (parentContainer.Triggers.Count == 0) {
+                return;
+            }
+
+            // Clone the parent's triggers to this container so they can operate 'normally'
+            IList<ISequenceTrigger> localTriggers;
+            lock (parentContainer.lockObj) {
+                localTriggers = parentContainer.Triggers.ToArray();
+            }
+
+            foreach (var trigger in localTriggers) {
+                if (trigger.Status == SequenceEntityStatus.DISABLED) { continue; }
+                Add((ISequenceTrigger)trigger.Clone());
+            }
+        }
+
+        private void AddInstructions(SchedulerPlan plan) {
 
             /* TODO: since our determination of target visibility over the course of a night will not detect the
              * 'horizon tree gap' problem, we need to mitigate.
@@ -192,7 +216,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     continue;
                 }
 
-                if (instruction is PlanTakeExposure) {
+                if (instruction is Plan.PlanTakeExposure) {
                     AddTakeExposure(instruction.planExposure);
                     continue;
                 }
@@ -241,7 +265,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             slewCenter.Description = "";
             slewCenter.ErrorBehavior = this.ErrorBehavior;
             slewCenter.Attempts = this.Attempts;
-            Add(new InstructionWrapper(monitor, planTarget.PlanId, slewCenter));
+            Add(slewCenter);
         }
 
         private void AddSwitchFilter(IPlanExposure planExposure) {
@@ -255,7 +279,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             switchFilter.Attempts = this.Attempts;
 
             switchFilter.Filter = LookupFilter(planExposure.FilterName);
-            Add(new InstructionWrapper(monitor, planExposure.PlanId, switchFilter));
+            Add(switchFilter);
         }
 
         private void AddSetReadoutMode(IPlanExposure planExposure) {
@@ -272,13 +296,14 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             setReadoutMode.Mode = (short)readoutMode;
 
-            Add(new InstructionWrapper(monitor, planExposure.PlanId, setReadoutMode));
+            Add(setReadoutMode);
         }
 
         private void AddTakeExposure(IPlanExposure planExposure) {
             Logger.Info($"Scheduler: adding take exposure: {planExposure.FilterName}");
 
-            AssistantTakeExposure takeExposure = new AssistantTakeExposure(profileService,
+            PlanTakeExposure takeExposure = new PlanTakeExposure(parentContainer,
+                        profileService,
                         cameraMediator,
                         imagingMediator,
                         imageSaveMediator,
@@ -298,18 +323,16 @@ namespace Assistant.NINAPlugin.Sequencer {
             takeExposure.Offset = GetOffset(planExposure.Offset);
             takeExposure.Binning = planExposure.BinningMode;
 
-            InstructionWrapper wrapper = new InstructionWrapper(monitor, planExposure.PlanId, takeExposure);
-            takeExposure.Wrapper = wrapper;
-            Add(wrapper);
+            Add(takeExposure);
         }
 
         private void AddWait(DateTime waitForTime, IPlanTarget planTarget) {
-            Add(new InstructionWrapper(monitor, planTarget.PlanId, new AssistantWaitInstruction(guiderMediator, telescopeMediator, waitForTime)));
+            Add(new PlanWaitInstruction(guiderMediator, telescopeMediator, waitForTime));
         }
 
         private int GetExposureCount() {
-            parentInstruction.TotalExposureCount++;
-            return parentInstruction.TotalExposureCount;
+            parentContainer.TotalExposureCount++;
+            return parentContainer.TotalExposureCount;
         }
 
         private FilterInfo LookupFilter(string filterName) {
@@ -330,49 +353,12 @@ namespace Assistant.NINAPlugin.Sequencer {
             return (int)((int)(offset == null ? cameraMediator.GetInfo().DefaultOffset : offset));
         }
 
-        // IDeepSkyObjectContainer behavior, defer to parent
-        public InputTarget Target { get => parentInstruction.Target; set { } }
-        public NighttimeData NighttimeData => parentInstruction.NighttimeData;
-    }
-
-    public class InstructionWrapper : SequenceItem {
-
-        private AssistantStatusMonitor Monitor;
-        private string PlanItemId;
-        private SequenceItem Instruction;
-
-        public InstructionWrapper(AssistantStatusMonitor monitor, string planItemId, SequenceItem instruction) {
-            this.Monitor = monitor;
-            this.PlanItemId = planItemId;
-            this.Instruction = instruction;
-
-            this.Name = $"{instruction.Name}";
-            this.Category = AssistantTargetContainer.INSTRUCTION_CATEGORY;
-            this.Description = "Wrapper";
-            this.ErrorBehavior = instruction.ErrorBehavior;
-            this.Attempts = instruction.Attempts;
-        }
-
-        public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-            try {
-                Monitor.ItemStart(PlanItemId, Name);
-                Instruction.Execute(progress, token).Wait();
-                Monitor.ItemFinish(PlanItemId, Name);
-            }
-            catch (Exception ex) {
-                throw ex;
-            }
-
-            return Task.CompletedTask;
-        }
-
-        public override string ToString() {
-            return $"Category: {Category}, Item: {nameof(InstructionWrapper)}";
-        }
-
         public override object Clone() {
             throw new NotImplementedException();
         }
-    }
 
+        // IDeepSkyObjectContainer behavior, defer to parent
+        public InputTarget Target { get => parentContainer.Target; set { } }
+        public NighttimeData NighttimeData => parentContainer.NighttimeData;
+    }
 }

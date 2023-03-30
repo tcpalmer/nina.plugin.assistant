@@ -367,12 +367,19 @@
       <DependentUpon>SVGDictionary.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Utils\ExposureTemplateReconciliation.cs" />
-    <Compile Include="Sequencer\AssistantTakeExposure.cs" />
+    <Compile Include="Sequencer\PlanTakeExposure.cs" />
+    <Compile Include="Sequencer\PlanTargetContainerStrategy.cs" />
+    <Compile Include="Sequencer\SchedulerTestCondition.cs" />
+    <Compile Include="Sequencer\SchedulerTestTrigger.cs" />
+    <Compile Include="Sequencer\TargetSchedulerContainer.cs" />
+    <Compile Include="Sequencer\TargetSchedulerContainerTemplate.xaml.cs">
+      <DependentUpon>TargetSchedulerContainerTemplate.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils\SequenceTargetParser.cs" />
     <Compile Include="Controls\ValidationRules\ValidationRules.cs" />
-    <Compile Include="Database\AssistantDatabaseInteraction.cs" />
-    <Compile Include="Database\AssistantDatabaseContext.cs" />
-    <Compile Include="Database\AssistantPlanLoader.cs" />
+    <Compile Include="Database\SchedulerDatabaseInteraction.cs" />
+    <Compile Include="Database\SchedulerDatabaseContext.cs" />
+    <Compile Include="Database\SchedulerPlanLoader.cs" />
     <Compile Include="Database\Initial\SQL.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -389,7 +396,7 @@
     <Compile Include="Options.xaml.cs">
       <DependentUpon>Options.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Plan\AssistantPlan.cs" />
+    <Compile Include="Plan\SchedulerPlan.cs" />
     <Compile Include="Plan\Planner.cs" />
     <Compile Include="Plan\Scoring\Rules\PercentCompleteRule.cs" />
     <Compile Include="Plan\Scoring\Rules\ProjectPriorityRule.cs" />
@@ -404,15 +411,11 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Sequencer\AssistantInstruction.cs" />
-    <Compile Include="Sequencer\AssistantInstructionTemplate.xaml.cs">
-      <DependentUpon>AssistantInstructionTemplate.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Sequencer\AssistantStatusMonitor.cs" />
-    <Compile Include="Sequencer\AssistantTargetContainer.cs" />
-    <Compile Include="Sequencer\AssistantTargetEndTimeTrigger.cs" />
+    <Compile Include="Sequencer\SchedulerStatusMonitor.cs" />
+    <Compile Include="Sequencer\PlanTargetContainer.cs" />
+    <Compile Include="Sequencer\SchedulerTargetEndTimeTrigger.cs" />
     <Compile Include="Plan\Scoring\ExposurePlanner.cs" />
-    <Compile Include="Sequencer\AssistantWaitInstruction.cs" />
+    <Compile Include="Sequencer\PlanWaitInstruction.cs" />
     <Compile Include="Sequencer\IImageSaveWatcher.cs" />
     <Compile Include="Sequencer\ImageGrader.cs" />
     <Compile Include="Sequencer\ImageSaveWatcher.cs" />
@@ -499,7 +502,7 @@
       <Generator>MSBuild:Compile</Generator>
       <ContainsDesignTimeResources>true</ContainsDesignTimeResources>
     </Page>
-    <Page Include="Sequencer\AssistantInstructionTemplate.xaml">
+    <Page Include="Sequencer\TargetSchedulerContainerTemplate.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

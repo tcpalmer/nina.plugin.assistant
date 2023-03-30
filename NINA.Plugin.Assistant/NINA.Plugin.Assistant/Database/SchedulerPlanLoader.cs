@@ -7,9 +7,9 @@ using System.Collections.Generic;
 
 namespace Assistant.NINAPlugin.Database {
 
-    public class AssistantPlanLoader {
+    public class SchedulerPlanLoader {
 
-        public List<IPlanProject> LoadActiveProjects(AssistantDatabaseContext context, IProfile activeProfile, DateTime atTime) {
+        public List<IPlanProject> LoadActiveProjects(SchedulerDatabaseContext context, IProfile activeProfile, DateTime atTime) {
             List<Project> projects = null;
             string profileId = activeProfile.Id.ToString();
 

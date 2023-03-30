@@ -19,10 +19,10 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
 
     public class PlanPreviewerViewVM : BaseVM {
 
-        private AssistantDatabaseInteraction database;
+        private SchedulerDatabaseInteraction database;
 
         public PlanPreviewerViewVM(IProfileService profileService) : base(profileService) {
-            database = new AssistantDatabaseInteraction();
+            database = new SchedulerDatabaseInteraction();
             profileService.ProfileChanged += ProfileService_ProfileChanged;
             profileService.Profiles.CollectionChanged += ProfileService_ProfileChanged;
 
@@ -122,7 +122,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                 DateTime atDateTime = PlanDate.Date.AddHours(PlanHours).AddMinutes(PlanMinutes).AddSeconds(PlanSeconds);
                 Logger.Debug($"running plan preview for {Utils.FormatDateTimeFull(atDateTime)}, profileId={SelectedProfileId}");
 
-                List<IPlanProject> projects = new AssistantPlanLoader().LoadActiveProjects(database.GetContext(), GetProfile(SelectedProfileId), atDateTime);
+                List<IPlanProject> projects = new SchedulerPlanLoader().LoadActiveProjects(database.GetContext(), GetProfile(SelectedProfileId), atDateTime);
 
                 if (projects == null) {
                     Logger.Debug($"no active projects for {atDateTime}, profileId={SelectedProfileId}");
@@ -133,9 +133,9 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                     return;
                 }
 
-                List<AssistantPlan> assistantPlans = Planner.GetPerfectPlan(atDateTime, profileService, projects);
+                List<SchedulerPlan> assistantPlans = Planner.GetPerfectPlan(atDateTime, profileService, projects);
 
-                foreach (AssistantPlan plan in assistantPlans) {
+                foreach (SchedulerPlan plan in assistantPlans) {
                     TreeViewItem planItem = new TreeViewItem();
 
                     if (plan.WaitForNextTargetTime != null) {
@@ -228,7 +228,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
             throw new Exception($"failed to get profile for ID={profileId}");
         }
 
-        private string GetTargetLabel(AssistantPlan plan) {
+        private string GetTargetLabel(SchedulerPlan plan) {
             string label = $"{plan.PlanTarget.Project.Name} / {plan.PlanTarget.Name}";
             return $"{label} - start: {Utils.FormatDateTimeFull(plan.TimeInterval.StartTime)} stop: {Utils.FormatDateTimeFull(plan.TimeInterval.EndTime)}";
         }

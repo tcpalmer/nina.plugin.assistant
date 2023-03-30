@@ -11,7 +11,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
     [TestFixture]
     public class DbPlayTest {
 
-        private AssistantDatabaseInteraction db;
+        private SchedulerDatabaseInteraction db;
 
         /*
         [SetUp]
@@ -26,7 +26,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
             // BEWARE! THIS WILL UPDATE ACTUAL DATABASE USED BY THE PLUGIN
             var testDbPath = @"C:\Users\Tom\AppData\Local\NINA\AssistantPlugin\assistantdb.sqlite";
-            db = new AssistantDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
+            db = new SchedulerDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
 
             string profileId = "395fdf35-4ca8-479b-bd5a-ff24ca2b2a91";
             using (var context = db.GetContext()) {
