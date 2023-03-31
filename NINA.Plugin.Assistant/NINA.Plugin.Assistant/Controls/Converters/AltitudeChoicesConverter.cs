@@ -12,6 +12,10 @@ namespace Assistant.NINAPlugin.Controls.Converters {
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {
+            if (value == null) {
+                return 0;
+            }
+
             string s = (string)value;
             return double.Parse(s.TrimEnd('°'));
         }
