@@ -44,8 +44,15 @@ namespace Assistant.NINAPlugin.Database {
             return ProjectSet
                 .Include("targets.exposureplans.exposuretemplate")
                 .Include("ruleweights")
-                .Where(p => p.ProfileId
-                .Equals(profileId))
+                .Where(p => p.ProfileId.Equals(profileId))
+                .ToList();
+        }
+
+        public List<Project> GetOrphanedProjects(List<string> currentProfileIdList) {
+            return ProjectSet
+                .Include("targets.exposureplans.exposuretemplate")
+                .Include("ruleweights")
+                .Where(p => !currentProfileIdList.Contains(p.ProfileId))
                 .ToList();
         }
 

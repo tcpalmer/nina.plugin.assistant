@@ -1,0 +1,179 @@
+﻿<UserControl
+    x:Class="Assistant.NINAPlugin.Controls.AssistantManager.OrphanedProjectsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Resources/Resources.xaml" />
+    </UserControl.Resources>
+
+    <StackPanel
+        Name="OrphanedProjectsViewPanel"
+        Width="700"
+        Margin="20,10,0,0"
+        Orientation="Vertical">
+        <StackPanel Orientation="Vertical">
+            <Label
+                Margin="0,0,0,6"
+                Content="Orphaned Projects"
+                FontSize="18"
+                FontWeight="Bold" />
+            <TextBlock
+                Margin="0,0,0,12"
+                FontStyle="Italic"
+                Text="If you delete a NINA profile and it had projects attached to it, then it will be listed here.  Your only options are to move the project (and associated targets) to another profile or delete it."
+                TextWrapping="Wrap" />
+        </StackPanel>
+
+        <Grid>
+
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <DataGrid
+                x:Name="PlanDataGrid"
+                Height="500"
+                Margin="0,0,0,0"
+                HorizontalAlignment="Left"
+                AutoGenerateColumns="False"
+                BorderThickness="0"
+                HeadersVisibility="Column"
+                HorizontalScrollBarVisibility="Hidden"
+                IsReadOnly="True"
+                ItemsSource="{Binding Projects}"
+                RowHeight="28"
+                VerticalScrollBarVisibility="Auto">
+
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="{x:Type DataGridColumnHeader}">
+                        <Setter Property="HorizontalAlignment" Value="Left" />
+                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="MinHeight" Value="25" />
+                        <Setter Property="Margin" Value="5,3,5,3" />
+                        <Setter Property="FontWeight" Value="Bold" />
+                        <Setter Property="FontSize" Value="12" />
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="MinHeight" Value="22" />
+                        <Setter Property="Margin" Value="5,3,5,3" />
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ButtonBackgroundBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.CellStyle>
+
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="MinHeight" Value="22" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="VerticalAlignment" Value="Center" />
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="{StaticResource SecondaryBackgroundBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Width="180" CanUserSort="False">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="Project Name" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Name}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="180" CanUserSort="False">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="Move To Profile" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox
+                                DisplayMemberPath="Value"
+                                ItemsSource="{Binding ElementName=OrphanedProjectsViewPanel, Path=DataContext.ProfileChoices}"
+                                SelectedValue="{Binding ElementName=OrphanedProjectsViewPanel, Path=DataContext.SelectedProfileId}"
+                                SelectedValuePath="Key" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="30" CanUserSort="False">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button
+                                    Width="15"
+                                    Height="15"
+                                    VerticalAlignment="Center"
+                                    HorizontalContentAlignment="Right"
+                                    Command="{Binding ElementName=OrphanedProjectsViewPanel, Path=DataContext.MoveProjectCommand}"
+                                    CommandParameter="{Binding}"
+                                    Style="{StaticResource BackgroundButton}"
+                                    ToolTip="Move project to profile">
+                                    <Grid>
+                                        <Path
+                                            Data="{StaticResource SS_MoveSVG}"
+                                            Fill="{StaticResource ButtonForegroundBrush}"
+                                            Stretch="Uniform" />
+                                    </Grid>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="30" CanUserSort="False">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button
+                                    Width="15"
+                                    Height="15"
+                                    VerticalAlignment="Center"
+                                    HorizontalContentAlignment="Right"
+                                    Command="{Binding ElementName=OrphanedProjectsViewPanel, Path=DataContext.DeleteProjectCommand}"
+                                    CommandParameter="{Binding}"
+                                    Style="{StaticResource BackgroundButton}"
+                                    ToolTip="Delete project">
+                                    <Grid>
+                                        <Path
+                                            Data="{StaticResource SS_DeleteSVG}"
+                                            Fill="{StaticResource ButtonForegroundBrush}"
+                                            Stretch="Uniform" />
+                                    </Grid>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+    </StackPanel>
+
+</UserControl>

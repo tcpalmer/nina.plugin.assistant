@@ -335,6 +335,10 @@
       <DependentUpon>ExposureTemplateView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\AssistantManager\ExposureTemplateViewVM.cs" />
+    <Compile Include="Controls\AssistantManager\OrphanedProjectsView.xaml.cs">
+      <DependentUpon>OrphanedProjectsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AssistantManager\OrphanedProjectsViewVM.cs" />
     <Compile Include="Controls\AssistantManager\ProfileView.xaml.cs">
       <DependentUpon>ProfileView.xaml</DependentUpon>
     </Compile>
@@ -459,6 +463,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\AssistantManager\ExposureTemplateView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\AssistantManager\OrphanedProjectsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

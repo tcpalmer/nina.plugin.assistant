@@ -19,6 +19,13 @@
         <PathGeometry Figures="M 10.11 14.75 H 3.39 v -11 H 4 V 2.5 H 3.39 A 1.25 1.25 0 0 0 2.14 3.75 v 11 A 1.25 1.25 0 0 0 3.39 16 h 6.72 a 1.25 1.25 0 0 0 1.25 -1.25 V 14.12 H 10.11 Z M 13.49 3 10.74 0.37 A 1.22 1.22 0 0 0 9.86 0 h -4 A 1.25 1.25 0 0 0 4.64 1.25 v 11 a 1.25 1.25 0 0 0 1.25 1.25 h 6.72 a 1.25 1.25 0 0 0 1.25 -1.25 V 3.88 A 1.22 1.22 0 0 0 13.49 3 Z m -0.88 9.25 H 5.89 v -11 h 2.72 v 2.63 a 1.25 1.25 0 0 0 1.25 1.25 h 2.75 z m 0 -8.37 H 9.86 V 1.25 Z" FillRule="NonZero" />
     </GeometryGroup>
 
+    <GeometryGroup x:Key="SS_MoveSVG">
+        <PathGeometry Figures="m 352 160 v 128 h 32 V 128 H 224 v 32 z" FillRule="NonZero" />
+        <PathGeometry Figures="m 176 176 v 32 h 128 v 128 h 32 V 176 Z" FillRule="NonZero" />
+        <PathGeometry Figures="M 256 0 C 114.609 0 0 114.609 0 256 0 397.391 114.609 512 256 512 397.391 512 512 397.391 512 256 512 114.609 397.391 0 256 0 Z m 0 472 C 136.703 472 40 375.297 40 256 40 136.703 136.703 40 256 40 c 119.297 0 216 96.703 216 216 0 119.297 -96.703 216 -216 216 z" FillRule="NonZero" />
+        <PathGeometry Figures="M 128 224 H 288 V 384 H 128 Z" FillRule="NonZero" />
+    </GeometryGroup>
+
     <GeometryGroup x:Key="SS_DeleteSVG">
         <PathGeometry Figures="M160 256H96a32 32 0 0 1 0-64h256V95.936a32 32 0 0 1 32-32h256a32 32 0 0 1 32 32V192h256a32 32 0 1 1 0 64h-64v672a32 32 0 0 1-32 32H192a32 32 0 0 1-32-32V256zm448-64v-64H416v64h192zM224 896h576V256H224v640zm192-128a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32zm192 0a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32z" FillRule="NonZero" />
     </GeometryGroup>
