@@ -44,8 +44,15 @@ namespace Assistant.NINAPlugin.Database {
             return ProjectSet
                 .Include("targets.exposureplans.exposuretemplate")
                 .Include("ruleweights")
-                .Where(p => p.ProfileId
-                .Equals(profileId))
+                .Where(p => p.ProfileId.Equals(profileId))
+                .ToList();
+        }
+
+        public List<Project> GetOrphanedProjects(List<string> currentProfileIdList) {
+            return ProjectSet
+                .Include("targets.exposureplans.exposuretemplate")
+                .Include("ruleweights")
+                .Where(p => !currentProfileIdList.Contains(p.ProfileId))
                 .ToList();
         }
 
@@ -178,6 +185,26 @@ namespace Assistant.NINAPlugin.Database {
                 }
                 catch (Exception e) {
                     Logger.Error($"Scheduler: error pasting project: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
+                }
+            }
+        }
+
+        public Project MoveProject(Project project, string profileId) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    Project copy = project.GetPasteCopy(profileId);
+                    ProjectSet.Add(copy);
+
+                    project = GetProject(project.Id);
+                    ProjectSet.Remove(project);
+                    SaveChanges();
+                    transaction.Commit();
+                    return copy;
+                }
+                catch (Exception e) {
+                    Logger.Error($"Scheduler: error moving project: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
                 }
@@ -376,6 +403,30 @@ namespace Assistant.NINAPlugin.Database {
                     RollbackTransaction(transaction);
                 }
             }
+        }
+
+        public ExposureTemplate MoveExposureTemplate(ExposureTemplate exposureTemplate, string profileId) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    ExposureTemplate copy = exposureTemplate.GetPasteCopy(profileId);
+                    ExposureTemplateSet.Add(copy);
+
+                    exposureTemplate = GetExposureTemplate(exposureTemplate.Id);
+                    ExposureTemplateSet.Remove(exposureTemplate);
+                    SaveChanges();
+                    transaction.Commit();
+                    return copy;
+                }
+                catch (Exception e) {
+                    Logger.Error($"Scheduler: error moving exposure template: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
+                }
+            }
+        }
+
+        public List<ExposureTemplate> GetOrphanedExposureTemplates(List<string> currentProfileIdList) {
+            return ExposureTemplateSet.Where(et => !currentProfileIdList.Contains(et.profileId)).ToList();
         }
 
         public static long DateTimeToUnixSeconds(DateTime? dateTime) {

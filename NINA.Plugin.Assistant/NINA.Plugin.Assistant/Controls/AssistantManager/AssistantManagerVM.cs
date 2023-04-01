@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Controls.Util;
 using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
+using LinqKit;
 using NINA.Core.Model.Equipment;
 using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
@@ -70,6 +71,33 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             set {
                 profileViewVM = value;
                 RaisePropertyChanged(nameof(ProfileViewVM));
+            }
+        }
+
+        private Visibility showOrphanedProjectsView = Visibility.Hidden;
+        public Visibility ShowOrphanedProjectsView {
+            get => showOrphanedProjectsView;
+            set {
+                showOrphanedProjectsView = value;
+                RaisePropertyChanged(nameof(ShowOrphanedProjectsView));
+            }
+        }
+
+        private OrphanedProjectsViewVM orphanedProjectsViewVM;
+        public OrphanedProjectsViewVM OrphanedProjectsViewVM {
+            get => orphanedProjectsViewVM;
+            set {
+                orphanedProjectsViewVM = value;
+                RaisePropertyChanged(nameof(OrphanedProjectsViewVM));
+            }
+        }
+
+        private List<Project> orphanedProjects;
+        public List<Project> OrphanedProjects {
+            get => orphanedProjects;
+            set {
+                orphanedProjects = value;
+                RaisePropertyChanged(nameof(OrphanedProjects));
             }
         }
 
@@ -145,6 +173,33 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        private Visibility showOrphanedExposureTemplatesView = Visibility.Hidden;
+        public Visibility ShowOrphanedExposureTemplatesView {
+            get => showOrphanedExposureTemplatesView;
+            set {
+                showOrphanedExposureTemplatesView = value;
+                RaisePropertyChanged(nameof(ShowOrphanedExposureTemplatesView));
+            }
+        }
+
+        private OrphanedExposureTemplatesViewVM orphanedExposureTemplatesViewVM;
+        public OrphanedExposureTemplatesViewVM OrphanedExposureTemplatesViewVM {
+            get => orphanedExposureTemplatesViewVM;
+            set {
+                orphanedExposureTemplatesViewVM = value;
+                RaisePropertyChanged(nameof(OrphanedExposureTemplatesViewVM));
+            }
+        }
+
+        private List<ExposureTemplate> orphanedExposureTemplates;
+        public List<ExposureTemplate> OrphanedExposureTemplates {
+            get => orphanedExposureTemplates;
+            set {
+                orphanedExposureTemplates = value;
+                RaisePropertyChanged(nameof(OrphanedExposureTemplates));
+            }
+        }
+
         public ICommand SelectedItemChangedCommand { get; private set; }
 
         private void SelectedItemChanged(object obj) {
@@ -158,6 +213,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     case TreeDataType.ProjectProfile:
                         activeTreeDataItem = item;
                         ProfileViewVM = new ProfileViewVM(this, profileService, item);
+                        ShowOrphanedProjectsView = Visibility.Collapsed;
+                        ShowOrphanedExposureTemplatesView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
                         ShowExposureTemplateProfileView = Visibility.Collapsed;
@@ -165,11 +222,25 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         ShowProfileView = Visibility.Visible;
                         break;
 
+                    case TreeDataType.OrphanedProjects:
+                        activeTreeDataItem = item;
+                        OrphanedProjectsViewVM = new OrphanedProjectsViewVM(this, profileService, item, OrphanedProjects);
+                        ShowOrphanedExposureTemplatesView = Visibility.Collapsed;
+                        ShowProfileView = Visibility.Collapsed;
+                        ShowTargetView = Visibility.Collapsed;
+                        ShowProjectView = Visibility.Collapsed;
+                        ShowExposureTemplateProfileView = Visibility.Collapsed;
+                        ShowExposureTemplateView = Visibility.Collapsed;
+                        ShowOrphanedProjectsView = Visibility.Visible;
+                        break;
+
                     case TreeDataType.Project:
                         activeTreeDataItem = item;
                         Project project = (Project)item.Data;
                         ProjectViewVM = new ProjectViewVM(this, profileService, project);
                         ShowProfileView = Visibility.Collapsed;
+                        ShowOrphanedProjectsView = Visibility.Collapsed;
+                        ShowOrphanedExposureTemplatesView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
                         ShowExposureTemplateProfileView = Visibility.Collapsed;
                         ShowExposureTemplateView = Visibility.Collapsed;
@@ -181,6 +252,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         Target target = (Target)item.Data;
                         TargetViewVM = new TargetViewVM(this, profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory, target);
                         ShowProfileView = Visibility.Collapsed;
+                        ShowOrphanedProjectsView = Visibility.Collapsed;
+                        ShowOrphanedExposureTemplatesView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
                         ShowExposureTemplateProfileView = Visibility.Collapsed;
                         ShowExposureTemplateView = Visibility.Collapsed;
@@ -190,11 +263,25 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     case TreeDataType.ExposureTemplateProfile:
                         activeTreeDataItem = item;
                         ExposureTemplateProfileViewVM = new ExposureTemplateProfileViewVM(this, profileService, item);
+                        ShowProfileView = Visibility.Collapsed;
+                        ShowOrphanedProjectsView = Visibility.Collapsed;
+                        ShowOrphanedExposureTemplatesView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
                         ShowExposureTemplateView = Visibility.Collapsed;
-                        ShowProfileView = Visibility.Collapsed;
                         ShowExposureTemplateProfileView = Visibility.Visible;
+                        break;
+
+                    case TreeDataType.OrphanedExposureTemplates:
+                        activeTreeDataItem = item;
+                        OrphanedExposureTemplatesViewVM = new OrphanedExposureTemplatesViewVM(this, profileService, item, OrphanedExposureTemplates);
+                        ShowOrphanedProjectsView = Visibility.Collapsed;
+                        ShowProfileView = Visibility.Collapsed;
+                        ShowTargetView = Visibility.Collapsed;
+                        ShowProjectView = Visibility.Collapsed;
+                        ShowExposureTemplateProfileView = Visibility.Collapsed;
+                        ShowExposureTemplateView = Visibility.Collapsed;
+                        ShowOrphanedExposureTemplatesView = Visibility.Visible;
                         break;
 
                     case TreeDataType.ExposureTemplate:
@@ -202,6 +289,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         ExposureTemplate exposureTemplate = (ExposureTemplate)item.Data;
                         ExposureTemplateViewVM = new ExposureTemplateViewVM(this, profileService, exposureTemplate);
                         ShowProfileView = Visibility.Collapsed;
+                        ShowOrphanedProjectsView = Visibility.Collapsed;
+                        ShowOrphanedExposureTemplatesView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
                         ShowExposureTemplateProfileView = Visibility.Collapsed;
@@ -211,6 +300,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     default:
                         activeTreeDataItem = null;
                         ShowProfileView = Visibility.Collapsed;
+                        ShowOrphanedProjectsView = Visibility.Collapsed;
+                        ShowOrphanedExposureTemplatesView = Visibility.Collapsed;
                         ShowProjectView = Visibility.Collapsed;
                         ShowTargetView = Visibility.Collapsed;
                         ShowExposureTemplateProfileView = Visibility.Collapsed;
@@ -295,6 +386,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             rootList.Add(profilesFolder);
 
             using (var context = database.GetContext()) {
+
                 foreach (ProfileMeta profile in profileService.Profiles) {
                     TreeDataItem profileItem = new TreeDataItem(TreeDataType.ProjectProfile, profile.Name, profile, profilesFolder);
                     profilesFolder.Items.Add(profileItem);
@@ -316,10 +408,24 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     profileItem.SortChildren();
                 }
 
+                // Handle 'orphaned' projects (associated profile has been deleted)
+                List<Project> orphanedProjects = GetOrphanedProjects(profileService, context);
+                if (orphanedProjects.Count > 0) {
+                    OrphanedProjects = orphanedProjects;
+                    TreeDataItem pseudoProfileItem = new TreeDataItem(TreeDataType.OrphanedProjects, "ORPHANED", null, profilesFolder);
+                    profilesFolder.Items.Add(pseudoProfileItem);
+                }
+
                 profilesFolder.SortChildren();
             }
 
             return rootList;
+        }
+
+        private List<Project> GetOrphanedProjects(IProfileService profileService, SchedulerDatabaseContext context) {
+            List<string> currentProfileIds = new List<string>();
+            profileService.Profiles.ForEach(p => currentProfileIds.Add(p.Id.ToString()));
+            return context.GetOrphanedProjects(currentProfileIds);
         }
 
         private List<TreeDataItem> LoadExposureTemplateTree() {
@@ -342,10 +448,24 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     // We could sort ETs into filter -> filter wheel order
                 }
 
+                // Handle 'orphaned' exposure templates (associated profile has been deleted)
+                List<ExposureTemplate> orphanedExposureTemplates = GetOrphanedExposureTemplates(profileService, context);
+                if (orphanedExposureTemplates.Count > 0) {
+                    OrphanedExposureTemplates = orphanedExposureTemplates;
+                    TreeDataItem pseudoProfileItem = new TreeDataItem(TreeDataType.OrphanedExposureTemplates, "ORPHANED", null, profilesFolder);
+                    profilesFolder.Items.Add(pseudoProfileItem);
+                }
+
                 profilesFolder.SortChildren();
             }
 
             return rootList;
+        }
+
+        private List<ExposureTemplate> GetOrphanedExposureTemplates(IProfileService profileService, SchedulerDatabaseContext context) {
+            List<string> currentProfileIds = new List<string>();
+            profileService.Profiles.ForEach(p => currentProfileIds.Add(p.Id.ToString()));
+            return context.GetOrphanedExposureTemplates(currentProfileIds);
         }
 
         public void SetEditMode(bool editMode) {
@@ -435,6 +555,39 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 }
                 else {
                     Notification.ShowError("Failed to delete Scheduler Project (see log for details)");
+                }
+            }
+        }
+
+        public bool MoveOrphanedProject(Project project, string profileId) {
+            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+                Project newProject = context.MoveProject(project, profileId);
+                if (newProject != null) {
+                    TreeDataItem parentItem = GetProfileItem(RootProjectsList, profileId);
+                    TreeDataItem newProjectItem = new TreeDataItem(TreeDataType.Project, newProject.Name, newProject, parentItem);
+                    parentItem.Items.Add(newProjectItem);
+
+                    newProject.Targets.ForEach(target => {
+                        TreeDataItem targetItem = new TreeDataItem(TreeDataType.Target, target.Name, target, newProjectItem);
+                        newProjectItem.Items.Add(targetItem);
+                    });
+                    return true;
+                }
+                else {
+                    Notification.ShowError("Failed to move Scheduler orphaned Project (see log for details)");
+                    return false;
+                }
+            }
+        }
+
+        public bool DeleteOrphanedProject(Project project) {
+            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+                if (context.DeleteProject(project)) {
+                    return true;
+                }
+                else {
+                    Notification.ShowError("Failed to delete Scheduler orphaned Project (see log for details)");
+                    return false;
                 }
             }
         }
@@ -617,6 +770,34 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        public bool MoveOrphanedExposureTemplate(ExposureTemplate exposureTemplate, string profileId) {
+            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+                ExposureTemplate newExposureTemplate = context.MoveExposureTemplate(exposureTemplate, profileId);
+                if (newExposureTemplate != null) {
+                    TreeDataItem parentItem = GetProfileItem(RootExposureTemplateList, profileId);
+                    TreeDataItem newProjectItem = new TreeDataItem(TreeDataType.ExposureTemplate, newExposureTemplate.Name, newExposureTemplate, parentItem);
+                    parentItem.Items.Add(newProjectItem);
+                    return true;
+                }
+                else {
+                    Notification.ShowError("Failed to move Scheduler orphaned Exposure Template (see log for details)");
+                    return false;
+                }
+            }
+        }
+
+        public bool DeleteOrphanedExposureTemplate(ExposureTemplate exposureTemplate) {
+            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+                if (context.DeleteExposureTemplate(exposureTemplate)) {
+                    return true;
+                }
+                else {
+                    Notification.ShowError("Failed to delete Scheduler orphaned Exposure Template (see log for details)");
+                    return false;
+                }
+            }
+        }
+
         public int ExposureTemplateUsage(int exposureTemplateId) {
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 return context.ExposurePlanSet.Where(ep => ep.ExposureTemplateId == exposureTemplateId).ToList().Count;
@@ -649,10 +830,28 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        private TreeDataItem GetProfileItem(List<TreeDataItem> rootList, string profileId) {
+            foreach (TreeDataItem item in rootList[0].Items) {
+                ProfileMeta profile = (ProfileMeta)item.Data;
+                if (profile != null && profile.Id.ToString() == profileId) {
+                    return item;
+                }
+            }
+
+            throw new Exception($"Failed to find profile in nav tree: {profileId}");
+        }
     }
 
     public enum TreeDataType {
-        ProjectRoot, ExposureTemplateRoot, ProjectProfile, ExposureTemplateProfile, Project, Target, ExposureTemplate
+        ProjectRoot,
+        ExposureTemplateRoot,
+        ProjectProfile,
+        OrphanedProjects,
+        ExposureTemplateProfile,
+        OrphanedExposureTemplates,
+        Project,
+        Target,
+        ExposureTemplate
     }
 
     public class TreeDataItem : TreeViewItem, IComparable {

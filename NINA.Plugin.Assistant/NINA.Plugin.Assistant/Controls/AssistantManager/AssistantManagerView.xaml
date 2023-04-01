@@ -37,6 +37,15 @@
             Height="620"
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1"
+            Visibility="{Binding ShowOrphanedProjectsView}">
+            <StackPanel>
+                <local:OrphanedProjectsView DataContext="{Binding OrphanedProjectsViewVM}" />
+            </StackPanel>
+        </Border>
+        <Border
+            Height="620"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
             Visibility="{Binding ShowProjectView}">
             <StackPanel>
                 <local:ProjectView DataContext="{Binding ProjectViewVM}" />
@@ -58,6 +67,15 @@
             Visibility="{Binding ShowExposureTemplateProfileView}">
             <StackPanel>
                 <local:ExposureTemplateProfileView DataContext="{Binding ExposureTemplateProfileViewVM}" />
+            </StackPanel>
+        </Border>
+        <Border
+            Height="620"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            Visibility="{Binding ShowOrphanedExposureTemplatesView}">
+            <StackPanel>
+                <local:OrphanedExposureTemplatesView DataContext="{Binding OrphanedExposureTemplatesViewVM}" />
             </StackPanel>
         </Border>
         <Border
