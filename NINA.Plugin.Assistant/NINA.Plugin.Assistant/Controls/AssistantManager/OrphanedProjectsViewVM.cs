@@ -75,7 +75,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private void MoveProject(object obj) {
 
             if (string.IsNullOrEmpty(SelectedProfileId)) {
-                MyMessageBox.Show("You must select a destination profile to move the project to.", "Oops");
+                MyMessageBox.Show("You must select a destination profile to move a project.", "Oops");
                 return;
             }
 
@@ -97,7 +97,10 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             if (project != null) {
                 if (MyMessageBox.Show($"Orphaned project '{project.Name}' will be permanently deleted.  Are you sure?", "Delete Project?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
                     Logger.Info($"Scheduler: deleting orphaned project '{project.Name}'");
-                    managerVM.DeleteProject(project, true);
+                    if (managerVM.DeleteOrphanedProject(project)) {
+                        Projects.Remove(project);
+                        RaisePropertyChanged(nameof(Projects));
+                    }
                 }
             }
         }

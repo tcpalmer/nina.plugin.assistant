@@ -180,7 +180,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private void Delete(object obj) {
             string message = $"Delete project '{ProjectProxy.Project.Name}' and any associated targets?  This cannot be undone.";
             if (MyMessageBox.Show(message, "Delete Project?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
-                managerVM.DeleteProject(ProjectProxy.Proxy, false);
+                managerVM.DeleteProject(ProjectProxy.Proxy);
             }
         }
 

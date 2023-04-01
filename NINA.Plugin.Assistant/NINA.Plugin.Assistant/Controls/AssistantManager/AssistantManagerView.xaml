@@ -73,6 +73,15 @@
             Height="620"
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1"
+            Visibility="{Binding ShowOrphanedExposureTemplatesView}">
+            <StackPanel>
+                <local:OrphanedExposureTemplatesView DataContext="{Binding OrphanedExposureTemplatesViewVM}" />
+            </StackPanel>
+        </Border>
+        <Border
+            Height="620"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
             Visibility="{Binding ShowExposureTemplateView}">
             <StackPanel>
                 <local:ExposureTemplateView DataContext="{Binding ExposureTemplateViewVM}" />
