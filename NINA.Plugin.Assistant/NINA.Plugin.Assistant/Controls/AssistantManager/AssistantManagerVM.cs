@@ -798,11 +798,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        /*
-        public bool MoveOrphanedProject(Project project, string profileId) {
-        }
-         */
-
         public int ExposureTemplateUsage(int exposureTemplateId) {
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 return context.ExposurePlanSet.Where(ep => ep.ExposureTemplateId == exposureTemplateId).ToList().Count;

@@ -19,11 +19,14 @@
         Margin="20,10,0,0"
         Orientation="Vertical">
         <StackPanel Orientation="Vertical">
-            <Label
-                Margin="0,0,0,6"
-                Content="Orphaned Projects"
-                FontSize="18"
-                FontWeight="Bold" />
+            <StackPanel Orientation="Horizontal">
+                <Label
+                    Margin="0,0,3,6"
+                    Content="Orphaned Projects"
+                    FontSize="18"
+                    FontWeight="Bold" />
+                <local:DocumentationLink URL="target-management/#orphaned-items" />
+            </StackPanel>
             <TextBlock
                 Margin="0,0,0,12"
                 FontStyle="Italic"
@@ -116,10 +119,10 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox
-                                DisplayMemberPath="Value"
-                                ItemsSource="{Binding ElementName=OrphanedProjectsViewPanel, Path=DataContext.ProfileChoices}"
-                                SelectedValue="{Binding ElementName=OrphanedProjectsViewPanel, Path=DataContext.SelectedProfileId}"
-                                SelectedValuePath="Key" />
+                                    DisplayMemberPath="Value"
+                                    ItemsSource="{Binding ElementName=OrphanedProjectsViewPanel, Path=DataContext.ProfileChoices}"
+                                    SelectedValue="{Binding ElementName=OrphanedProjectsViewPanel, Path=DataContext.SelectedProfileId}"
+                                    SelectedValuePath="Key" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
