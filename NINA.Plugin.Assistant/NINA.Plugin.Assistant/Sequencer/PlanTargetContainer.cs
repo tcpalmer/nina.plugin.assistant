@@ -105,19 +105,20 @@ namespace Assistant.NINAPlugin.Sequencer {
             PlanTargetContainerStrategy containerStrategy = Strategy as PlanTargetContainerStrategy;
             containerStrategy.SetContext(parentContainer, plan, monitor);
 
+            if (!plan.IsEmulator)
+                ImageSaveWatcher = new ImageSaveWatcher(imageSaveMediator, plan.PlanTarget);
+            else
+                ImageSaveWatcher = new ImageSaveWatcherEmulator();
+
+            // These have no impact on the container itself but are used to assign to each added instruction
             Attempts = 1;
-            ErrorBehavior = InstructionErrorBehavior.SkipInstructionSetOnError;
+            ErrorBehavior = InstructionErrorBehavior.ContinueOnError;
         }
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
             Logger.Debug("Scheduler: executing target container");
 
             try {
-                if (!plan.IsEmulator)
-                    ImageSaveWatcher = new ImageSaveWatcher(imageSaveMediator, plan.PlanTarget);
-                else
-                    ImageSaveWatcher = new ImageSaveWatcherEmulator();
-
                 AddEndTimeTrigger(plan.PlanTarget);
                 AddDitherTrigger(plan.PlanTarget);
                 AddParentTriggers();
@@ -187,12 +188,6 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private void AddInstructions(SchedulerPlan plan) {
 
-            /* TODO: since our determination of target visibility over the course of a night will not detect the
-             * 'horizon tree gap' problem, we need to mitigate.
-             * - If that was the only potential target, it would still get picked so the sequence container may also have to detect and
-             *   skip exposures, maybe a custom trigger that looks for horizon dynamically and takes action?
-             */
-
             foreach (IPlanInstruction instruction in plan.PlanInstructions) {
 
                 if (instruction is PlanMessage) {
@@ -261,10 +256,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 (slewCenter as SlewScopeToRaDec).Coordinates = slewCoordinates;
             }
 
-            slewCenter.Category = INSTRUCTION_CATEGORY;
-            slewCenter.Description = "";
-            slewCenter.ErrorBehavior = this.ErrorBehavior;
-            slewCenter.Attempts = this.Attempts;
+            SetItemDefaults(slewCenter, null);
             Add(slewCenter);
         }
 
@@ -272,11 +264,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             Logger.Info($"Scheduler: adding switch filter: {planExposure.FilterName}");
 
             SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator);
-            switchFilter.Name = nameof(SwitchFilter);
-            switchFilter.Category = INSTRUCTION_CATEGORY;
-            switchFilter.Description = "";
-            switchFilter.ErrorBehavior = this.ErrorBehavior;
-            switchFilter.Attempts = this.Attempts;
+            SetItemDefaults(switchFilter, nameof(SwitchFilter));
 
             switchFilter.Filter = LookupFilter(planExposure.FilterName);
             Add(switchFilter);
@@ -288,11 +276,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             Logger.Info($"Scheduler: adding set readout mode: {readoutMode}");
             SetReadoutMode setReadoutMode = new SetReadoutMode(cameraMediator);
-            setReadoutMode.Name = nameof(SetReadoutMode);
-            setReadoutMode.Category = INSTRUCTION_CATEGORY;
-            setReadoutMode.Description = "";
-            setReadoutMode.ErrorBehavior = this.ErrorBehavior;
-            setReadoutMode.Attempts = this.Attempts;
+            SetItemDefaults(setReadoutMode, nameof(SetReadoutMode));
 
             setReadoutMode.Mode = (short)readoutMode;
 
@@ -310,14 +294,9 @@ namespace Assistant.NINAPlugin.Sequencer {
                         imageHistoryVM,
                         ImageSaveWatcher,
                         planExposure.DatabaseId);
+            SetItemDefaults(takeExposure, nameof(TakeExposure));
 
-            takeExposure.Name = nameof(TakeExposure);
-            takeExposure.Category = INSTRUCTION_CATEGORY;
-            takeExposure.Description = "";
-            takeExposure.ErrorBehavior = this.ErrorBehavior;
-            takeExposure.Attempts = this.Attempts;
             takeExposure.ExposureCount = GetExposureCount();
-
             takeExposure.ExposureTime = planExposure.ExposureLength;
             takeExposure.Gain = GetGain(planExposure.Gain);
             takeExposure.Offset = GetOffset(planExposure.Offset);
@@ -328,6 +307,17 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private void AddWait(DateTime waitForTime, IPlanTarget planTarget) {
             Add(new PlanWaitInstruction(guiderMediator, telescopeMediator, waitForTime));
+        }
+
+        private void SetItemDefaults(ISequenceItem item, string name) {
+            if (name != null) {
+                item.Name = name;
+            }
+
+            item.Category = INSTRUCTION_CATEGORY;
+            item.Description = "";
+            item.ErrorBehavior = this.ErrorBehavior;
+            item.Attempts = this.Attempts;
         }
 
         private int GetExposureCount() {
