@@ -296,6 +296,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         planExposure.DatabaseId);
             SetItemDefaults(takeExposure, nameof(TakeExposure));
 
+            takeExposure.ExposureCount = GetExposureCount();
             takeExposure.ExposureTime = planExposure.ExposureLength;
             takeExposure.Gain = GetGain(planExposure.Gain);
             takeExposure.Offset = GetOffset(planExposure.Offset);
