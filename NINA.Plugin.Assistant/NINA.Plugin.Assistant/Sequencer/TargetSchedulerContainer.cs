@@ -112,12 +112,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             WeakEventManager<IProfileService, EventArgs>.AddHandler(profileService, nameof(profileService.HorizonChanged), ProfileService_HorizonChanged);
             WeakEventManager<INighttimeCalculator, EventArgs>.AddHandler(nighttimeCalculator, nameof(nighttimeCalculator.OnReferenceDayChanged), NighttimeCalculator_OnReferenceDayChanged);
 
-            // TODO: this can better be set via the ... on the instruction (see Smart Exposure)
-            // Interestingly, DSO Container doesn't have ... but this instruction does.
-            // TODO: also need to pay attention to Attempts - can also be set via ...
-            //Attempts = 1;
-            //ErrorBehavior = InstructionErrorBehavior.SkipInstructionSetOnError;
-
             // TODO: Need to figure out a way to block or warn about adding Loop Conditions or Instructions
             // Following doesn't work, nor does trying to override the Add()
             ((ObservableCollection<ISequenceCondition>)Conditions).CollectionChanged += LoopConditions_CollectionChanged;
