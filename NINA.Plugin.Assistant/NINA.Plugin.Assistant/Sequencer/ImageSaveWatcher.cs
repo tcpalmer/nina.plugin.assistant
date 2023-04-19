@@ -14,8 +14,8 @@ namespace Assistant.NINAPlugin.Sequencer {
     /// <summary>
     /// Watch for saved images and update the associated exposure plan in the scheduler database.
     /// 
-    /// This class works in conjunction with AssistantTakeExposure (the scheduler version of the core
-    /// NINA instruction to take an exposure).  AssistantTakeExposure.Execute will call WaitForExposure
+    /// This class works in conjunction with PlanTakeExposure (the scheduler version of the core
+    /// NINA instruction to take an exposure).  PlanTakeExposure.Execute will call WaitForExposure
     /// to register an image Id with the associated exposure plan database Id and tell the watcher that
     /// it can't stop until all image Ids have come through the pipeline.
     /// 
@@ -56,16 +56,17 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             // We need to wait on all exposures to process (and the database to be updated) before we can stop.
             // Otherwise, the planner will be called again with the exposure plan counts not reflecting the
-            // latest exposures.  Poll every 1/5 sec and bail out after 10 secs.
+            // latest exposures.  The wait can be considerable given processing like platesolves for Center After Drift.
 
+            // Poll every 400ms and bail out after 80 secs
             int count = 0;
             while (!exposureDictionary.IsEmpty) {
-                if (++count == 50) {
-                    Logger.Warning("Timed out waiting on all exposures to be processed and scheduler database updated");
+                if (++count == 200) {
+                    Logger.Warning($"Scheduler: timed out waiting on all exposures to be processed and scheduler database updated.  Remaining:\n{ExposureIdsLog()}");
                     break;
                 }
 
-                Thread.Sleep(200);
+                Thread.Sleep(400);
             }
 
             imageSaveMediator.ImageSaved -= ImageSaved;
@@ -99,18 +100,24 @@ namespace Assistant.NINAPlugin.Sequencer {
                     try {
                         if (imageId != null) {
 
-                            // Update the exposure plan record
                             int exposureDatabaseId;
-                            exposureDictionary.TryGetValue((int)imageId, out exposureDatabaseId);
-                            ExposurePlan exposurePlan = context.GetExposurePlan(exposureDatabaseId);
-                            if (exposurePlan != null) {
-                                exposurePlan.Acquired++;
+                            bool found = exposureDictionary.TryGetValue((int)imageId, out exposureDatabaseId);
 
-                                if (accepted) { exposurePlan.Accepted++; }
-                                context.ExposurePlanSet.AddOrUpdate(exposurePlan);
-                            }
-                            else {
-                                Logger.Warning($"Scheduler: failed to get exposure plan for id={exposureDatabaseId}, image id={imageId}");
+                            if (found) {
+
+                                // Update the exposure plan record
+                                ExposurePlan exposurePlan = context.GetExposurePlan(exposureDatabaseId);
+                                if (exposurePlan != null) {
+                                    exposurePlan.Acquired++;
+
+                                    if (accepted) { exposurePlan.Accepted++; }
+                                    context.ExposurePlanSet.AddOrUpdate(exposurePlan);
+                                }
+                                else {
+                                    Logger.Warning($"Scheduler: failed to get exposure plan for id={exposureDatabaseId}, image id={imageId}");
+                                }
+                            } else {
+                                Logger.Warning($"Scheduler: not waiting for image id={imageId}");
                             }
                         }
                         else {
