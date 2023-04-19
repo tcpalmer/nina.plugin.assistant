@@ -136,7 +136,12 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public override void ResetProgress() {
             Logger.Debug("Scheduler instruction: ResetProgress");
-            StatusMonitor.Reset();
+
+            if (StatusMonitor != null) {
+                StatusMonitor.Reset();
+            }
+
+            Target = GetEmptyTarget();
             base.ResetProgress();
         }
 
@@ -235,7 +240,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public void ClearTarget() {
             lock (lockObj) {
-                Target = null;
+                Target = GetEmptyTarget();
                 ProjectTargetDisplay = "";
                 CoordinatesDisplay = "";
                 StopAtDisplay = "";
@@ -282,6 +287,18 @@ namespace Assistant.NINAPlugin.Sequencer {
                 RaisePropertyChanged(nameof(NighttimeData));
                 RaisePropertyChanged(nameof(Target));
             }
+        }
+
+        private InputTarget GetEmptyTarget() {
+            IProfile activeProfile = profileService.ActiveProfile;
+            InputTarget inputTarget = new InputTarget(
+                Angle.ByDegree(activeProfile.AstrometrySettings.Latitude),
+                Angle.ByDegree(activeProfile.AstrometrySettings.Longitude),
+                activeProfile.AstrometrySettings.Horizon);
+            inputTarget.TargetName = string.Empty;
+            inputTarget.InputCoordinates.Coordinates = new Coordinates(Angle.Zero, Angle.Zero, Epoch.J2000);
+            inputTarget.Rotation = 0;
+            return inputTarget;
         }
 
         private void StatusMonitor_PropertyChanged(object sender, PropertyChangedEventArgs e) {
