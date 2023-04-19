@@ -1,6 +1,7 @@
 # Target Scheduler
 
 ## 0.2.0.1 - 2023-04-XX
+* Increased the timeout in the image save watcher for DB updates
 * Fixed problem saving a sequence as a sequence template
 
 ## 0.2.0.0 - 2023-04-02
