@@ -1,9 +1,10 @@
 # Target Scheduler
 
-## 0.3.0.0 - 2023-04-XX
+## 0.3.0.0 - 2023-04-21
 * Removed start and end date fields from projects
 * Created a custom log for the plugin
 * Added support for database migration scripts
+* Fixed bug with plan end time
 
 ## 0.2.0.1 - 2023-04-20
 * Increased the timeout in the image save watcher for DB updates

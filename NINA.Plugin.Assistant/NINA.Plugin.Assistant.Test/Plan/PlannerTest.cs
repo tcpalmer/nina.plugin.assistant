@@ -374,6 +374,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             window.EndTime.Should().BeSameDateAs(23.January(2023).At(19, 0, 0));
             window.Duration.Should().Be(minimumMinutes * 60);
         }
+
         [Test]
         [Ignore("should test in the future")]
         public void testPerfectPlan() {
@@ -392,6 +393,12 @@ namespace NINA.Plugin.Assistant.Test.Plan {
                 TestContext.WriteLine(plan.PlanSummary());
             }
 
+        }
+
+        [Test]
+        public void testNotEmulator() {
+            // prevent commits with emulator on
+            Planner.USE_EMULATOR.Should().BeFalse();
         }
     }
 

@@ -19,6 +19,8 @@ namespace Assistant.NINAPlugin.Plan {
         private ObserverInfo observerInfo;
         private List<IPlanProject> projects;
 
+        public static readonly bool USE_EMULATOR = false;
+
         public Planner(DateTime atTime, IProfileService profileService) : this(atTime, profileService, null) { }
 
         public Planner(DateTime atTime, IProfileService profileService, List<IPlanProject> projects) {
@@ -40,8 +42,7 @@ namespace Assistant.NINAPlugin.Plan {
         public SchedulerPlan GetPlan(IPlanTarget previousPlanTarget) {
             TSLogger.Debug($"getting current plan for {Utils.FormatDateTimeFull(atTime)}");
 
-            bool emulatePlan = true;
-            if (emulatePlan) {
+            if (USE_EMULATOR) {
                 Notification.ShowInformation("REMINDER: running plan emulation");
                 return new PlannerEmulator(atTime, activeProfile).GetPlan(previousPlanTarget);
             }
@@ -342,8 +343,8 @@ namespace Assistant.NINAPlugin.Plan {
 
             int minimumTimeOnTarget = planTarget.Project.MinimumTime;
             DateTime hardStopTime = hardStartTime.AddMinutes(minimumTimeOnTarget);
-            if (hardStartTime > planTarget.EndTime) {
-                hardStartTime = planTarget.EndTime;
+            if (hardStopTime > planTarget.EndTime) {
+                hardStopTime = planTarget.EndTime;
             }
 
             return new TimeInterval(hardStartTime, hardStopTime);
