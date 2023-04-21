@@ -87,8 +87,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p1.Description = "test project 1";
                     p1.State = ProjectState.Active;
                     p1.ActiveDate = DateTime.Now;
-                    p1.StartDate = DateTime.Now;
-                    p1.EndDate = DateTime.Now.AddDays(100);
 
                     // TODO: set project pref fields
                     //p1Prefs.AddRuleWeight(ProjectPriorityRule.RULE_NAME, ProjectPriorityRule.DEFAULT_WEIGHT);
@@ -127,8 +125,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p2.Description = "test project 2";
                     p2.State = ProjectState.Active;
                     p2.ActiveDate = DateTime.Now;
-                    p2.StartDate = DateTime.Now;
-                    p2.EndDate = DateTime.Now.AddDays(100);
 
                     // TODO: set project pref fields
                     //p2Prefs.AddRuleWeight(ProjectPriorityRule.RULE_NAME, ProjectPriorityRule.DEFAULT_WEIGHT);

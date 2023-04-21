@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Assistant.NINAPlugin.Database.Initial {
+namespace Assistant.NINAPlugin.Database.Migrate {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Assistant.NINAPlugin.Database.Initial {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Assistant.NINAPlugin.Database.Initial.SQL", typeof(SQL).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Assistant.NINAPlugin.Database.Migrate.SQL", typeof(SQL).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,32 +61,18 @@ namespace Assistant.NINAPlugin.Database.Initial {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /* */
+        ///   Looks up a localized string similar to /*
+        ///*/
         ///
-        ///CREATE TABLE IF NOT EXISTS `project` (
-        ///	`Id`			INTEGER NOT NULL,
-        ///	`profileId`		TEXT NOT NULL,
-        ///	`name`			TEXT NOT NULL,
-        ///	`description`	TEXT,
-        ///	`state`			INTEGER,
-        ///	`priority`		INTEGER,
-        ///	`createdate`	INTEGER,
-        ///	`activedate`	INTEGER,
-        ///	`inactivedate`	INTEGER,
-        ///	`startdate`		INTEGER,
-        ///	`enddate`		INTEGER,
-        ///	`minimumtime`	INTEGER,
-        ///	`minimumaltitude`	REAL,
-        ///	`usecustomhorizon`	INTEGER,
-        ///	`horizonoffset`	REAL,
-        ///	`meridianwindow`	INTEGER,
-        ///	`filterswitchfrequency`	INTEGER,
-        ///	`ditherevery`	INTEGER,
-        ///	 [rest of string was truncated]&quot;;.
+        ///ALTER TABLE project DROP COLUMN startdate;
+        ///ALTER TABLE project DROP COLUMN enddate;
+        ///
+        ///PRAGMA user_version = 1;
+        ///.
         /// </summary>
-        internal static string initial_schema {
+        internal static string _1 {
             get {
-                return ResourceManager.GetString("initial_schema", resourceCulture);
+                return ResourceManager.GetString("1", resourceCulture);
             }
         }
     }

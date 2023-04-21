@@ -1,6 +1,9 @@
 # Target Scheduler
 
-## 0.2.0.1 - 2023-04-XX
+## 0.2.1.0 - 2023-04-XX
+* Removed start and end date fields from projects
+
+## 0.2.0.1 - 2023-04-20
 * Increased the timeout in the image save watcher for DB updates
 * Fixed problem saving a sequence as a sequence template
 

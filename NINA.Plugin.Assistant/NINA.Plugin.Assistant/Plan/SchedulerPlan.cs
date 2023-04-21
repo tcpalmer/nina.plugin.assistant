@@ -72,8 +72,6 @@ namespace Assistant.NINAPlugin.Plan {
         DateTime CreateDate { get; set; }
         DateTime? ActiveDate { get; set; }
         DateTime? InactiveDate { get; set; }
-        DateTime? StartDate { get; set; }
-        DateTime? EndDate { get; set; }
 
         int MinimumTime { get; set; }
         double MinimumAltitude { get; set; }
@@ -104,8 +102,6 @@ namespace Assistant.NINAPlugin.Plan {
         public DateTime CreateDate { get; set; }
         public DateTime? ActiveDate { get; set; }
         public DateTime? InactiveDate { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
 
         public int MinimumTime { get; set; }
         public double MinimumAltitude { get; set; }
@@ -133,8 +129,6 @@ namespace Assistant.NINAPlugin.Plan {
             this.CreateDate = project.CreateDate;
             this.ActiveDate = project.ActiveDate;
             this.InactiveDate = project.InactiveDate;
-            this.StartDate = project.StartDate;
-            this.EndDate = project.EndDate;
 
             this.MinimumTime = project.MinimumTime;
             this.MinimumAltitude = project.MinimumAltitude;
@@ -173,8 +167,6 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"Description: {Description}");
             sb.AppendLine($"State: {State}");
             sb.AppendLine($"Priority: {Priority}");
-            sb.AppendLine($"StartDate: {Utils.FormatDateTimeFull(StartDate)}");
-            sb.AppendLine($"EndDate: {Utils.FormatDateTimeFull(EndDate)}");
 
             sb.AppendLine($"MinimumTime: {MinimumTime}");
             sb.AppendLine($"MinimumAltitude: {MinimumAltitude}");

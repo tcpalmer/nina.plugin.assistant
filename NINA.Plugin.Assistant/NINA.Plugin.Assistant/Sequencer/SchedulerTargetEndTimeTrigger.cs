@@ -15,7 +15,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public SchedulerTargetEndTimeTrigger(DateTime endTime) {
             Name = nameof(SchedulerTargetEndTimeTrigger);
-            Category = "Assistant";
+            Category = PlanTargetContainer.INSTRUCTION_CATEGORY;
             this.EndTime = endTime;
         }
 
@@ -24,7 +24,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override Task Execute(ISequenceContainer context, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Info("AssistantTargetEndTimeTrigger: target stop time exceeded, interrupting target container");
+            Logger.Info("Scheduler: target stop time exceeded, interrupting target container");
             this.Parent.Interrupt().Wait(token);
             return Task.CompletedTask;
         }

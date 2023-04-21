@@ -30,8 +30,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public long createDate { get; set; }
         public long? activeDate { get; set; }
         public long? inactiveDate { get; set; }
-        public long? startDate { get; set; }
-        public long? endDate { get; set; }
 
         public int minimumTime { get; set; }
         public double minimumAltitude { get; set; }
@@ -130,36 +128,9 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
-        public DateTime? StartDate {
-            get { return SchedulerDatabaseContext.UnixSecondsToDateTime(startDate); }
-            set {
-                if (value != null) {
-                    value = ((DateTime)value).Date;
-                }
-
-                startDate = SchedulerDatabaseContext.DateTimeToUnixSeconds(value);
-                RaisePropertyChanged(nameof(StartDate));
-            }
-        }
-
-        [NotMapped]
-        public DateTime? EndDate {
-            get { return SchedulerDatabaseContext.UnixSecondsToDateTime(endDate); }
-            set {
-                if (value != null) {
-                    value = ((DateTime)value).Date.AddDays(1).AddSeconds(-1);
-                }
-
-                endDate = SchedulerDatabaseContext.DateTimeToUnixSeconds(value);
-                RaisePropertyChanged(nameof(EndDate));
-            }
-        }
-
-        [NotMapped]
         public bool ActiveNow {
             get {
-                DateTime now = DateTime.Now;
-                return State == ProjectState.Active && StartDate <= now && now <= EndDate;
+                return State == ProjectState.Active;
             }
         }
 
@@ -291,8 +262,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
             project.createDate = createDate;
             project.activeDate = activeDate;
             project.inactiveDate = inactiveDate;
-            project.startDate = startDate;
-            project.endDate = endDate;
             project.minimumTime = minimumTime;
             project.minimumAltitude = minimumAltitude;
             project.useCustomHorizon = useCustomHorizon;
@@ -331,8 +300,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"CreateDate: {CreateDate}");
             sb.AppendLine($"ActiveDate: {ActiveDate}");
             sb.AppendLine($"InactiveDate: {InactiveDate}");
-            sb.AppendLine($"StartDate: {StartDate}");
-            sb.AppendLine($"EndDate: {EndDate}");
             sb.AppendLine($"MinimumTime: {MinimumTime}");
             sb.AppendLine($"MinimumAltitude: {MinimumAltitude}");
             sb.AppendLine($"UseCustomHorizon: {UseCustomHorizon}");

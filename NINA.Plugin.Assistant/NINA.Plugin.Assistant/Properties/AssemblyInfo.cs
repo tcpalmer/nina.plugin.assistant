@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 [assembly: Guid("B4541BA9-7B07-4D71-B8E1-6C73D4933EA0")]
 
 [assembly: AssemblyTitle("Target Scheduler")]
-[assembly: AssemblyDescription("An automated target scheduler for NINA *EXPERIMENTAL RELEASE*")]
+[assembly: AssemblyDescription("An automated target scheduler for NINA *BETA RELEASE*")]
 [assembly: AssemblyCompany("Tom Palmer @tcpalmer")]
 [assembly: AssemblyProduct("Assistant.NINAPlugin")]
 [assembly: AssemblyCopyright("Copyright © 2023")]
@@ -12,8 +12,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: AssemblyVersion("0.2.0.1")]
-[assembly: AssemblyFileVersion("0.2.0.1")]
+[assembly: AssemblyVersion("0.2.1.0")]
+[assembly: AssemblyFileVersion("0.2.1.0")]
 
 // The minimum Version of N.I.N.A. that this plugin is compatible with
 [assembly: AssemblyMetadata("MinimumApplicationVersion", "2.1.0.9001")]
