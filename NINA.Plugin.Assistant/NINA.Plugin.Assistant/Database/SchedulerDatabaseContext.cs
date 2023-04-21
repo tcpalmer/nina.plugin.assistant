@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using NINA.Core.Utility;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Migrations;
@@ -57,26 +58,22 @@ namespace Assistant.NINAPlugin.Database {
         }
 
         public List<Project> GetActiveProjects(string profileId, DateTime atTime) {
-            long secs = DateTimeToUnixSeconds(atTime);
             var projects = ProjectSet
                 .Include("targets.exposureplans.exposuretemplate")
                 .Include("ruleweights")
                 .Where(p =>
                 p.ProfileId.Equals(profileId) &&
-                p.state_col == (int)ProjectState.Active &&
-                p.startDate <= secs && secs <= p.endDate);
+                p.state_col == (int)ProjectState.Active);
             return projects.ToList();
         }
 
         public bool HasActiveTargets(string profileId, DateTime atTime) {
-            long secs = DateTimeToUnixSeconds(atTime);
             List<Project> projects = ProjectSet
                 .AsNoTracking()
                 .Include("targets")
                 .Where(p =>
                 p.ProfileId.Equals(profileId) &&
-                p.state_col == (int)ProjectState.Active &&
-                p.startDate <= secs && secs <= p.endDate).ToList();
+                p.state_col == (int)ProjectState.Active).ToList();
 
             foreach (Project project in projects) {
                 foreach (Target target in project.Targets) {
@@ -473,6 +470,33 @@ namespace Assistant.NINAPlugin.Database {
                         }
                     }
                 }
+
+                // Apply any new migration scripts
+                int version = context.Database.SqlQuery<int>("PRAGMA user_version").First();
+                Dictionary<int, string> migrationScripts = GetMigrationSQL();
+                foreach (KeyValuePair<int, string> scriptEntry in migrationScripts.OrderBy(entry => entry.Key)) {
+
+                    if (scriptEntry.Key <= version) {
+                        continue;
+                    }
+
+                    Logger.Info($"Scheduler: applying database migration script number {scriptEntry.Key}");
+                    using (var transaction = context.Database.BeginTransaction()) {
+                        try {
+                            context.Database.ExecuteSqlCommand(scriptEntry.Value);
+                            transaction.Commit();
+                        }
+                        catch (Exception e) {
+                            Logger.Error($"Scheduler: error applying database migration script number {scriptEntry.Key}: {e.Message} {e.StackTrace}");
+                            RollbackTransaction(transaction);
+                        }
+                    }
+                }
+
+                int newVersion = context.Database.SqlQuery<int>("PRAGMA user_version").First();
+                if (newVersion != version) {
+                    Logger.Info($"Scheduler: database updated: {version} -> {newVersion}");
+                }
             }
 
             private bool DatabaseExists(TContext context) {
@@ -487,6 +511,27 @@ namespace Assistant.NINAPlugin.Database {
                 }
                 catch (Exception ex) {
                     Logger.Error($"failed to load Scheduler database initial SQL: {ex.Message}");
+                    throw ex;
+                }
+            }
+
+            private Dictionary<int, string> GetMigrationSQL() {
+                try {
+                    Dictionary<int, string> migrateScripts = new Dictionary<int, string>();
+                    ResourceManager rm = new ResourceManager("Assistant.NINAPlugin.Database.Migrate.SQL", Assembly.GetExecutingAssembly());
+                    ResourceSet rs = rm.GetResourceSet(System.Globalization.CultureInfo.InvariantCulture, true, false);
+
+                    foreach(DictionaryEntry entry in rs) {
+                        if (Int32.TryParse((string)entry.Key, out int migrateNum)) {
+                            Logger.Debug($"Scheduler: loaded migration script number {migrateNum}");
+                            migrateScripts.Add(migrateNum, (string)entry.Value);
+                        }
+                    }
+
+                    return migrateScripts;
+                }
+                catch (Exception ex) {
+                    Logger.Error($"failed to load Scheduler database migration scripts: {ex.Message}");
                     throw ex;
                 }
             }

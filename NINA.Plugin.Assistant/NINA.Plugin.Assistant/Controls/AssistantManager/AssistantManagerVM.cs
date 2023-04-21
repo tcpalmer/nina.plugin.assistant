@@ -486,8 +486,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ProfileMeta profile = (ProfileMeta)parentItem.Data;
             Project project = new Project(profile.Id.ToString());
             project.Name = "<new project>";
-            project.StartDate = DateTime.Now;
-            project.EndDate = DateTime.Now.AddMonths(1);
 
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 Project newProject = context.SaveProject(project);

@@ -375,6 +375,16 @@
       <DependentUpon>SVGDictionary.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Utils\ExposureTemplateReconciliation.cs" />
+    <Compile Include="Database\Initial\SQL.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SQL.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Database\Migrate\SQL.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SQL.resx</DependentUpon>
+    </Compile>
     <Compile Include="Plan\Scoring\Rules\SettingSoonestRule.cs" />
     <Compile Include="Sequencer\PlanTakeExposure.cs" />
     <Compile Include="Sequencer\PlanTargetContainerStrategy.cs" />
@@ -389,11 +399,6 @@
     <Compile Include="Database\SchedulerDatabaseInteraction.cs" />
     <Compile Include="Database\SchedulerDatabaseContext.cs" />
     <Compile Include="Database\SchedulerPlanLoader.cs" />
-    <Compile Include="Database\Initial\SQL.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>SQL.resx</DependentUpon>
-    </Compile>
     <Compile Include="Database\Schema\AcquiredImage.cs" />
     <Compile Include="Database\Schema\ImageData.cs" />
     <Compile Include="Database\Schema\ExposurePlan.cs" />
@@ -532,9 +537,17 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>SQL.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Database\Migrate\SQL.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SQL.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="Database\Initial\initial_schema.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Database\Migrate\1.sql" />
+    <None Include="Resources\1.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Accord.3.8.0\build\Accord.targets" Condition="Exists('..\packages\Accord.3.8.0\build\Accord.targets')" />

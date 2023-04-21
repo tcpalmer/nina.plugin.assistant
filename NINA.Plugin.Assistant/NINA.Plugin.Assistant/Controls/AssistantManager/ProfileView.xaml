@@ -209,7 +209,7 @@
 
                     <DataGridTemplateColumn Width="50" CanUserSort="False">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="Active" ToolTip="Project state active, date active, and has active targets?" />
+                            <TextBlock Text="Active" ToolTip="Project state active and has active targets with incomplete exposure plans?" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -227,22 +227,22 @@
 
                     <DataGridTemplateColumn Width="*" CanUserSort="False">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="State Date" ToolTip="Project start date" />
+                            <TextBlock Text="Priority" ToolTip="Project priority" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Path=StartDate, StringFormat='{}{0:yyyy/MM/dd}'}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Path=Priority}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
                     <DataGridTemplateColumn Width="*" CanUserSort="False">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="End Date" ToolTip="Project end date" />
+                            <TextBlock Text="Minimum Time" ToolTip="Project minimum acquisition time" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding Path=EndDate, StringFormat='{}{0:yyyy/MM/dd}'}" />
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Path=MinimumTime, Converter={StaticResource ImagingMinutesConverter}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

@@ -41,7 +41,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
         public void TestLoad() {
             using (var context = db.GetContext()) {
 
-                context.HasActiveTargets(profileId, markDate.AddDays(-1)).Should().BeFalse();
                 context.HasActiveTargets("", markDate.AddDays(-1)).Should().BeFalse();
                 context.HasActiveTargets(profileId, markDate.AddDays(1)).Should().BeTrue();
 
@@ -125,9 +124,9 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                 // Test GetActiveProjects
                 projects = context.GetActiveProjects(profileId, markDate);
-                projects.Count.Should().Be(1);
-                p1 = projects[0];
-                p1.Name.Should().Be("Project: M42");
+                projects.Count.Should().Be(2);
+                projects[0].Name.Should().Be("Project: M42");
+                projects[1].Name.Should().Be("Project: IC1805");
             }
         }
 
@@ -276,8 +275,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p1.Description = "";
                     p1.State = ProjectState.Active;
                     p1.ActiveDate = markDate;
-                    p1.StartDate = markDate;
-                    p1.EndDate = markDate.AddDays(10);
                     p1.MinimumTime = 60;
                     p1.MinimumAltitude = 23;
                     p1.UseCustomHorizon = false;
@@ -330,8 +327,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p2.Description = "";
                     p2.State = ProjectState.Active;
                     p2.ActiveDate = markDate;
-                    p2.StartDate = markDate.AddDays(10);
-                    p2.EndDate = markDate.AddDays(20);
                     p2.MinimumTime = 90;
                     p2.MinimumAltitude = 24;
                     p2.UseCustomHorizon = true;

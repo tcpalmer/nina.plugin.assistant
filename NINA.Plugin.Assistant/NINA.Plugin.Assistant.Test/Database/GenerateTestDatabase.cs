@@ -38,8 +38,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p1.Description = "";
                     p1.State = ProjectState.Active;
                     p1.ActiveDate = new DateTime(2022, 12, 1);
-                    p1.StartDate = p1.ActiveDate;
-                    p1.EndDate = new DateTime(2023, 2, 1);
                     // TODO: set new project prefs here
                     /*
                     AssistantProjectPreferencesOLD p1Prefs = new AssistantProjectPreferencesOLD();
@@ -87,8 +85,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p2.Description = "";
                     p2.State = ProjectState.Active;
                     p2.ActiveDate = new DateTime(2022, 12, 1);
-                    p2.StartDate = p2.ActiveDate;
-                    p2.EndDate = new DateTime(2023, 2, 1);
 
                     Target t2 = new Target();
                     t2.Name = "IC1805";
@@ -157,8 +153,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p1.Description = "";
                     p1.State = ProjectState.Active;
                     p1.ActiveDate = atTime.AddDays(-1);
-                    p1.StartDate = atTime;
-                    p1.EndDate = atTime.AddDays(100);
                     p1.MinimumTime = 60;
                     p1.MinimumAltitude = 22;
                     p1.UseCustomHorizon = false;
@@ -198,8 +192,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p2.Description = "";
                     p2.State = ProjectState.Active;
                     p2.ActiveDate = atTime.AddDays(-1);
-                    p2.StartDate = atTime;
-                    p2.EndDate = atTime.AddDays(100);
 
                     SetDefaultRuleWeights(p2);
 
@@ -240,8 +232,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p1.Description = "";
                     p1.State = ProjectState.Active;
                     p1.ActiveDate = atTime.AddDays(-1);
-                    p1.StartDate = atTime;
-                    p1.EndDate = atTime.AddDays(100);
                     p1.MinimumTime = 30;
                     p1.MinimumAltitude = 0;
                     p1.UseCustomHorizon = false;
@@ -376,8 +366,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     pLRGB.Description = "";
                     pLRGB.State = ProjectState.Active;
                     pLRGB.ActiveDate = atTime.AddDays(-1);
-                    pLRGB.StartDate = atTime;
-                    pLRGB.EndDate = atTime.AddYears(10);
                     pLRGB.MinimumTime = 30;
                     pLRGB.MinimumAltitude = 0;
                     pLRGB.UseCustomHorizon = false;
@@ -438,8 +426,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     pNB.Description = "";
                     pNB.State = ProjectState.Active;
                     pNB.ActiveDate = atTime.AddDays(-1);
-                    pNB.StartDate = atTime;
-                    pNB.EndDate = atTime.AddYears(10);
                     pNB.MinimumTime = 30;
                     pNB.MinimumAltitude = 0;
                     pNB.UseCustomHorizon = false;

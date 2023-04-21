@@ -92,11 +92,11 @@
 
         <UniformGrid
             Width="280"
-            Height="160"
+            Height="90"
             Margin="12,0,0,6"
             HorizontalAlignment="Left"
             Columns="2"
-            Rows="6">
+            Rows="4">
 
             <TextBlock
                 VerticalAlignment="Center"
@@ -165,63 +165,8 @@
                 Text="{Binding ProjectProxy.Project.Priority}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
-            <TextBlock
-                VerticalAlignment="Center"
-                FontWeight="Bold"
-                Text="Start Date"
-                ToolTip="Set the start date of the project" />
-            <DatePicker Margin="0,0,0,0" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
-                <DatePicker.Resources>
-                    <local:BindingHelper x:Key="helper" Data="{Binding}" />
-                </DatePicker.Resources>
-                <DatePicker.SelectedDate>
-                    <Binding Path="ProjectProxy.Project.StartDate">
-                        <Binding.ValidationRules>
-                            <rules:DateRangeRule>
-                                <rules:DateRangeRule.ValidRange>
-                                    <rules:DateCheck CheckBefore="True" CheckDate="{Binding Data.ProjectProxy.Project.EndDate, Source={StaticResource helper}}" />
-                                </rules:DateRangeRule.ValidRange>
-                            </rules:DateRangeRule>
-
-                        </Binding.ValidationRules>
-                    </Binding>
-                </DatePicker.SelectedDate>
-            </DatePicker>
-            <TextBlock
-                MaxHeight="20"
-                Margin="3,3,0,0"
-                Text="{Binding ProjectProxy.Project.StartDate, StringFormat='{}{0:yyyy-MM-dd}'}"
-                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
-            <TextBlock
-                VerticalAlignment="Center"
-                FontWeight="Bold"
-                Text="End Date"
-                ToolTip="Set the start date of the project" />
-            <DatePicker Margin="0,0,0,0" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
-                <DatePicker.Resources>
-                    <local:BindingHelper x:Key="helper" Data="{Binding}" />
-                </DatePicker.Resources>
-                <DatePicker.SelectedDate>
-                    <Binding Path="ProjectProxy.Project.EndDate">
-                        <Binding.ValidationRules>
-                            <rules:DateRangeRule>
-                                <rules:DateRangeRule.ValidRange>
-                                    <rules:DateCheck CheckBefore="False" CheckDate="{Binding Data.ProjectProxy.Project.StartDate, Source={StaticResource helper}}" />
-                                </rules:DateRangeRule.ValidRange>
-                            </rules:DateRangeRule>
-
-                        </Binding.ValidationRules>
-                    </Binding>
-                </DatePicker.SelectedDate>
-            </DatePicker>
-            <TextBlock
-                MaxHeight="20"
-                Margin="3,3,0,0"
-                Text="{Binding ProjectProxy.Project.EndDate, StringFormat='{}{0:yyyy-MM-dd}'}"
-                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
         </UniformGrid>
+
         <UniformGrid
             Width="280"
             Height="200"
