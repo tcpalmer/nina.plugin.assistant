@@ -1,4 +1,5 @@
-﻿using NINA.Core.Utility;
+﻿using Assistant.NINAPlugin.Util;
+using NINA.Core.Utility;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
 using System;
@@ -42,7 +43,7 @@ namespace Assistant.NINAPlugin.Controls.Util {
                 }
             }
             catch (Exception e) {
-                Logger.Error($"failed to read profile at {profileMeta.Location}: {e.Message} {e.StackTrace}");
+                TSLogger.Error($"failed to read profile at {profileMeta.Location}: {e.Message} {e.StackTrace}");
                 return null;
             }
         }

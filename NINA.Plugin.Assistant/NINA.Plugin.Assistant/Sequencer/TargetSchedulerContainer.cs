@@ -118,12 +118,12 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void LoopConditions_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
-            Logger.Debug("IN LoopConditions_CollectionChanged");
+            TSLogger.Debug("IN LoopConditions_CollectionChanged");
             Notification.ShowWarning("you don't want to do this");
         }
 
         public override void Initialize() {
-            Logger.Debug("Scheduler instruction: Initialize");
+            TSLogger.Debug("Scheduler instruction: Initialize");
 
             if (StatusMonitor != null) {
                 StatusMonitor.Reset();
@@ -135,7 +135,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override void ResetProgress() {
-            Logger.Debug("Scheduler instruction: ResetProgress");
+            TSLogger.Debug("Scheduler instruction: ResetProgress");
 
             if (StatusMonitor != null) {
                 StatusMonitor.Reset();
@@ -146,12 +146,12 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override void Teardown() {
-            Logger.Debug("Scheduler instruction: Teardown");
+            TSLogger.Debug("Scheduler instruction: Teardown");
             base.Teardown();
         }
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Debug("Scheduler instruction: Execute");
+            TSLogger.Debug("Scheduler instruction: Execute");
 
             IPlanTarget previousPlanTarget = null;
 
@@ -160,12 +160,12 @@ namespace Assistant.NINAPlugin.Sequencer {
                 SchedulerPlan plan = new Planner(atTime, profileService).GetPlan(previousPlanTarget);
 
                 if (plan == null) {
-                    Logger.Info("Scheduler: planner returned empty plan, done");
+                    TSLogger.Info("planner returned empty plan, done");
                     return Task.CompletedTask;
                 }
 
                 if (plan.WaitForNextTargetTime != null) {
-                    Logger.Info("Scheduler: planner waiting for next target to become available");
+                    TSLogger.Info("planner waiting for next target to become available");
                     StatusMonitor.BeginWait((DateTime)plan.WaitForNextTargetTime);
                     WaitForNextTarget(plan.WaitForNextTargetTime, progress, token);
                     StatusMonitor.EndWait();
@@ -174,7 +174,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 else {
                     try {
                         IPlanTarget planTarget = plan.PlanTarget;
-                        Logger.Info($"Scheduler: starting execution of plan target: {planTarget.Name}");
+                        TSLogger.Info($"starting execution of plan target: {planTarget.Name}");
                         SetTarget(atTime, planTarget);
                         StatusMonitor.BeginTarget(planTarget);
 
@@ -188,8 +188,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                             throw ex;
                         }
 
-                        Logger.Error($"Scheduler: exception executing plan: {ex}");
-                        throw new SequenceEntityFailedException($"Scheduler: exception executing plan: {ex.Message}", ex);
+                        TSLogger.Error($"exception executing plan: {ex}");
+                        throw new SequenceEntityFailedException($"exception executing plan: {ex.Message}", ex);
                     }
                     finally {
                         ClearTarget();
@@ -200,13 +200,13 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void WaitForNextTarget(DateTime? waitForNextTargetTime, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Info($"Scheduler: stopping guiding/tracking, then waiting for next target to be available at {Utils.FormatDateTimeFull(waitForNextTargetTime)}");
+            TSLogger.Info($"stopping guiding/tracking, then waiting for next target to be available at {Utils.FormatDateTimeFull(waitForNextTargetTime)}");
             SequenceCommands.StopGuiding(guiderMediator, token);
             SequenceCommands.SetTelescopeTracking(telescopeMediator, TrackingMode.Stopped, token);
 
             TimeSpan duration = ((DateTime)waitForNextTargetTime) - DateTime.Now;
             CoreUtil.Wait(duration, token, progress).Wait(token);
-            Logger.Debug("Scheduler: done waiting for next target");
+            TSLogger.Debug("done waiting for next target");
         }
 
         private PlanTargetContainer GetPlanTargetContainer(IPlanTarget previousPlanTarget, SchedulerPlan plan, SchedulerStatusMonitor monitor) {

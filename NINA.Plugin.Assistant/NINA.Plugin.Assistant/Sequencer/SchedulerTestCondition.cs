@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Assistant.NINAPlugin.Util;
+using Newtonsoft.Json;
 using NINA.Core.Utility;
 using NINA.Sequencer.Conditions;
 using NINA.Sequencer.SequenceItem;
@@ -18,7 +19,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         public SchedulerTestCondition() : base() { }
 
         public override bool Check(ISequenceItem previousItem, ISequenceItem nextItem) {
-            Logger.Debug($"TEST CONDITION: Check p={GetParentType()}");
+            TSLogger.Debug($"TEST CONDITION: Check p={GetParentType()}");
             return base.Check(previousItem, nextItem);
         }
 

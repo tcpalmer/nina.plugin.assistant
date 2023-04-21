@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.Util;
 using NINA.Core.Utility;
 using NINA.Profile.Interfaces;
 using System;
@@ -23,7 +24,7 @@ namespace Assistant.NINAPlugin.Database {
             }
 
             if (projects == null || projects.Count == 0) {
-                Logger.Warning("Assistant: no projects are active and within start/end dates at planning time");
+                TSLogger.Warning("Assistant: no projects are active at planning time");
                 return null;
             }
 
@@ -45,7 +46,7 @@ namespace Assistant.NINAPlugin.Database {
             }
 
             if (!haveActiveTargets) {
-                Logger.Warning("Assistant: no targets with exposure plans are active for active projects at planning time");
+                TSLogger.Warning("Assistant: no targets with exposure plans are active for active projects at planning time");
                 return null;
             }
 

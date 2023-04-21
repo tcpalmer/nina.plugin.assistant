@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace Assistant.NINAPlugin.Plan {
 
     /// <summary>
-    /// PlannerEmulator isolates the NINA Assistant sequence instructions from the Planner, allowing comprehensive
+    /// PlannerEmulator isolates the NINA Scheduler sequence instructions from the Planner, allowing comprehensive
     /// testing of the sequencer operation without having to have an working database or running planner that relies
     /// on the current time, nighttime circumstances, etc.
     /// </summary>

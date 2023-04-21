@@ -120,12 +120,12 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
 
             try {
                 DateTime atDateTime = PlanDate.Date.AddHours(PlanHours).AddMinutes(PlanMinutes).AddSeconds(PlanSeconds);
-                Logger.Debug($"running plan preview for {Utils.FormatDateTimeFull(atDateTime)}, profileId={SelectedProfileId}");
+                TSLogger.Debug($"running plan preview for {Utils.FormatDateTimeFull(atDateTime)}, profileId={SelectedProfileId}");
 
                 List<IPlanProject> projects = new SchedulerPlanLoader().LoadActiveProjects(database.GetContext(), GetProfile(SelectedProfileId), atDateTime);
 
                 if (projects == null) {
-                    Logger.Debug($"no active projects for {atDateTime}, profileId={SelectedProfileId}");
+                    TSLogger.Debug($"no active projects for {atDateTime}, profileId={SelectedProfileId}");
                     InstructionList = list;
 
                     string profileName = ProfileChoices.First(p => p.Key == selectedProfileId).Value;
@@ -192,6 +192,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                             continue;
                         }
 
+                        TSLogger.Error($"unknown instruction type in plan preview: {instruction.GetType().FullName}");
                         throw new Exception($"unknown instruction type in plan preview: {instruction.GetType().FullName}");
                     }
                 }
@@ -199,7 +200,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                 InstructionList = list;
             }
             catch (Exception ex) {
-                Logger.Error($"failed to run plan preview: {ex.Message} {ex.StackTrace}");
+                TSLogger.Error($"failed to run plan preview: {ex.Message} {ex.StackTrace}");
                 InstructionList = null;
             }
         }
@@ -225,6 +226,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                 }
             }
 
+            TSLogger.Error($"failed to get profile for ID={profileId}");
             throw new Exception($"failed to get profile for ID={profileId}");
         }
 

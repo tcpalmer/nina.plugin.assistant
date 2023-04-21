@@ -1,4 +1,5 @@
-﻿using NINA.Core.Utility;
+﻿using Assistant.NINAPlugin.Util;
+using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
 using System;
 using System.Collections.Generic;
@@ -41,7 +42,7 @@ namespace Assistant.NINAPlugin.Database {
             try {
                 string renamed = $"{DATABASE_BASENAME}-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}-backup.{DATABASE_SUFFIX}";
                 string newFileName = Path.Combine(AssistantPlugin.PLUGIN_HOME, renamed);
-                Logger.Debug($"backing up Target Scheduler database to {newFileName}");
+                TSLogger.Debug($"backing up Target Scheduler database to {newFileName}");
                 File.Copy(sourceFile, newFileName);
 
                 // Keep only the most recent N backups
@@ -55,14 +56,14 @@ namespace Assistant.NINAPlugin.Database {
 
                 for (int i = DATABASE_BACKUPS; i < dbFiles.Count; i++) {
                     string filename = dbFiles[i].FullName;
-                    Logger.Debug($"removing older Target Scheduler backup database file: {filename}");
+                    TSLogger.Debug($"removing older backup database file: {filename}");
                     File.Delete(filename);
                 }
 
             }
             catch (Exception e) {
-                Logger.Error($"failed to backup Target Scheduler database: {e.Message}:{Environment.NewLine}{e.StackTrace}");
-                Notification.ShowError($"Failed to backup Target Scheduler database, see log for errors");
+                TSLogger.Error($"failed to backup database: {e.Message}:{Environment.NewLine}{e.StackTrace}");
+                Notification.ShowWarning($"Failed to backup Target Scheduler database, see log for errors");
             }
         }
     }

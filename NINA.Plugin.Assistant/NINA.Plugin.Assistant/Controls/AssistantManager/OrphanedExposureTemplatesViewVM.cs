@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Util;
 using LinqKit;
 using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
@@ -83,7 +84,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             if (exposureTemplate != null) {
                 string selectedProfileName = ProfileChoices.Where(p => p.Key == SelectedProfileId).FirstOrDefault().Value;
                 if (MyMessageBox.Show($"Orphaned Exposure Template '{exposureTemplate.Name}' will be moved to profile '{selectedProfileName}'.  Are you sure?", "Move Project?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
-                    Logger.Info($"Scheduler: moving orphaned Exposure Template '{exposureTemplate.Name}' to '{selectedProfileName}'");
+                    TSLogger.Info($"moving orphaned Exposure Template '{exposureTemplate.Name}' to '{selectedProfileName}'");
                     if (managerVM.MoveOrphanedExposureTemplate(exposureTemplate, SelectedProfileId)) {
                         ExposureTemplates.Remove(exposureTemplate);
                         RaisePropertyChanged(nameof(ExposureTemplates));
@@ -96,7 +97,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ExposureTemplate exposureTemplate = obj as ExposureTemplate;
             if (exposureTemplate != null) {
                 if (MyMessageBox.Show($"Orphaned Exposure Template '{exposureTemplate.Name}' will be permanently deleted.  Are you sure?", "Delete Exposure Template?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
-                    Logger.Info($"Scheduler: deleting orphaned Exposure Template '{exposureTemplate.Name}'");
+                    TSLogger.Info($"deleting orphaned Exposure Template '{exposureTemplate.Name}'");
                     if (managerVM.DeleteOrphanedExposureTemplate(exposureTemplate)) {
                         ExposureTemplates.Remove(exposureTemplate);
                         RaisePropertyChanged(nameof(ExposureTemplates));

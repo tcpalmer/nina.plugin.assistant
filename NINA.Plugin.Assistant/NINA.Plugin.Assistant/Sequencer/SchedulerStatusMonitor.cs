@@ -75,6 +75,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public string GetFilterName(string planItemId) {
             if (CurrentTargetStatus == null) {
+                TSLogger.Error("currentTargetStatus is unexpectedly null");
                 throw new Exception("currentTargetStatus is unexpectedly null");
             }
 
@@ -94,6 +95,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public void ItemStart(string itemId, string sequenceItemName) {
             if (CurrentTargetStatus == null) {
+                TSLogger.Error("currentTargetStatus is unexpectedly null");
                 throw new Exception("currentTargetStatus is unexpectedly null");
             }
 
@@ -103,6 +105,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public void ItemFinish(string itemId, string sequenceItemName) {
             if (CurrentTargetStatus == null) {
+                TSLogger.Error("currentTargetStatus is unexpectedly null");
                 throw new Exception("currentTargetStatus is unexpectedly null");
             }
 

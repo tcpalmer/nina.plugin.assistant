@@ -114,7 +114,7 @@ namespace Assistant.NINAPlugin.Astrometry {
         /// <returns></returns>
         public static double GetMoonAvoidanceLorentzianSeparation(double moonAge, double distance, int width) {
             if (width == 0) {
-                Logger.Error("moon avoidance width cannot be zero");
+                TSLogger.Error("moon avoidance width cannot be zero");
                 return 0;
             }
 

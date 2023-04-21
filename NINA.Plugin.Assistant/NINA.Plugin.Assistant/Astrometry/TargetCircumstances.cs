@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Astrometry.Solver;
 using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Utility;
 using System;
@@ -30,7 +31,7 @@ namespace Assistant.NINAPlugin.Astrometry {
             this.endTime = twilightSpan.EndTime;
 
             string cacheKey = GetCacheKey();
-            Logger.Trace($"TargetCircumstances cache key: {cacheKey}");
+            TSLogger.Trace($"TargetCircumstances cache key: {cacheKey}");
 
             TargetCircumstances targetCircumstances = TargetCircumstancesCache.GetTargetCircumstances(cacheKey);
             if (targetCircumstances == null) {

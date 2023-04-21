@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Util;
 using NINA.Core.Model.Equipment;
 using NINA.Core.Utility;
 using NINA.Profile;
@@ -59,7 +60,7 @@ namespace Assistant.NINAPlugin.Controls.Util {
 
                     if (list != null) {
                         list.ForEach(filterName => {
-                            Logger.Debug($"Scheduler: ExposureTemplate missing for filter '{filterName}' in profile '{profileId}', adding default");
+                            TSLogger.Debug($"ExposureTemplate missing for filter '{filterName}' in profile '{profileId}', adding default");
                             string name = $"{filterName} Default";
                             missingExposureTemplates.Add(new ExposureTemplate(profileId, name, filterName));
                         });
