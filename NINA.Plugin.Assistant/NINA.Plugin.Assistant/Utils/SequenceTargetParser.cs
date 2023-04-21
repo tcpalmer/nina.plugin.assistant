@@ -43,6 +43,7 @@ namespace Assistant.NINAPlugin.Util {
                 }
             }
 
+            TSLogger.Error($"failed to parse sequence target json from file (key lines not found): {pathToFile}");
             throw new Exception($"failed to parse sequence target json from file (key lines not found): {pathToFile}");
         }
 

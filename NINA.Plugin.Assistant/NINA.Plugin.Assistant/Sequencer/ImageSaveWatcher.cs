@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.Util;
 using NINA.Core.Utility;
 using NINA.WPF.Base.Interfaces.Mediator;
 using System;
@@ -43,16 +44,16 @@ namespace Assistant.NINAPlugin.Sequencer {
         public void Start() {
             exposureDictionary.Clear();
             imageSaveMediator.ImageSaved += ImageSaved;
-            Logger.Debug($"Scheduler: start watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
+            TSLogger.Debug($"start watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
         }
 
         public void WaitForExposure(int imageId, int exposurePlanDatabaseId) {
-            Logger.Debug($"Scheduler: registering waitFor exposure: iId={imageId} eId={exposurePlanDatabaseId}");
+            TSLogger.Debug($"registering waitFor exposure: iId={imageId} eId={exposurePlanDatabaseId}");
             exposureDictionary.TryAdd(imageId, exposurePlanDatabaseId);
         }
 
         public void Stop() {
-            Logger.Debug($"Scheduler: stopping image save watcher, waiting for exposures to complete:\n{ExposureIdsLog()}");
+            TSLogger.Debug($"stopping image save watcher, waiting for exposures to complete:\n{ExposureIdsLog()}");
 
             // We need to wait on all exposures to process (and the database to be updated) before we can stop.
             // Otherwise, the planner will be called again with the exposure plan counts not reflecting the
@@ -62,7 +63,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             int count = 0;
             while (!exposureDictionary.IsEmpty) {
                 if (++count == 200) {
-                    Logger.Warning($"Scheduler: timed out waiting on all exposures to be processed and scheduler database updated.  Remaining:\n{ExposureIdsLog()}");
+                    TSLogger.Warning($"timed out waiting on all exposures to be processed and scheduler database updated.  Remaining:\n{ExposureIdsLog()}");
                     break;
                 }
 
@@ -70,7 +71,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             imageSaveMediator.ImageSaved -= ImageSaved;
-            Logger.Debug($"Scheduler: stopped watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
+            TSLogger.Debug($"stopped watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
         }
 
         private void ImageSaved(object sender, ImageSavedEventArgs msg) {
@@ -80,7 +81,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             int? imageId = msg.MetaData?.Image?.Id;
             bool accepted = enableGrader ? new ImageGrader().GradeImage(planTarget, msg) : false;
-            Logger.Debug($"Scheduler: image save for {planTarget.Project.Name}/{planTarget.Name}, filter={msg.Filter}, grader enabled={enableGrader}, accepted={accepted}, image id={imageId}");
+            TSLogger.Debug($"image save for {planTarget.Project.Name}/{planTarget.Name}, filter={msg.Filter}, grader enabled={enableGrader}, accepted={accepted}, image id={imageId}");
 
             UpdateDatabase(planTarget, msg.Filter, accepted, msg, imageId);
 
@@ -89,7 +90,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 exposureDictionary.TryRemove((int)imageId, out old);
             }
 
-            Logger.Debug($"Scheduler: ImageSaved: id={imageId}");
+            TSLogger.Debug($"ImageSaved: id={imageId}");
         }
 
         private void UpdateDatabase(IPlanTarget planTarget, string filterName, bool accepted, ImageSavedEventArgs msg, int? imageId) {
@@ -114,14 +115,14 @@ namespace Assistant.NINAPlugin.Sequencer {
                                     context.ExposurePlanSet.AddOrUpdate(exposurePlan);
                                 }
                                 else {
-                                    Logger.Warning($"Scheduler: failed to get exposure plan for id={exposureDatabaseId}, image id={imageId}");
+                                    TSLogger.Warning($"failed to get exposure plan for id={exposureDatabaseId}, image id={imageId}");
                                 }
                             } else {
-                                Logger.Warning($"Scheduler: not waiting for image id={imageId}");
+                                TSLogger.Warning($"not waiting for image id={imageId}");
                             }
                         }
                         else {
-                            Logger.Warning("Scheduler: no image id to determine exposure plan database id?!");
+                            TSLogger.Warning("no image id to determine exposure plan database id?!");
                         }
 
                         // Save the acquired image record
@@ -138,7 +139,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         transaction.Commit();
                     }
                     catch (Exception e) {
-                        Logger.Error($"Scheduler: exception updating database for saved image: {e.Message}\n{e.StackTrace}");
+                        TSLogger.Error($"exception updating database for saved image: {e.Message}\n{e.StackTrace}");
                     }
                 }
             }
@@ -157,15 +158,15 @@ namespace Assistant.NINAPlugin.Sequencer {
     public class ImageSaveWatcherEmulator : IImageSaveWatcher {
 
         public void Start() {
-            Logger.Debug("Scheduler ImageSaveWatcherEmulator Start");
+            TSLogger.Debug("Scheduler ImageSaveWatcherEmulator Start");
         }
 
         public void WaitForExposure(int imageId, int exposurePlanDatabaseId) {
-            Logger.Debug($"WaitForExposure: iId={imageId} eId={exposurePlanDatabaseId}");
+            TSLogger.Debug($"WaitForExposure: iId={imageId} eId={exposurePlanDatabaseId}");
         }
 
         public void Stop() {
-            Logger.Debug("Scheduler ImageSaveWatcherEmulator Stop");
+            TSLogger.Debug("Scheduler ImageSaveWatcherEmulator Stop");
         }
     }
 

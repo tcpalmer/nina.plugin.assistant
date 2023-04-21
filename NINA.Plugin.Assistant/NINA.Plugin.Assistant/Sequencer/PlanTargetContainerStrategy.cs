@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.Util;
 using NINA.Core.Enum;
 using NINA.Core.Model;
 using NINA.Core.Utility;
@@ -70,12 +71,13 @@ namespace Assistant.NINAPlugin.Sequencer {
                     continue;
                 }
 
+                TSLogger.Error($"Unknown instruction type in PlanTargetContainerStrategy: {instruction.GetType()}");
                 throw new Exception($"Unknown instruction type in PlanTargetContainerStrategy: {instruction.GetType()}");
             }
         }
 
         public async Task Execute(ISequenceContainer context, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Debug("PlanTargetContainerStrategy: Execute");
+            TSLogger.Debug("PlanTargetContainerStrategy: Execute");
 
             ISequenceItem previous = null;
             ISequenceItem next = null;

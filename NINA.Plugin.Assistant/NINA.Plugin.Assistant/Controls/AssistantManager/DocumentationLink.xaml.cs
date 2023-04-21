@@ -1,4 +1,5 @@
-﻿using NINA.Core.Utility;
+﻿using Assistant.NINAPlugin.Util;
+using NINA.Core.Utility;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -20,7 +21,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 Process.Start(URL);
             }
             catch (Exception ex) {
-                Logger.Error($"failed to open HTTP link {URL}: {ex.Message}");
+                TSLogger.Error($"failed to open HTTP link {URL}: {ex.Message}");
             }
 
             e.Handled = true;

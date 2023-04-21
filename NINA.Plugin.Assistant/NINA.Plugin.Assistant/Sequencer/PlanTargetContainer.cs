@@ -116,7 +116,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Debug("Scheduler: executing target container");
+            TSLogger.Debug("executing target container");
 
             try {
                 AddEndTimeTrigger(plan.PlanTarget);
@@ -143,26 +143,26 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 Items.Clear();
                 Triggers.Clear();
-                Logger.Debug("Scheduler: done executing target container");
+                TSLogger.Debug("done executing target container");
             }
 
             return Task.CompletedTask;
         }
 
         public override Task Interrupt() {
-            Logger.Warning("PlanTargetContainer: interrupt");
+            TSLogger.Warning("PlanTargetContainer: interrupt");
             return base.Interrupt();
         }
 
         private void AddEndTimeTrigger(IPlanTarget planTarget) {
-            Logger.Info($"Scheduler: adding target end time trigger, run until: {Utils.FormatDateTimeFull(planTarget.EndTime)}");
+            TSLogger.Info($"adding target end time trigger, run until: {Utils.FormatDateTimeFull(planTarget.EndTime)}");
             Add(new SchedulerTargetEndTimeTrigger(planTarget.EndTime));
         }
 
         private void AddDitherTrigger(IPlanTarget planTarget) {
             int ditherEvery = planTarget.Project.DitherEvery;
             if (ditherEvery > 0) {
-                Logger.Info($"Scheduler: adding dither trigger: every {ditherEvery} exposures");
+                TSLogger.Info($"adding dither trigger: every {ditherEvery} exposures");
                 DitherAfterExposures ditherTrigger = new DitherAfterExposures(guiderMediator, imageHistoryVM, profileService);
                 ditherTrigger.AfterExposures = ditherEvery;
                 Add(ditherTrigger);
@@ -191,7 +191,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             foreach (IPlanInstruction instruction in plan.PlanInstructions) {
 
                 if (instruction is PlanMessage) {
-                    Logger.Debug($"exp plan msg: {((PlanMessage)instruction).msg}");
+                    TSLogger.Debug($"exp plan msg: {((PlanMessage)instruction).msg}");
                     continue;
                 }
 
@@ -221,6 +221,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     continue;
                 }
 
+                TSLogger.Error($"unknown instruction type: {instruction.GetType().FullName}");
                 throw new Exception($"unknown instruction type: {instruction.GetType().FullName}");
             }
         }
@@ -235,7 +236,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             //Notification.ShowInformation("REMINDER: center is disabled for slews");
 
             string with = isPlateSolve ? "with" : "without";
-            Logger.Info($"Scheduler: slew ({with} center): {Utils.FormatCoordinates(planTarget.Coordinates)}");
+            TSLogger.Info($"slew ({with} center): {Utils.FormatCoordinates(planTarget.Coordinates)}");
 
             if (isPlateSolve) {
                 if (planTarget.Rotation == 0) {
@@ -261,7 +262,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void AddSwitchFilter(IPlanExposure planExposure) {
-            Logger.Info($"Scheduler: adding switch filter: {planExposure.FilterName}");
+            TSLogger.Info($"adding switch filter: {planExposure.FilterName}");
 
             SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator);
             SetItemDefaults(switchFilter, nameof(SwitchFilter));
@@ -274,7 +275,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             int? readoutMode = planExposure.ReadoutMode;
             readoutMode = (readoutMode == null || readoutMode < 0) ? 0 : readoutMode;
 
-            Logger.Info($"Scheduler: adding set readout mode: {readoutMode}");
+            TSLogger.Info($"adding set readout mode: {readoutMode}");
             SetReadoutMode setReadoutMode = new SetReadoutMode(cameraMediator);
             SetItemDefaults(setReadoutMode, nameof(SetReadoutMode));
 
@@ -284,7 +285,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void AddTakeExposure(IPlanExposure planExposure) {
-            Logger.Info($"Scheduler: adding take exposure: {planExposure.FilterName}");
+            TSLogger.Info($"adding take exposure: {planExposure.FilterName}");
 
             PlanTakeExposure takeExposure = new PlanTakeExposure(parentContainer,
                         profileService,

@@ -105,7 +105,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     Target = target;
                 }
                 catch (Exception e) {
-                    Logger.Error($"failed to read sequence target at {pathToFile}: {e.Message} {e.StackTrace}");
+                    TSLogger.Error($"failed to read sequence target at {pathToFile}: {e.Message} {e.StackTrace}");
                     Notification.ShowError($"Failed to import target from {pathToFile}");
                     return;
                 }
@@ -142,7 +142,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 return null;
             }
             catch (Exception e) {
-                Logger.Error($"failed to get coordinates from planetarium: {e.Message}");
+                TSLogger.Error($"failed to get coordinates from planetarium: {e.Message}");
                 Notification.ShowError($"Failed to get coordinates from planetarium: {e.Message}");
                 return null;
             }

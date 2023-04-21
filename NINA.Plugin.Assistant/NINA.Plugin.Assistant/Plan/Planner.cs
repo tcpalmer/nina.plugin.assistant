@@ -32,14 +32,15 @@ namespace Assistant.NINAPlugin.Plan {
             };
 
             if (AstrometryUtils.IsAbovePolarCircle(observerInfo)) {
+                TSLogger.Error("observer location is above a polar circle - not supported");
                 throw new Exception("Scheduler: observer location is above a polar circle - not supported");
             }
         }
 
         public SchedulerPlan GetPlan(IPlanTarget previousPlanTarget) {
-            Logger.Debug($"Scheduler: getting current plan for {Utils.FormatDateTimeFull(atTime)}");
+            TSLogger.Debug($"getting current plan for {Utils.FormatDateTimeFull(atTime)}");
 
-            bool emulatePlan = false;
+            bool emulatePlan = true;
             if (emulatePlan) {
                 Notification.ShowInformation("REMINDER: running plan emulation");
                 return new PlannerEmulator(atTime, activeProfile).GetPlan(previousPlanTarget);
@@ -52,13 +53,13 @@ namespace Assistant.NINAPlugin.Plan {
                     }
 
                     projects = FilterForIncomplete(projects);
-                    Logger.Trace($"Scheduler: GetPlan after FilterForIncomplete:\n{PlanProject.ListToString(projects)}");
+                    TSLogger.Trace($"GetPlan after FilterForIncomplete:\n{PlanProject.ListToString(projects)}");
 
                     projects = FilterForVisibility(projects);
-                    Logger.Trace($"Scheduler: GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
+                    TSLogger.Trace($"GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
 
                     projects = FilterForMoonAvoidance(projects);
-                    Logger.Trace($"Scheduler: GetPlan after FilterForMoonAvoidance:\n{PlanProject.ListToString(projects)}");
+                    TSLogger.Trace($"GetPlan after FilterForMoonAvoidance:\n{PlanProject.ListToString(projects)}");
 
                     DateTime? waitForVisibleNow = CheckForVisibleNow(projects);
                     if (waitForVisibleNow != null) {
@@ -69,15 +70,15 @@ namespace Assistant.NINAPlugin.Plan {
                     IPlanTarget planTarget = SelectTargetByScore(projects, scoringEngine);
 
                     if (planTarget != null) {
-                        Logger.Trace($"Scheduler Planner: highest scoring (or only) target:\n{planTarget}");
-                        Logger.Debug($"Scheduler Planner: highest scoring (or only) target: {planTarget.Name}");
+                        TSLogger.Trace($"Scheduler Planner: highest scoring (or only) target:\n{planTarget}");
+                        TSLogger.Debug($"Scheduler Planner: highest scoring (or only) target: {planTarget.Name}");
 
                         TimeInterval targetWindow = GetTargetTimeWindow(atTime, planTarget);
                         List<IPlanInstruction> planInstructions = PlanInstructions(planTarget, previousPlanTarget, targetWindow);
                         return new SchedulerPlan(planTarget, targetWindow, planInstructions);
                     }
                     else {
-                        Logger.Debug("Scheduler Planner: no target selected");
+                        TSLogger.Debug("Scheduler Planner: no target selected");
                         return null;
                     }
                 }
@@ -86,7 +87,7 @@ namespace Assistant.NINAPlugin.Plan {
                         throw ex;
                     }
 
-                    Logger.Error($"Scheduler: exception generating plan: {ex.StackTrace}");
+                    TSLogger.Error($"exception generating plan: {ex.StackTrace}");
                     throw new SequenceEntityFailedException($"Scheduler: exception generating plan: {ex.Message}", ex);
                 }
             }
@@ -185,7 +186,7 @@ namespace Assistant.NINAPlugin.Plan {
                     if (planTarget.Rejected) { continue; }
 
                     if (!AstrometryUtils.RisesAtLocation(observerInfo, planTarget.Coordinates)) {
-                        Logger.Warning($"Scheduler: target {planProject.Name}/{planTarget.Name} never rises at location - skipping");
+                        TSLogger.Warning($"target {planProject.Name}/{planTarget.Name} never rises at location - skipping");
                         SetRejected(planTarget, Reasons.TargetNeverRises);
                         continue;
                     }
@@ -302,7 +303,7 @@ namespace Assistant.NINAPlugin.Plan {
                 foreach (IPlanTarget planTarget in planProject.Targets) {
                     if (planTarget.Rejected) { continue; }
 
-                    Logger.Debug($"Scheduler: running scoring engine for project/target {planProject.Name}/{planTarget.Name}");
+                    TSLogger.Debug($"running scoring engine for project/target {planProject.Name}/{planTarget.Name}");
                     double score = scoringEngine.ScoreTarget(planTarget);
                     if (score > highScore) {
                         highScoreTarget = planTarget;
@@ -461,7 +462,7 @@ namespace Assistant.NINAPlugin.Plan {
             double moonSeparation = AstrometryUtils.GetMoonSeparationAngle(observerInfo, midPointTime, planTarget.Coordinates);
             double moonAvoidanceSeparation = AstrometryUtils.GetMoonAvoidanceLorentzianSeparation(moonAge,
                 planExposure.MoonAvoidanceSeparation, planExposure.MoonAvoidanceWidth);
-            Logger.Debug($"Scheduler: moon avoidance {planTarget.Name}/{planExposure.FilterName} midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
+            TSLogger.Debug($"moon avoidance {planTarget.Name}/{planExposure.FilterName} midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
 
             return moonSeparation < moonAvoidanceSeparation;
         }
@@ -492,7 +493,7 @@ namespace Assistant.NINAPlugin.Plan {
                 return loader.LoadActiveProjects(database.GetContext(), activeProfile, atTime);
             }
             catch (Exception ex) {
-                Logger.Error($"Scheduler: exception reading database: {ex.StackTrace}");
+                TSLogger.Error($"exception reading database: {ex.StackTrace}");
                 throw new SequenceEntityFailedException($"Scheduler: exception reading database: {ex.Message}", ex);
             }
         }

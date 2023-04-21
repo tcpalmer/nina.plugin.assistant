@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Util;
 using LinqKit;
 using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
@@ -83,7 +84,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             if (project != null) {
                 string selectedProfileName = ProfileChoices.Where(p => p.Key == SelectedProfileId).FirstOrDefault().Value;
                 if (MyMessageBox.Show($"Orphaned project '{project.Name}' will be moved to profile '{selectedProfileName}'.  Are you sure?", "Move Project?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
-                    Logger.Info($"Scheduler: moving orphaned project '{project.Name}' to '{selectedProfileName}'");
+                    TSLogger.Info($"moving orphaned project '{project.Name}' to '{selectedProfileName}'");
                     if (managerVM.MoveOrphanedProject(project, SelectedProfileId)) {
                         Projects.Remove(project);
                         RaisePropertyChanged(nameof(Projects));
@@ -96,7 +97,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             Project project = obj as Project;
             if (project != null) {
                 if (MyMessageBox.Show($"Orphaned project '{project.Name}' will be permanently deleted.  Are you sure?", "Delete Project?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
-                    Logger.Info($"Scheduler: deleting orphaned project '{project.Name}'");
+                    TSLogger.Info($"deleting orphaned project '{project.Name}'");
                     if (managerVM.DeleteOrphanedProject(project)) {
                         Projects.Remove(project);
                         RaisePropertyChanged(nameof(Projects));

@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Plan.Scoring.Rules;
+using Assistant.NINAPlugin.Util;
 using NINA.Core.Utility;
 using NINA.Profile.Interfaces;
 using System;
@@ -40,7 +41,7 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
                 double weight = RuleWeights[rule.Name] / ScoringRule.WEIGHT_SCALE;
                 double score = rule.Score(this, planTarget);
                 totalScore += weight * score;
-                Logger.Debug($"Scheduler: scoring rule {rule.Name}: raw score={score}, weight={weight * ScoringRule.WEIGHT_SCALE}, new total={totalScore}");
+                TSLogger.Debug($"scoring rule {rule.Name}: raw score={score}, weight={weight * ScoringRule.WEIGHT_SCALE}, new total={totalScore}");
             }
 
             return totalScore;

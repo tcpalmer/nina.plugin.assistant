@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Assistant.NINAPlugin.Util;
+using Newtonsoft.Json;
 using NINA.Astrometry;
 using NINA.Core.Model;
 using NINA.Core.Utility;
@@ -40,42 +41,42 @@ namespace Assistant.NINAPlugin.Sequencer {
             var contextCoordinates = ItemUtility.RetrieveContextCoordinates(Parent);
             if (contextCoordinates != null) {
                 Coordinates.Coordinates = contextCoordinates.Coordinates;
-                Logger.Debug($"TEST TRIGGER: p={GetParentType()} retrieved coords {CoordString()}");
+                TSLogger.Debug($"TEST TRIGGER: p={GetParentType()} retrieved coords {CoordString()}");
             }
 
-            Logger.Debug($"TEST TRIGGER: Execute p={GetParentType()} {StateCounter} {CoordString()}");
+            TSLogger.Debug($"TEST TRIGGER: Execute p={GetParentType()} {StateCounter} {CoordString()}");
             StateCounter++;
             return Task.CompletedTask;
         }
 
         public override bool ShouldTrigger(ISequenceItem previousItem, ISequenceItem nextItem) {
-            Logger.Debug($"TEST TRIGGER: ShouldTrigger p={GetParentType()} {CoordString()}");
+            TSLogger.Debug($"TEST TRIGGER: ShouldTrigger p={GetParentType()} {CoordString()}");
             return true;
         }
 
         public override bool ShouldTriggerAfter(ISequenceItem previousItem, ISequenceItem nextItem) {
-            Logger.Debug($"TEST TRIGGER: ShouldTriggerAfter p={GetParentType()} {CoordString()}");
+            TSLogger.Debug($"TEST TRIGGER: ShouldTriggerAfter p={GetParentType()} {CoordString()}");
             return true;
         }
 
         public override void SequenceBlockInitialize() {
-            Logger.Debug($"TEST TRIGGER: SequenceBlockInitialize p={GetParentType()}");
+            TSLogger.Debug($"TEST TRIGGER: SequenceBlockInitialize p={GetParentType()}");
         }
 
         public override void SequenceBlockStarted() {
-            Logger.Debug($"TEST TRIGGER: SequenceBlockStarted p={GetParentType()}");
+            TSLogger.Debug($"TEST TRIGGER: SequenceBlockStarted p={GetParentType()}");
         }
 
         public override void SequenceBlockFinished() {
-            Logger.Debug($"TEST TRIGGER: SequenceBlockFinished p={GetParentType()}");
+            TSLogger.Debug($"TEST TRIGGER: SequenceBlockFinished p={GetParentType()}");
         }
 
         public override void SequenceBlockTeardown() {
-            Logger.Debug($"TEST TRIGGER: SequenceBlockTeardown p={GetParentType()}");
+            TSLogger.Debug($"TEST TRIGGER: SequenceBlockTeardown p={GetParentType()}");
         }
 
         public override void AfterParentChanged() {
-            Logger.Debug($"TEST TRIGGER: AfterParentChanged p={GetParentType()}");
+            TSLogger.Debug($"TEST TRIGGER: AfterParentChanged p={GetParentType()}");
 
             /*
             if (Parent == null) {
@@ -87,7 +88,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     Coordinates.Coordinates = contextCoordinates.Coordinates;
                 }
 
-                Logger.Debug($"TEST TRIGGER: retrieved coords {CoordString()}");
+                TSLogger.Debug($"TEST TRIGGER: retrieved coords {CoordString()}");
 
                 if (Parent.Status == SequenceEntityStatus.RUNNING) {
                     SequenceBlockInitialize();

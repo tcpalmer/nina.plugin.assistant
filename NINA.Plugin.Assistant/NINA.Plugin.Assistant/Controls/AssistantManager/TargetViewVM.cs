@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Enum;
 using NINA.Core.MyMessageBox;
@@ -282,7 +283,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 }
             }
             else {
-                Logger.Error($"Scheduler: failed to find original exposure plan: {item.Id}");
+                TSLogger.Error($"failed to find original exposure plan: {item.Id}");
             }
         }
 

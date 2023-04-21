@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Controls.Util;
 using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Util;
 using LinqKit;
 using NINA.Core.Model.Equipment;
 using NINA.Core.Utility;
@@ -338,7 +339,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 return RootExposureTemplateList;
             }
 
-            Logger.Warning("failed to determine the root list for scheduler manager");
+            TSLogger.Warning("failed to determine the root list for scheduler manager");
             return null;
         }
 
@@ -520,7 +521,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ProfileMeta profile = (ProfileMeta)parentItem.Data;
 
             if (!Clipboard.HasType(TreeDataType.Project)) {
-                Logger.Error($"expected clipboard to hold Project");
+                TSLogger.Error($"expected clipboard to hold Project");
                 return;
             }
 
@@ -630,7 +631,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         public void PasteTarget(Project project) {
             if (!Clipboard.HasType(TreeDataType.Target)) {
-                Logger.Error($"expected clipboard to hold Target");
+                TSLogger.Error($"expected clipboard to hold Target");
                 return;
             }
 
@@ -698,7 +699,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             IProfile profile = GetProfile(profileMeta.Id.ToString());
             FilterInfo filterInfo = profile?.FilterWheelSettings?.FilterWheelFilters.FirstOrDefault();
             if (filterInfo == null) {
-                Logger.Error("failed to get the first filter in profile's filter wheel");
+                TSLogger.Error("failed to get the first filter in profile's filter wheel");
                 Notification.ShowError("Scheduler: failed to get the first filter in profile's filter wheel");
                 return;
             }
@@ -723,7 +724,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ProfileMeta profile = (ProfileMeta)parentItem.Data;
 
             if (!Clipboard.HasType(TreeDataType.ExposureTemplate)) {
-                Logger.Error($"expected clipboard to hold Exposure Template");
+                TSLogger.Error($"expected clipboard to hold Exposure Template");
                 return;
             }
 
@@ -812,7 +813,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 return ProfileLoader.Load(profileService, profileMeta);
             }
 
-            Logger.Error($"Scheduler: failed to load profile, id = {profileId}");
+            TSLogger.Error($"failed to load profile, id = {profileId}");
             return null;
         }
 
@@ -836,6 +837,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 }
             }
 
+            TSLogger.Error($"Failed to find profile in nav tree: {profileId}");
             throw new Exception($"Failed to find profile in nav tree: {profileId}");
         }
     }

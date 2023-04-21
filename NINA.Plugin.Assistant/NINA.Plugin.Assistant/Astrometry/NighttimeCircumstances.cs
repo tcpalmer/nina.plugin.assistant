@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Astrometry.Solver;
 using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Astrometry.Body;
 using NINA.Core.Utility;
@@ -85,7 +86,7 @@ namespace Assistant.NINAPlugin.Astrometry {
             }
 
             string cacheKey = GetCacheKey();
-            Logger.Trace($"NighttimeCircumstances cache key: {cacheKey}");
+            TSLogger.Trace($"NighttimeCircumstances cache key: {cacheKey}");
 
             NighttimeCircumstances cached = NighttimeCircumstancesCache.Get(cacheKey);
             if (cached == null) {

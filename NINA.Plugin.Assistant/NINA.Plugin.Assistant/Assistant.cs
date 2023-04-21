@@ -2,6 +2,7 @@
 using Assistant.NINAPlugin.Controls.AssistantManager;
 using Assistant.NINAPlugin.Controls.PlanPreview;
 using Assistant.NINAPlugin.Database;
+using Assistant.NINAPlugin.Util;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
 using NINA.Plugin;
@@ -54,6 +55,7 @@ namespace Assistant.NINAPlugin {
             profileService.ProfileChanged += ProfileService_ProfileChanged;
 
             InitPluginHome();
+            TSLogger.Info("plugin initialized");
         }
 
         private void InitPluginHome() {
@@ -125,11 +127,13 @@ namespace Assistant.NINAPlugin {
         }
 
         private void ProcessExited(object sender, EventArgs e) {
-            Logger.Warning($"process exited");
+            TSLogger.Warning($"process exited");
         }
 
         public override Task Teardown() {
             profileService.ProfileChanged -= ProfileService_ProfileChanged;
+            TSLogger.Info("closing log");
+            TSLogger.CloseAndFlush();
             return base.Teardown();
         }
 

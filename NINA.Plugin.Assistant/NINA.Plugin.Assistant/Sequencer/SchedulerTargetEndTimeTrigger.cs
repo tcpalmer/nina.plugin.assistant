@@ -1,4 +1,5 @@
-﻿using NINA.Core.Model;
+﻿using Assistant.NINAPlugin.Util;
+using NINA.Core.Model;
 using NINA.Core.Utility;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
@@ -24,7 +25,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override Task Execute(ISequenceContainer context, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            Logger.Info("Scheduler: target stop time exceeded, interrupting target container");
+            TSLogger.Info("target stop time exceeded, interrupting target container");
             this.Parent.Interrupt().Wait(token);
             return Task.CompletedTask;
         }
