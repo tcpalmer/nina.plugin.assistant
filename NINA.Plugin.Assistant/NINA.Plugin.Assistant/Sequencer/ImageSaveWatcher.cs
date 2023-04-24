@@ -3,6 +3,7 @@ using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using NINA.Core.Utility;
+using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;
 using System;
 using System.Collections.Concurrent;
@@ -28,13 +29,15 @@ namespace Assistant.NINAPlugin.Sequencer {
     /// </summary>
     public class ImageSaveWatcher : IImageSaveWatcher {
 
+        private IProfile profile;
         private IImageSaveMediator imageSaveMediator;
         private ConcurrentDictionary<int, int> exposureDictionary;
 
         private IPlanTarget planTarget;
         private bool enableGrader;
 
-        public ImageSaveWatcher(IImageSaveMediator imageSaveMediator, IPlanTarget planTarget) {
+        public ImageSaveWatcher(IProfile profile, IImageSaveMediator imageSaveMediator, IPlanTarget planTarget) {
+            this.profile = profile;
             this.imageSaveMediator = imageSaveMediator;
             exposureDictionary = new ConcurrentDictionary<int, int>(Environment.ProcessorCount * 2, 31);
             this.planTarget = planTarget;
@@ -80,7 +83,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             int? imageId = msg.MetaData?.Image?.Id;
-            bool accepted = enableGrader ? new ImageGrader().GradeImage(planTarget, msg) : false;
+            bool accepted = enableGrader ? new ImageGrader(profile).GradeImage(planTarget, msg) : false;
             TSLogger.Debug($"image save for {planTarget.Project.Name}/{planTarget.Name}, filter={msg.Filter}, grader enabled={enableGrader}, accepted={accepted}, image id={imageId}");
 
             UpdateDatabase(planTarget, msg.Filter, accepted, msg, imageId);
@@ -117,7 +120,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                                 else {
                                     TSLogger.Warning($"failed to get exposure plan for id={exposureDatabaseId}, image id={imageId}");
                                 }
-                            } else {
+                            }
+                            else {
                                 TSLogger.Warning($"not waiting for image id={imageId}");
                             }
                         }

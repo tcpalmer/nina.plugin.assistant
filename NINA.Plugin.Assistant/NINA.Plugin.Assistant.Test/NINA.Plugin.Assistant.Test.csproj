@@ -361,6 +361,7 @@
     <Compile Include="Sequencer\ImageGraderTest.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Utils\SequenceTargetParserTest.cs" />
+    <Compile Include="Utils\StatsTest.cs" />
     <Compile Include="Utils\UtilsTest.cs" />
   </ItemGroup>
   <ItemGroup>

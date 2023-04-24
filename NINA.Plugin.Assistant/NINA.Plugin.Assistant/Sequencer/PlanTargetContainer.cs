@@ -106,7 +106,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             containerStrategy.SetContext(parentContainer, plan, monitor);
 
             if (!plan.IsEmulator)
-                ImageSaveWatcher = new ImageSaveWatcher(imageSaveMediator, plan.PlanTarget);
+                ImageSaveWatcher = new ImageSaveWatcher(activeProfile, imageSaveMediator, plan.PlanTarget);
             else
                 ImageSaveWatcher = new ImageSaveWatcherEmulator();
 
