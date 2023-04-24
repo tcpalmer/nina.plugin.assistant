@@ -128,6 +128,15 @@ namespace Assistant.NINAPlugin.Database {
             return images.ToList();
         }
 
+        public List<AcquiredImage> GetAcquiredImagesForGrading(int targetId, string filterName) {
+            var images = AcquiredImageSet.AsNoTracking().Where(p =>
+                p.TargetId == targetId &&
+                p.FilterName == filterName &&
+                p.accepted == 1)
+              .OrderByDescending(p => p.acquiredDate);
+            return images.ToList();
+        }
+
         public ImageData GetImageData(int acquiredImageId) {
             return ImageDataSet.Where(d => d.AcquiredImageId == acquiredImageId).FirstOrDefault();
         }
@@ -517,7 +526,7 @@ namespace Assistant.NINAPlugin.Database {
                     ResourceManager rm = new ResourceManager("Assistant.NINAPlugin.Database.Migrate.SQL", Assembly.GetExecutingAssembly());
                     ResourceSet rs = rm.GetResourceSet(System.Globalization.CultureInfo.InvariantCulture, true, false);
 
-                    foreach(DictionaryEntry entry in rs) {
+                    foreach (DictionaryEntry entry in rs) {
                         if (Int32.TryParse((string)entry.Key, out int migrateNum)) {
                             TSLogger.Debug($"loaded migration script number {migrateNum}");
                             migrateScripts.Add(migrateNum, (string)entry.Value);

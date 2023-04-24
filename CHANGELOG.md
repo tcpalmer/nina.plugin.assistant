@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 0.4.0.0 - 2023-04-24
+* First cut at image grader
+
 ## 0.3.0.0 - 2023-04-21
 * Removed start and end date fields from projects
 * Created a custom log for the plugin

@@ -441,6 +441,7 @@
     <Compile Include="Sequencer\ImageSaveWatcher.cs" />
     <Compile Include="Sequencer\SequenceCommands.cs" />
     <Compile Include="Controls\Utils\ProfileLoader.cs" />
+    <Compile Include="Utils\Stats.cs" />
     <Compile Include="Utils\TSLogger.cs" />
     <Compile Include="Utils\Utils.cs" />
     <Compile Include="Utils\Assert.cs" />
