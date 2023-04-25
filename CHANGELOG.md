@@ -1,6 +1,6 @@
 # Target Scheduler
 
-## 0.4.1.0 - 2023-04-XX
+## 0.4.1.0 - 2023-04-25
 * Added support for managing profile preferences
 * Added image grader reject reason to acquired image data
 
