@@ -45,6 +45,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
                 case "Stars": return "DetectedStars";
                 case "HFR": return "HFR";
                 case "Accepted": return "Accepted";
+                case "Reject Reason": return "RejectReason";
                 default: return null;
             }
         }

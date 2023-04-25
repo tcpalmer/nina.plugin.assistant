@@ -11,11 +11,13 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
+using System.Web.Configuration;
 
 namespace Assistant.NINAPlugin.Database {
 
     public class SchedulerDatabaseContext : DbContext {
 
+        public DbSet<ProfilePreference> ProfilePreferenceSet { get; set; }
         public DbSet<Project> ProjectSet { get; set; }
         public DbSet<RuleWeight> RuleWeightSet { get; set; }
         public DbSet<Target> TargetSet { get; set; }
@@ -40,6 +42,10 @@ namespace Assistant.NINAPlugin.Database {
 
             var sqi = new CreateOrMigrateDatabaseInitializer<SchedulerDatabaseContext>();
             System.Data.Entity.Database.SetInitializer(sqi);
+        }
+
+        public ProfilePreference GetProfilePreference(string profileId) {
+            return ProfilePreferenceSet.Where(p => p.ProfileId.Equals(profileId)).FirstOrDefault();
         }
 
         public List<Project> GetAllProjects(string profileId) {
@@ -145,6 +151,23 @@ namespace Assistant.NINAPlugin.Database {
             return ImageDataSet.Where(d =>
                 d.AcquiredImageId == acquiredImageId &&
                 d.tag == tag).FirstOrDefault();
+        }
+
+        public ProfilePreference SaveProfilePreference(ProfilePreference profilePreference) {
+            TSLogger.Debug($"saving ProfilePreference Id={profilePreference.Id}");
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    ProfilePreferenceSet.AddOrUpdate(profilePreference);
+                    SaveChanges();
+                    transaction.Commit();
+                    return GetProfilePreference(profilePreference.ProfileId);
+                }
+                catch (Exception e) {
+                    TSLogger.Error($"error persisting project: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
+                }
+            }
         }
 
         public Project AddNewProject(Project project) {

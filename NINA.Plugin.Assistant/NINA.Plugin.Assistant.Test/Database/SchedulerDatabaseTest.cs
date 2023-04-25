@@ -140,10 +140,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 context.GetAcquiredImages(1, "nada").Count.Should().Be(0);
 
                 ImageSavedEventArgs msg = PlanMocks.GetImageSavedEventArgs(markDate.AddDays(1), "Ha");
-                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1), "Ha", true, new ImageMetadata(msg)));
-                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1).AddMinutes(1), "Ha", true, new ImageMetadata(msg)));
-                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1).AddMinutes(2), "Ha", true, new ImageMetadata(msg)));
-                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1).AddMinutes(3), "Ha", true, new ImageMetadata(msg)));
+                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1), "Ha", true, "rr1", new ImageMetadata(msg)));
+                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1).AddMinutes(1), "Ha", true, "rr2", new ImageMetadata(msg)));
+                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1).AddMinutes(2), "Ha", true, "rr3", new ImageMetadata(msg)));
+                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1).AddMinutes(3), "Ha", true, "rr4", new ImageMetadata(msg)));
                 context.SaveChanges();
 
                 List<AcquiredImage> ai = context.GetAcquiredImages(1, "Ha");
@@ -154,6 +154,12 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 ai[1].AcquiredDate.Should().BeExactly(markDate.AddDays(1).AddMinutes(2).TimeOfDay);
                 ai[2].AcquiredDate.Should().BeExactly(markDate.AddDays(1).AddMinutes(1).TimeOfDay);
                 ai[3].AcquiredDate.Should().BeExactly(markDate.AddDays(1).AddMinutes(0).TimeOfDay);
+
+                ai[0].RejectReason.Should().Be("rr4");
+                ai[1].RejectReason.Should().Be("rr3");
+                ai[2].RejectReason.Should().Be("rr2");
+                ai[3].RejectReason.Should().Be("rr1");
+
                 ai[0].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(3).TimeOfDay);
                 ai[1].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(2).TimeOfDay);
                 ai[2].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(1).TimeOfDay);
@@ -264,6 +270,39 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 p2t1.ExposurePlans.Add(ep);
 
                 context.SaveTarget(p2t1);
+            }
+        }
+
+        [Test, Order(7)]
+        [NonParallelizable]
+        public void TestProfilePreference() {
+            using (var context = db.GetContext()) {
+
+                ProfilePreference pp = context.GetProfilePreference("abcd-1234");
+                pp.Should().BeNull();
+
+                pp = new ProfilePreference("abcd-1234");
+                pp.EnableGradeRMS = true;
+                pp.EnableGradeStars = true;
+                pp.EnableGradeHFR = true;
+                pp.MaxGradingSampleSize = 100;
+                pp.RMSPixelThreshold = 1;
+                pp.DetectedStarsSigmaFactor = 2;
+                pp.HFRSigmaFactor = 3;
+
+                context.ProfilePreferenceSet.Add(pp);
+                context.SaveChanges();
+
+                ProfilePreference pp2 = context.GetProfilePreference("abcd-1234");
+                pp2.Should().NotBeNull();
+
+                pp2.EnableGradeRMS.Should().BeTrue();
+                pp2.EnableGradeStars.Should().BeTrue();
+                pp2.EnableGradeHFR.Should().BeTrue();
+                pp2.MaxGradingSampleSize.Should().Be(100);
+                pp2.RMSPixelThreshold.Should().BeApproximately(1, 0.001);
+                pp2.DetectedStarsSigmaFactor.Should().BeApproximately(2, 0.001);
+                pp2.HFRSigmaFactor.Should().BeApproximately(3, 0.001);
             }
         }
 

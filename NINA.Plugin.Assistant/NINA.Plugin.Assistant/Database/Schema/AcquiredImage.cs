@@ -16,6 +16,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public long acquiredDate { get; set; }
         [Required] public string FilterName { get; set; }
         [Required] public int accepted { get; set; }
+        public string rejectreason { get; set; }
         internal string _metadata { get; set; }
 
         [NotMapped]
@@ -29,6 +30,14 @@ namespace Assistant.NINAPlugin.Database.Schema {
             get { return accepted == 1; }
             set {
                 accepted = value ? 1 : 0;
+            }
+        }
+
+        [NotMapped]
+        public string RejectReason {
+            get { return rejectreason == null ? "" : rejectreason; }
+            set {
+                rejectreason = value;
             }
         }
 
@@ -50,12 +59,13 @@ namespace Assistant.NINAPlugin.Database.Schema {
             this.Metadata = imageMetadata;
         }
 
-        public AcquiredImage(int projectId, int targetId, DateTime acquiredDate, string filterName, bool accepted, ImageMetadata imageMetadata) {
+        public AcquiredImage(int projectId, int targetId, DateTime acquiredDate, string filterName, bool accepted, string rejectReason, ImageMetadata imageMetadata) {
             this.ProjectId = projectId;
             this.TargetId = targetId;
             this.AcquiredDate = acquiredDate;
             this.FilterName = filterName;
             this.Accepted = accepted;
+            this.RejectReason = rejectReason;
             this.Metadata = imageMetadata;
         }
 
@@ -64,6 +74,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"AcquiredDate: {AcquiredDate}");
             sb.AppendLine($"FilterName: {FilterName}");
             sb.AppendLine($"Accepted: {Accepted}");
+            sb.AppendLine($"RejectReason: {RejectReason}");
             sb.AppendLine($"Metadata: {_metadata}");
 
             return sb.ToString();

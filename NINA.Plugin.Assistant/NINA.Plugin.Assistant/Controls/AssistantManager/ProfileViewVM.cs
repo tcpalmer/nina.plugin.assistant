@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Util;
 using NINA.Core.Utility;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
@@ -41,6 +42,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             parentItem = profileItem;
             Projects = InitProjects(profileItem);
 
+            ProfileSettingsCommand = new RelayCommand(ViewProfilePreferences);
             AddProjectCommand = new RelayCommand(AddProject);
             PasteProjectCommand = new RelayCommand(PasteProject);
             ViewProjectCommand = new RelayCommand(ViewProject);
@@ -56,10 +58,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             return projects;
         }
 
+        public ICommand ProfileSettingsCommand { get; private set; }
         public ICommand AddProjectCommand { get; private set; }
         public ICommand PasteProjectCommand { get; private set; }
         public ICommand ViewProjectCommand { get; private set; }
         public ICommand CopyProjectCommand { get; private set; }
+
+        private void ViewProfilePreferences(object obj) {
+            managerVM.ViewProfilePreferences(Profile);
+        }
 
         private void AddProject(object obj) {
             managerVM.AddNewProject(parentItem);
