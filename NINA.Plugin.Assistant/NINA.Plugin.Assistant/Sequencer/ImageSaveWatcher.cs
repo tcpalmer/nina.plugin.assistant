@@ -82,11 +82,16 @@ namespace Assistant.NINAPlugin.Sequencer {
                 return;
             }
 
-            int? imageId = msg.MetaData?.Image?.Id;
-            bool accepted = enableGrader ? new ImageGrader(profile).GradeImage(planTarget, msg) : false;
-            TSLogger.Debug($"image save for {planTarget.Project.Name}/{planTarget.Name}, filter={msg.Filter}, grader enabled={enableGrader}, accepted={accepted}, image id={imageId}");
+            bool accepted = false;
+            string rejectReason = "";
+            if (enableGrader) {
+                (accepted, rejectReason) = new ImageGrader(profile).GradeImage(planTarget, msg);
+            }
 
-            UpdateDatabase(planTarget, msg.Filter, accepted, msg, imageId);
+            int? imageId = msg.MetaData?.Image?.Id;
+            TSLogger.Debug($"image save for {planTarget.Project.Name}/{planTarget.Name}, filter={msg.Filter}, grader enabled={enableGrader}, accepted={accepted}, rejectReason={rejectReason}, image id={imageId}");
+
+            UpdateDatabase(planTarget, msg.Filter, accepted, rejectReason, msg, imageId);
 
             if (imageId != null) {
                 int old;
@@ -96,7 +101,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             TSLogger.Debug($"ImageSaved: id={imageId}");
         }
 
-        private void UpdateDatabase(IPlanTarget planTarget, string filterName, bool accepted, ImageSavedEventArgs msg, int? imageId) {
+        private void UpdateDatabase(IPlanTarget planTarget, string filterName, bool accepted, string rejectReason, ImageSavedEventArgs msg, int? imageId) {
 
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 using (var transaction = context.Database.BeginTransaction()) {
@@ -136,6 +141,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                             msg.MetaData.Image.ExposureStart,
                             filterName,
                             accepted,
+                            rejectReason,
                             new ImageMetadata(msg));
                         context.AcquiredImageSet.Add(acquiredImage);
 

@@ -75,5 +75,46 @@ namespace Assistant.NINAPlugin.Database.Migrate {
                 return ResourceManager.GetString("1", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /*
+        ///*/
+        ///
+        ///CREATE TABLE IF NOT EXISTS `profilepreference` (
+        ///	`Id`			INTEGER NOT NULL,
+        ///	`profileId`		TEXT NOT NULL,
+        ///	`enableGradeRMS`	INTEGER,
+        ///	`enableGradeStars`	INTEGER,
+        ///	`enableGradeHFR`	INTEGER,
+        ///	`maxGradingSampleSize`		INTEGER,
+        ///	`rmsPixelThreshold`			REAL,
+        ///	`detectedStarsSigmaFactor`	REAL,
+        ///	`hfrSigmaFactor`			REAL,
+        ///	PRIMARY KEY(`id`)
+        ///);
+        ///
+        ///PRAGMA user_version = 2;
+        ///.
+        /// </summary>
+        internal static string _2 {
+            get {
+                return ResourceManager.GetString("2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /*
+        ///*/
+        ///
+        ///ALTER TABLE acquiredimage ADD COLUMN rejectreason TEXT;
+        ///
+        ///PRAGMA user_version = 3;
+        ///.
+        /// </summary>
+        internal static string _3 {
+            get {
+                return ResourceManager.GetString("3", resourceCulture);
+            }
+        }
     }
 }

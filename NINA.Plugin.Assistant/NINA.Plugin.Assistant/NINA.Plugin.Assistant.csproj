@@ -349,6 +349,10 @@
       <DependentUpon>OrphanedProjectsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\AssistantManager\OrphanedProjectsViewVM.cs" />
+    <Compile Include="Controls\AssistantManager\ProfilePreferencesView.xaml.cs">
+      <DependentUpon>ProfilePreferencesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AssistantManager\ProfilePreferencesViewVM.cs" />
     <Compile Include="Controls\AssistantManager\ProfileView.xaml.cs">
       <DependentUpon>ProfileView.xaml</DependentUpon>
     </Compile>
@@ -391,6 +395,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SQL.resx</DependentUpon>
     </Compile>
+    <Compile Include="Database\Schema\ProfilePreference.cs" />
     <Compile Include="Plan\Scoring\Rules\SettingSoonestRule.cs" />
     <Compile Include="Sequencer\PlanTakeExposure.cs" />
     <Compile Include="Sequencer\PlanTargetContainerStrategy.cs" />
@@ -491,6 +496,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\AssistantManager\ProfilePreferencesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\AssistantManager\ProfileView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -554,6 +563,8 @@
     <None Include="Database\Initial\initial_schema.sql" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Database\Migrate\3.sql" />
+    <Content Include="Database\Migrate\2.sql" />
     <Content Include="Database\Migrate\1.sql" />
     <None Include="Resources\1.sql" />
   </ItemGroup>

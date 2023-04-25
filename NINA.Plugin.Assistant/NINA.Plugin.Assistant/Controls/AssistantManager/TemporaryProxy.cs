@@ -73,6 +73,18 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
     }
 
+    public class ProfilePreferenceProxy : TemporaryProxy<ProfilePreference> {
+
+        public ProfilePreferenceProxy(ProfilePreference profilePreference) : base(profilePreference) { }
+
+        public ProfilePreference ProfilePreference {
+            get => Proxy;
+            set {
+                Proxy = value;
+            }
+        }
+    }
+
     public class ProjectProxy : TemporaryProxy<Project> {
 
         public ProjectProxy(Project project) : base(project) { }

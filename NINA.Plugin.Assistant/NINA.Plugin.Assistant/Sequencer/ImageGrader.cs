@@ -13,6 +13,10 @@ namespace Assistant.NINAPlugin.Sequencer {
 
     public class ImageGrader {
 
+        public static readonly string REJECT_RMS = "Guiding RMS";
+        public static readonly string REJECT_STARS = "Star Count";
+        public static readonly string REJECT_HFR = "HFR";
+
         public IProfile Profile { get; set; }
         public ImageGraderPreferences Preferences { get; set; }
 
@@ -20,7 +24,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public ImageGrader(IProfile profile) {
             this.Profile = profile;
-            this.Preferences = GetPreferences();
+            this.Preferences = GetPreferences(profile);
         }
 
         public ImageGrader(IProfile profile, ImageGraderPreferences preferences) {
@@ -28,57 +32,57 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.Preferences = preferences;
         }
 
-        public bool GradeImage(IPlanTarget planTarget, ImageSavedEventArgs msg) {
+        public (bool, string) GradeImage(IPlanTarget planTarget, ImageSavedEventArgs msg) {
 
-            if (!Preferences.GradeRMS && !Preferences.GradeDetectedStars && !Preferences.GradeHFR) {
+            if (!Preferences.EnableGradeRMS && !Preferences.EnableGradeStars && !Preferences.EnableGradeHFR) {
                 TSLogger.Info("image grading: no metrics enabled => accepted");
-                return true;
+                return (true, "");
             }
 
             try {
-                if (Preferences.GradeRMS && !GradeRMS(msg)) {
+                if (Preferences.EnableGradeRMS && !GradeRMS(msg)) {
                     TSLogger.Info("image grading: failed guiding RMS => NOT accepted");
-                    return false;
+                    return (false, REJECT_RMS);
                 }
 
-                if (!Preferences.GradeDetectedStars && !Preferences.GradeHFR) {
+                if (!Preferences.EnableGradeStars && !Preferences.EnableGradeHFR) {
                     TSLogger.Info("image grading: no additional metrics enabled => accepted");
-                    return true;
+                    return (true, "");
                 }
 
                 // Get comparable images to compare against; if we don't have at least 3 to compare against, assume this one is acceptable
                 List<AcquiredImage> images = GetSampleImageData(planTarget.DatabaseId, msg.Filter, msg);
                 if (images == null) {
                     TSLogger.Info("image grading: not enough matching images => accepted");
-                    return true;
+                    return (true, "");
                 }
 
-                if (Preferences.GradeDetectedStars) {
+                if (Preferences.EnableGradeStars) {
                     List<double> samples = GetSamples(images, i => { return i.Metadata.DetectedStars; });
                     TSLogger.Info("image grading: detected star count ->");
                     if (!WithinAcceptableVariance(samples, msg.StarDetectionAnalysis.DetectedStars, Preferences.DetectedStarsSigmaFactor)) {
                         TSLogger.Info("image grading: failed detected star count grading => NOT accepted");
-                        return false;
+                        return (false, REJECT_STARS);
                     }
                 }
 
-                if (Preferences.GradeHFR) {
+                if (Preferences.EnableGradeHFR) {
                     List<double> samples = GetSamples(images, i => { return i.Metadata.HFR; });
                     TSLogger.Info("image grading: HFR ->");
                     if (!WithinAcceptableVariance(samples, msg.StarDetectionAnalysis.HFR, Preferences.HFRSigmaFactor)) {
                         TSLogger.Info("image grading: failed HFR grading => NOT accepted");
-                        return false;
+                        return (false, REJECT_HFR);
                     }
                 }
 
                 TSLogger.Info("image grading: all tests passed => accepted");
-                return true;
+                return (true, "");
 
             }
             catch (Exception e) {
                 TSLogger.Error("image grading: exception => NOT accepted");
                 TSLogger.Error(e);
-                return false;
+                return (false, "exception");
             }
         }
 
@@ -148,21 +152,18 @@ namespace Assistant.NINAPlugin.Sequencer {
                 return null;
             }
 
-            return list.Take(Preferences.MaxSampleSize).ToList();
+            return list.Take(Preferences.MaxGradingSampleSize).ToList();
         }
 
-        public ImageGraderPreferences GetPreferences() {
-            // TODO: read from database
-            string profileId = Profile.Id.ToString();
-            return new ImageGraderPreferences {
-                MaxSampleSize = 10,
-                GradeRMS = true,
-                RMSPixelThreshold = 8,
-                GradeDetectedStars = true,
-                DetectedStarsSigmaFactor = 3,
-                GradeHFR = true,
-                HFRSigmaFactor = 3
-            };
+        private ImageGraderPreferences GetPreferences(IProfile profile) {
+            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+                ProfilePreference profilePreference = context.GetProfilePreference(profile.Id.ToString());
+                if (profilePreference == null) {
+                    profilePreference = new ProfilePreference(profile.Id.ToString());
+                }
+
+                return new ImageGraderPreferences(profilePreference);
+            }
         }
 
         private double GetBinning(ImageSavedEventArgs msg) {
@@ -186,18 +187,38 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
     }
 
-    // TODO: move to Database/Schema
     public class ImageGraderPreferences {
 
-        public int MaxSampleSize { get; set; }
+        public int MaxGradingSampleSize { get; private set; }
+        public bool EnableGradeRMS { get; private set; }
+        public double RMSPixelThreshold { get; private set; }
+        public bool EnableGradeStars { get; private set; }
+        public double DetectedStarsSigmaFactor { get; private set; }
+        public bool EnableGradeHFR { get; private set; }
+        public double HFRSigmaFactor { get; private set; }
 
-        public bool GradeRMS { get; set; }
-        public double RMSPixelThreshold { get; set; }
+        public ImageGraderPreferences(ProfilePreference profilePreference) {
+            MaxGradingSampleSize = profilePreference.MaxGradingSampleSize;
+            EnableGradeRMS = profilePreference.EnableGradeRMS;
+            RMSPixelThreshold = profilePreference.RMSPixelThreshold;
+            EnableGradeStars = profilePreference.EnableGradeStars;
+            DetectedStarsSigmaFactor = profilePreference.DetectedStarsSigmaFactor;
+            EnableGradeHFR = profilePreference.EnableGradeHFR;
+            HFRSigmaFactor = profilePreference.HFRSigmaFactor;
+        }
 
-        public bool GradeDetectedStars { get; set; }
-        public double DetectedStarsSigmaFactor { get; set; }
-
-        public bool GradeHFR { get; set; }
-        public double HFRSigmaFactor { get; set; }
+        public ImageGraderPreferences(
+                                    int MaxGradingSampleSize,
+                                    bool EnableGradeRMS, double RMSPixelThreshold,
+                                    bool EnableGradeStars, double DetectedStarsSigmaFactor,
+                                    bool EnableGradeHFR, double HFRSigmaFactor) {
+            this.MaxGradingSampleSize = MaxGradingSampleSize;
+            this.EnableGradeRMS = EnableGradeRMS;
+            this.RMSPixelThreshold = RMSPixelThreshold;
+            this.EnableGradeStars = EnableGradeStars;
+            this.DetectedStarsSigmaFactor = DetectedStarsSigmaFactor;
+            this.EnableGradeHFR = EnableGradeHFR;
+            this.HFRSigmaFactor = HFRSigmaFactor;
+        }
     }
 }
