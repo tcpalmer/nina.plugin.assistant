@@ -86,6 +86,25 @@
                                 Stretch="Uniform" />
                         </Grid>
                     </Button>
+                    <Button
+                        Width="25"
+                        Height="25"
+                        Margin="10,0,0,0"
+                        VerticalAlignment="Center"
+                        HorizontalContentAlignment="Right"
+                        Command="{Binding ImportMosaicPanelsCommand}"
+                        IsEnabled="{Binding MosaicPanelsAvailable}"
+                        Style="{StaticResource BackgroundButton}"
+                        ToolTip="Import mosaic panels from Framing Assistant"
+                        ToolTipService.ShowOnDisabled="True">
+                        <Grid>
+                            <Path
+                                Margin="5"
+                                Data="{StaticResource SS_ImportSVG}"
+                                Fill="{StaticResource ButtonForegroundBrush}"
+                                Stretch="Uniform" />
+                        </Grid>
+                    </Button>
                 </StackPanel>
             </StackPanel>
         </StackPanel>

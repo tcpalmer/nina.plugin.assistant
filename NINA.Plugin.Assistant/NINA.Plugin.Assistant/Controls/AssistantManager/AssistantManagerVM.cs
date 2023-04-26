@@ -246,7 +246,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     case TreeDataType.Project:
                         activeTreeDataItem = item;
                         Project project = (Project)item.Data;
-                        ProjectViewVM = new ProjectViewVM(this, profileService, project);
+                        ProjectViewVM = new ProjectViewVM(this, framingAssistantVM, profileService, project);
                         CollapseAllViews();
                         ShowProjectView = Visibility.Visible;
                         break;
@@ -616,6 +616,23 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 }
                 else {
                     Notification.ShowError("Failed to add new Scheduler Target (see log for details)");
+                }
+            }
+        }
+
+        public void AddTargets(Project project, List<Target> targets) {
+            TreeDataItem parentItem = activeTreeDataItem;
+            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+                foreach (Target target in targets) {
+                    Target newTarget = context.AddNewTarget(project, target);
+                    if (newTarget != null) {
+                        TreeDataItem targetItem = new TreeDataItem(TreeDataType.Target, target.Name, target, parentItem);
+                        parentItem.Items.Add(targetItem);
+                        parentItem.IsExpanded = true;
+                    }
+                    else {
+                        Notification.ShowError("Failed to add new Scheduler Target (see log for details)");
+                    }
                 }
             }
         }

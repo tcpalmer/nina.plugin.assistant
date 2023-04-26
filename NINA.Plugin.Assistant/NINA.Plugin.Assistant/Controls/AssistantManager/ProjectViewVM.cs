@@ -1,8 +1,10 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Util;
+using NINA.Astrometry;
 using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
 using NINA.Profile.Interfaces;
+using NINA.WPF.Base.Interfaces.ViewModel;
 using NINA.WPF.Base.ViewModel;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,6 +16,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
     public class ProjectViewVM : BaseVM {
 
         private AssistantManagerVM managerVM;
+        private IFramingAssistantVM framingAssistantVM;
         private ProjectProxy projectProxy;
 
         public ProjectProxy ProjectProxy {
@@ -24,8 +27,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        public ProjectViewVM(AssistantManagerVM managerVM, IProfileService profileService, Project project) : base(profileService) {
+        public ProjectViewVM(AssistantManagerVM managerVM, IFramingAssistantVM framingAssistantVM, IProfileService profileService, Project project) : base(profileService) {
             this.managerVM = managerVM;
+            this.framingAssistantVM = framingAssistantVM;
             ProjectProxy = new ProjectProxy(project);
             ProjectActive = ProjectProxy.Project.ActiveNowWithActiveTargets;
 
@@ -39,6 +43,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             DeleteCommand = new RelayCommand(Delete);
             AddTargetCommand = new RelayCommand(AddTarget);
             PasteTargetCommand = new RelayCommand(PasteTarget);
+            ImportMosaicPanelsCommand = new RelayCommand(ImportMosaicPanels);
         }
 
         private void InitializeRuleWeights(Project project) {
@@ -138,6 +143,10 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             get => Clipboard.HasType(TreeDataType.Target);
         }
 
+        public bool MosaicPanelsAvailable {
+            get => FramingAssistantPanelsDefined() > 1;
+        }
+
         public ICommand EditCommand { get; private set; }
         public ICommand SaveCommand { get; private set; }
         public ICommand CancelCommand { get; private set; }
@@ -145,6 +154,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand DeleteCommand { get; private set; }
         public ICommand AddTargetCommand { get; private set; }
         public ICommand PasteTargetCommand { get; private set; }
+        public ICommand ImportMosaicPanelsCommand { get; private set; }
 
         private void Edit(object obj) {
             ProjectProxy.PropertyChanged += ProjectProxy_PropertyChanged;
@@ -193,5 +203,32 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ProjectActive = ProjectProxy.Project.ActiveNowWithActiveTargets;
         }
 
+        private void ImportMosaicPanels(object obj) {
+            int panels = FramingAssistantPanelsDefined();
+            if (panels == 1) {
+                MyMessageBox.Show("The Framing Assistant only defines one panel at the moment.", "Oops");
+                return;
+            }
+
+            string message = $"Add {panels} mosaic panels as new targets to project '{ProjectProxy.Project.Name}'?";
+            if (MyMessageBox.Show(message, "Add Targets?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
+                List<Target> targets = new List<Target>();
+                foreach (FramingRectangle rect in framingAssistantVM.CameraRectangles) {
+                    TSLogger.Debug($"Add mosaic panel as target: {rect.Name} {rect.Coordinates.RAString} {rect.Coordinates.DecString} rot={rect.DSORotation}");
+                    Target target = new Target();
+                    target.Name = rect.Name;
+                    target.ra = rect.Coordinates.RA;
+                    target.dec = rect.Coordinates.Dec;
+                    target.Rotation = rect.DSORotation;
+                    targets.Add(target);
+                }
+
+                managerVM.AddTargets(ProjectProxy.Project, targets);
+            }
+        }
+
+        private int FramingAssistantPanelsDefined() {
+            return framingAssistantVM.VerticalPanels * framingAssistantVM.HorizontalPanels;
+        }
     }
 }

@@ -78,24 +78,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             return new Coordinates(AstroUtil.HMSToDegrees(hms), AstroUtil.DMSToDegrees(dms), Epoch.J2000, Coordinates.RAType.Degrees);
         }
 
-        private void GetMosaicPanels() {
-            // Shows how to get mosaic panel coords
-            //  Name will be '<targetName> Panel #'
-            //  rect.DSORotation is the rotation we want
-
-            // This should be available at the Project level though - not Target
-            if (framingAssistantVM.VerticalPanels > 1 || framingAssistantVM.HorizontalPanels > 1) {
-                foreach (FramingRectangle rect in framingAssistantVM.CameraRectangles) {
-                    TSLogger.Debug($"Panel: {rect.Name} {rect.Coordinates.RAString} {rect.Coordinates.DecString} rot={rect.Rotation} dsoRot={rect.DSORotation}");
-                }
-            }
-            else {
-                TSLogger.Debug("no mosaic panels defined in framing assistant");
-            }
-        }
-
         public ICommand PlanetariumImportCommand { get; private set; }
-
 
         public ICommand SequenceTargetImportCommand { get; private set; }
 
