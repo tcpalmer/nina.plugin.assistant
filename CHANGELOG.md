@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 0.5.0.0 - 2023-04-26
+* Added support for importing mosaic panels from Framing Assistant
+
 ## 0.4.1.0 - 2023-04-25
 * Added support for managing profile preferences
 * Added image grader reject reason to acquired image data
