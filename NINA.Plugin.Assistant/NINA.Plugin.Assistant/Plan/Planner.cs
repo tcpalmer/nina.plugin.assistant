@@ -7,6 +7,7 @@ using NINA.Core.Model;
 using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
 using NINA.Profile.Interfaces;
+using Serilog.Events;
 using System;
 using System.Collections.Generic;
 
@@ -40,6 +41,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         public SchedulerPlan GetPlan(IPlanTarget previousPlanTarget) {
+            TSLogger.Info("-- BEGIN PLANNING ENGINE RUN ---------------------------------------------------");
             TSLogger.Debug($"getting current plan for {Utils.FormatDateTimeFull(atTime)}");
 
             if (USE_EMULATOR) {
@@ -54,13 +56,19 @@ namespace Assistant.NINAPlugin.Plan {
                     }
 
                     projects = FilterForIncomplete(projects);
-                    TSLogger.Trace($"GetPlan after FilterForIncomplete:\n{PlanProject.ListToString(projects)}");
+                    if (TSLogger.IsEnabled(LogEventLevel.Verbose)) {
+                        TSLogger.Trace($"GetPlan after FilterForIncomplete:\n{PlanProject.ListToString(projects)}");
+                    }
 
                     projects = FilterForVisibility(projects);
-                    TSLogger.Trace($"GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
+                    if (TSLogger.IsEnabled(LogEventLevel.Verbose)) {
+                        TSLogger.Trace($"GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
+                    }
 
                     projects = FilterForMoonAvoidance(projects);
-                    TSLogger.Trace($"GetPlan after FilterForMoonAvoidance:\n{PlanProject.ListToString(projects)}");
+                    if (TSLogger.IsEnabled(LogEventLevel.Verbose)) {
+                        TSLogger.Trace($"GetPlan after FilterForMoonAvoidance:\n{PlanProject.ListToString(projects)}");
+                    }
 
                     DateTime? waitForVisibleNow = CheckForVisibleNow(projects);
                     if (waitForVisibleNow != null) {
@@ -71,8 +79,10 @@ namespace Assistant.NINAPlugin.Plan {
                     IPlanTarget planTarget = SelectTargetByScore(projects, scoringEngine);
 
                     if (planTarget != null) {
-                        TSLogger.Trace($"Scheduler Planner: highest scoring (or only) target:\n{planTarget}");
-                        TSLogger.Debug($"Scheduler Planner: highest scoring (or only) target: {planTarget.Name}");
+                        TSLogger.Debug($"highest scoring (or only) target: {planTarget.Name}");
+                        if (TSLogger.IsEnabled(LogEventLevel.Verbose)) {
+                            TSLogger.Trace($"highest scoring (or only) target:\n{planTarget}");
+                        }
 
                         TimeInterval targetWindow = GetTargetTimeWindow(atTime, planTarget);
                         List<IPlanInstruction> planInstructions = PlanInstructions(planTarget, previousPlanTarget, targetWindow);
@@ -90,6 +100,9 @@ namespace Assistant.NINAPlugin.Plan {
 
                     TSLogger.Error($"exception generating plan: {ex.StackTrace}");
                     throw new SequenceEntityFailedException($"Scheduler: exception generating plan: {ex.Message}", ex);
+                }
+                finally {
+                    TSLogger.Info("-- END PLANNING ENGINE RUN -----------------------------------------------------");
                 }
             }
         }
@@ -111,20 +124,31 @@ namespace Assistant.NINAPlugin.Plan {
         /// <param name="projects"></param>
         /// <returns>list</returns>
         public static List<SchedulerPlan> GetPerfectPlan(DateTime atTime, IProfileService profileService, List<IPlanProject> projects) {
-            List<SchedulerPlan> plans = new List<SchedulerPlan>();
 
+            TSLogger.Info("-- BEGIN PLAN PREVIEW ----------------------------------------------------------");
+
+            List<SchedulerPlan> plans = new List<SchedulerPlan>();
             DateTime currentTime = atTime;
             IPlanTarget previousPlanTarget = null;
 
-            SchedulerPlan plan;
-            while ((plan = new Planner(currentTime, profileService, projects).GetPlan(previousPlanTarget)) != null) {
-                plans.Add(plan);
-                previousPlanTarget = plan.WaitForNextTargetTime != null ? null : plan.PlanTarget;
-                currentTime = plan.WaitForNextTargetTime != null ? (DateTime)plan.WaitForNextTargetTime : plan.TimeInterval.EndTime;
-                PrepForNextRun(projects, plan);
-            }
+            try {
+                SchedulerPlan plan;
+                while ((plan = new Planner(currentTime, profileService, projects).GetPlan(previousPlanTarget)) != null) {
+                    plans.Add(plan);
+                    previousPlanTarget = plan.WaitForNextTargetTime != null ? null : plan.PlanTarget;
+                    currentTime = plan.WaitForNextTargetTime != null ? (DateTime)plan.WaitForNextTargetTime : plan.TimeInterval.EndTime;
+                    PrepForNextRun(projects, plan);
+                }
 
-            return plans;
+                return plans;
+            }
+            catch (Exception ex) {
+                TSLogger.Error($"exception during plan preview: {ex.Message}\n{ex.StackTrace}");
+                return plans;
+            }
+            finally {
+                TSLogger.Info("-- END PLAN PREVIEW ------------------------------------------------------------");
+            }
         }
 
         private static void PrepForNextRun(List<IPlanProject> projects, SchedulerPlan plan) {

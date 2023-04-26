@@ -169,12 +169,12 @@ namespace Assistant.NINAPlugin.Sequencer {
                     StatusMonitor.BeginWait((DateTime)plan.WaitForNextTargetTime);
                     WaitForNextTarget(plan.WaitForNextTargetTime, progress, token);
                     StatusMonitor.EndWait();
-                    //Notification.ShowInformation("REMINDER: skipping wait");
                 }
                 else {
                     try {
                         IPlanTarget planTarget = plan.PlanTarget;
-                        TSLogger.Info($"starting execution of plan target: {planTarget.Name}");
+                        TSLogger.Info("--BEGIN PLAN EXECUTION--------------------------------------------------------");
+                        TSLogger.Info($"plan target: {planTarget.Name}");
                         SetTarget(atTime, planTarget);
                         StatusMonitor.BeginTarget(planTarget);
 
@@ -194,6 +194,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     finally {
                         ClearTarget();
                         StatusMonitor.EndTarget();
+                        TSLogger.Info("-- END PLAN EXECUTION ----------------------------------------------------------");
                     }
                 }
             }

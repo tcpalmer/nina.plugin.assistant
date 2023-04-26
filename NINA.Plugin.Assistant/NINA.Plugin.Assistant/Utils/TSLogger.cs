@@ -1,15 +1,15 @@
-﻿using NINA.Core.Utility;
-using Serilog.Core;
+﻿using NINA.Core.Enum;
+using NINA.Core.Utility;
 using Serilog;
-using System;
-using System.IO;
-using NINA.Core.Enum;
+using Serilog.Core;
 using Serilog.Events;
-using System.Runtime.CompilerServices;
 using Serilog.Sinks.File;
-using System.Text;
-using System.Reflection;
+using System;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Assistant.NINAPlugin.Util {
 
@@ -67,6 +67,10 @@ namespace Assistant.NINAPlugin.Util {
         private static string GetPluginVersion() {
             Assembly assembly = Assembly.GetExecutingAssembly();
             return FileVersionInfo.GetVersionInfo(assembly.Location).FileVersion;
+        }
+
+        public static bool IsEnabled(LogEventLevel level) {
+            return TSLog.IsEnabled(level);
         }
 
         public static void SetLogLevel(LogLevelEnum logLevel) {
