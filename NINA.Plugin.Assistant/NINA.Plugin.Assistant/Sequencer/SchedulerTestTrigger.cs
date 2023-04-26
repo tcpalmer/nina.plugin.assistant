@@ -14,12 +14,14 @@ using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
+    /* disabling for now
     [ExportMetadata("Name", "Target Scheduler Test Trigger")]
     [ExportMetadata("Description", "Test Trigger for Target Scheduler")]
     [ExportMetadata("Icon", "Scheduler.SchedulerSVG")]
     [ExportMetadata("Category", "Lbl_SequenceCategory_Container")]
     [Export(typeof(ISequenceTrigger))]
     [JsonObject(MemberSerialization.OptIn)]
+    */
     public class SchedulerTestTrigger : SequenceTrigger {
 
         // Tested for Target retrieval and working:
