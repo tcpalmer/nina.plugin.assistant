@@ -6,7 +6,6 @@ using NINA.Astrometry;
 using NINA.Astrometry.Interfaces;
 using NINA.Core.Model;
 using NINA.Core.Utility;
-using NINA.Core.Utility.Notification;
 using NINA.Core.Utility.WindowService;
 using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
@@ -111,15 +110,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             WeakEventManager<IProfileService, EventArgs>.AddHandler(profileService, nameof(profileService.LocationChanged), ProfileService_LocationChanged);
             WeakEventManager<IProfileService, EventArgs>.AddHandler(profileService, nameof(profileService.HorizonChanged), ProfileService_HorizonChanged);
             WeakEventManager<INighttimeCalculator, EventArgs>.AddHandler(nighttimeCalculator, nameof(nighttimeCalculator.OnReferenceDayChanged), NighttimeCalculator_OnReferenceDayChanged);
-
-            // TODO: Need to figure out a way to block or warn about adding Loop Conditions or Instructions
-            // Following doesn't work, nor does trying to override the Add()
-            ((ObservableCollection<ISequenceCondition>)Conditions).CollectionChanged += LoopConditions_CollectionChanged;
-        }
-
-        private void LoopConditions_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
-            TSLogger.Debug("IN LoopConditions_CollectionChanged");
-            Notification.ShowWarning("you don't want to do this");
         }
 
         public override void Initialize() {
@@ -231,13 +221,20 @@ namespace Assistant.NINAPlugin.Sequencer {
             get => StatusMonitor?.StatusItemList;
         }
 
-        /*
-         * TODO:
-         *   - Validation: confirm TS instruction is one of the instructions.  Do any other containers do validation?
-         *     Just implement IValidatable
-         *   - We might need to think about doing a lock on the Target.  Since triggers like MF could be accessing it,
-         *     we need to ensure a smooth transition when it changes.  Maybe for NighttimeData too.
-         */
+        public override bool Validate() {
+            var issues = new List<string>();
+
+            if (Conditions.Count > 0) {
+                issues.Add("Loop conditions added to the Target Scheduler Container will be ignored");
+            }
+
+            if (Items.Count > 0) {
+                issues.Add("Instructions added to the Target Scheduler Container will be ignored");
+            }
+
+            Issues = issues;
+            return issues.Count == 0;
+        }
 
         public void ClearTarget() {
             lock (lockObj) {
