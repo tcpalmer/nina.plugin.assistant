@@ -551,7 +551,6 @@ namespace Assistant.NINAPlugin.Database {
 
                     foreach (DictionaryEntry entry in rs) {
                         if (Int32.TryParse((string)entry.Key, out int migrateNum)) {
-                            TSLogger.Debug($"loaded migration script number {migrateNum}");
                             migrateScripts.Add(migrateNum, (string)entry.Value);
                         }
                     }

@@ -7,12 +7,14 @@ using System.ComponentModel.Composition;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
+    /* disabling for now
     [ExportMetadata("Name", "Target Scheduler Test Condition")]
     [ExportMetadata("Description", "Test Condition for Target Scheduler")]
     [ExportMetadata("Icon", "Scheduler.SchedulerSVG")]
     [ExportMetadata("Category", "Lbl_SequenceCategory_Container")]
     [Export(typeof(ISequenceCondition))]
     [JsonObject(MemberSerialization.OptIn)]
+    */
     public class SchedulerTestCondition : LoopCondition {
 
         [ImportingConstructor]
