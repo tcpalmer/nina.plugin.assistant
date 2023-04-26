@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 0.6.0.0 - 2023-04-XX
+* Added validation to detect when Loop Conditions or Instructions are added to the TS container
+
 ## 0.5.0.0 - 2023-04-26
 * Added support for importing mosaic panels from Framing Assistant
 
