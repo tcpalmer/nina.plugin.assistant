@@ -31,7 +31,10 @@ using System.Runtime.InteropServices;
 The [plugin documentation](https://tcpalmer.github.io/nina-scheduler/) provides a detailed description of the plugin and how to use it.
 
 ## Acknowledgements ##
-* 
+* Chris Woodhouse has been involved since the beginning and was instrumental in hashing out the initial design and requirements.
+* Matt Nudi also provided design feedback and critical early beta testing.
+* The concept for the plugin was originally inspired by the AIC video [Tim Hutchison: Automating a Backyard Observatory](https://www.youtube.com/watch?v=a4IkAUZkXH0).
+* Finally, it's a tribute to the elegant design of NINA and the Advanced Sequencer that a plugin of this type is not only possible, but can also interact correctly with other elements in a sequence.
 
 # Getting Help #
 * Review the [plugin documentation](https://tcpalmer.github.io/nina-scheduler/)
