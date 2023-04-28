@@ -212,7 +212,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 if (instruction is Plan.PlanTakeExposure) {
-                    AddTakeExposure(instruction.planExposure);
+                    AddTakeExposure(plan.PlanTarget, instruction.planExposure);
                     continue;
                 }
 
@@ -284,7 +284,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             Add(setReadoutMode);
         }
 
-        private void AddTakeExposure(IPlanExposure planExposure) {
+        private void AddTakeExposure(IPlanTarget planTarget, IPlanExposure planExposure) {
             TSLogger.Info($"adding take exposure: {planExposure.FilterName}");
 
             PlanTakeExposure takeExposure = new PlanTakeExposure(parentContainer,
@@ -302,6 +302,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             takeExposure.Gain = GetGain(planExposure.Gain);
             takeExposure.Offset = GetOffset(planExposure.Offset);
             takeExposure.Binning = planExposure.BinningMode;
+            takeExposure.ROI = planTarget.ROI;
 
             Add(takeExposure);
         }
