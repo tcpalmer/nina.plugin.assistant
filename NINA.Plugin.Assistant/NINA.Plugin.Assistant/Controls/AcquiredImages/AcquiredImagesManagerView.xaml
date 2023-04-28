@@ -313,6 +313,10 @@
                                 <TextBlock
                                     Margin="0,3,0,0"
                                     VerticalAlignment="Center"
+                                    Text="Airmass" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
                                     Text="ADU Min" />
                                 <TextBlock
                                     Margin="0,3,0,0"
@@ -338,6 +342,10 @@
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="0,0,2,0">
                             <StackPanel Orientation="Vertical">
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding Airmass}" />
                                 <TextBlock
                                     Margin="0,3,0,0"
                                     VerticalAlignment="Center"
