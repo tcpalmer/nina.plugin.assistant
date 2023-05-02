@@ -204,7 +204,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         private List<IPlanExposure> GetPlanExposuresForTwilightLevel(TwilightLevel twilightLevel) {
-            return NightPrioritize(planTarget.ExposurePlans.Where(f => f.TwilightLevel >= twilightLevel).ToList(), twilightLevel);
+            return NightPrioritize(planTarget.ExposurePlans.Where(f => f.TwilightLevel >= twilightLevel && !f.Rejected).ToList(), twilightLevel);
         }
 
         private List<IPlanExposure> NightPrioritize(List<IPlanExposure> planExposures, TwilightLevel twilightLevel) {

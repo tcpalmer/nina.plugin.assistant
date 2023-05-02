@@ -513,9 +513,11 @@ namespace Assistant.NINAPlugin.Plan {
             double moonSeparation = AstrometryUtils.GetMoonSeparationAngle(observerInfo, midPointTime, planTarget.Coordinates);
             double moonAvoidanceSeparation = AstrometryUtils.GetMoonAvoidanceLorentzianSeparation(moonAge,
                 planExposure.MoonAvoidanceSeparation, planExposure.MoonAvoidanceWidth);
-            TSLogger.Debug($"moon avoidance {planTarget.Name}/{planExposure.FilterName} midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
 
-            return moonSeparation < moonAvoidanceSeparation;
+            bool rejected = moonSeparation < moonAvoidanceSeparation;
+            TSLogger.Debug($"moon avoidance {planTarget.Name}/{planExposure.FilterName} rejected={rejected}, midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
+
+            return rejected;
         }
 
         private List<IPlanTarget> GetActiveTargets(List<IPlanProject> projects) {
