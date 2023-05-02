@@ -134,6 +134,33 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         }
 
         [Test]
+        public void testExposurePlanMixRejected() {
+            DateTime dateTime = DateTime.Now;
+
+            TestNighttimeCircumstances ntc = TestNighttimeCircumstances.GetNormal(dateTime);
+
+            Mock<IPlanProject> pp = PlanMocks.GetMockPlanProject("pp", ProjectState.Active);
+            pp.Object.FilterSwitchFrequency = 0;
+            Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("pt", TestUtil.M42);
+            PlanMocks.AddMockPlanTarget(pp, pt);
+
+            Mock<IPlanExposure> pe = PlanMocks.GetMockPlanExposure("O3", 1, 0, 60);
+            pe.Object.TwilightLevel = TwilightLevel.Nighttime;
+            pe.Object.Rejected = false;
+            PlanMocks.AddMockPlanFilter(pt, pe);
+
+            pe = PlanMocks.GetMockPlanExposure("R", 1, 0, 60);
+            pe.Object.TwilightLevel = TwilightLevel.Nighttime;
+            pe.Object.Rejected = true;
+            pe.Object.RejectedReason = Reasons.TargetMoonAvoidance;
+            PlanMocks.AddMockPlanFilter(pt, pe);
+
+            TimeInterval window = new TimeInterval((DateTime)ntc.NighttimeStart, (DateTime)ntc.NighttimeEnd);
+            List<IPlanInstruction> list = new ExposurePlanner(pt.Object, window, ntc).Plan();
+            AssertPlan(GetExpectedPlanMixRejected(), list);
+        }
+
+        [Test]
         public void testCleanup() {
             List<IPlanInstruction> list = new List<IPlanInstruction>();
 
@@ -409,6 +436,18 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             actual.Add(new PlanMessage(""));
             AddActualExposures(actual, Civil.Object, 1);
             AddActualExposures(actual, Nautical.Object, 18);
+
+            return actual;
+        }
+
+        private List<IPlanInstruction> GetExpectedPlanMixRejected() {
+            List<IPlanInstruction> actual = new List<IPlanInstruction>();
+
+            Mock<IPlanExposure> Night = PlanMocks.GetMockPlanExposure("O3", 1, 0, 60);
+
+            actual.Add(new PlanMessage(""));
+            actual.Add(new PlanMessage(""));
+            AddActualExposures(actual, Night.Object, 1);
 
             return actual;
         }
