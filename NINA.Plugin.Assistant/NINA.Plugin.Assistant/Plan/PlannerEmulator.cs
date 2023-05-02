@@ -278,7 +278,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.ExposurePlans = new List<IPlanExposure>();
         }
 
-        public void SetCircumstances(TargetCircumstances targetCircumstances) {
+        public void SetCircumstances(bool isVisible, DateTime startTime, DateTime culminationTime, DateTime endTime) {
             throw new NotImplementedException();
         }
     }

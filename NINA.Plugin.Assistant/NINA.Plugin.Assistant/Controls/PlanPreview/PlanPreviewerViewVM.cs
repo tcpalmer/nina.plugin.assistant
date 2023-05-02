@@ -122,7 +122,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                 DateTime atDateTime = PlanDate.Date.AddHours(PlanHours).AddMinutes(PlanMinutes).AddSeconds(PlanSeconds);
                 TSLogger.Debug($"running plan preview for {Utils.FormatDateTimeFull(atDateTime)}, profileId={SelectedProfileId}");
 
-                List<IPlanProject> projects = new SchedulerPlanLoader().LoadActiveProjects(database.GetContext(), GetProfile(SelectedProfileId), atDateTime);
+                List<IPlanProject> projects = new SchedulerPlanLoader().LoadActiveProjects(database.GetContext(), GetProfile(SelectedProfileId));
 
                 if (projects == null) {
                     TSLogger.Debug($"no active projects for {atDateTime}, profileId={SelectedProfileId}");

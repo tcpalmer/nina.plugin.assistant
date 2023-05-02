@@ -52,7 +52,7 @@ namespace Assistant.NINAPlugin.Plan {
             using (MyStopWatch.Measure("Scheduler Plan Generation")) {
                 try {
                     if (projects == null) {
-                        projects = GetProjects(atTime);
+                        projects = GetProjects();
                     }
 
                     projects = FilterForIncomplete(projects);
@@ -196,8 +196,8 @@ namespace Assistant.NINAPlugin.Plan {
         /// <summary>
         /// Review each project and the list of associated targets: reject those targets that are not visible.  If all targets
         /// for the project are rejected, mark the project rejected too.  A target is visible if it is above the horizon
-        /// within the time window set by the most inclusive twilight over all incomplete exposure plans for that target AND that
-        /// visible time is greater than the minimum imaging time preference for the project.
+        /// within the time window set by the most inclusive twilight over all incomplete exposure plans for that target, is clipped
+        /// to any meridian window, and the remaining visible time is greater than the minimum imaging time preference for the project.
         /// </summary>
         /// <param name="projects"></param>
         /// <returns></returns>
@@ -223,21 +223,47 @@ namespace Assistant.NINAPlugin.Plan {
                     // Determine the potential imaging time span
                     TargetCircumstances targetCircumstances = new TargetCircumstances(planTarget.Coordinates, observerInfo, planProject.HorizonDefinition, twilightSpan);
 
-                    DateTime actualStart = atTime > targetCircumstances.RiseAboveHorizonTime ? atTime : targetCircumstances.RiseAboveHorizonTime;
-                    int TimeOnTargetSeconds = (int)(targetCircumstances.SetBelowHorizonTime - actualStart).TotalSeconds;
+                    DateTime targetStartTime = targetCircumstances.RiseAboveHorizonTime;
+                    DateTime targetCulminationTime = targetCircumstances.CulminationTime;
+                    DateTime targetEndTime = targetCircumstances.SetBelowHorizonTime;
+
+                    // Clip time span to optional meridian window
+                    TimeInterval meridianClippedSpan = null;
+                    if (planProject.MeridianWindow > 0) {
+                        meridianClippedSpan = new MeridianWindowClipper().Clip(
+                                           targetStartTime,
+                                           targetCircumstances.CulminationTime,
+                                           targetEndTime,
+                                           planProject.MeridianWindow);
+
+                        if (meridianClippedSpan == null) {
+                            SetRejected(planTarget, Reasons.TargetMeridianWindowClipped);
+                            continue;
+                        }
+
+                        targetStartTime = meridianClippedSpan.StartTime;
+                        targetEndTime = meridianClippedSpan.EndTime;
+                    }
+
+                    DateTime actualStart = atTime > targetStartTime ? atTime : targetStartTime;
+                    int TimeOnTargetSeconds = (int)(targetEndTime - actualStart).TotalSeconds;
 
                     // If the start time is in the future, reject for now
                     if (actualStart > atTime) {
                         planTarget.StartTime = actualStart;
-                        SetRejected(planTarget, Reasons.TargetNotYetVisible);
+                        string reason = meridianClippedSpan != null ? Reasons.TargetBeforeMeridianWindow : Reasons.TargetNotYetVisible;
+                        SetRejected(planTarget, reason);
+                        continue;
                     }
+
                     // If the target is visible for at least the minimum time, then accept it
-                    else if (targetCircumstances.IsVisible && (TimeOnTargetSeconds >= planProject.MinimumTime * 60)) {
-                        planTarget.SetCircumstances(targetCircumstances);
+                    if (targetCircumstances.IsVisible && (TimeOnTargetSeconds >= planProject.MinimumTime * 60)) {
+                        planTarget.SetCircumstances(targetCircumstances.IsVisible, targetStartTime, targetCulminationTime, targetEndTime);
+                        continue;
                     }
-                    else {
-                        SetRejected(planTarget, Reasons.TargetNotVisible);
-                    }
+
+                    // Otherwise reject it
+                    SetRejected(planTarget, Reasons.TargetNotVisible);
                 }
             }
 
@@ -290,7 +316,7 @@ namespace Assistant.NINAPlugin.Plan {
                         return null;
                     }
 
-                    if (planTarget.RejectedReason == Reasons.TargetNotYetVisible) {
+                    if (planTarget.RejectedReason == Reasons.TargetNotYetVisible || planTarget.RejectedReason == Reasons.TargetBeforeMeridianWindow) {
                         nextAvailableTime = planTarget.StartTime < nextAvailableTime ? planTarget.StartTime : nextAvailableTime;
                     }
                 }
@@ -510,12 +536,12 @@ namespace Assistant.NINAPlugin.Plan {
             return targets;
         }
 
-        private List<IPlanProject> GetProjects(DateTime atTime) {
+        private List<IPlanProject> GetProjects() {
 
             try {
                 SchedulerDatabaseInteraction database = new SchedulerDatabaseInteraction();
                 SchedulerPlanLoader loader = new SchedulerPlanLoader();
-                return loader.LoadActiveProjects(database.GetContext(), activeProfile, atTime);
+                return loader.LoadActiveProjects(database.GetContext(), activeProfile);
             }
             catch (Exception ex) {
                 TSLogger.Error($"exception reading database: {ex.StackTrace}");

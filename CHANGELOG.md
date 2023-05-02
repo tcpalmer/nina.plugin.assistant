@@ -1,6 +1,7 @@
 # Target Scheduler
 
-## 0.6.1.0 - 2023-XX-XX
+## 0.7.0.0 - 2023-XX-XX
+* Added support for meridian window restriction
 * Added airmass to acquired image data detail display
 * Fixed problem with ROI exposure capture
 

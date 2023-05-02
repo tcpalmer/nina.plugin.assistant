@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan.Scoring.Rules;
 using Assistant.NINAPlugin.Util;
 using NINA.Core.Utility;
 using System;
@@ -48,6 +49,13 @@ namespace Assistant.NINAPlugin.Database {
             return ProfilePreferenceSet.Where(p => p.ProfileId.Equals(profileId)).FirstOrDefault();
         }
 
+        public List<Project> GetAllProjects() {
+            return ProjectSet
+                .Include("targets.exposureplans.exposuretemplate")
+                .Include("ruleweights")
+                .ToList();
+        }
+
         public List<Project> GetAllProjects(string profileId) {
             return ProjectSet
                 .Include("targets.exposureplans.exposuretemplate")
@@ -64,7 +72,7 @@ namespace Assistant.NINAPlugin.Database {
                 .ToList();
         }
 
-        public List<Project> GetActiveProjects(string profileId, DateTime atTime) {
+        public List<Project> GetActiveProjects(string profileId) {
             var projects = ProjectSet
                 .Include("targets.exposureplans.exposuretemplate")
                 .Include("ruleweights")
@@ -74,7 +82,7 @@ namespace Assistant.NINAPlugin.Database {
             return projects.ToList();
         }
 
-        public bool HasActiveTargets(string profileId, DateTime atTime) {
+        public bool HasActiveTargets(string profileId) {
             List<Project> projects = ProjectSet
                 .AsNoTracking()
                 .Include("targets")
@@ -520,6 +528,9 @@ namespace Assistant.NINAPlugin.Database {
                     }
                 }
 
+                // Other repairs/updates
+                RepairAndUpdate(context);
+
                 int newVersion = context.Database.SqlQuery<int>("PRAGMA user_version").First();
                 if (newVersion != version) {
                     TSLogger.Info($"database updated: {version} -> {newVersion}");
@@ -564,7 +575,33 @@ namespace Assistant.NINAPlugin.Database {
                 }
             }
 
-        }
+            private void RepairAndUpdate(TContext context) {
 
+                // If a new scoring rule was added, we need to add a rule weight record to projects that don't have it
+                List<Project> projects = context.GetAllProjects();
+                if (projects != null && projects.Count > 0) {
+                    bool updated = false;
+                    Dictionary<string, IScoringRule> rules = ScoringRule.GetAllScoringRules();
+                    foreach (Project project in projects) {
+                        foreach (KeyValuePair<string, IScoringRule> item in rules) {
+                            RuleWeight rw = project.RuleWeights.Where(r => r.Name == item.Key).FirstOrDefault();
+                            if (rw == null) {
+                                TSLogger.Info($"project '{project.Name}' is missing rule weight record: '{item.Value.Name}': adding");
+                                rw = new RuleWeight(item.Value.Name, item.Value.DefaultWeight);
+                                rw.Project = project;
+                                context.RuleWeightSet.Add(rw);
+                                updated = true;
+                            }
+                        }
+                    }
+
+                    if (updated) {
+                        context.SaveChanges();
+                    }
+                }
+
+            }
+
+        }
     }
 }

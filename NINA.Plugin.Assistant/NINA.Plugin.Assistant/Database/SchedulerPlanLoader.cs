@@ -1,7 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
-using NINA.Core.Utility;
 using NINA.Profile.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -10,13 +9,13 @@ namespace Assistant.NINAPlugin.Database {
 
     public class SchedulerPlanLoader {
 
-        public List<IPlanProject> LoadActiveProjects(SchedulerDatabaseContext context, IProfile activeProfile, DateTime atTime) {
+        public List<IPlanProject> LoadActiveProjects(SchedulerDatabaseContext context, IProfile activeProfile) {
             List<Project> projects = null;
             string profileId = activeProfile.Id.ToString();
 
             using (context) {
                 try {
-                    projects = context.GetActiveProjects(profileId, atTime);
+                    projects = context.GetActiveProjects(profileId);
                 }
                 catch (Exception ex) {
                     throw ex; // let the caller decide how to handle

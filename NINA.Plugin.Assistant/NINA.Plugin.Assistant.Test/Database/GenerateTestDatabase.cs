@@ -118,7 +118,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     context.SaveChanges();
 
-                    ReadAndDump(profileId, new DateTime(2023, 1, 1));
+                    ReadAndDump(profileId);
                 }
                 catch (DbEntityValidationException e) {
                     StringBuilder sb = new StringBuilder();
@@ -519,7 +519,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
             return ep;
         }
 
-        private List<IPlanProject> ReadAndDump(string profileId, DateTime atTime) {
+        private List<IPlanProject> ReadAndDump(string profileId) {
 
             List<Project> projects = null;
             List<ExposureTemplate> exposureTemplates = null;
@@ -527,7 +527,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
             SchedulerDatabaseInteraction database = GetDatabase();
             using (var context = database.GetContext()) {
                 try {
-                    projects = context.GetActiveProjects(profileId, atTime);
+                    projects = context.GetActiveProjects(profileId);
                     exposureTemplates = context.GetExposureTemplates(profileId);
                 }
                 catch (Exception ex) {

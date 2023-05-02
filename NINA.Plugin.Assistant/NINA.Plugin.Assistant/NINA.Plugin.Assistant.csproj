@@ -301,6 +301,7 @@
   <ItemGroup>
     <Compile Include="Assistant.cs" />
     <Compile Include="Astrometry\AstrometryUtils.cs" />
+    <Compile Include="Astrometry\MeridianWindowClipper.cs" />
     <Compile Include="Astrometry\NighttimeCircumstances.cs" />
     <Compile Include="Astrometry\Solver\Altitudes.cs" />
     <Compile Include="Astrometry\Solver\CircumstanceSolver.cs" />
@@ -396,6 +397,7 @@
       <DependentUpon>SQL.resx</DependentUpon>
     </Compile>
     <Compile Include="Database\Schema\ProfilePreference.cs" />
+    <Compile Include="Plan\Scoring\Rules\MeridianWindowPriorityRule.cs" />
     <Compile Include="Plan\Scoring\Rules\SettingSoonestRule.cs" />
     <Compile Include="Sequencer\PlanTakeExposure.cs" />
     <Compile Include="Sequencer\PlanTargetContainerStrategy.cs" />

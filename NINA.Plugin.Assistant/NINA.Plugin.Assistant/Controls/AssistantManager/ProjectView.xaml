@@ -277,7 +277,7 @@
                 VerticalAlignment="Center"
                 FontWeight="Bold"
                 Text="Meridian Window"
-                ToolTip="Limit imaging to timespan around the meridian crossing (minutes) (NOT YET IMPLEMENTED)" />
+                ToolTip="Limit imaging to this amount of time on either side of target meridian crossing" />
             <TextBox MaxHeight="20" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                 <TextBox.Text>
                     <Binding Path="ProjectProxy.Project.MeridianWindow" UpdateSourceTrigger="LostFocus">
@@ -369,7 +369,7 @@
             FontWeight="Bold"
             Text="Scoring Engine Rule Weights" />
         <DataGrid
-            Height="100"
+            Height="140"
             Margin="12,0,0,0"
             AutoGenerateColumns="False"
             BorderThickness="0"
