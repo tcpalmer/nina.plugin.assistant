@@ -32,8 +32,6 @@ namespace Assistant.NINAPlugin.Astrometry {
             // Case 7: ------M===E===T======M------ -> end in span, before transit (end no change)
             // Case 8: ------M======T===E===M------ -> end in span, after transit (end no change)
 
-            //long meridianProximitySecs = meridianProximityTime * 60;
-
             // Case 2: M======T======M------S------ -> start after the entire span (reject)
             if (startTime > transitTime.AddSeconds(meridianWindowSecs)) {
                 return null;

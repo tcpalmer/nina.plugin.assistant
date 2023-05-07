@@ -4,6 +4,7 @@
 * Added support for meridian window restriction
 * Added airmass to acquired image data detail display
 * Fixed problem with ROI exposure capture
+* Fixed problem with including rejected exposure plans
 
 ## 0.6.0.0 - 2023-04-27
 * Added validation to detect when Loop Conditions or Instructions are added to the TS container

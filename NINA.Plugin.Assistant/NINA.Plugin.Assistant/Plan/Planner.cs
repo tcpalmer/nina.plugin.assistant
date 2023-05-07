@@ -363,6 +363,20 @@ namespace Assistant.NINAPlugin.Plan {
                 }
             }
 
+            // Mark losing targets rejected
+            foreach (IPlanProject planProject in projects) {
+                if (planProject.Rejected) { continue; }
+
+                foreach (IPlanTarget planTarget in planProject.Targets) {
+                    if (planTarget.Rejected) { continue; }
+
+                    if (planTarget != highScoreTarget) {
+                        planTarget.Rejected = true;
+                        planTarget.RejectedReason = Reasons.TargetLowerScore;
+                    }
+                }
+            }
+
             return highScoreTarget;
         }
 

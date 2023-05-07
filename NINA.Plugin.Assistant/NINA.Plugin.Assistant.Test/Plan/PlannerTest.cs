@@ -488,6 +488,12 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             IPlanTarget selected = new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object).SelectTargetByScore(projects, scoringEngineMock.Object);
             Assert.IsNotNull(selected);
             selected.Name.Should().Be("IC1805");
+            selected.Rejected.Should().BeFalse();
+
+            IPlanTarget m42 = pp1.Object.Targets[0];
+            m42.Name.Should().Be("M42");
+            m42.Rejected.Should().BeTrue();
+            m42.RejectedReason.Should().Be(Reasons.TargetLowerScore);
         }
 
         [Test]
