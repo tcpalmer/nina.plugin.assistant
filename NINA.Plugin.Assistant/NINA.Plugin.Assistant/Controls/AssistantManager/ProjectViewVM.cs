@@ -164,6 +164,14 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private void Save(object obj) {
+
+            // Prevent save if minimum time setting is such that it would never allow a meridian window to work properly
+            if (ProjectProxy.Proxy.MeridianWindow > 0 && ProjectProxy.Proxy.MinimumTime > (ProjectProxy.Proxy.MeridianWindow * 2)) {
+                string message = $"Minimum Time must be less than twice the Meridian Window or the project will never be selected for imaging.";
+                MyMessageBox.Show(message, "Oops");
+                return;
+            }
+
             ProjectProxy.Proxy.RuleWeights = RuleWeights;
             managerVM.SaveProject(ProjectProxy.Proxy);
             ProjectProxy.OnSave();

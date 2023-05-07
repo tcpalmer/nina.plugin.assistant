@@ -41,8 +41,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
         public void TestLoad() {
             using (var context = db.GetContext()) {
 
-                context.HasActiveTargets("", markDate.AddDays(-1)).Should().BeFalse();
-                context.HasActiveTargets(profileId, markDate.AddDays(1)).Should().BeTrue();
+                context.HasActiveTargets("").Should().BeFalse();
+                context.HasActiveTargets(profileId).Should().BeTrue();
 
                 context.GetAllProjects("").Count.Should().Be(0);
 
@@ -123,7 +123,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 ets[2].MoonAvoidanceEnabled.Should().BeFalse();
 
                 // Test GetActiveProjects
-                projects = context.GetActiveProjects(profileId, markDate);
+                projects = context.GetActiveProjects(profileId);
                 projects.Count.Should().Be(2);
                 projects[0].Name.Should().Be("Project: M42");
                 projects[1].Name.Should().Be("Project: IC1805");

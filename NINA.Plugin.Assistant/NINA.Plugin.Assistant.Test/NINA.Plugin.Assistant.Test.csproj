@@ -327,6 +327,7 @@
     <Compile Include="Astrometry\AltitudesTest.cs" />
     <Compile Include="Astrometry\AstrometryUtilsTest.cs" />
     <Compile Include="Astrometry\DSORiseAndSetTest.cs" />
+    <Compile Include="Astrometry\MeridianWindowClipperTest.cs" />
     <Compile Include="Astrometry\NighttimeCircumstancesTest.cs" />
     <Compile Include="Astrometry\Solver\CircumstanceSolverTest.cs" />
     <Compile Include="Astrometry\Solver\DSORefinerTest.cs" />
@@ -345,6 +346,7 @@
     <Compile Include="Plan\PlanMocks.cs" />
     <Compile Include="Plan\PlannerTest.cs" />
     <Compile Include="Plan\Scoring\Rules\PercentCompleteRuleTest.cs" />
+    <Compile Include="Plan\Scoring\Rules\MeridianWindowPriorityRuleTest.cs" />
     <Compile Include="Plan\Scoring\Rules\ProjectPriorityRuleTest.cs" />
     <Compile Include="Plan\Scoring\Rules\ScoringRuleTest.cs" />
     <Compile Include="Plan\Scoring\Rules\SettingSoonestRuleTest.cs" />

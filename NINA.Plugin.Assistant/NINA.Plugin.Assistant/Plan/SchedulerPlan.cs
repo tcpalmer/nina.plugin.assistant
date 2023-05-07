@@ -231,7 +231,7 @@ namespace Assistant.NINAPlugin.Plan {
         DateTime EndTime { get; set; }
         DateTime CulminationTime { get; set; }
 
-        void SetCircumstances(TargetCircumstances targetCircumstances);
+        void SetCircumstances(bool isVisible, DateTime startTime, DateTime culminationTime, DateTime endTime);
         string ToString();
     }
 
@@ -275,11 +275,11 @@ namespace Assistant.NINAPlugin.Plan {
             }
         }
 
-        public void SetCircumstances(TargetCircumstances targetCircumstances) {
-            if (targetCircumstances.IsVisible) {
-                StartTime = targetCircumstances.RiseAboveHorizonTime;
-                EndTime = targetCircumstances.SetBelowHorizonTime;
-                CulminationTime = targetCircumstances.CulminationTime;
+        public void SetCircumstances(bool isVisible, DateTime startTime, DateTime culminationTime, DateTime endTime) {
+            if (isVisible) {
+                StartTime = startTime;
+                CulminationTime = culminationTime;
+                EndTime = endTime;
             }
         }
 
@@ -445,7 +445,10 @@ namespace Assistant.NINAPlugin.Plan {
         public const string TargetNeverRises = "never rises at location";
         public const string TargetNotVisible = "not visible at this time";
         public const string TargetNotYetVisible = "not yet visible at this time";
+        public const string TargetMeridianWindowClipped = "clipped by meridian window";
+        public const string TargetBeforeMeridianWindow = "before meridian window";
         public const string TargetMoonAvoidance = "moon avoidance";
+        public const string TargetLowerScore = "lower score";
         public const string TargetAllExposurePlans = "all exposure plans rejected";
 
         public const string FilterComplete = "complete";

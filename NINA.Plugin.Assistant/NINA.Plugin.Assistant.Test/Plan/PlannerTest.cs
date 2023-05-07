@@ -1,4 +1,5 @@
-﻿using Assistant.NINAPlugin.Database.Schema;
+﻿using Assistant.NINAPlugin.Astrometry;
+using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Plan.Scoring;
 using FluentAssertions;
@@ -190,7 +191,20 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
 
             Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
+
+            bool captureVisibility = false;
+            DateTime captureStartTime = DateTime.MinValue;
+            DateTime captureCulminationTime = DateTime.MinValue;
+            DateTime captureEndTime = DateTime.MinValue;
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
+            pt.Setup(c => c.SetCircumstances(It.IsAny<bool>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .Callback<bool, DateTime, DateTime, DateTime>((visible, st, ct, et) => {
+                    captureVisibility = visible;
+                    captureStartTime = st;
+                    captureCulminationTime = ct;
+                    captureEndTime = et;
+                });
+
             Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("Ha", 10, 0);
             PlanMocks.AddMockPlanFilter(pt, pf);
             PlanMocks.AddMockPlanTarget(pp1, pt);
@@ -205,6 +219,135 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pp.Rejected.Should().BeFalse();
             IPlanTarget pt1 = pp.Targets[0];
             pt1.Rejected.Should().BeFalse();
+
+            captureVisibility.Should().BeTrue();
+            TimeSpan precision = TimeSpan.FromSeconds(1);
+            captureStartTime.Should().BeCloseTo(new DateTime(2023, 12, 17, 18, 36, 46), precision);
+            captureCulminationTime.Should().BeCloseTo(new DateTime(2023, 12, 18, 0, 5, 45), precision);
+            captureEndTime.Should().BeCloseTo(new DateTime(2023, 12, 18, 5, 49, 13), precision);
+        }
+
+        [Test]
+        public void testFilterForVisibilityInMeridianWindow() {
+            Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
+
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
+            pp1.SetupProperty(m => m.MeridianWindow, 30);
+
+            bool captureVisibility = false;
+            DateTime captureStartTime = DateTime.MinValue;
+            DateTime captureCulminationTime = DateTime.MinValue;
+            DateTime captureEndTime = DateTime.MinValue;
+            Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
+            pt.Setup(c => c.SetCircumstances(It.IsAny<bool>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .Callback<bool, DateTime, DateTime, DateTime>((visible, st, ct, et) => {
+                    captureVisibility = visible;
+                    captureStartTime = st;
+                    captureCulminationTime = ct;
+                    captureEndTime = et;
+                });
+
+            Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("Ha", 10, 0);
+            PlanMocks.AddMockPlanFilter(pt, pf);
+            PlanMocks.AddMockPlanTarget(pp1, pt);
+            List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
+
+            projects = new Planner(new DateTime(2023, 12, 17, 23, 36, 0), profileMock.Object).FilterForVisibility(projects);
+            Assert.IsNotNull(projects);
+            projects.Count.Should().Be(1);
+
+            IPlanProject pp = projects[0];
+            pp.Name.Should().Be("pp1");
+            pp.Rejected.Should().BeFalse();
+            IPlanTarget pt1 = pp.Targets[0];
+            pt1.Rejected.Should().BeFalse();
+
+            captureVisibility.Should().BeTrue();
+            TimeSpan precision = TimeSpan.FromSeconds(1);
+            captureStartTime.Should().BeCloseTo(new DateTime(2023, 12, 17, 23, 35, 45), precision);
+            captureCulminationTime.Should().BeCloseTo(new DateTime(2023, 12, 18, 0, 5, 45), precision);
+            captureEndTime.Should().BeCloseTo(new DateTime(2023, 12, 18, 0, 35, 45), precision);
+        }
+
+        [Test]
+        public void testFilterForVisibilityWaitForMeridianWindow() {
+            Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
+
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
+            pp1.SetupProperty(m => m.MeridianWindow, 30);
+
+            bool captureVisibility = false;
+            DateTime captureStartTime = DateTime.MinValue;
+            DateTime captureCulminationTime = DateTime.MinValue;
+            DateTime captureEndTime = DateTime.MinValue;
+            Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
+            pt.Setup(c => c.SetCircumstances(It.IsAny<bool>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .Callback<bool, DateTime, DateTime, DateTime>((visible, st, ct, et) => {
+                    captureVisibility = visible;
+                    captureStartTime = st;
+                    captureCulminationTime = ct;
+                    captureEndTime = et;
+                });
+
+            Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("Ha", 10, 0);
+            PlanMocks.AddMockPlanFilter(pt, pf);
+            PlanMocks.AddMockPlanTarget(pp1, pt);
+            List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
+
+            projects = new Planner(new DateTime(2023, 12, 17, 19, 0, 0), profileMock.Object).FilterForVisibility(projects);
+            Assert.IsNotNull(projects);
+            projects.Count.Should().Be(1);
+
+            IPlanProject pp = projects[0];
+            pp.Name.Should().Be("pp1");
+            pp.Rejected.Should().BeTrue();
+            IPlanTarget pt1 = pp.Targets[0];
+            pt1.Rejected.Should().BeTrue();
+            pt1.RejectedReason.Should().Be(Reasons.TargetBeforeMeridianWindow);
+
+            captureVisibility.Should().BeFalse();
+        }
+
+        [Test]
+        public void testFilterForVisibilityMeridianWindowCircumpolar() {
+            Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_6);
+
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
+            pp1.SetupProperty(m => m.MeridianWindow, 30);
+
+            bool captureVisibility = false;
+            DateTime captureStartTime = DateTime.MinValue;
+            DateTime captureCulminationTime = DateTime.MinValue;
+            DateTime captureEndTime = DateTime.MinValue;
+            Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("IC1805", TestUtil.IC1805);
+            pt.Setup(c => c.SetCircumstances(It.IsAny<bool>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .Callback<bool, DateTime, DateTime, DateTime>((visible, st, ct, et) => {
+                    captureVisibility = visible;
+                    captureStartTime = st;
+                    captureCulminationTime = ct;
+                    captureEndTime = et;
+                });
+
+            Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("Ha", 10, 0);
+            PlanMocks.AddMockPlanFilter(pt, pf);
+            PlanMocks.AddMockPlanTarget(pp1, pt);
+            List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
+
+            projects = new Planner(new DateTime(2023, 12, 17, 20, 34, 0), profileMock.Object).FilterForVisibility(projects);
+            Assert.IsNotNull(projects);
+            projects.Count.Should().Be(1);
+
+            IPlanProject pp = projects[0];
+            pp.Name.Should().Be("pp1");
+            pp.Rejected.Should().BeFalse();
+            IPlanTarget pt1 = pp.Targets[0];
+            pt1.Rejected.Should().BeFalse();
+
+            captureVisibility.Should().BeTrue();
+            TimeSpan precision = TimeSpan.FromSeconds(1);
+            captureStartTime.Should().BeCloseTo(new DateTime(2023, 12, 17, 20, 33, 52), precision);
+            captureCulminationTime.Should().BeCloseTo(new DateTime(2023, 12, 17, 21, 3, 52), precision);
+            captureEndTime.Should().BeCloseTo(new DateTime(2023, 12, 17, 21, 33, 52), precision);
         }
 
         [Test]
@@ -345,6 +488,12 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             IPlanTarget selected = new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object).SelectTargetByScore(projects, scoringEngineMock.Object);
             Assert.IsNotNull(selected);
             selected.Name.Should().Be("IC1805");
+            selected.Rejected.Should().BeFalse();
+
+            IPlanTarget m42 = pp1.Object.Targets[0];
+            m42.Name.Should().Be("M42");
+            m42.Rejected.Should().BeTrue();
+            m42.RejectedReason.Should().Be(Reasons.TargetLowerScore);
         }
 
         [Test]
