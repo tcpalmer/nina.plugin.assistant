@@ -10,6 +10,7 @@ using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Windows.Controls;
@@ -23,6 +24,8 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
 
         public PlanPreviewerViewVM(IProfileService profileService) : base(profileService) {
             database = new SchedulerDatabaseInteraction();
+            InstructionList = new ObservableCollection<TreeViewItem>();
+
             profileService.ProfileChanged += ProfileService_ProfileChanged;
             profileService.Profiles.CollectionChanged += ProfileService_ProfileChanged;
 
@@ -32,7 +35,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
         }
 
         private void ProfileService_ProfileChanged(object sender, EventArgs e) {
-            instructionList.Clear();
+            InstructionList.Clear();
             SelectedProfileId = profileService.ActiveProfile.Id.ToString();
             ProfileChoices = GetProfileChoices();
         }
@@ -99,8 +102,8 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
             }
         }
 
-        private AsyncObservableCollection<TreeViewItem> instructionList = new AsyncObservableCollection<TreeViewItem>();
-        public AsyncObservableCollection<TreeViewItem> InstructionList {
+        private ObservableCollection<TreeViewItem> instructionList;
+        public ObservableCollection<TreeViewItem> InstructionList {
             get => instructionList;
             set {
                 instructionList = value;
@@ -111,8 +114,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
         public ICommand PlanPreviewCommand { get; private set; }
 
         private void RunPlanPreview(object obj) {
-            AsyncObservableCollection<TreeViewItem> list = new AsyncObservableCollection<TreeViewItem>();
-            InstructionList = list;
+            ObservableCollection<TreeViewItem> list = new ObservableCollection<TreeViewItem>();
 
             if (PlanDate == DateTime.MinValue || SelectedProfileId == null) {
                 return;
@@ -201,7 +203,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
             }
             catch (Exception ex) {
                 TSLogger.Error($"failed to run plan preview: {ex.Message} {ex.StackTrace}");
-                InstructionList = null;
+                InstructionList.Clear();
             }
         }
 
