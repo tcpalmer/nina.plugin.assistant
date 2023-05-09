@@ -241,6 +241,7 @@ namespace Assistant.NINAPlugin.Plan {
                             continue;
                         }
 
+                        planTarget.MeridianWindow = meridianClippedSpan;
                         targetStartTime = meridianClippedSpan.StartTime;
                         targetEndTime = meridianClippedSpan.EndTime;
                     }
@@ -380,38 +381,16 @@ namespace Assistant.NINAPlugin.Plan {
             return highScoreTarget;
         }
 
-        /// <summary>
-        /// Determine the time window for the selected target.  The start time is basically ASAP but the end time
-        /// needs to be chosen carefully since that's the point at which the planner will be called again to
-        /// select the next (same or different) target.
-        /// 
-        /// There are a number of future events that might be of interest in determining the stop time:
-        /// - Hard stop time for the target
-        /// - Current time plus the minimum imaging time for the target
-        /// - Twilight level change events
-        /// - The visibility (or meridian window) start time of other potential targets
-        /// 
-        /// At this point, there's no need to over-optimize this.  For now, we'll just let it use now plus minimum
-        /// imaging time.  That should work well unless people set that too high.  In fact, maybe the property
-        /// needs to be renamed so it's role here is obvious.
-        /// </summary>
-        /// <param name="atTime"></param>
-        /// <param name="planTarget"></param>
-        /// <returns></returns>
         public TimeInterval GetTargetTimeWindow(DateTime atTime, IPlanTarget planTarget) {
-            DateTime hardStartTime = planTarget.StartTime < atTime ? atTime : planTarget.StartTime;
 
-            // Set the stop time to the earliest of the target's hard stop time and the time when the
-            // minimum time-on-target is achieved.  Rather than do a deeper analysis of which target
-            // might be better to image next, we just let the planner run again and decide at that point.
+            DateTime planStartTime = planTarget.StartTime < atTime ? atTime : planTarget.StartTime;
+            DateTime planStopTime = new PlanStopTimeExpert().GetStopTime(planStartTime, planTarget, null);
 
-            int minimumTimeOnTarget = planTarget.Project.MinimumTime;
-            DateTime hardStopTime = hardStartTime.AddMinutes(minimumTimeOnTarget);
-            if (hardStopTime > planTarget.EndTime) {
-                hardStopTime = planTarget.EndTime;
+            if (planStopTime > planTarget.EndTime) {
+                planStopTime = planTarget.EndTime;
             }
 
-            return new TimeInterval(hardStartTime, hardStopTime);
+            return new TimeInterval(planStartTime, planStopTime);
         }
 
         /// <summary>

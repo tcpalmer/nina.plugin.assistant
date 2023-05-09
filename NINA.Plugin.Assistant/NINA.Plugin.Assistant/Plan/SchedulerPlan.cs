@@ -230,6 +230,7 @@ namespace Assistant.NINAPlugin.Plan {
         DateTime StartTime { get; set; }
         DateTime EndTime { get; set; }
         DateTime CulminationTime { get; set; }
+        TimeInterval MeridianWindow { get; set; }
 
         void SetCircumstances(bool isVisible, DateTime startTime, DateTime culminationTime, DateTime endTime);
         string ToString();
@@ -252,6 +253,7 @@ namespace Assistant.NINAPlugin.Plan {
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public DateTime CulminationTime { get; set; }
+        public TimeInterval MeridianWindow { get; set; }
 
         public PlanTarget(IPlanProject planProject, Target target) {
             this.PlanId = Guid.NewGuid().ToString();
@@ -293,6 +295,11 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"StartTime: {Utils.FormatDateTimeFull(StartTime)}");
             sb.AppendLine($"EndTime: {Utils.FormatDateTimeFull(EndTime)}");
             sb.AppendLine($"CulminationTime: {Utils.FormatDateTimeFull(CulminationTime)}");
+
+            if (MeridianWindow != null) {
+                sb.AppendLine($"Meridian Window: {Utils.FormatDateTimeFull(MeridianWindow.StartTime)} - {Utils.FormatDateTimeFull(MeridianWindow.EndTime)}");
+            }
+
             sb.AppendLine($"Rejected: {Rejected}");
             sb.AppendLine($"RejectedReason: {RejectedReason}");
 

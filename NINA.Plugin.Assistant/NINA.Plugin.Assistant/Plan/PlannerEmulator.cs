@@ -272,6 +272,7 @@ namespace Assistant.NINAPlugin.Plan {
         public bool Rejected { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string RejectedReason { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DateTime CulminationTime { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public TimeInterval MeridianWindow { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public PlanTargetEmulator() {
             this.PlanId = Guid.NewGuid().ToString();
