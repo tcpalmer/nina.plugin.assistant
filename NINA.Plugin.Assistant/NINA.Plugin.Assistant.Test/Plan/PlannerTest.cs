@@ -522,6 +522,18 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             window.StartTime.Should().BeSameDateAs(23.January(2023).At(18, 0, 0));
             window.EndTime.Should().BeSameDateAs(23.January(2023).At(19, 0, 0));
             window.Duration.Should().Be(minimumMinutes * 60);
+
+            atTime = new DateTime(2023, 1, 24, 1, 0, 0);
+            pp.SetupProperty(p => p.MeridianWindow, 120);
+            TimeInterval meridianWindow = new TimeInterval(atTime.AddMinutes(-10), atTime.AddHours(3));
+            pt.SetupProperty(t => t.MeridianWindow, meridianWindow);
+            pt.SetupProperty(t => t.StartTime, atTime.AddMinutes(-20));
+            pt.SetupProperty(t => t.EndTime, atTime.AddHours(4));
+            window = new Planner(atTime, profileMock.Object).GetTargetTimeWindow(atTime, pt.Object);
+            TimeSpan precision = TimeSpan.FromSeconds(1);
+            window.StartTime.Should().BeCloseTo(atTime, precision);
+            window.EndTime.Should().BeCloseTo(atTime.AddHours(3), precision);
+            window.Duration.Should().Be(60 * 60 * 3);
         }
 
         [Test]

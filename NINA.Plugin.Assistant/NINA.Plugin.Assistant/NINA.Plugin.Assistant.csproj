@@ -397,12 +397,12 @@
       <DependentUpon>SQL.resx</DependentUpon>
     </Compile>
     <Compile Include="Database\Schema\ProfilePreference.cs" />
+    <Compile Include="Plan\PlanStopTimeExpert.cs" />
     <Compile Include="Plan\Scoring\Rules\MeridianWindowPriorityRule.cs" />
     <Compile Include="Plan\Scoring\Rules\SettingSoonestRule.cs" />
     <Compile Include="Sequencer\PlanTakeExposure.cs" />
     <Compile Include="Sequencer\PlanTargetContainerStrategy.cs" />
     <Compile Include="Sequencer\SchedulerTestCondition.cs" />
-    <Compile Include="Sequencer\SchedulerTestTrigger.cs" />
     <Compile Include="Sequencer\TargetSchedulerContainer.cs" />
     <Compile Include="Sequencer\TargetSchedulerContainerTemplate.xaml.cs">
       <DependentUpon>TargetSchedulerContainerTemplate.xaml</DependentUpon>

@@ -345,6 +345,7 @@
     <Compile Include="Database\Schema\TargetTest.cs" />
     <Compile Include="Plan\PlanMocks.cs" />
     <Compile Include="Plan\PlannerTest.cs" />
+    <Compile Include="Plan\PlanStopTimeExpertTest.cs" />
     <Compile Include="Plan\Scoring\Rules\PercentCompleteRuleTest.cs" />
     <Compile Include="Plan\Scoring\Rules\MeridianWindowPriorityRuleTest.cs" />
     <Compile Include="Plan\Scoring\Rules\ProjectPriorityRuleTest.cs" />
