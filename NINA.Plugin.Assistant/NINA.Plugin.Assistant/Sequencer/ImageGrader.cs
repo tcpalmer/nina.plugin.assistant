@@ -60,7 +60,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 if (Preferences.EnableGradeStars) {
                     List<double> samples = GetSamples(images, i => { return i.Metadata.DetectedStars; });
                     TSLogger.Info("image grading: detected star count ->");
-                    if (!WithinAcceptableVariance(samples, msg.StarDetectionAnalysis.DetectedStars, Preferences.DetectedStarsSigmaFactor)) {
+                    if (!WithinAcceptableVariance(samples, msg.StarDetectionAnalysis.DetectedStars, Preferences.DetectedStarsSigmaFactor, true)) {
                         TSLogger.Info("image grading: failed detected star count grading => NOT accepted");
                         return (false, REJECT_STARS);
                     }
@@ -69,7 +69,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 if (Preferences.EnableGradeHFR) {
                     List<double> samples = GetSamples(images, i => { return i.Metadata.HFR; });
                     TSLogger.Info("image grading: HFR ->");
-                    if (!WithinAcceptableVariance(samples, msg.StarDetectionAnalysis.HFR, Preferences.HFRSigmaFactor)) {
+                    if (!WithinAcceptableVariance(samples, msg.StarDetectionAnalysis.HFR, Preferences.HFRSigmaFactor, false)) {
                         TSLogger.Info("image grading: failed HFR grading => NOT accepted");
                         return (false, REJECT_HFR);
                     }
@@ -116,9 +116,21 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        private bool WithinAcceptableVariance(List<double> samples, double newSample, double sigmaFactor) {
+        private bool WithinAcceptableVariance(List<double> samples, double newSample, double sigmaFactor, bool positiveImprovement) {
             TSLogger.Info($"    samples={SamplesToString(samples)}");
             (double mean, double stddev) = Stats.SampleStandardDeviation(samples);
+
+            if (Preferences.AcceptImprovement) {
+                if (positiveImprovement && newSample > mean) {
+                    TSLogger.Info($"    mean={mean} sample={newSample} (acceptable: improved)");
+                    return true;
+                }
+                if (!positiveImprovement && newSample < mean) {
+                    TSLogger.Info($"    mean={mean} sample={newSample} (acceptable: improved)");
+                    return true;
+                }
+            }
+
             double variance = Math.Abs(mean - newSample);
             TSLogger.Info($"    mean={mean} stddev={stddev} sample={newSample} variance={variance} sigmaX={sigmaFactor}");
             return variance <= (stddev * sigmaFactor);
@@ -190,6 +202,7 @@ namespace Assistant.NINAPlugin.Sequencer {
     public class ImageGraderPreferences {
 
         public int MaxGradingSampleSize { get; private set; }
+        public bool AcceptImprovement { get; private set; }
         public bool EnableGradeRMS { get; private set; }
         public double RMSPixelThreshold { get; private set; }
         public bool EnableGradeStars { get; private set; }
@@ -199,6 +212,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public ImageGraderPreferences(ProfilePreference profilePreference) {
             MaxGradingSampleSize = profilePreference.MaxGradingSampleSize;
+            AcceptImprovement = profilePreference.AcceptImprovement;
             EnableGradeRMS = profilePreference.EnableGradeRMS;
             RMSPixelThreshold = profilePreference.RMSPixelThreshold;
             EnableGradeStars = profilePreference.EnableGradeStars;
@@ -208,11 +222,12 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public ImageGraderPreferences(
-                                    int MaxGradingSampleSize,
+                                    int MaxGradingSampleSize, bool AcceptImprovement,
                                     bool EnableGradeRMS, double RMSPixelThreshold,
                                     bool EnableGradeStars, double DetectedStarsSigmaFactor,
                                     bool EnableGradeHFR, double HFRSigmaFactor) {
             this.MaxGradingSampleSize = MaxGradingSampleSize;
+            this.AcceptImprovement = AcceptImprovement;
             this.EnableGradeRMS = EnableGradeRMS;
             this.RMSPixelThreshold = RMSPixelThreshold;
             this.EnableGradeStars = EnableGradeStars;

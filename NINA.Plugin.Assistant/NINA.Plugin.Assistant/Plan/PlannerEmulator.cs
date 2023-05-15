@@ -316,7 +316,7 @@ namespace Assistant.NINAPlugin.Plan {
             throw new NotImplementedException();
         }
 
-        public int NeededExposures() {
+        public int NeededExposures(double exposureThrottlePercentage) {
             throw new NotImplementedException();
         }
     }

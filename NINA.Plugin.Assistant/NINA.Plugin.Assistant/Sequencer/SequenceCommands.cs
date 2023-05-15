@@ -1,6 +1,5 @@
 ﻿using Assistant.NINAPlugin.Util;
 using NINA.Core.Model;
-using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
 using System;

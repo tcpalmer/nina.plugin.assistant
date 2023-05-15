@@ -27,7 +27,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             IPlanTarget pt = pp.Object.Targets[0];
 
             TimeInterval window = new TimeInterval((DateTime)ntc.AstronomicalTwilightStart, (DateTime)ntc.AstronomicalTwilightEnd);
-            List<IPlanInstruction> list = new ExposurePlanner(pt, window, ntc).Plan();
+            List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt, window, ntc).Plan();
             AssertPlan(GetExpectedTestTypical(ntc), list);
 
             Assert.AreEqual(nbExposures, pt.ExposurePlans[0].PlannedExposures);
@@ -53,7 +53,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             IPlanTarget pt = pp.Object.Targets[0];
 
             TimeInterval window = new TimeInterval((DateTime)ntc.AstronomicalTwilightStart, ((DateTime)ntc.NighttimeStart).AddMinutes(60));
-            List<IPlanInstruction> list = new ExposurePlanner(pt, window, ntc).Plan();
+            List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt, window, ntc).Plan();
             AssertPlan(GetExpectedTestTypicalFS2(ntc), list);
 
             Assert.AreEqual(11, pt.ExposurePlans[0].PlannedExposures);
@@ -79,7 +79,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             IPlanTarget pt = pp.Object.Targets[0];
 
             TimeInterval window = new TimeInterval((DateTime)ntc.AstronomicalTwilightStart, ((DateTime)ntc.NighttimeStart).AddMinutes(60));
-            List<IPlanInstruction> list = new ExposurePlanner(pt, window, ntc).Plan();
+            List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt, window, ntc).Plan();
             AssertPlan(GetExpectedWindowNotFilled(ntc), list);
 
             Assert.AreEqual(nbExposures, pt.ExposurePlans[0].PlannedExposures);
@@ -103,7 +103,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             IPlanTarget pt = pp.Object.Targets[0];
 
             TimeInterval window = new TimeInterval(ntc.CivilTwilightStart, ((DateTime)ntc.AstronomicalTwilightStart).AddHours(2));
-            List<IPlanInstruction> list = new ExposurePlanner(pt, window, ntc).Plan();
+            List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt, window, ntc).Plan();
             AssertPlan(GetExpectedTestNoNightAtDusk(ntc), list);
 
             Assert.AreEqual(exposures, pt.ExposurePlans[0].PlannedExposures);
@@ -124,7 +124,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             IPlanTarget pt = pp.Object.Targets[0];
 
             TimeInterval window = new TimeInterval(dateTime.Date.AddDays(1).AddHours(4), ntc.CivilTwilightEnd);
-            List<IPlanInstruction> list = new ExposurePlanner(pt, window, ntc).Plan();
+            List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt, window, ntc).Plan();
             AssertPlan(GetExpectedTestNoNightAtDawn(ntc), list);
 
             Assert.AreEqual(exposures, pt.ExposurePlans[0].PlannedExposures);
@@ -156,7 +156,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             PlanMocks.AddMockPlanFilter(pt, pe);
 
             TimeInterval window = new TimeInterval((DateTime)ntc.NighttimeStart, (DateTime)ntc.NighttimeEnd);
-            List<IPlanInstruction> list = new ExposurePlanner(pt.Object, window, ntc).Plan();
+            List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt.Object, window, ntc).Plan();
             AssertPlan(GetExpectedPlanMixRejected(), list);
         }
 
@@ -196,6 +196,10 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             list.Add(new PlanWait(DateTime.Now));
             list.Add(new PlanSwitchFilter(null));
             ExposurePlanner.Cleanup(list).Count.Should().Be(4);
+        }
+
+        private ProfilePreference GetPrefs(string profileId = "abcd-1234") {
+            return new ProfilePreference(profileId);
         }
 
         private Mock<IPlanProject> GetTestProject(DateTime dateTime, int filterSwitchFrequency, int nbExposures, int nbExposureLength, int wbExposures, int wbExposureLength) {

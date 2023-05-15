@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Controls.Util;
 using Assistant.NINAPlugin.Database;
+using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using LinqKit;
@@ -124,7 +125,9 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                 DateTime atDateTime = PlanDate.Date.AddHours(PlanHours).AddMinutes(PlanMinutes).AddSeconds(PlanSeconds);
                 TSLogger.Debug($"running plan preview for {Utils.FormatDateTimeFull(atDateTime)}, profileId={SelectedProfileId}");
 
-                List<IPlanProject> projects = new SchedulerPlanLoader().LoadActiveProjects(database.GetContext(), GetProfile(SelectedProfileId));
+                SchedulerPlanLoader loader = new SchedulerPlanLoader(GetProfile(SelectedProfileId));
+                List<IPlanProject> projects = loader.LoadActiveProjects(database.GetContext());
+                ProfilePreference profilePreference = loader.GetProfilePreferences(database.GetContext());
 
                 if (projects == null) {
                     TSLogger.Debug($"no active projects for {atDateTime}, profileId={SelectedProfileId}");
@@ -135,7 +138,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                     return;
                 }
 
-                List<SchedulerPlan> assistantPlans = Planner.GetPerfectPlan(atDateTime, profileService, projects);
+                List<SchedulerPlan> assistantPlans = Planner.GetPerfectPlan(atDateTime, profileService, profilePreference, projects);
 
                 foreach (SchedulerPlan plan in assistantPlans) {
                     TreeViewItem planItem = new TreeViewItem();

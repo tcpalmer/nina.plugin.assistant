@@ -9,7 +9,19 @@ namespace Assistant.NINAPlugin.Database {
 
     public class SchedulerPlanLoader {
 
-        public List<IPlanProject> LoadActiveProjects(SchedulerDatabaseContext context, IProfile activeProfile) {
+        private IProfile activeProfile;
+
+        public SchedulerPlanLoader(IProfile activeProfile) {
+            this.activeProfile = activeProfile;
+        }
+
+        public ProfilePreference GetProfilePreferences(SchedulerDatabaseContext context) {
+            using (context) {
+                return context.GetProfilePreference(activeProfile.Id.ToString());
+            }
+        }
+
+        public List<IPlanProject> LoadActiveProjects(SchedulerDatabaseContext context) {
             List<Project> projects = null;
             string profileId = activeProfile.Id.ToString();
 
