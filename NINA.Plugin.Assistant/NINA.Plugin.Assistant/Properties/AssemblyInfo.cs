@@ -30,7 +30,7 @@ using System.Runtime.InteropServices;
 If you like this plugin and it saves you time, please consider [Buying Me a Beer](https://www.buymeacoffee.com/tcpalmer).
 
 ## Documentation
-The [plugin documentation](https://tcpalmer.github.io/nina-scheduler/) provides a detailed description of the plugin and how to use it.
+The [plugin documentation](https://tcpalmer.github.io/nina-scheduler/) provides a detailed description of the plugin and how to use it.  See the [release notes](https://tcpalmer.github.io/nina-scheduler/release.html) for changes in recent versions.
 
 ## Acknowledgements ##
 * Chris Woodhouse has been involved since the beginning and was instrumental in hashing out the initial design and requirements.
