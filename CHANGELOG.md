@@ -1,6 +1,6 @@
 # Target Scheduler
 
-## 0.7.0.0 - 2023-XX-XX
+## 0.7.0.0 - 2023-05-XX
 * Added support for meridian window restriction
 * Added airmass to acquired image data detail display
 * Added option to park the mount while waiting for next target
