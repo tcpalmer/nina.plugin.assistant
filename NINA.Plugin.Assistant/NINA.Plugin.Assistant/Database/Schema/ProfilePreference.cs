@@ -29,7 +29,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public ProfilePreference(string profileId) {
             ProfileId = profileId;
             ParkOnWait = false;
-            ExposureThrottle = 100;
+            ExposureThrottle = 125;
             EnableGradeRMS = true;
             EnableGradeStars = true;
             EnableGradeHFR = true;

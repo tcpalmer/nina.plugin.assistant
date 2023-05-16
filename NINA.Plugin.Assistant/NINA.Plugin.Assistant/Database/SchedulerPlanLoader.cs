@@ -10,20 +10,26 @@ namespace Assistant.NINAPlugin.Database {
     public class SchedulerPlanLoader {
 
         private IProfile activeProfile;
+        private string profileId;
 
         public SchedulerPlanLoader(IProfile activeProfile) {
             this.activeProfile = activeProfile;
+            profileId = activeProfile.Id.ToString();
         }
 
         public ProfilePreference GetProfilePreferences(SchedulerDatabaseContext context) {
             using (context) {
-                return context.GetProfilePreference(activeProfile.Id.ToString());
+                ProfilePreference profilePreference = context.GetProfilePreference(profileId);
+                if (profilePreference == null) {
+                    profilePreference = new ProfilePreference(profileId);
+                }
+
+                return profilePreference;
             }
         }
 
         public List<IPlanProject> LoadActiveProjects(SchedulerDatabaseContext context) {
             List<Project> projects = null;
-            string profileId = activeProfile.Id.ToString();
 
             using (context) {
                 try {

@@ -12,7 +12,7 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
             ProfilePreference sut = new ProfilePreference("pid");
             sut.ProfileId.Should().Be("pid");
             sut.ParkOnWait.Should().BeFalse();
-            sut.ExposureThrottle.Should().BeApproximately(100, 0.001);
+            sut.ExposureThrottle.Should().BeApproximately(125, 0.001);
             sut.EnableGradeRMS.Should().BeTrue();
             sut.EnableGradeStars.Should().BeTrue();
             sut.EnableGradeHFR.Should().BeTrue();
