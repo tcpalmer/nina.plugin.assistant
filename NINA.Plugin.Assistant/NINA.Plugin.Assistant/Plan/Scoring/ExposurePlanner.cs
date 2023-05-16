@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
+using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Util;
 using System;
 using System.Collections.Generic;
@@ -21,12 +22,14 @@ namespace Assistant.NINAPlugin.Plan {
     /// even allowing imaging during civil twilight on the solstice if that's your thing.
     public class ExposurePlanner {
 
+        private ProfilePreference profilePreferences;
         private IPlanTarget planTarget;
         private TimeInterval planInterval;
         private NighttimeCircumstances nighttimeCircumstances;
         public int filterSwitchFrequency;
 
-        public ExposurePlanner(IPlanTarget planTarget, TimeInterval planInterval, NighttimeCircumstances nighttimeCircumstances) {
+        public ExposurePlanner(ProfilePreference profilePreferences, IPlanTarget planTarget, TimeInterval planInterval, NighttimeCircumstances nighttimeCircumstances) {
+            this.profilePreferences = profilePreferences;
             this.planTarget = planTarget;
             this.planInterval = planInterval;
             this.nighttimeCircumstances = nighttimeCircumstances;
@@ -200,7 +203,8 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         private bool IsPlanExposureComplete(IPlanExposure planExposure) {
-            return planExposure.NeededExposures() <= planExposure.PlannedExposures;
+            double exposureThrottlePercentage = planTarget.Project.EnableGrader ? -1 : profilePreferences.ExposureThrottle;
+            return planExposure.NeededExposures(exposureThrottlePercentage) <= planExposure.PlannedExposures;
         }
 
         private List<IPlanExposure> GetPlanExposuresForTwilightLevel(TwilightLevel twilightLevel) {

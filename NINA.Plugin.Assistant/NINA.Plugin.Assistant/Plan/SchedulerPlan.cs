@@ -356,7 +356,7 @@ namespace Assistant.NINAPlugin.Plan {
         string RejectedReason { get; set; }
         int PlannedExposures { get; set; }
 
-        int NeededExposures();
+        int NeededExposures(double exposureThrottlePercentage);
         bool IsIncomplete();
         string ToString();
     }
@@ -411,7 +411,16 @@ namespace Assistant.NINAPlugin.Plan {
             this.PlannedExposures = 0;
         }
 
-        public int NeededExposures() { return Accepted > Desired ? 0 : Desired - Accepted; }
+        public int NeededExposures(double exposureThrottlePercentage) {
+            if (exposureThrottlePercentage > 0) {
+                int throttleAt = (int)((exposureThrottlePercentage / 100) * Desired);
+                return Acquired > throttleAt ? 0 : throttleAt - Acquired;
+            }
+            else {
+                return Accepted > Desired ? 0 : Desired - Accepted;
+            }
+        }
+
         public bool IsIncomplete() { return Accepted < Desired; }
 
         public override string ToString() {

@@ -11,9 +11,13 @@ namespace Assistant.NINAPlugin.Database.Schema {
         [Key] public int Id { get; set; }
         [Required] public string ProfileId { get; set; }
 
+        public int parkOnWait { get; set; }
+        public double exposureThrottle { get; set; }
+
         public int enableGradeRMS { get; set; }
         public int enableGradeStars { get; set; }
         public int enableGradeHFR { get; set; }
+        public int acceptimprovement { get; set; }
 
         public int maxGradingSampleSize { get; set; }
         public double rmsPixelThreshold { get; set; }
@@ -24,13 +28,35 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public ProfilePreference(string profileId) {
             ProfileId = profileId;
+            ParkOnWait = false;
+            ExposureThrottle = 125;
             EnableGradeRMS = true;
             EnableGradeStars = true;
             EnableGradeHFR = true;
+            AcceptImprovement = true;
             MaxGradingSampleSize = 10;
             RMSPixelThreshold = 8;
             DetectedStarsSigmaFactor = 4;
             HFRSigmaFactor = 4;
+        }
+
+        [NotMapped]
+        public bool ParkOnWait {
+            get { return parkOnWait == 1; }
+            set {
+                parkOnWait = value ? 1 : 0;
+                RaisePropertyChanged(nameof(ParkOnWait));
+            }
+        }
+
+        // exposurethrottle
+        [NotMapped]
+        public double ExposureThrottle {
+            get { return exposureThrottle; }
+            set {
+                exposureThrottle = value;
+                RaisePropertyChanged(nameof(ExposureThrottle));
+            }
         }
 
         [NotMapped]
@@ -57,6 +83,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 enableGradeHFR = value ? 1 : 0;
                 RaisePropertyChanged(nameof(EnableGradeHFR));
+            }
+        }
+
+        [NotMapped]
+        public bool AcceptImprovement {
+            get { return acceptimprovement == 1; }
+            set {
+                acceptimprovement = value ? 1 : 0;
+                RaisePropertyChanged(nameof(AcceptImprovement));
             }
         }
 

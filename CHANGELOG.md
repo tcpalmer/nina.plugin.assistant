@@ -3,6 +3,9 @@
 ## 0.7.0.0 - 2023-XX-XX
 * Added support for meridian window restriction
 * Added airmass to acquired image data detail display
+* Added option to park the mount while waiting for next target
+* Added option to throttle exposure planning when not grading
+* Added option to accept all improvements in image grading
 * Fixed problem with ROI exposure capture
 * Fixed problem with including rejected exposure plans
 

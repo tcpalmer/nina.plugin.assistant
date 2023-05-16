@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
 using Assistant.NINAPlugin.Database;
+using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan.Scoring;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
@@ -17,16 +18,18 @@ namespace Assistant.NINAPlugin.Plan {
 
         private DateTime atTime;
         private IProfile activeProfile;
+        private ProfilePreference profilePreferences;
         private ObserverInfo observerInfo;
         private List<IPlanProject> projects;
 
         public static readonly bool USE_EMULATOR = false;
 
-        public Planner(DateTime atTime, IProfileService profileService) : this(atTime, profileService, null) { }
+        public Planner(DateTime atTime, IProfileService profileService, ProfilePreference profilePreferences) : this(atTime, profileService, profilePreferences, null) { }
 
-        public Planner(DateTime atTime, IProfileService profileService, List<IPlanProject> projects) {
+        public Planner(DateTime atTime, IProfileService profileService, ProfilePreference profilePreferences, List<IPlanProject> projects) {
             this.atTime = atTime;
             this.activeProfile = profileService.ActiveProfile;
+            this.profilePreferences = profilePreferences;
             this.projects = projects;
             this.observerInfo = new ObserverInfo {
                 Latitude = activeProfile.AstrometrySettings.Latitude,
@@ -123,7 +126,7 @@ namespace Assistant.NINAPlugin.Plan {
         /// <param name="profileService"></param>
         /// <param name="projects"></param>
         /// <returns>list</returns>
-        public static List<SchedulerPlan> GetPerfectPlan(DateTime atTime, IProfileService profileService, List<IPlanProject> projects) {
+        public static List<SchedulerPlan> GetPerfectPlan(DateTime atTime, IProfileService profileService, ProfilePreference profilePreferences, List<IPlanProject> projects) {
 
             TSLogger.Info("-- BEGIN PLAN PREVIEW ----------------------------------------------------------");
 
@@ -133,7 +136,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             try {
                 SchedulerPlan plan;
-                while ((plan = new Planner(currentTime, profileService, projects).GetPlan(previousPlanTarget)) != null) {
+                while ((plan = new Planner(currentTime, profileService, profilePreferences, projects).GetPlan(previousPlanTarget)) != null) {
                     plans.Add(plan);
                     previousPlanTarget = plan.WaitForNextTargetTime != null ? null : plan.PlanTarget;
                     currentTime = plan.WaitForNextTargetTime != null ? (DateTime)plan.WaitForNextTargetTime : plan.TimeInterval.EndTime;
@@ -169,8 +172,8 @@ namespace Assistant.NINAPlugin.Plan {
             }
         }
 
-        public static List<SchedulerPlan> GetPerfectPlan(DateTime atTime, IProfileService profileService) {
-            return GetPerfectPlan(atTime, profileService, null);
+        public static List<SchedulerPlan> GetPerfectPlan(DateTime atTime, IProfileService profileService, ProfilePreference profilePreferences) {
+            return GetPerfectPlan(atTime, profileService, profilePreferences, null);
         }
 
         /// <summary>
@@ -414,7 +417,7 @@ namespace Assistant.NINAPlugin.Plan {
             }
 
             NighttimeCircumstances nighttimeCircumstances = NighttimeCircumstances.AdjustNighttimeCircumstances(observerInfo, atTime);
-            instructions.AddRange(new ExposurePlanner(planTarget, targetWindow, nighttimeCircumstances).Plan());
+            instructions.AddRange(new ExposurePlanner(profilePreferences, planTarget, targetWindow, nighttimeCircumstances).Plan());
             return instructions;
         }
 
@@ -535,8 +538,8 @@ namespace Assistant.NINAPlugin.Plan {
 
             try {
                 SchedulerDatabaseInteraction database = new SchedulerDatabaseInteraction();
-                SchedulerPlanLoader loader = new SchedulerPlanLoader();
-                return loader.LoadActiveProjects(database.GetContext(), activeProfile);
+                SchedulerPlanLoader loader = new SchedulerPlanLoader(activeProfile);
+                return loader.LoadActiveProjects(database.GetContext());
             }
             catch (Exception ex) {
                 TSLogger.Error($"exception reading database: {ex.StackTrace}");

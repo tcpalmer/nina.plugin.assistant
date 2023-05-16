@@ -98,16 +98,75 @@
             <Label
                 Margin="0,0,0,6"
                 VerticalAlignment="Center"
+                Content="General Preferences"
+                FontSize="16"
+                FontWeight="Bold" />
+            <UniformGrid
+                Width="320"
+                Height="45"
+                Margin="12,0,0,6"
+                HorizontalAlignment="Left"
+                Columns="2"
+                Rows="2">
+
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
+                    Text="Park On Wait"
+                    ToolTip="If true, then when the scheduler is waiting for the next target, park the mount.  Otherwise just stop tracking and guiding." />
+                <CheckBox
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    IsChecked="{Binding Path=ProfilePreferenceProxy.ProfilePreference.ParkOnWait, Mode=TwoWay}"
+                    Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+                <TextBlock
+                    MaxHeight="20"
+                    Margin="3,3,0,0"
+                    Text="{Binding ProfilePreferenceProxy.ProfilePreference.ParkOnWait}"
+                    Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
+                    Text="Exposure Count Throttle"
+                    ToolTip="If image grading is disabled for a project, stop planning for new exposures when the total number Acquired is greater than or equal to the number Desired times the percentage." />
+                <TextBox
+                    MaxHeight="20"
+                    HorizontalAlignment="Left"
+                    Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                    <TextBox.Text>
+                        <Binding Path="ProfilePreferenceProxy.ProfilePreference.ExposureThrottle" UpdateSourceTrigger="LostFocus">
+                            <Binding.ValidationRules>
+                                <rules:DoubleRangeRule>
+                                    <rules:DoubleRangeRule.ValidRange>
+                                        <rules:DoubleRangeChecker Maximum="1000" Minimum="1" />
+                                    </rules:DoubleRangeRule.ValidRange>
+                                </rules:DoubleRangeRule>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <TextBlock
+                    MaxHeight="20"
+                    Margin="3,3,0,0"
+                    Text="{Binding ProfilePreferenceProxy.ProfilePreference.ExposureThrottle, Converter={StaticResource PercentDisplayConverter}}"
+                    Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+            </UniformGrid>
+
+            <Label
+                Margin="0,20,0,6"
+                VerticalAlignment="Center"
                 Content="Image Grader Preferences"
                 FontSize="16"
                 FontWeight="Bold" />
             <UniformGrid
                 Width="320"
-                Height="180"
+                Height="200"
                 Margin="12,0,0,6"
                 HorizontalAlignment="Left"
                 Columns="2"
-                Rows="7">
+                Rows="8">
 
                 <TextBlock
                     VerticalAlignment="Center"
@@ -160,6 +219,22 @@
                 <TextBlock
                     VerticalAlignment="Center"
                     FontWeight="Bold"
+                    Text="Accept All Improvements"
+                    ToolTip="If true, automatically accept latest image if the sample value (star count/HFR) is an improvement (greater than/less) than the mean of the previous samples" />
+                <CheckBox
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    IsChecked="{Binding Path=ProfilePreferenceProxy.ProfilePreference.AcceptImprovement, Mode=TwoWay}"
+                    Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+                <TextBlock
+                    MaxHeight="20"
+                    Margin="3,3,0,0"
+                    Text="{Binding ProfilePreferenceProxy.ProfilePreference.AcceptImprovement}"
+                    Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
                     Text="Max Grading Samples"
                     ToolTip="Max number of recent images to use for star count and HFR comparison" />
                 <TextBox MaxHeight="20" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
@@ -186,9 +261,7 @@
                     FontWeight="Bold"
                     Text="RMS Pixel Threshold"
                     ToolTip="Threshold to accept/reject based on guiding RMS error" />
-                <TextBox
-                    MaxHeight="20"
-                    Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                <TextBox MaxHeight="20" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                     <TextBox.Text>
                         <Binding Path="ProfilePreferenceProxy.ProfilePreference.RMSPixelThreshold" UpdateSourceTrigger="LostFocus">
                             <Binding.ValidationRules>
@@ -212,9 +285,7 @@
                     FontWeight="Bold"
                     Text="Stars Sigma Factor"
                     ToolTip="Number of standard deviations for acceptable star count comparison" />
-                <TextBox
-                    MaxHeight="20"
-                    Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                <TextBox MaxHeight="20" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                     <TextBox.Text>
                         <Binding Path="ProfilePreferenceProxy.ProfilePreference.DetectedStarsSigmaFactor" UpdateSourceTrigger="LostFocus">
                             <Binding.ValidationRules>
@@ -238,9 +309,7 @@
                     FontWeight="Bold"
                     Text="HFR Sigma Factor"
                     ToolTip="Number of standard deviations for acceptable HFR comparison" />
-                <TextBox
-                    MaxHeight="20"
-                    Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                <TextBox MaxHeight="20" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                     <TextBox.Text>
                         <Binding Path="ProfilePreferenceProxy.ProfilePreference.HFRSigmaFactor" UpdateSourceTrigger="LostFocus">
                             <Binding.ValidationRules>

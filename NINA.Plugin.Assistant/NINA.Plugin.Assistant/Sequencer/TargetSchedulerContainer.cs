@@ -1,4 +1,6 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
+using Assistant.NINAPlugin.Database;
+using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
@@ -23,6 +25,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -59,6 +62,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IWindowServiceFactory windowServiceFactory;
         private readonly IFramingAssistantVM framingAssistantVM;
         private readonly IApplicationMediator applicationMediator;
+
+        private ProfilePreference profilePreferences;
 
         public object lockObj = new object();
         public int TotalExposureCount { get; set; }
@@ -147,7 +152,8 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             while (true) {
                 DateTime atTime = DateTime.Now;
-                SchedulerPlan plan = new Planner(atTime, profileService).GetPlan(previousPlanTarget);
+                profilePreferences = GetProfilePreferences();
+                SchedulerPlan plan = new Planner(atTime, profileService, profilePreferences).GetPlan(previousPlanTarget);
 
                 if (plan == null) {
                     TSLogger.Info("planner returned empty plan, done");
@@ -190,14 +196,34 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
+        private ProfilePreference GetProfilePreferences() {
+            SchedulerPlanLoader loader = new SchedulerPlanLoader(profileService.ActiveProfile);
+            return loader.GetProfilePreferences(new SchedulerDatabaseInteraction().GetContext());
+        }
+
         private void WaitForNextTarget(DateTime? waitForNextTargetTime, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            TSLogger.Info($"stopping guiding/tracking, then waiting for next target to be available at {Utils.FormatDateTimeFull(waitForNextTargetTime)}");
-            SequenceCommands.StopGuiding(guiderMediator, token);
-            SequenceCommands.SetTelescopeTracking(telescopeMediator, TrackingMode.Stopped, token);
 
             TimeSpan duration = ((DateTime)waitForNextTargetTime) - DateTime.Now;
+            bool parked = false;
+
+            if (profilePreferences.ParkOnWait && duration.TotalSeconds > 60) {
+                TSLogger.Info($"stopping guiding/tracking, parking mount, then waiting for next target to be available at {Utils.FormatDateTimeFull(waitForNextTargetTime)}");
+                SequenceCommands.SetTelescopeTracking(telescopeMediator, TrackingMode.Stopped, token);
+                _ = SequenceCommands.ParkTelescope(telescopeMediator, guiderMediator, progress, token);
+                parked = true;
+            }
+            else {
+                TSLogger.Info($"stopping guiding/tracking, then waiting for next target to be available at {Utils.FormatDateTimeFull(waitForNextTargetTime)}");
+                SequenceCommands.StopGuiding(guiderMediator, token);
+                SequenceCommands.SetTelescopeTracking(telescopeMediator, TrackingMode.Stopped, token);
+            }
+
             CoreUtil.Wait(duration, token, progress).Wait(token);
-            TSLogger.Debug("done waiting for next target");
+            TSLogger.Info("done waiting for next target");
+
+            if (parked) {
+                SequenceCommands.UnparkTelescope(telescopeMediator, progress, token).Wait();
+            }
         }
 
         private PlanTargetContainer GetPlanTargetContainer(IPlanTarget previousPlanTarget, SchedulerPlan plan, SchedulerStatusMonitor monitor) {
