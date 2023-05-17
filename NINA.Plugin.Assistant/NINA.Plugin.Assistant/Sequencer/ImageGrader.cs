@@ -150,7 +150,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public List<AcquiredImage> GetSampleImageData(int targetId, string filterName, ImageSavedEventArgs msg) {
-            TSLogger.Info($"image grading: comparing against like images, exp={msg.Duration}s, gain={msg.MetaData.Camera.Gain}, offset={msg.MetaData.Camera.Offset}, bin={msg.MetaData.Image.Binning}");
+            TSLogger.Info($"image grading: comparing against like images, filter={filterName}, exp={msg.Duration}, gain={msg.MetaData.Camera.Gain}, offset={msg.MetaData.Camera.Offset}, bin={msg.MetaData.Image.Binning}");
             List<AcquiredImage> rawList = GetAcquiredImages(targetId, filterName);
 
             // Filter for matching duration/gain/offset/binning
