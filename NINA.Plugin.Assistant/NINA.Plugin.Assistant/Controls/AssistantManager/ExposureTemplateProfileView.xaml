@@ -181,9 +181,9 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="160" CanUserSort="False">
+                    <DataGridTemplateColumn Width="110" CanUserSort="False">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="Template Name" />
+                            <TextBlock Text="Name" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -192,13 +192,24 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="100" CanUserSort="False">
+                    <DataGridTemplateColumn Width="60" CanUserSort="False">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="Filter Name" />
+                            <TextBlock Text="Filter" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock VerticalAlignment="Center" Text="{Binding FilterName}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="65" CanUserSort="False">
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="Exposure"/>
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock VerticalAlignment="Center" Text="{Binding DefaultExposure, Converter={StaticResource MinusOneToEmptyStringConverter}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

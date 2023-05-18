@@ -17,6 +17,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         [Required] public string name { get; set; }
         [Required] public string filterName { get; set; }
 
+        public double defaultExposure { get; set; }
         public int gain { get; set; }
         public int offset { get; set; }
         public int? bin { get; set; }
@@ -52,6 +53,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 filterName = value;
                 RaisePropertyChanged(nameof(FilterName));
+            }
+        }
+
+        [NotMapped]
+        public double DefaultExposure {
+            get { return defaultExposure; }
+            set {
+                defaultExposure = value;
+                RaisePropertyChanged(nameof(DefaultExposure));
             }
         }
 
@@ -143,6 +153,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             Name = name;
             FilterName = filterName;
 
+            DefaultExposure = 60;
             Gain = -1;
             Offset = -1;
             BinningMode = new BinningMode(1, 1);
@@ -174,6 +185,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public ExposureTemplate GetPasteCopy(string newProfileId) {
             ExposureTemplate copy = new ExposureTemplate(newProfileId, Utils.CopiedItemName(name), filterName);
 
+            copy.DefaultExposure = DefaultExposure;
             copy.Gain = Gain;
             copy.Offset = Offset;
             copy.BinningMode = BinningMode;
@@ -192,6 +204,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"ProfileId: {ProfileId}");
             sb.AppendLine($"Name: {Name}");
             sb.AppendLine($"FilterName: {FilterName}");
+            sb.AppendLine($"Default Exposure: {DefaultExposure}");
             sb.AppendLine($"Gain: {Gain}");
             sb.AppendLine($"Offset: {Offset}");
             sb.AppendLine($"BinningMode: {BinningMode}");

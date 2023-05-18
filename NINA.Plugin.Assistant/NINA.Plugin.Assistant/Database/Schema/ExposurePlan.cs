@@ -78,7 +78,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public ExposurePlan(string profileId) {
             ProfileId = profileId;
-            Exposure = 60;
+            Exposure = -1;
             Desired = 1;
             Acquired = 0;
             Accepted = 0;

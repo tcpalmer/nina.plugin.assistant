@@ -391,7 +391,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.PlanId = Guid.NewGuid().ToString();
             this.DatabaseId = exposurePlan.Id;
             this.FilterName = exposureTemplate.FilterName;
-            this.ExposureLength = exposurePlan.Exposure;
+            this.ExposureLength = exposurePlan.Exposure != -1 ? exposurePlan.Exposure : exposureTemplate.DefaultExposure;
             this.Gain = GetNullableIntValue(exposureTemplate.Gain);
             this.Offset = GetNullableIntValue(exposureTemplate.Offset);
             this.BinningMode = exposureTemplate.BinningMode;

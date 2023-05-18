@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ninactrl="clr-namespace:NINACustomControlLibrary;assembly=NINACustomControlLibrary"
     xmlns:nrules="clr-namespace:NINA.Core.Utility.ValidationRules;assembly=NINA.Core"
     xmlns:rules="clr-namespace:Assistant.NINAPlugin.Controls.ValidationRules"
     xmlns:uc="clr-namespace:Assistant.NINAPlugin.Controls.AssistantManager"
@@ -488,28 +489,45 @@
 
                 <DataGridTemplateColumn Width="*" CanUserSort="False">
                     <DataGridTemplateColumn.Header>
-                        <TextBlock Text="Exposure" ToolTip="Exposure time in seconds" />
+                        <TextBlock Text="Exposure" ToolTip="Exposure time in seconds (leave blank for template default)" />
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Width="Auto" Text="{Binding Exposure}" />
+                            <ninactrl:HintTextBox
+                                Width="Auto"
+                                VerticalAlignment="Center"
+                                HintText="(Template)"
+                                IsEnabled="False">
+                                <ninactrl:HintTextBox.Text>
+                                    <Binding
+                                        Converter="{StaticResource MinusOneToEmptyStringConverter}"
+                                        Path="Exposure"
+                                        UpdateSourceTrigger="LostFocus">
+                                        <Binding.ValidationRules>
+                                            <rules:NullableDoubleRule />
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </ninactrl:HintTextBox.Text>
+                            </ninactrl:HintTextBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <TextBox Width="Auto">
-                                <TextBox.Text>
-                                    <Binding Path="Exposure" UpdateSourceTrigger="LostFocus">
+                            <ninactrl:HintTextBox
+                                Width="Auto"
+                                VerticalAlignment="Center"
+                                HintText="(Template)">
+                                <ninactrl:HintTextBox.Text>
+                                    <Binding
+                                        Converter="{StaticResource MinusOneToEmptyStringConverter}"
+                                        Path="Exposure"
+                                        UpdateSourceTrigger="LostFocus">
                                         <Binding.ValidationRules>
-                                            <rules:DoubleRangeRule>
-                                                <rules:DoubleRangeRule.ValidRange>
-                                                    <rules:DoubleRangeChecker Maximum="32767" Minimum="0" />
-                                                </rules:DoubleRangeRule.ValidRange>
-                                            </rules:DoubleRangeRule>
+                                            <rules:NullableDoubleRule />
                                         </Binding.ValidationRules>
                                     </Binding>
-                                </TextBox.Text>
-                            </TextBox>
+                                </ninactrl:HintTextBox.Text>
+                            </ninactrl:HintTextBox>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>

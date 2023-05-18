@@ -122,7 +122,7 @@ namespace Assistant.NINAPlugin.Database.Migrate {
         ///*/
         ///
         ///ALTER TABLE profilepreference ADD COLUMN acceptimprovement INTEGER DEFAULT 1;
-        ///ALTER TABLE profilepreference ADD COLUMN exposurethrottle REAL DEFAULT 100;
+        ///ALTER TABLE profilepreference ADD COLUMN exposurethrottle REAL DEFAULT 125;
         ///ALTER TABLE profilepreference ADD COLUMN parkonwait INTEGER DEFAULT 0;
         ///
         ///PRAGMA user_version = 4;
@@ -131,6 +131,23 @@ namespace Assistant.NINAPlugin.Database.Migrate {
         internal static string _4 {
             get {
                 return ResourceManager.GetString("4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /*
+        ///*/
+        ///
+        ///ALTER TABLE profilepreference ADD COLUMN acceptimprovement INTEGER DEFAULT 1;
+        ///ALTER TABLE profilepreference ADD COLUMN exposurethrottle REAL DEFAULT 125;
+        ///ALTER TABLE profilepreference ADD COLUMN parkonwait INTEGER DEFAULT 0;
+        ///
+        ///PRAGMA user_version = 4;
+        ///.
+        /// </summary>
+        internal static string _5 {
+            get {
+                return ResourceManager.GetString("5", resourceCulture);
             }
         }
     }

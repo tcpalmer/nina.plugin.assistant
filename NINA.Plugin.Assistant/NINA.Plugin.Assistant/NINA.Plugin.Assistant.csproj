@@ -565,6 +565,7 @@
     <None Include="Database\Initial\initial_schema.sql" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Database\Migrate\5.sql" />
     <Content Include="Database\Migrate\4.sql" />
     <Content Include="Database\Migrate\3.sql" />
     <Content Include="Database\Migrate\2.sql" />
