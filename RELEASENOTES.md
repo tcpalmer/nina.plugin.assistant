@@ -7,6 +7,15 @@ This release adds support for restricting target imaging to a timespan around th
 
 A new rule for the Scoring Engine lets you set the priority of targets using meridian windows so they can be prioritized if desired.
 
+### Default Exposure Times
+
+You can now add a default exposure time to your Exposure Templates.  This duration will be used unless overridden in Exposure Plans that use the template.
+
+If you have existing Exposure Plans and want to use this feature:
+* Add the desired default to your Exposure Templates.
+* In your Exposure Plans, simply clear the existing exposure value - it should change to '(Template)' to indicate usage of the default.
+
+
 ### New Profile Preferences
 
 * Option to park the mount when the planner is waiting for the next target.

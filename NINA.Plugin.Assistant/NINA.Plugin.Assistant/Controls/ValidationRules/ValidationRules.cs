@@ -227,4 +227,31 @@ namespace Assistant.NINAPlugin.Controls.ValidationRules {
             return new ValidationResult(true, null);
         }
     }
+
+    public class NullableDoubleRule : ValidationRule {
+
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo) {
+
+            string s = value as string;
+            if (string.IsNullOrEmpty(s)) {
+                return new ValidationResult(true, null);
+            }
+
+            double parameter = 0;
+            try {
+                if (("" + value).Length > 0) {
+                    parameter = Double.Parse("" + value);
+                }
+            }
+            catch (Exception e) {
+                return new ValidationResult(false, "Illegal characters or " + e.Message);
+            }
+
+            if (parameter < 0) {
+                return new ValidationResult(false, "Value must be empty or >= 0");
+            }
+
+            return new ValidationResult(true, null);
+        }
+    }
 }
