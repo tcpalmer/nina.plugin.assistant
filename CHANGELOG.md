@@ -7,6 +7,7 @@
 * Added option to park the mount while waiting for next target
 * Added option to throttle exposure planning when not grading
 * Added option to accept all improvements in image grading
+* Added loop condition to support outer loops for safety or multi-night
 * Fixed problem with ROI exposure capture
 * Fixed problem with including rejected exposure plans
 
