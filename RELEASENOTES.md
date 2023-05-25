@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.7.1.0 - 2023-05-XX
+## 0.7.1.0 - 2023-05-25
 
 ### Meridian Window Support
 This release adds support for restricting target imaging to a timespan around the target's meridian crossing in order to minimize airmass and light pollution impacts.

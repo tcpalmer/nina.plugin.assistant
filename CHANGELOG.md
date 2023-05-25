@@ -1,6 +1,6 @@
 # Target Scheduler
 
-## 0.7.0.0 - 2023-05-XX
+## 0.7.0.0 - 2023-05-25
 * Added support for meridian window restriction
 * Added default exposure time to Exposure Templates
 * Added airmass to acquired image data detail display
