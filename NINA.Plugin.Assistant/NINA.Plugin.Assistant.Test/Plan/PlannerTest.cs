@@ -1,5 +1,4 @@
-﻿using Assistant.NINAPlugin.Astrometry;
-using Assistant.NINAPlugin.Database.Schema;
+﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Plan.Scoring;
 using FluentAssertions;
@@ -534,6 +533,35 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             window.StartTime.Should().BeCloseTo(atTime, precision);
             window.EndTime.Should().BeCloseTo(atTime.AddHours(3), precision);
             window.Duration.Should().Be(60 * 60 * 3);
+        }
+
+        [Test]
+        public void testHasActiveProjects() {
+            Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
+            Planner sut = new Planner(DateTime.Now, profileMock.Object, GetPrefs());
+            sut.HasActiveProjects(null).Should().BeFalse();
+
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
+            Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
+            Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("Ha", 10, 0);
+            PlanMocks.AddMockPlanFilter(pt, pf);
+            PlanMocks.AddMockPlanTarget(pp1, pt);
+
+            Mock<IPlanProject> pp2 = PlanMocks.GetMockPlanProject("pp2", ProjectState.Active);
+            pt = PlanMocks.GetMockPlanTarget("M31", TestUtil.M31);
+            pf = PlanMocks.GetMockPlanExposure("OIII", 10, 10);
+            PlanMocks.AddMockPlanFilter(pt, pf);
+            pf = PlanMocks.GetMockPlanExposure("SII", 10, 10);
+            PlanMocks.AddMockPlanFilter(pt, pf);
+            PlanMocks.AddMockPlanTarget(pp2, pt);
+
+            List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object, pp2.Object);
+            sut = new Planner(DateTime.Now, profileMock.Object, GetPrefs());
+            sut.HasActiveProjects(projects).Should().BeTrue();
+
+            projects = PlanMocks.ProjectsList(pp2.Object);
+            sut = new Planner(DateTime.Now, profileMock.Object, GetPrefs());
+            sut.HasActiveProjects(projects).Should().BeFalse();
         }
 
         [Test]

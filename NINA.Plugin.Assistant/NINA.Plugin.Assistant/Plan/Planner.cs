@@ -421,6 +421,24 @@ namespace Assistant.NINAPlugin.Plan {
             return instructions;
         }
 
+        public bool HasActiveProjects(List<IPlanProject> projects) {
+            if (projects == null) {
+                projects = GetProjects();
+            }
+
+            if (NoProjects(projects)) {
+                return false;
+            }
+
+            foreach (IPlanProject project in projects) {
+                if (ProjectIsInComplete(project)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private bool NoProjects(List<IPlanProject> projects) {
             return projects == null || projects.Count == 0;
         }

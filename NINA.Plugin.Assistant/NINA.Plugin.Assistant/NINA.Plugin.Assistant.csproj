@@ -402,7 +402,10 @@
     <Compile Include="Plan\Scoring\Rules\SettingSoonestRule.cs" />
     <Compile Include="Sequencer\PlanTakeExposure.cs" />
     <Compile Include="Sequencer\PlanTargetContainerStrategy.cs" />
-    <Compile Include="Sequencer\SchedulerTestCondition.cs" />
+    <Compile Include="Sequencer\TargetSchedulerCondition.cs" />
+    <Compile Include="Sequencer\TargetSchedulerConditionTemplate.xaml.cs">
+      <DependentUpon>TargetSchedulerConditionTemplate.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Sequencer\TargetSchedulerContainer.cs" />
     <Compile Include="Sequencer\TargetSchedulerContainerTemplate.xaml.cs">
       <DependentUpon>TargetSchedulerContainerTemplate.xaml</DependentUpon>
@@ -542,6 +545,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <ContainsDesignTimeResources>true</ContainsDesignTimeResources>
+    </Page>
+    <Page Include="Sequencer\TargetSchedulerConditionTemplate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Sequencer\TargetSchedulerContainerTemplate.xaml">
       <SubType>Designer</SubType>
