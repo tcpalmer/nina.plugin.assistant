@@ -1,6 +1,9 @@
 # Target Scheduler
 
-## 0.7.0.0 - 2023-05-25
+## 0.7.1.1 - 2023-05-30
+* Fixed problem with missing parent for internal container
+
+## 0.7.1.0 - 2023-05-25
 * Added support for meridian window restriction
 * Added default exposure time to Exposure Templates
 * Added airmass to acquired image data detail display

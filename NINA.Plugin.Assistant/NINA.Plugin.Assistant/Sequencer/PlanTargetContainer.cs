@@ -103,6 +103,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             PlanTargetContainerStrategy containerStrategy = Strategy as PlanTargetContainerStrategy;
             containerStrategy.SetContext(parentContainer, plan, monitor);
+            AttachNewParent(parentContainer);
 
             if (!plan.IsEmulator)
                 ImageSaveWatcher = new ImageSaveWatcher(activeProfile, imageSaveMediator, plan.PlanTarget);
