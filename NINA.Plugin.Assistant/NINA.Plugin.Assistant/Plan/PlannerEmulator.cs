@@ -75,10 +75,12 @@ namespace Assistant.NINAPlugin.Plan {
             instructions.Add(new PlanTakeExposure(lum));
             instructions.Add(new PlanTakeExposure(lum));
             instructions.Add(new PlanTakeExposure(lum));
+            instructions.Add(new PlanDither());
             instructions.Add(new PlanSwitchFilter(red));
             instructions.Add(new PlanTakeExposure(red));
             instructions.Add(new PlanTakeExposure(red));
             instructions.Add(new PlanTakeExposure(red));
+            instructions.Add(new PlanDither());
             /*
             instructions.Add(new PlanSwitchFilter(grn));
             instructions.Add(new PlanTakeExposure(grn));
@@ -91,7 +93,6 @@ namespace Assistant.NINAPlugin.Plan {
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
             */
-
 
             return new SchedulerPlan(planTarget, timeInterval, instructions);
         }
@@ -131,8 +132,10 @@ namespace Assistant.NINAPlugin.Plan {
             instructions.Add(new PlanTakeExposure(grn));
             instructions.Add(new PlanSwitchFilter(blu));
             instructions.Add(new PlanTakeExposure(blu));
+            instructions.Add(new PlanDither());
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
+            instructions.Add(new PlanDither());
 
             return new SchedulerPlan(planTarget, timeInterval, instructions);
         }

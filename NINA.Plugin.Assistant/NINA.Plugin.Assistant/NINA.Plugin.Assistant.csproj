@@ -398,6 +398,7 @@
     </Compile>
     <Compile Include="Database\Schema\ProfilePreference.cs" />
     <Compile Include="Plan\PlanStopTimeExpert.cs" />
+    <Compile Include="Plan\Scoring\DitherInjector.cs" />
     <Compile Include="Plan\Scoring\Rules\MeridianWindowPriorityRule.cs" />
     <Compile Include="Plan\Scoring\Rules\SettingSoonestRule.cs" />
     <Compile Include="Sequencer\PlanTakeExposure.cs" />

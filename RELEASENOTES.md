@@ -1,5 +1,16 @@
 # Release Notes
 
+## 0.8.0.0 - 2023-06-XX
+
+### Revised Dithering Approach
+Previously, the 'Dither After Every' setting in Projects was the number of exposures before dithering would be triggered - regardless of filter.  This can lead to under-dithering in situations where the planner returns exposures for fewer filters than expected (e.g. due to exposure plan completion or moon avoidance).
+
+Now, the setting means to 'dither after N instances of each filter'.  For example, if dither = 1 and the planner generates LRGBLRGBLRGBLLL, then dithers would be added to execute LRGBdLRGBdLRGBdLdLdL.  Previously, you might use dither = 4 in this situation but then once RGB is done, you'd be under-dithering the L exposures.
+
+### Miscellaneous
+* Fixed problem with missing parent for internal container
+
+
 ## 0.7.1.0 - 2023-05-25
 
 ### Meridian Window Support

@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
 using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan.Scoring;
 using Assistant.NINAPlugin.Util;
 using System;
 using System.Collections.Generic;
@@ -74,7 +75,7 @@ namespace Assistant.NINAPlugin.Plan {
                 instructions.Clear();
             }
 
-            return Cleanup(instructions);
+            return new DitherInjector(Cleanup(instructions), planTarget.Project.DitherEvery).Inject();
         }
 
         public static List<IPlanInstruction> Cleanup(List<IPlanInstruction> instructions) {
@@ -314,6 +315,14 @@ namespace Assistant.NINAPlugin.Plan {
 
         public override string ToString() {
             return $"TakeExposure: {planExposure.FilterName} {planExposure.ExposureLength}";
+        }
+    }
+
+    public class PlanDither : PlanInstruction {
+        public PlanDither() : base(null) { }
+
+        public override string ToString() {
+            return $"Dither";
         }
     }
 
