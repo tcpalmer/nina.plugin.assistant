@@ -186,14 +186,12 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                         if (instruction is PlanTakeExposure) {
                             instructionItem.Header = GetTakeExposureLabel((PlanTakeExposure)instruction);
                             planItem.Items.Add(instructionItem);
+                            continue;
+                        }
 
-                            if (plan.PlanTarget.Project.DitherEvery > 0) {
-                                if (++ditherTrigger == plan.PlanTarget.Project.DitherEvery) {
-                                    planItem.Items.Add(new TreeViewItem { Header = "Dither" });
-                                    ditherTrigger = 0;
-                                }
-                            }
-
+                        if (instruction is PlanDither) {
+                            instructionItem.Header = "Dither";
+                            planItem.Items.Add(instructionItem);
                             continue;
                         }
 
@@ -241,18 +239,11 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
         }
 
         private string GetSlewLabel(IPlanTarget planTarget, PlanSlew planSlew) {
-
             string name = "Slew";
-            string rotate = planTarget.Rotation != 0 ? $", Rotate: {planTarget.Rotation}°" : "";
+            string rotate = $", Rotate: {planTarget.Rotation}°";
 
-            if (planSlew.center && planTarget.Rotation == 0) {
-                name = "Slew/Center";
-            }
-            else if (planSlew.center && planTarget.Rotation != 0) {
+            if (planSlew.center) {
                 name = "Slew/Rotate/Center";
-            }
-            else if (planSlew.center) {
-                name = "Slew/Center";
             }
 
             return $"{name}: {planTarget.Coordinates.RAString} {planTarget.Coordinates.DecString}{rotate}";
