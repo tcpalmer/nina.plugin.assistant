@@ -9,6 +9,7 @@ Now, the setting means to 'dither after N instances of each filter'.  For exampl
 
 ### Miscellaneous
 * Fixed problem with missing parent for internal container
+* Fixed problem where target rotation = 0 was ignored.  Now, if you're slewing and centering it will do a slew and center with rotation even if zero (assuming you have a rotator connected).
 
 
 ## 0.7.1.0 - 2023-05-25
