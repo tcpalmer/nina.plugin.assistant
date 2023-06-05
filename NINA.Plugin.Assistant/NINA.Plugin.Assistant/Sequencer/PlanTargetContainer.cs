@@ -223,7 +223,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private void AddSlew(PlanSlew instruction, IPlanTarget planTarget) {
 
-            bool isPlateSolve = instruction.center || planTarget.Rotation != 0;
+            bool isPlateSolve = instruction.center;
             InputCoordinates slewCoordinates = new InputCoordinates(planTarget.Coordinates);
             SequenceItem slewCenter;
 
@@ -234,16 +234,16 @@ namespace Assistant.NINAPlugin.Sequencer {
             TSLogger.Info($"slew ({with} center): {Utils.FormatCoordinates(planTarget.Coordinates)}");
 
             if (isPlateSolve) {
-                if (planTarget.Rotation == 0) {
-                    slewCenter = new Center(profileService, telescopeMediator, imagingMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
-                    slewCenter.Name = nameof(Center);
-                    (slewCenter as Center).Coordinates = slewCoordinates;
-                }
-                else {
+                if (rotatorMediator.GetInfo().Connected) {
                     slewCenter = new CenterAndRotate(profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
                     slewCenter.Name = nameof(CenterAndRotate);
                     (slewCenter as Center).Coordinates = slewCoordinates;
                     (slewCenter as CenterAndRotate).Rotation = planTarget.Rotation;
+                }
+                else {
+                    slewCenter = new Center(profileService, telescopeMediator, imagingMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
+                    slewCenter.Name = nameof(Center);
+                    (slewCenter as Center).Coordinates = slewCoordinates;
                 }
             }
             else {
