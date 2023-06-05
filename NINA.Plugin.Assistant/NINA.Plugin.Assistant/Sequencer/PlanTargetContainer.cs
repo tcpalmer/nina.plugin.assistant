@@ -13,6 +13,7 @@ using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
 using NINA.Sequencer.SequenceItem.Camera;
 using NINA.Sequencer.SequenceItem.FilterWheel;
+using NINA.Sequencer.SequenceItem.Guider;
 using NINA.Sequencer.SequenceItem.Imaging;
 using NINA.Sequencer.SequenceItem.Platesolving;
 using NINA.Sequencer.SequenceItem.Telescope;
@@ -120,7 +121,6 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             try {
                 AddEndTimeTrigger(plan.PlanTarget);
-                AddDitherTrigger(plan.PlanTarget);
                 AddParentTriggers();
                 AddInstructions(plan);
 
@@ -157,16 +157,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         private void AddEndTimeTrigger(IPlanTarget planTarget) {
             TSLogger.Info($"adding target end time trigger, run until: {Utils.FormatDateTimeFull(planTarget.EndTime)}");
             Add(new SchedulerTargetEndTimeTrigger(planTarget.EndTime));
-        }
-
-        private void AddDitherTrigger(IPlanTarget planTarget) {
-            int ditherEvery = planTarget.Project.DitherEvery;
-            if (ditherEvery > 0) {
-                TSLogger.Info($"adding dither trigger: every {ditherEvery} exposures");
-                DitherAfterExposures ditherTrigger = new DitherAfterExposures(guiderMediator, imageHistoryVM, profileService);
-                ditherTrigger.AfterExposures = ditherEvery;
-                Add(ditherTrigger);
-            }
         }
 
         private void AddParentTriggers() {
@@ -213,6 +203,11 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 if (instruction is Plan.PlanTakeExposure) {
                     AddTakeExposure(plan.PlanTarget, instruction.planExposure);
+                    continue;
+                }
+
+                if (instruction is PlanDither) {
+                    AddDither();
                     continue;
                 }
 
@@ -305,6 +300,12 @@ namespace Assistant.NINAPlugin.Sequencer {
             takeExposure.ROI = planTarget.ROI;
 
             Add(takeExposure);
+        }
+
+        private void AddDither() {
+            TSLogger.Info("adding dither");
+            Dither dither = new Dither(guiderMediator, profileService);
+            Add(dither);
         }
 
         private void AddWait(DateTime waitForTime, IPlanTarget planTarget) {

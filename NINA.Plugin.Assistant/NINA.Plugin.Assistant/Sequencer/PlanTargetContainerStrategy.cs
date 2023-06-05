@@ -66,6 +66,11 @@ namespace Assistant.NINAPlugin.Sequencer {
                     continue;
                 }
 
+                if (instruction is PlanDither) {
+                    instructionMonitorQueue.Enqueue(new InstructionMonitor(schedulerPlan.PlanTarget.PlanId, "Dither"));
+                    continue;
+                }
+
                 if (instruction is PlanWait) {
                     instructionMonitorQueue.Enqueue(new InstructionMonitor(schedulerPlan.PlanTarget.PlanId, "Wait"));
                     continue;

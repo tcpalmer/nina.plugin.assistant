@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 0.8.0.0 - 2023-06-XX
+* Revised dithering approach
+
 ## 0.7.1.1 - 2023-05-30
 * Fixed problem with missing parent for internal container
 

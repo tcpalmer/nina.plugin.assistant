@@ -161,6 +161,27 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         }
 
         [Test]
+        public void testDither() {
+            DateTime dateTime = DateTime.Now;
+            TestNighttimeCircumstances ntc = TestNighttimeCircumstances.GetNormal(dateTime);
+
+            int nbExposures = 0;
+            int nbExposureLength = 60;
+            int wbExposures = 4;
+            int wbExposureLength = 120;
+
+            Mock<IPlanProject> pp = GetTestProject(dateTime, 0, nbExposures, nbExposureLength, wbExposures, wbExposureLength);
+            pp.SetupProperty(p => p.FilterSwitchFrequency, 1);
+            pp.SetupProperty(p => p.DitherEvery, 3);
+            IPlanTarget pt = pp.Object.Targets[0];
+
+            TimeInterval window = new TimeInterval((DateTime)ntc.NighttimeStart, ((DateTime)ntc.NighttimeStart).AddMinutes(60));
+            List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt, window, ntc).Plan();
+
+            AssertPlan(GetExpectedDither(ntc), list);
+        }
+
+        [Test]
         public void testCleanup() {
             List<IPlanInstruction> list = new List<IPlanInstruction>();
 
@@ -301,6 +322,10 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
                 if (expected is PlanWait) {
                     Assert.AreEqual(((PlanWait)expected).waitForTime, ((PlanWait)actual).waitForTime);
+                    continue;
+                }
+
+                if (expected is PlanDither) {
                     continue;
                 }
 
@@ -456,11 +481,46 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             return actual;
         }
 
-        private void AddActualExposures(List<IPlanInstruction> actual, IPlanExposure planFilter, int count) {
+        private List<IPlanInstruction> GetExpectedDither(NighttimeCircumstances ntc) {
+            List<IPlanInstruction> actual = new List<IPlanInstruction>();
+
+            Mock<IPlanExposure> L = PlanMocks.GetMockPlanExposure("L", 10, 0, 120);
+            Mock<IPlanExposure> R = PlanMocks.GetMockPlanExposure("R", 10, 0, 120);
+            Mock<IPlanExposure> G = PlanMocks.GetMockPlanExposure("G", 10, 0, 120);
+            Mock<IPlanExposure> B = PlanMocks.GetMockPlanExposure("B", 10, 0, 120);
+
+            actual.Add(new PlanMessage(""));
+            actual.Add(new PlanMessage(""));
+
+            for (int i = 0; i < 3; i++) {
+                AddActualExposures(actual, L.Object, 1);
+                AddActualExposures(actual, R.Object, 1);
+                AddActualExposures(actual, G.Object, 1);
+                AddActualExposures(actual, B.Object, 1);
+            }
+
+            actual.Add(new PlanSwitchFilter(L.Object));
+            actual.Add(new PlanSetReadoutMode(L.Object));
+            actual.Add(new PlanDither());
+            actual.Add(new PlanTakeExposure(L.Object));
+            AddActualExposures(actual, R.Object, 1);
+            AddActualExposures(actual, G.Object, 1);
+            AddActualExposures(actual, B.Object, 1);
+
+            return actual;
+        }
+
+        private void AddActualExposures(List<IPlanInstruction> actual, IPlanExposure planFilter, int count, int dither = 0) {
             actual.Add(new PlanSwitchFilter(planFilter));
             actual.Add(new PlanSetReadoutMode(planFilter));
             for (int i = 0; i < count; i++) {
                 actual.Add(new PlanTakeExposure(planFilter));
+                if (dither > 0) {
+                    if ((i + 1) % dither == 0) {
+                        // if ((i + 1) != count && (i + 1) % dither == 0) {
+                        actual.Add(new PlanDither());
+                    }
+                }
             }
         }
 

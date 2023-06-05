@@ -344,6 +344,7 @@
     <Compile Include="Database\Schema\ProfilePreferenceTest.cs" />
     <Compile Include="Database\Schema\ProjectTest.cs" />
     <Compile Include="Database\Schema\TargetTest.cs" />
+    <Compile Include="Plan\DitherInjectorTest.cs" />
     <Compile Include="Plan\PlanMocks.cs" />
     <Compile Include="Plan\PlannerTest.cs" />
     <Compile Include="Plan\PlanStopTimeExpertTest.cs" />
