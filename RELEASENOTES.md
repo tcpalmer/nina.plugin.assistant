@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.8.0.0 - 2023-06-XX
+## 0.8.0.0 - 2023-06-12
 
 ### Revised Dithering Approach
 Previously, the 'Dither After Every' setting in Projects was the number of exposures before dithering would be triggered - regardless of filter.  This can lead to under-dithering in situations where the planner returns exposures for fewer filters than expected (e.g. due to exposure plan completion or moon avoidance).

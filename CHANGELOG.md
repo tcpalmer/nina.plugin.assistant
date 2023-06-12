@@ -1,6 +1,6 @@
 # Target Scheduler
 
-## 0.8.0.0 - 2023-06-XX
+## 0.8.0.0 - 2023-06-12
 * Revised dithering approach (see release notes)
 * Now does a center with rotation even if target rotation is zero
 
