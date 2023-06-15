@@ -12,7 +12,6 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
-using System.Web.Configuration;
 
 namespace Assistant.NINAPlugin.Database {
 

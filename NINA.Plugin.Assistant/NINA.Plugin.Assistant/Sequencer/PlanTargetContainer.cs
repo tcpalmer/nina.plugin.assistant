@@ -238,7 +238,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     slewCenter = new CenterAndRotate(profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
                     slewCenter.Name = nameof(CenterAndRotate);
                     (slewCenter as Center).Coordinates = slewCoordinates;
-                    (slewCenter as CenterAndRotate).Rotation = planTarget.Rotation;
+                    (slewCenter as CenterAndRotate).DeprecatedRotation = planTarget.Rotation;
                 }
                 else {
                     slewCenter = new Center(profileService, telescopeMediator, imagingMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);

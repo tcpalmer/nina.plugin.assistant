@@ -1,5 +1,8 @@
 # Release Notes
 
+## 3.0.0.0 - 2023-06-XX
+Ported to NINA 3
+
 ## 0.8.0.0 - 2023-06-12
 
 ### Revised Dithering Approach
