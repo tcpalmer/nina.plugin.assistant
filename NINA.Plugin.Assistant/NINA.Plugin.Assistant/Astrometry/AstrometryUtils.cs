@@ -221,6 +221,20 @@ namespace Assistant.NINAPlugin.Astrometry {
             return location.Latitude >= 66.6 || location.Latitude <= -66.6;
         }
 
+        /// <summary>
+        /// Convert NINA 2.x rotation to NINA 3.x position angle.  From the NINA 3 release notes:
+        /// 
+        /// Rotation values in N.I.N.A. are now displayed in counter clockwise notation to follow the standard of
+        /// "East of North of North Celestial Pole" that is used in most astro applications. Templates, Targets and
+        /// other saved items in previous versions will be auto migrated to this adjusted approach.
+        /// 
+        /// </summary>
+        /// <param name="rotation"></param>
+        /// <returns></returns>
+        public static double ConvertRotation(double rotation) {
+            return AstroUtil.EuclidianModulus(360 - rotation, 360);
+        }
+
         private AstrometryUtils() { }
     }
 

@@ -2,6 +2,7 @@
 
 ## 3.0.0.0 - 2023-06-XX
 * Ported to NINA 3
+* Target rotation values will be auto-converted to NINA 3 counter-clockwise notation
 
 ## 0.8.0.0 - 2023-06-12
 * Revised dithering approach (see release notes)

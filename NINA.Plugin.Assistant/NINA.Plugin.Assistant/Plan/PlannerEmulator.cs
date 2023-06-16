@@ -209,7 +209,7 @@ namespace Assistant.NINAPlugin.Plan {
             planTarget.Project = planProject;
             planTarget.Name = name;
             planTarget.Coordinates = coordinates;
-            planTarget.Rotation = 0;
+            planTarget.Rotation = 16;
             return planTarget;
         }
 

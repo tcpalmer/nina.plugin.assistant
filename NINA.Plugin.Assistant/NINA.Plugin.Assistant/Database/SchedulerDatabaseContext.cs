@@ -1,4 +1,5 @@
-﻿using Assistant.NINAPlugin.Database.Schema;
+﻿using Assistant.NINAPlugin.Astrometry;
+using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan.Scoring.Rules;
 using Assistant.NINAPlugin.Util;
 using NINA.Core.Utility;
@@ -527,10 +528,11 @@ namespace Assistant.NINAPlugin.Database {
                     }
                 }
 
-                // Other repairs/updates
-                RepairAndUpdate(context);
-
                 int newVersion = context.Database.SqlQuery<int>("PRAGMA user_version").First();
+
+                // Other repairs/updates
+                RepairAndUpdate(version, newVersion, context);
+
                 if (newVersion != version) {
                     TSLogger.Info($"database updated: {version} -> {newVersion}");
                 }
@@ -574,7 +576,7 @@ namespace Assistant.NINAPlugin.Database {
                 }
             }
 
-            private void RepairAndUpdate(TContext context) {
+            private void RepairAndUpdate(int oldVersion, int newVersion, TContext context) {
 
                 // If a new scoring rule was added, we need to add a rule weight record to projects that don't have it
                 List<Project> projects = context.GetAllProjects();
@@ -599,6 +601,26 @@ namespace Assistant.NINAPlugin.Database {
                     }
                 }
 
+                // Convert NINA 2 rotation to NINA 3 position angle
+                if (oldVersion == 5 && newVersion == 6) {
+                    if (projects != null && projects.Count > 0) {
+                        bool updated = false;
+                        foreach (Project project in projects) {
+                            foreach (Target target in project.Targets) {
+                                double rotation = target.Rotation;
+                                if (rotation != 0) {
+                                    target.Rotation = AstrometryUtils.ConvertRotation(rotation);
+                                    updated = true;
+                                }
+                            }
+                        }
+
+                        if (updated) {
+                            context.SaveChanges();
+                            TSLogger.Info("updated target rotation values for NINA 3");
+                        }
+                    }
+                }
             }
 
         }

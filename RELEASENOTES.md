@@ -1,7 +1,10 @@
 # Release Notes
 
 ## 3.0.0.0 - 2023-06-XX
-Ported to NINA 3
+Ported to NINA 3.
+
+### Target Rotation Angles
+NINA 3 changed the meaning of target rotation to use the more standard 'counter clockwise notation'.  If you have non-zero rotation values for a target, they will be automatically converted.
 
 ## 0.8.0.0 - 2023-06-12
 
