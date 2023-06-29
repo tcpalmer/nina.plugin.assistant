@@ -222,12 +222,12 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             if (MyMessageBox.Show(message, "Add Targets?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
                 List<Target> targets = new List<Target>();
                 foreach (FramingRectangle rect in framingAssistantVM.CameraRectangles) {
-                    TSLogger.Debug($"Add mosaic panel as target: {rect.Name} {rect.Coordinates.RAString} {rect.Coordinates.DecString} rot={rect.DSORotation}");
+                    TSLogger.Debug($"Add mosaic panel as target: {rect.Name} {rect.Coordinates.RAString} {rect.Coordinates.DecString} rot={rect.DSOPositionAngle}");
                     Target target = new Target();
                     target.Name = rect.Name;
                     target.ra = rect.Coordinates.RA;
                     target.dec = rect.Coordinates.Dec;
-                    target.Rotation = rect.DSORotation;
+                    target.Rotation = rect.DSOPositionAngle;
                     targets.Add(target);
                 }
 

@@ -292,7 +292,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 inputTarget.DeepSkyObject = GetDeepSkyObject(referenceDate, activeProfile, planTarget, customHorizon);
                 inputTarget.TargetName = planTarget.Name;
                 inputTarget.InputCoordinates = new InputCoordinates(planTarget.Coordinates);
-                inputTarget.Rotation = planTarget.Rotation;
+                inputTarget.PositionAngle = planTarget.Rotation;
                 inputTarget.Expanded = true;
                 Target = inputTarget;
 
@@ -320,7 +320,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 activeProfile.AstrometrySettings.Horizon);
             inputTarget.TargetName = string.Empty;
             inputTarget.InputCoordinates.Coordinates = new Coordinates(Angle.Zero, Angle.Zero, Epoch.J2000);
-            inputTarget.Rotation = 0;
+            inputTarget.PositionAngle = 0;
             return inputTarget;
         }
 
@@ -450,7 +450,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public override string ToString() {
             var baseString = base.ToString();
-            return $"{baseString}, Target: {Target?.TargetName} {Target?.InputCoordinates?.Coordinates} {Target?.Rotation}";
+            return $"{baseString}, Target: {Target?.TargetName} {Target?.InputCoordinates?.Coordinates} {Target?.PositionAngle}";
         }
     }
 }

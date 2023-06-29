@@ -18,7 +18,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private void OpenLink(object sender, RoutedEventArgs e) {
             try {
-                Process.Start(URL);
+                Process.Start(new ProcessStartInfo(URL) { UseShellExecute = true });
             }
             catch (Exception ex) {
                 TSLogger.Error($"failed to open HTTP link {URL}: {ex.Message}");

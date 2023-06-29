@@ -1,4 +1,5 @@
-﻿using Assistant.NINAPlugin.Database.Schema;
+﻿using Assistant.NINAPlugin.Astrometry;
+using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Util;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using NINA.Astrometry;
@@ -60,7 +61,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             Target target = new Target();
             target.Coordinates = GetFramingAssistantCoordinates();
             target.Name = framingAssistantVM.DSO.Name;
-            target.Rotation = framingAssistantVM.Rectangle.TotalRotation;
+            target.Rotation = AstrometryUtils.ConvertRotation(framingAssistantVM.Rectangle.TotalRotation);
 
             Target = target;
         }
