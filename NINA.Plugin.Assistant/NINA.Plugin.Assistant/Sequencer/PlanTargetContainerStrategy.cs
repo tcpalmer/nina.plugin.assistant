@@ -76,6 +76,11 @@ namespace Assistant.NINAPlugin.Sequencer {
                     continue;
                 }
 
+                if (instruction is PlanBeforeTargetContainer) {
+                    instructionMonitorQueue.Enqueue(new InstructionMonitor(schedulerPlan.PlanTarget.PlanId, "BeforeTarget"));
+                    continue;
+                }
+
                 TSLogger.Error($"Unknown instruction type in PlanTargetContainerStrategy: {instruction.GetType()}");
                 throw new Exception($"Unknown instruction type in PlanTargetContainerStrategy: {instruction.GetType()}");
             }

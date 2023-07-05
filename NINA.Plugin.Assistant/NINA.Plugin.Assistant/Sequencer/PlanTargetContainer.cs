@@ -187,7 +187,6 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 if (instruction is PlanSlew) {
                     AddSlew((PlanSlew)instruction, plan.PlanTarget);
-                    //Notification.ShowInformation("REMINDER: SKIPPING SLEW");
                     continue;
                 }
 
@@ -216,6 +215,11 @@ namespace Assistant.NINAPlugin.Sequencer {
                     continue;
                 }
 
+                if (instruction is PlanBeforeTargetContainer) {
+                    AddBeforeTargetInstructions();
+                    continue;
+                }
+
                 TSLogger.Error($"unknown instruction type: {instruction.GetType().FullName}");
                 throw new Exception($"unknown instruction type: {instruction.GetType().FullName}");
             }
@@ -226,9 +230,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             bool isPlateSolve = instruction.center;
             InputCoordinates slewCoordinates = new InputCoordinates(planTarget.Coordinates);
             SequenceItem slewCenter;
-
-            //isPlateSolve = false;
-            //Notification.ShowInformation("REMINDER: center is disabled for slews");
 
             string with = isPlateSolve ? "with" : "without";
             TSLogger.Info($"slew ({with} center): {Utils.FormatCoordinates(planTarget.Coordinates)}");
@@ -254,6 +255,12 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             SetItemDefaults(slewCenter, null);
             Add(slewCenter);
+        }
+
+        private void AddBeforeTargetInstructions() {
+            if (parentContainer.BeforeTargetContainer.Items?.Count > 0) {
+                Add(parentContainer.BeforeTargetContainer);
+            }
         }
 
         private void AddSwitchFilter(IPlanExposure planExposure) {

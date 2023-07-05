@@ -322,7 +322,16 @@ namespace Assistant.NINAPlugin.Plan {
         public PlanDither() : base(null) { }
 
         public override string ToString() {
-            return $"Dither";
+            return "Dither";
+        }
+    }
+
+    public class PlanBeforeTargetContainer : PlanInstruction {
+
+        public PlanBeforeTargetContainer() : base(null) { }
+
+        public override string ToString() {
+            return "BeforeTargetContainer";
         }
     }
 

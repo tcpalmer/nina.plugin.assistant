@@ -22,7 +22,7 @@ namespace Assistant.NINAPlugin.Plan {
         private ObserverInfo observerInfo;
         private List<IPlanProject> projects;
 
-        public static readonly bool USE_EMULATOR = false;
+        public static readonly bool USE_EMULATOR = true;
 
         public Planner(DateTime atTime, IProfileService profileService, ProfilePreference profilePreferences) : this(atTime, profileService, profilePreferences, null) { }
 
@@ -415,6 +415,8 @@ namespace Assistant.NINAPlugin.Plan {
             if (!planTarget.Equals(previousPlanTarget)) {
                 instructions.Add(new PlanSlew(true));
             }
+
+            instructions.Add(new PlanBeforeTargetContainer());
 
             NighttimeCircumstances nighttimeCircumstances = NighttimeCircumstances.AdjustNighttimeCircumstances(observerInfo, atTime);
             instructions.AddRange(new ExposurePlanner(profilePreferences, planTarget, targetWindow, nighttimeCircumstances).Plan());

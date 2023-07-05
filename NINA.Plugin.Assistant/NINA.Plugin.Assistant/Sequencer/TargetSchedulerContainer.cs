@@ -62,6 +62,24 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IFramingAssistantVM framingAssistantVM;
         private readonly IApplicationMediator applicationMediator;
 
+        [JsonProperty]
+        public InstructionContainer BeforeWaitContainer { get; set; }
+
+        [JsonProperty]
+        public InstructionContainer AfterWaitContainer { get; set; }
+
+        [JsonProperty]
+        public InstructionContainer BeforeTargetContainer { get; set; }
+
+        [JsonProperty]
+        public InstructionContainer AfterTargetContainer { get; set; }
+
+        [JsonProperty]
+        public InstructionContainer WhenSafeContainer { get; set; }
+
+        [JsonProperty]
+        public InstructionContainer WhenUnsafeContainer { get; set; }
+
         private ProfilePreference profilePreferences;
 
         public object lockObj = new object();
@@ -105,6 +123,13 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.applicationMediator = applicationMediator;
             this.framingAssistantVM = framingAssistantVM;
 
+            BeforeWaitContainer = new InstructionContainer("BeforeWait", Parent);
+            AfterWaitContainer = new InstructionContainer("AfterWait", Parent);
+            BeforeTargetContainer = new InstructionContainer("BeforeTarget", Parent);
+            AfterTargetContainer = new InstructionContainer("AfterTarget", Parent);
+            WhenSafeContainer = new InstructionContainer("WhenSafe", Parent);
+            WhenUnsafeContainer = new InstructionContainer("WhenUnsafe", Parent);
+
             Task.Run(() => NighttimeData = nighttimeCalculator.Calculate());
             Target = new InputTarget(Angle.ByDegree(profileService.ActiveProfile.AstrometrySettings.Latitude), Angle.ByDegree(profileService.ActiveProfile.AstrometrySettings.Longitude), profileService.ActiveProfile.AstrometrySettings.Horizon);
 
@@ -128,8 +153,39 @@ namespace Assistant.NINAPlugin.Sequencer {
             StatusMonitor.PropertyChanged += StatusMonitor_PropertyChanged;
         }
 
+        public override void AfterParentChanged() {
+            base.AfterParentChanged();
+
+            /* TODO - implement.  Following was copied from TestContainer ...
+
+            if (Parent == null) {
+                SequenceBlockTeardown();
+            }
+            else {
+                BeforeWaitContainer.AttachNewParent(Parent);
+                AfterWaitContainer.AttachNewParent(Parent);
+                BeforeTargetContainer.AttachNewParent(Parent);
+                AfterTargetContainer.AttachNewParent(Parent);
+                SchedulerCompleteContainer.AttachNewParent(Parent);
+                WhenSafeContainer.AttachNewParent(Parent);
+                WhenUnsafeContainer.AttachNewParent(Parent);
+
+                if (Parent.Status == SequenceEntityStatus.RUNNING) {
+                    SequenceBlockInitialize();
+                }
+            }
+             */
+        }
+
         public override void ResetProgress() {
             TSLogger.Debug("Scheduler instruction: ResetProgress");
+
+            BeforeWaitContainer.ResetProgress();
+            AfterWaitContainer.ResetProgress();
+            BeforeTargetContainer.ResetProgress();
+            AfterTargetContainer.ResetProgress();
+            WhenSafeContainer.ResetProgress();
+            WhenUnsafeContainer.ResetProgress();
 
             if (StatusMonitor != null) {
                 StatusMonitor.Reset();
@@ -161,8 +217,13 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 if (plan.WaitForNextTargetTime != null) {
                     TSLogger.Info("planner waiting for next target to become available");
+
                     StatusMonitor.BeginWait((DateTime)plan.WaitForNextTargetTime);
+                    // TODO: add to status monitor
+                    ExecuteEventContainer(BeforeWaitContainer, "", progress, token);
                     WaitForNextTarget(plan.WaitForNextTargetTime, progress, token);
+                    // TODO: add to status monitor
+                    ExecuteEventContainer(AfterWaitContainer, "", progress, token);
                     StatusMonitor.EndWait();
                 }
                 else {
@@ -179,18 +240,41 @@ namespace Assistant.NINAPlugin.Sequencer {
                         previousPlanTarget = planTarget;
                     }
                     catch (Exception ex) {
+                        TSLogger.Error($"exception executing plan: {ex}");
                         if (ex is SequenceEntityFailedException) {
-                            throw ex;
+                            throw;
                         }
 
-                        TSLogger.Error($"exception executing plan: {ex}");
                         throw new SequenceEntityFailedException($"exception executing plan: {ex.Message}", ex);
                     }
                     finally {
+                        ExecuteEventContainer(AfterTargetContainer, plan.PlanTarget.PlanId, progress, token);
                         ClearTarget();
                         StatusMonitor.EndTarget();
                         TSLogger.Info("-- END PLAN EXECUTION ----------------------------------------------------------");
                     }
+                }
+            }
+        }
+
+        public void ExecuteEventContainer(InstructionContainer container, string planId, IProgress<ApplicationStatus> progress, CancellationToken token) {
+            if (container.Items?.Count > 0) {
+                //StatusMonitor.ItemStart(planId, container.Name);
+
+                try {
+                    container.ResetProgress();
+                    container.Execute(progress, token).Wait();
+                }
+                catch (Exception ex) {
+                    TSLogger.Error($"exception executing {container.Name} instruction container: {ex}");
+                    if (ex is SequenceEntityFailedException) {
+                        throw;
+                    }
+
+                    throw new SequenceEntityFailedException($"exception executing {container.Name} instruction container: {ex.Message}", ex);
+                }
+                finally {
+                    //StatusMonitor.ItemFinish(planId, container.Name);
                 }
             }
         }
@@ -432,6 +516,20 @@ namespace Assistant.NINAPlugin.Sequencer {
                 Triggers = new ObservableCollection<ISequenceTrigger>(Triggers.Select(t => t.Clone() as ISequenceTrigger)),
                 Conditions = new ObservableCollection<ISequenceCondition>(Conditions.Select(t => t.Clone() as ISequenceCondition)),
             };
+
+            clone.BeforeWaitContainer = (InstructionContainer)BeforeWaitContainer.Clone();
+            clone.AfterWaitContainer = (InstructionContainer)AfterWaitContainer.Clone();
+            clone.BeforeTargetContainer = (InstructionContainer)BeforeTargetContainer.Clone();
+            clone.AfterTargetContainer = (InstructionContainer)AfterTargetContainer.Clone();
+            clone.WhenSafeContainer = (InstructionContainer)WhenSafeContainer.Clone();
+            clone.WhenUnsafeContainer = (InstructionContainer)WhenUnsafeContainer.Clone();
+
+            clone.BeforeWaitContainer.AttachNewParent(clone);
+            clone.AfterWaitContainer.AttachNewParent(clone);
+            clone.BeforeTargetContainer.AttachNewParent(clone);
+            clone.AfterTargetContainer.AttachNewParent(clone);
+            clone.WhenSafeContainer.AttachNewParent(clone);
+            clone.WhenUnsafeContainer.AttachNewParent(clone);
 
             foreach (var item in clone.Items) {
                 item.AttachNewParent(clone);
