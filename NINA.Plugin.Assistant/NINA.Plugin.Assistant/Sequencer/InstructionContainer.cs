@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
+using NINA.Core.Enum;
 using NINA.Core.Model;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
@@ -33,7 +34,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
             TSLogger.Info($"begin executing '{Name}' event instructions");
             Task t = base.Execute(progress, token);
-            TSLogger.Info($"done executing '{Name}' event instructions");
+            TSLogger.Info($"done executing '{Name}' event instructions, resetting progress for next execution");
+            base.ResetAll();
             return t;
         }
 

@@ -297,70 +297,157 @@
                                     AutoGenerateColumns="False"
                                     BorderThickness="1"
                                     CanUserAddRows="false"
-                                    HeadersVisibility="None"
                                     HorizontalScrollBarVisibility="Disabled"
-                                    ItemsSource="{Binding StatusItemList}"
+                                    ItemsSource="{Binding ProgressItemsView}"
                                     ScrollViewer.CanContentScroll="False"
                                     VerticalScrollBarVisibility="Auto">
+
+                                    <DataGrid.GroupStyle>
+                                        <GroupStyle>
+                                            <GroupStyle.ContainerStyle>
+                                                <Style TargetType="{x:Type GroupItem}">
+                                                    <Setter Property="Margin" Value="0,0,0,2" />
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                                <Expander
+                                                                    BorderBrush="{StaticResource BorderBrush}"
+                                                                    BorderThickness="2"
+                                                                    IsExpanded="True">
+                                                                    <Expander.Header>
+                                                                        <DockPanel>
+                                                                            <TextBlock
+                                                                                Margin="3,0,0,2"
+                                                                                HorizontalAlignment="Left"
+                                                                                Foreground="{StaticResource ButtonForegroundBrush}"
+                                                                                Text="{Binding Path=Name}" />
+                                                                        </DockPanel>
+                                                                    </Expander.Header>
+                                                                    <Expander.Content>
+                                                                        <ItemsPresenter />
+                                                                    </Expander.Content>
+                                                                </Expander>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </GroupStyle.ContainerStyle>
+                                        </GroupStyle>
+                                    </DataGrid.GroupStyle>
+
+                                    <DataGrid.ColumnHeaderStyle>
+                                        <Style TargetType="{x:Type DataGridColumnHeader}">
+                                            <Setter Property="HorizontalAlignment" Value="Left" />
+                                            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+                                            <Setter Property="BorderThickness" Value="0" />
+                                            <Setter Property="FontWeight" Value="Bold" />
+                                            <Setter Property="MinHeight" Value="25" />
+                                            <Setter Property="Margin" Value="5,3,5,3" />
+                                            <Setter Property="FontWeight" Value="Bold" />
+                                            <Setter Property="FontSize" Value="12" />
+                                        </Style>
+                                    </DataGrid.ColumnHeaderStyle>
 
                                     <DataGrid.CellStyle>
                                         <Style TargetType="DataGridCell">
                                             <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
                                             <Setter Property="BorderThickness" Value="0" />
-                                            <Setter Property="MinHeight" Value="22" />
-                                            <Setter Property="Margin" Value="5,3,5,3" />
-                                            <Style.Triggers>
-                                                <Trigger Property="IsSelected" Value="True">
-                                                    <Setter Property="Background" Value="{StaticResource ButtonBackgroundBrush}" />
-                                                </Trigger>
-                                                <Trigger Property="IsSelected" Value="False">
-                                                    <Setter Property="Background" Value="Transparent" />
-                                                </Trigger>
-                                            </Style.Triggers>
+                                            <Setter Property="MinHeight" Value="20" />
+                                            <Setter Property="Margin" Value="5,1,5,1" />
                                         </Style>
                                     </DataGrid.CellStyle>
 
                                     <DataGrid.RowStyle>
                                         <Style TargetType="DataGridRow">
-                                            <Setter Property="MinHeight" Value="22" />
+                                            <Setter Property="MinHeight" Value="20" />
                                             <Setter Property="Background" Value="Transparent" />
                                             <Setter Property="VerticalAlignment" Value="Center" />
-                                            <Style.Triggers>
-                                                <Trigger Property="IsSelected" Value="True">
-                                                    <Setter Property="Background" Value="{StaticResource SecondaryBackgroundBrush}" />
-                                                </Trigger>
-                                                <Trigger Property="IsSelected" Value="False">
-                                                    <Setter Property="Background" Value="Transparent" />
-                                                </Trigger>
-                                            </Style.Triggers>
+                                            <Setter Property="IsHitTestVisible" Value="False" />
                                         </Style>
                                     </DataGrid.RowStyle>
 
                                     <DataGrid.Columns>
 
-                                        <DataGridTemplateColumn
-                                            Width="*"
-                                            CanUserReorder="False"
-                                            CanUserSort="False"
-                                            IsReadOnly="True">
+                                        <DataGridTemplateColumn Width="180">
+                                            <DataGridTemplateColumn.Header>
+                                                <TextBlock Text="Item" />
+                                            </DataGridTemplateColumn.Header>
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <Expander
-                                                        ExpandDirection="Down"
-                                                        Header="{Binding Name}"
-                                                        IsExpanded="False">
-                                                        <TextBlock
-                                                            Margin="3,3,3,3"
-                                                            FontFamily="Courier New"
-                                                            Text="{Binding History}"
-                                                            TextWrapping="Wrap" />
-                                                    </Expander>
+                                                    <TextBlock Width="Auto" Text="{Binding ItemName}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="100">
+                                            <DataGridTemplateColumn.Header>
+                                                <TextBlock Text="Filter" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Width="Auto" Text="{Binding FilterName}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="140">
+                                            <DataGridTemplateColumn.Header>
+                                                <TextBlock Text="Start" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Width="Auto" Text="{Binding StartTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="140">
+                                            <DataGridTemplateColumn.Header>
+                                                <TextBlock Text="End" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock
+                                                        Width="Auto"
+                                                        Text="{Binding EndTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
+                                                        Visibility="{Binding IsComplete, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <DataGridTemplateColumn Width="50">
+                                            <DataGridTemplateColumn.Header>
+                                                <TextBlock Text="" />
+                                            </DataGridTemplateColumn.Header>
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <ninactrl:LoadingControl
+                                                            Height="15"
+                                                            Margin="0,0,0,0"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            LoadingImageBrush="{StaticResource ButtonForegroundBrush}"
+                                                            Visibility="{Binding IsComplete, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+                                                        <Path
+                                                            Width="15"
+                                                            Height="15"
+                                                            Margin="0,0,0,0"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Data="{Binding Complete}"
+                                                            Fill="{StaticResource ButtonForegroundBrush}"
+                                                            Stretch="Uniform"
+                                                            Visibility="{Binding IsComplete, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+                                                    </StackPanel>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
 
                                     </DataGrid.Columns>
+
                                 </DataGrid>
+
                             </StackPanel>
 
                         </ninactrl:DetachingExpander>

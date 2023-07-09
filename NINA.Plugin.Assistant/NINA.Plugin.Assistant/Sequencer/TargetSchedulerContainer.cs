@@ -144,13 +144,13 @@ namespace Assistant.NINAPlugin.Sequencer {
         public override void Initialize() {
             TSLogger.Debug("Scheduler instruction: Initialize");
 
-            if (StatusMonitor != null) {
-                StatusMonitor.Reset();
-                StatusMonitor.PropertyChanged -= StatusMonitor_PropertyChanged;
+            if (SchedulerProgress != null) {
+                SchedulerProgress.Reset();
+                SchedulerProgress.PropertyChanged -= SchedulerProgress_PropertyChanged;
             }
 
-            StatusMonitor = new SchedulerStatusMonitor();
-            StatusMonitor.PropertyChanged += StatusMonitor_PropertyChanged;
+            SchedulerProgress = new SchedulerProgressVM();
+            SchedulerProgress.PropertyChanged += SchedulerProgress_PropertyChanged;
         }
 
         public override void AfterParentChanged() {
@@ -187,11 +187,12 @@ namespace Assistant.NINAPlugin.Sequencer {
             WhenSafeContainer.ResetProgress();
             WhenUnsafeContainer.ResetProgress();
 
-            if (StatusMonitor != null) {
-                StatusMonitor.Reset();
+            if (SchedulerProgress != null) {
+                SchedulerProgress.Reset();
             }
 
-            Target = GetEmptyTarget();
+            ClearTarget();
+
             base.ResetProgress();
         }
 
@@ -218,13 +219,17 @@ namespace Assistant.NINAPlugin.Sequencer {
                 if (plan.WaitForNextTargetTime != null) {
                     TSLogger.Info("planner waiting for next target to become available");
 
-                    StatusMonitor.BeginWait((DateTime)plan.WaitForNextTargetTime);
-                    // TODO: add to status monitor
+                    SchedulerProgress.WaitStart();
                     ExecuteEventContainer(BeforeWaitContainer, "", progress, token);
+                    SchedulerProgress.Add("Wait");
+
                     WaitForNextTarget(plan.WaitForNextTargetTime, progress, token);
-                    // TODO: add to status monitor
+
                     ExecuteEventContainer(AfterWaitContainer, "", progress, token);
-                    StatusMonitor.EndWait();
+                    SchedulerProgress.End();
+
+                    //RaisePropertyChanged(nameof(SchedulerProgress));
+                    //RaisePropertyChanged(nameof(ProgressItemsView));
                 }
                 else {
                     try {
@@ -232,10 +237,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                         TSLogger.Info("--BEGIN PLAN EXECUTION--------------------------------------------------------");
                         TSLogger.Info($"plan target: {planTarget.Name}");
                         SetTarget(atTime, planTarget);
-                        StatusMonitor.BeginTarget(planTarget);
+                        SchedulerProgress.TargetStart(planTarget.Project.Name, planTarget.Name);
 
                         // Create a container for this target, add the instructions, and execute
-                        PlanTargetContainer targetContainer = GetPlanTargetContainer(previousPlanTarget, plan, StatusMonitor);
+                        PlanTargetContainer targetContainer = GetPlanTargetContainer(previousPlanTarget, plan, SchedulerProgress);
                         targetContainer.Execute(progress, token).Wait();
                         previousPlanTarget = planTarget;
                     }
@@ -248,9 +253,12 @@ namespace Assistant.NINAPlugin.Sequencer {
                         throw new SequenceEntityFailedException($"exception executing plan: {ex.Message}", ex);
                     }
                     finally {
-                        ExecuteEventContainer(AfterTargetContainer, plan.PlanTarget.PlanId, progress, token);
+                        if (!token.IsCancellationRequested) {
+                            ExecuteEventContainer(AfterTargetContainer, plan.PlanTarget.PlanId, progress, token);
+                        }
+
                         ClearTarget();
-                        StatusMonitor.EndTarget();
+                        SchedulerProgress.End();
                         TSLogger.Info("-- END PLAN EXECUTION ----------------------------------------------------------");
                     }
                 }
@@ -259,22 +267,20 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public void ExecuteEventContainer(InstructionContainer container, string planId, IProgress<ApplicationStatus> progress, CancellationToken token) {
             if (container.Items?.Count > 0) {
-                //StatusMonitor.ItemStart(planId, container.Name);
+                SchedulerProgress.Add(container.Name);
 
                 try {
-                    container.ResetProgress();
                     container.Execute(progress, token).Wait();
                 }
                 catch (Exception ex) {
+                    SchedulerProgress.End();
                     TSLogger.Error($"exception executing {container.Name} instruction container: {ex}");
+
                     if (ex is SequenceEntityFailedException) {
                         throw;
                     }
 
                     throw new SequenceEntityFailedException($"exception executing {container.Name} instruction container: {ex.Message}", ex);
-                }
-                finally {
-                    //StatusMonitor.ItemFinish(planId, container.Name);
                 }
             }
         }
@@ -309,29 +315,32 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        private PlanTargetContainer GetPlanTargetContainer(IPlanTarget previousPlanTarget, SchedulerPlan plan, SchedulerStatusMonitor monitor) {
+        private PlanTargetContainer GetPlanTargetContainer(IPlanTarget previousPlanTarget, SchedulerPlan plan, SchedulerProgressVM schedulerProgress) {
             PlanTargetContainer targetContainer = new PlanTargetContainer(this, profileService, dateTimeProviders, telescopeMediator,
             rotatorMediator, guiderMediator, cameraMediator, imagingMediator, imageSaveMediator,
             imageHistoryVM, filterWheelMediator, domeMediator, domeFollower,
-                plateSolverFactory, windowServiceFactory, previousPlanTarget, plan, monitor);
+                plateSolverFactory, windowServiceFactory, previousPlanTarget, plan, schedulerProgress);
             return targetContainer;
         }
 
-        private SchedulerStatusMonitor statusMonitor;
-        public SchedulerStatusMonitor StatusMonitor {
-            get => statusMonitor;
+        private SchedulerProgressVM schedulerProgress;
+        public SchedulerProgressVM SchedulerProgress {
+            get => schedulerProgress;
             set {
-                statusMonitor = value;
-                RaisePropertyChanged(nameof(StatusMonitor));
+                schedulerProgress = value;
+                RaisePropertyChanged(nameof(SchedulerProgress));
+                RaisePropertyChanged(nameof(ProgressItemsView));
             }
         }
 
-        public AsyncObservableCollection<IStatusItem> StatusItemList {
-            get => StatusMonitor?.StatusItemList;
+        public ICollectionView ProgressItemsView {
+            get => SchedulerProgress?.ItemsView;
         }
 
         public override bool Validate() {
             var issues = new List<string>();
+
+            // TODO: these can go away
 
             if (Conditions.Count > 0) {
                 issues.Add("Loop conditions added to the Target Scheduler Container will be ignored");
@@ -408,9 +417,9 @@ namespace Assistant.NINAPlugin.Sequencer {
             return inputTarget;
         }
 
-        private void StatusMonitor_PropertyChanged(object sender, PropertyChangedEventArgs e) {
-            RaisePropertyChanged(nameof(StatusMonitor));
-            RaisePropertyChanged(nameof(StatusItemList));
+        private void SchedulerProgress_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+            RaisePropertyChanged(nameof(SchedulerProgress));
+            RaisePropertyChanged(nameof(ProgressItemsView));
         }
 
         public NighttimeData NighttimeData { get; private set; }

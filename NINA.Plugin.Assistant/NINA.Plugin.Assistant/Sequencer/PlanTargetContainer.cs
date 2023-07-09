@@ -54,7 +54,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IPlanTarget previousPlanTarget;
         private readonly SchedulerPlan plan;
         private readonly IProfile activeProfile;
-        private SchedulerStatusMonitor monitor;
+        private SchedulerProgressVM schedulerProgress;
 
         private IImageSaveWatcher ImageSaveWatcher;
 
@@ -76,7 +76,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 IWindowServiceFactory windowServiceFactory,
                 IPlanTarget previousPlanTarget,
                 SchedulerPlan plan,
-                SchedulerStatusMonitor monitor) : base(new PlanTargetContainerStrategy()) {
+                SchedulerProgressVM schedulerProgress) : base(new PlanTargetContainerStrategy()) {
             Name = nameof(PlanTargetContainer);
             Description = "";
             Category = "Assistant";
@@ -97,13 +97,13 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.plateSolverFactory = plateSolverFactory;
             this.windowServiceFactory = windowServiceFactory;
 
-            this.monitor = monitor;
+            this.schedulerProgress = schedulerProgress;
             this.previousPlanTarget = previousPlanTarget;
             this.plan = plan;
             this.activeProfile = profileService.ActiveProfile;
 
             PlanTargetContainerStrategy containerStrategy = Strategy as PlanTargetContainerStrategy;
-            containerStrategy.SetContext(parentContainer, plan, monitor);
+            containerStrategy.SetContext(parentContainer, plan, schedulerProgress);
             AttachNewParent(parentContainer);
 
             if (!plan.IsEmulator)
@@ -259,6 +259,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private void AddBeforeTargetInstructions() {
             if (parentContainer.BeforeTargetContainer.Items?.Count > 0) {
+                parentContainer.BeforeTargetContainer.ResetAll();
                 Add(parentContainer.BeforeTargetContainer);
             }
         }

@@ -6,6 +6,7 @@ using System.Text;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
+    [Obsolete]
     public class SchedulerStatusMonitor : BaseINPC {
 
         public SchedulerStatusMonitor() {
