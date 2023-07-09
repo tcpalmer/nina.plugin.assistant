@@ -456,6 +456,45 @@
 
                             <ninactrl:DetachingExpander>
                                 <ninactrl:DetachingExpander.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path
+                                            Width="15"
+                                            Height="15"
+                                            Margin="0,0,3,0"
+                                            Data="{StaticResource ThunderSVG}"
+                                            Fill="{StaticResource PrimaryBrush}"
+                                            Stretch="Uniform" />
+                                        <TextBlock VerticalAlignment="Center" Text="{ns:Loc LblTriggers}" />
+                                    </StackPanel>
+                                </ninactrl:DetachingExpander.Header>
+                                <StackPanel Orientation="Vertical">
+                                    <Border
+                                        MinHeight="50"
+                                        Margin="0,10,0,0"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1">
+                                        <Grid Background="{StaticResource BackgroundBrush}">
+                                            <ItemsControl MinHeight="50" ItemsSource="{Binding Triggers}" />
+                                            <TextBlock
+                                                Height="18"
+                                                MaxHeight="18"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Top"
+                                                FontStyle="Italic"
+                                                Opacity="0.4"
+                                                Text="Drop triggers here"
+                                                Visibility="{Binding Items.Count, Converter={StaticResource InverseZeroToVisibilityConverter}}" />
+                                            <i:Interaction.Behaviors>
+                                                <behaviors:DragOverBehavior DragAboveSize="0" DragBelowSize="0" />
+                                                <behaviors:DropIntoBehavior AllowedDragDropTypesString="NINA.Sequencer.Trigger.ISequenceTrigger" OnDropCommand="DropIntoTriggersCommand" />
+                                            </i:Interaction.Behaviors>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                            </ninactrl:DetachingExpander>
+
+                            <ninactrl:DetachingExpander>
+                                <ninactrl:DetachingExpander.Header>
                                     <TextBlock Text="Before Wait Instructions" />
                                 </ninactrl:DetachingExpander.Header>
                                 <StackPanel Orientation="Vertical">

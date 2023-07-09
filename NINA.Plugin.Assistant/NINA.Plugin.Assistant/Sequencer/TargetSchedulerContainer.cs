@@ -227,9 +227,6 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                     ExecuteEventContainer(AfterWaitContainer, "", progress, token);
                     SchedulerProgress.End();
-
-                    //RaisePropertyChanged(nameof(SchedulerProgress));
-                    //RaisePropertyChanged(nameof(ProgressItemsView));
                 }
                 else {
                     try {

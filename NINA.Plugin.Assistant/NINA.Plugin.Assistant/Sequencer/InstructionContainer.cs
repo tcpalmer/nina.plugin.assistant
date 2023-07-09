@@ -1,6 +1,5 @@
 ﻿using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
-using NINA.Core.Enum;
 using NINA.Core.Model;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
