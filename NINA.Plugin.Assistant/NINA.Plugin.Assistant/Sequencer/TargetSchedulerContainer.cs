@@ -6,6 +6,7 @@ using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
 using NINA.Astrometry;
 using NINA.Astrometry.Interfaces;
+using NINA.Core.Enum;
 using NINA.Core.Model;
 using NINA.Core.Utility;
 using NINA.Core.Utility.WindowService;
@@ -156,8 +157,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         public override void AfterParentChanged() {
             base.AfterParentChanged();
 
-            /* TODO - implement.  Following was copied from TestContainer ...
-
             if (Parent == null) {
                 SequenceBlockTeardown();
             }
@@ -166,7 +165,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                 AfterWaitContainer.AttachNewParent(Parent);
                 BeforeTargetContainer.AttachNewParent(Parent);
                 AfterTargetContainer.AttachNewParent(Parent);
-                SchedulerCompleteContainer.AttachNewParent(Parent);
                 WhenSafeContainer.AttachNewParent(Parent);
                 WhenUnsafeContainer.AttachNewParent(Parent);
 
@@ -174,7 +172,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                     SequenceBlockInitialize();
                 }
             }
-             */
         }
 
         public override void ResetProgress() {
@@ -242,7 +239,13 @@ namespace Assistant.NINAPlugin.Sequencer {
                         previousPlanTarget = planTarget;
                     }
                     catch (Exception ex) {
-                        TSLogger.Error($"exception executing plan: {ex}");
+                        if (ex.InnerException?.Message == "A task was canceled.") {
+                            TSLogger.Warning("sequence was canceled");
+                        }
+                        else {
+                            TSLogger.Error($"exception executing plan: {ex}");
+                        }
+
                         if (ex is SequenceEntityFailedException) {
                             throw;
                         }
@@ -337,14 +340,12 @@ namespace Assistant.NINAPlugin.Sequencer {
         public override bool Validate() {
             var issues = new List<string>();
 
-            // TODO: these can go away
-
             if (Conditions.Count > 0) {
-                issues.Add("Loop conditions added to the Target Scheduler Container will be ignored");
+                TSLogger.Error("Huh?  Somehow a condition was added to TSC ... ?  Will be ignored but ...");
             }
 
             if (Items.Count > 0) {
-                issues.Add("Instructions added to the Target Scheduler Container will be ignored");
+                TSLogger.Error("Huh?  Somehow an instruction was added to TSC ... ?  Will be ignored but ...");
             }
 
             Issues = issues;
