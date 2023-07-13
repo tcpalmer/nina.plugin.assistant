@@ -4,6 +4,7 @@ using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
 using NINA.Core.Model;
+using NINA.Core.Utility.Notification;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Conditions;
 using NINA.Sequencer.SequenceItem;
@@ -56,7 +57,19 @@ namespace Assistant.NINAPlugin.Sequencer {
             };
         }
 
+        public static readonly bool DISABLE = false;
+        public static bool WARNED = false;
+
         public override bool Check(ISequenceItem previousItem, ISequenceItem nextItem) {
+            if (DISABLE) {
+                if (!WARNED) {
+                    Notification.ShowInformation("REMINDER: TS Condition disabled, always true");
+                    WARNED = true;
+                }
+
+                return true;
+            }
+
             return SelectedMode == TARGETS_REMAIN ? HasRemainingTargets() : HasActiveProjects();
         }
 

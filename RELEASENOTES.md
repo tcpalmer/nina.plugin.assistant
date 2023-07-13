@@ -1,6 +1,10 @@
 # Release Notes
 
-## 3.0.0.0 - 2023-06-XX
+## 3.1.0.0 - 2023-07-XX
+MORE HERE: Added support for inserting arbitrary instructions to run at various points during scheduler operation.
+
+
+## 3.0.0.0 - 2023-07-XX
 Ported to NINA 3.
 
 ### Target Rotation Angles

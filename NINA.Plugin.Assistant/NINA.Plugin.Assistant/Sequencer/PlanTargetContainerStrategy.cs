@@ -2,7 +2,6 @@
 using Assistant.NINAPlugin.Util;
 using NINA.Core.Enum;
 using NINA.Core.Model;
-using NINA.Core.Utility;
 using NINA.Sequencer.Conditions;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.Container.ExecutionStrategy;
@@ -30,16 +29,14 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private ISequenceContainer parentContainer;
-        private SchedulerPlan schedulerPlan;
-        private SchedulerStatusMonitor monitor;
-        private Queue<InstructionMonitor> instructionMonitorQueue;
+        private SchedulerProgressVM schedulerProgress;
+        private Queue<InstructionMonitor> instructionProgressQueue;
 
-        public void SetContext(TargetSchedulerContainer parentContainer, SchedulerPlan schedulerPlan, SchedulerStatusMonitor monitor) {
+        public void SetContext(TargetSchedulerContainer parentContainer, SchedulerPlan schedulerPlan, SchedulerProgressVM schedulerProgress) {
             this.parentContainer = parentContainer;
-            this.schedulerPlan = schedulerPlan;
-            this.monitor = monitor;
+            this.schedulerProgress = schedulerProgress;
 
-            instructionMonitorQueue = new Queue<InstructionMonitor>();
+            instructionProgressQueue = new Queue<InstructionMonitor>();
             foreach (IPlanInstruction instruction in schedulerPlan.PlanInstructions) {
 
                 if (instruction is PlanMessage) {
@@ -47,32 +44,38 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 if (instruction is PlanSlew) {
-                    instructionMonitorQueue.Enqueue(new InstructionMonitor(schedulerPlan.PlanTarget.PlanId, "Slew"));
+                    instructionProgressQueue.Enqueue(new InstructionMonitor("Slew"));
                     continue;
                 }
 
                 if (instruction is PlanSwitchFilter) {
-                    instructionMonitorQueue.Enqueue(new InstructionMonitor(instruction.planExposure.PlanId, "SwitchFilter"));
+
+                    instructionProgressQueue.Enqueue(new InstructionMonitor("SwitchFilter", instruction.planExposure.FilterName));
                     continue;
                 }
 
                 if (instruction is PlanSetReadoutMode) {
-                    instructionMonitorQueue.Enqueue(new InstructionMonitor(instruction.planExposure.PlanId, "SetReadoutMode"));
+                    instructionProgressQueue.Enqueue(new InstructionMonitor("SetReadoutMode"));
                     continue;
                 }
 
                 if (instruction is Plan.PlanTakeExposure) {
-                    instructionMonitorQueue.Enqueue(new InstructionMonitor(instruction.planExposure.PlanId, "TakeExposure"));
+                    instructionProgressQueue.Enqueue(new InstructionMonitor("TakeExposure", instruction.planExposure.FilterName));
                     continue;
                 }
 
                 if (instruction is PlanDither) {
-                    instructionMonitorQueue.Enqueue(new InstructionMonitor(schedulerPlan.PlanTarget.PlanId, "Dither"));
+                    instructionProgressQueue.Enqueue(new InstructionMonitor("Dither"));
                     continue;
                 }
 
                 if (instruction is PlanWait) {
-                    instructionMonitorQueue.Enqueue(new InstructionMonitor(schedulerPlan.PlanTarget.PlanId, "Wait"));
+                    instructionProgressQueue.Enqueue(new InstructionMonitor("Wait"));
+                    continue;
+                }
+
+                if (instruction is PlanBeforeTargetContainer) {
+                    instructionProgressQueue.Enqueue(new InstructionMonitor("BeforeTarget"));
                     continue;
                 }
 
@@ -101,10 +104,9 @@ namespace Assistant.NINAPlugin.Sequencer {
                         token.ThrowIfCancellationRequested();
                         await RunTriggers(context, previous, next, progress, token);
 
-                        InstructionMonitor instructionMonitor = instructionMonitorQueue.Dequeue();
-                        monitor.ItemStart(instructionMonitor.Id, instructionMonitor.Name);
+                        InstructionMonitor instructionProgressItem = instructionProgressQueue.Dequeue();
+                        schedulerProgress.Add(instructionProgressItem.Name, instructionProgressItem.Filter);
                         await next.Run(progress, token);
-                        monitor.ItemFinish(instructionMonitor.Id, instructionMonitor.Name);
 
                         previous = next;
 
@@ -319,12 +321,12 @@ namespace Assistant.NINAPlugin.Sequencer {
 
     class InstructionMonitor {
 
-        public string Id { get; private set; }
         public string Name { get; private set; }
+        public string Filter { get; private set; }
 
-        public InstructionMonitor(string id, string name) {
-            Id = id;
+        public InstructionMonitor(string name, string filter = "") {
             Name = name;
+            Filter = filter;
         }
     }
 }

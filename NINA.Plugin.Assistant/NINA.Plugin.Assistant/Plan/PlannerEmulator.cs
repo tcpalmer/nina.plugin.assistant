@@ -33,7 +33,9 @@ namespace Assistant.NINAPlugin.Plan {
                 case 1: plan = WaitForTime(DateTime.Now.AddSeconds(10)); break;
                 case 2: plan = Plan1(); break;
                 case 3: plan = Plan2(); break;
-                default: return null;
+                default:
+                    CallNumber = 0;
+                    return null;
             }
 
             plan.IsEmulator = true;
@@ -70,6 +72,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             instructions.Add(new PlanMessage("planner emulator: Plan1"));
+            instructions.Add(new PlanBeforeTargetContainer());
             instructions.Add(new PlanSetReadoutMode(lum));
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
@@ -102,13 +105,13 @@ namespace Assistant.NINAPlugin.Plan {
             TimeInterval timeInterval = new TimeInterval(atTime, endTime);
 
             IPlanProject planProject = new PlanProjectEmulator();
-            planProject.Name = "P01";
+            planProject.Name = "M31 Andromeda";
             planProject.UseCustomHorizon = false;
             planProject.MinimumAltitude = 10;
             planProject.DitherEvery = 0;
             planProject.EnableGrader = false;
 
-            IPlanTarget planTarget = GetBasePlanTarget("T02", planProject, Cp1525);
+            IPlanTarget planTarget = GetBasePlanTarget("M31 Andromeda Panel 1", planProject, Cp1525);
             planTarget.EndTime = endTime;
 
             IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3, 101);
@@ -123,6 +126,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             instructions.Add(new PlanMessage("planner emulator: Plan2"));
+            instructions.Add(new PlanBeforeTargetContainer());
             instructions.Add(new PlanSetReadoutMode(lum));
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));

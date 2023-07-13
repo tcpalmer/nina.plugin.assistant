@@ -416,6 +416,8 @@ namespace Assistant.NINAPlugin.Plan {
                 instructions.Add(new PlanSlew(true));
             }
 
+            instructions.Add(new PlanBeforeTargetContainer());
+
             NighttimeCircumstances nighttimeCircumstances = NighttimeCircumstances.AdjustNighttimeCircumstances(observerInfo, atTime);
             instructions.AddRange(new ExposurePlanner(profilePreferences, planTarget, targetWindow, nighttimeCircumstances).Plan());
             return instructions;

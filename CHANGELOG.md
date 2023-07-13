@@ -1,6 +1,9 @@
 # Target Scheduler
 
-## 3.0.0.0 - 2023-06-XX
+## 3.1.0.0 - 2023-07-XX
+* Added support for inserting arbitrary instructions to run at various points during scheduler operation.
+
+## 3.0.0.0 - 2023-07-XX
 * Ported to NINA 3
 * Target rotation values will be auto-converted to NINA 3 counter-clockwise notation
 
