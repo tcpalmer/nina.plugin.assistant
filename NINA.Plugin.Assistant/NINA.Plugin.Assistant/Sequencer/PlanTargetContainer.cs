@@ -48,6 +48,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IFilterWheelMediator filterWheelMediator;
         private readonly IDomeMediator domeMediator;
         private readonly IDomeFollower domeFollower;
+        private readonly ISafetyMonitorMediator safetyMonitor;
         private readonly IPlateSolverFactory plateSolverFactory;
         private readonly IWindowServiceFactory windowServiceFactory;
 
@@ -72,6 +73,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 IFilterWheelMediator filterWheelMediator,
                 IDomeMediator domeMediator,
                 IDomeFollower domeFollower,
+                ISafetyMonitorMediator safetyMonitor,
                 IPlateSolverFactory plateSolverFactory,
                 IWindowServiceFactory windowServiceFactory,
                 IPlanTarget previousPlanTarget,
@@ -94,6 +96,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.filterWheelMediator = filterWheelMediator;
             this.domeMediator = domeMediator;
             this.domeFollower = domeFollower;
+            this.safetyMonitor = safetyMonitor;
             this.plateSolverFactory = plateSolverFactory;
             this.windowServiceFactory = windowServiceFactory;
 

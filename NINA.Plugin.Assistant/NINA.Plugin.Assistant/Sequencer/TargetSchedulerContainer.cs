@@ -57,6 +57,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IFilterWheelMediator filterWheelMediator;
         private readonly IDomeMediator domeMediator;
         private readonly IDomeFollower domeFollower;
+        private readonly ISafetyMonitorMediator safetyMonitor;
         private readonly IPlateSolverFactory plateSolverFactory;
         private readonly INighttimeCalculator nighttimeCalculator;
         private readonly IWindowServiceFactory windowServiceFactory;
@@ -100,6 +101,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 IFilterWheelMediator filterWheelMediator,
                 IDomeMediator domeMediator,
                 IDomeFollower domeFollower,
+                ISafetyMonitorMediator safetyMonitor,
                 IPlateSolverFactory plateSolverFactory,
                 INighttimeCalculator nighttimeCalculator,
                 IWindowServiceFactory windowServiceFactory,
@@ -118,6 +120,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.filterWheelMediator = filterWheelMediator;
             this.domeMediator = domeMediator;
             this.domeFollower = domeFollower;
+            this.safetyMonitor = safetyMonitor;
             this.plateSolverFactory = plateSolverFactory;
             this.nighttimeCalculator = nighttimeCalculator;
             this.windowServiceFactory = windowServiceFactory;
@@ -215,6 +218,8 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 if (plan.WaitForNextTargetTime != null) {
                     TSLogger.Info("planner waiting for next target to become available");
+                    SafetyWatchDog watchdog = new SafetyWatchDog(Parent, schedulerProgress, true, null, safetyMonitor, progress, token);
+                    watchdog.Start();
 
                     SchedulerProgress.WaitStart();
                     ExecuteEventContainer(BeforeWaitContainer, "", progress, token);
@@ -223,6 +228,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     WaitForNextTarget(plan.WaitForNextTargetTime, progress, token);
 
                     ExecuteEventContainer(AfterWaitContainer, "", progress, token);
+                    watchdog.Cancel();
                     SchedulerProgress.End();
                 }
                 else {
@@ -318,7 +324,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private PlanTargetContainer GetPlanTargetContainer(IPlanTarget previousPlanTarget, SchedulerPlan plan, SchedulerProgressVM schedulerProgress) {
             PlanTargetContainer targetContainer = new PlanTargetContainer(this, profileService, dateTimeProviders, telescopeMediator,
             rotatorMediator, guiderMediator, cameraMediator, imagingMediator, imageSaveMediator,
-            imageHistoryVM, filterWheelMediator, domeMediator, domeFollower,
+            imageHistoryVM, filterWheelMediator, domeMediator, domeFollower, safetyMonitor,
                 plateSolverFactory, windowServiceFactory, previousPlanTarget, plan, schedulerProgress);
             return targetContainer;
         }
@@ -486,6 +492,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 cloneMe.filterWheelMediator,
                 cloneMe.domeMediator,
                 cloneMe.domeFollower,
+                cloneMe.safetyMonitor,
                 cloneMe.plateSolverFactory,
                 cloneMe.nighttimeCalculator,
                 cloneMe.windowServiceFactory,
@@ -509,6 +516,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 filterWheelMediator,
                 domeMediator,
                 domeFollower,
+                safetyMonitor,
                 plateSolverFactory,
                 nighttimeCalculator,
                 windowServiceFactory,

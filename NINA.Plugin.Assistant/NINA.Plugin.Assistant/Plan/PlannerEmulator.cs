@@ -30,7 +30,7 @@ namespace Assistant.NINAPlugin.Plan {
             SchedulerPlan plan;
 
             switch (CallNumber) {
-                case 1: plan = WaitForTime(DateTime.Now.AddSeconds(10)); break;
+                case 1: plan = WaitForTime(DateTime.Now.AddSeconds(80)); break;
                 case 2: plan = Plan1(); break;
                 case 3: plan = Plan2(); break;
                 default:
