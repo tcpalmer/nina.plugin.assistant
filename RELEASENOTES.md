@@ -1,8 +1,22 @@
 # Release Notes
 
-## 3.1.0.0 - 2023-07-XX
-MORE HERE: Added support for inserting arbitrary instructions to run at various points during scheduler operation.
+## 3.1.0.0 - 2023-07-13
 
+### Custom Event Instructions
+
+You can now drop arbitrary instructions into four separate containers that will be executed at specific times in the scheduler lifecycle:
+- Before each Wait
+- After each Wait
+- Before each Target
+- After each Target
+
+For example, you could park your mount and/or close a flip-flat before a wait and then reverse after.
+
+As part of this update, the default Conditions and Instructions drop areas in the Target Scheduler Container instruction were removed.  They weren't used and were just confusing.
+
+### Display of Running Instructions
+
+The display of running instructions in the Target Scheduler Container instruction has been greatly improved.
 
 ## 3.0.0.0 - 2023-07-XX
 Ported to NINA 3.

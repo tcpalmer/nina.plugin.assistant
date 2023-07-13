@@ -1,9 +1,13 @@
 # Target Scheduler
 
-## 3.1.0.0 - 2023-07-XX
-* Added support for inserting arbitrary instructions to run at various points during scheduler operation.
+## 3.1.0.0 - 2023-07-13
+Limited release only.
+* Added support for inserting arbitrary instructions to run at various points during scheduler operation: before/after each wait period and before/after each target plan.
+* Removed Conditions and Instructions drop areas in the Target Scheduler Container (not used and just confusing).
+* Improved the display of running instructions in Target Scheduler Container
 
 ## 3.0.0.0 - 2023-07-XX
+Limited release only.
 * Ported to NINA 3
 * Target rotation values will be auto-converted to NINA 3 counter-clockwise notation
 
