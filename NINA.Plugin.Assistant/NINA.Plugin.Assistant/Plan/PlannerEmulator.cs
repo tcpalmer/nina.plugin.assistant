@@ -72,7 +72,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             instructions.Add(new PlanMessage("planner emulator: Plan1"));
-            //instructions.Add(new PlanBeforeTargetContainer());
+            instructions.Add(new PlanBeforeTargetContainer());
             instructions.Add(new PlanSetReadoutMode(lum));
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
@@ -126,7 +126,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             instructions.Add(new PlanMessage("planner emulator: Plan2"));
-            //instructions.Add(new PlanBeforeTargetContainer());
+            instructions.Add(new PlanBeforeTargetContainer());
             instructions.Add(new PlanSetReadoutMode(lum));
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));

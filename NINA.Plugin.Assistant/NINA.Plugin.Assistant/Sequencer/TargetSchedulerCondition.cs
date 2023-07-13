@@ -57,7 +57,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             };
         }
 
-        public static readonly bool DISABLE = true;
+        public static readonly bool DISABLE = false;
         public static bool WARNED = false;
 
         public override bool Check(ISequenceItem previousItem, ISequenceItem nextItem) {

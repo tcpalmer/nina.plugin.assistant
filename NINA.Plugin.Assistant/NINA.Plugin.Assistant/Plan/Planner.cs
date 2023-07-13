@@ -22,7 +22,7 @@ namespace Assistant.NINAPlugin.Plan {
         private ObserverInfo observerInfo;
         private List<IPlanProject> projects;
 
-        public static readonly bool USE_EMULATOR = true;
+        public static readonly bool USE_EMULATOR = false;
 
         public Planner(DateTime atTime, IProfileService profileService, ProfilePreference profilePreferences) : this(atTime, profileService, profilePreferences, null) { }
 

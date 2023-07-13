@@ -75,12 +75,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         [JsonProperty]
         public InstructionContainer AfterTargetContainer { get; set; }
 
-        [JsonProperty]
-        public InstructionContainer WhenSafeContainer { get; set; }
-
-        [JsonProperty]
-        public InstructionContainer WhenUnsafeContainer { get; set; }
-
         private ProfilePreference profilePreferences;
 
         public object lockObj = new object();
@@ -128,8 +122,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             AfterWaitContainer = new InstructionContainer("AfterWait", Parent);
             BeforeTargetContainer = new InstructionContainer("BeforeTarget", Parent);
             AfterTargetContainer = new InstructionContainer("AfterTarget", Parent);
-            WhenSafeContainer = new InstructionContainer("WhenSafe", Parent);
-            WhenUnsafeContainer = new InstructionContainer("WhenUnsafe", Parent);
 
             Task.Run(() => NighttimeData = nighttimeCalculator.Calculate());
             Target = new InputTarget(Angle.ByDegree(profileService.ActiveProfile.AstrometrySettings.Latitude), Angle.ByDegree(profileService.ActiveProfile.AstrometrySettings.Longitude), profileService.ActiveProfile.AstrometrySettings.Horizon);
@@ -165,8 +157,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                 AfterWaitContainer.AttachNewParent(Parent);
                 BeforeTargetContainer.AttachNewParent(Parent);
                 AfterTargetContainer.AttachNewParent(Parent);
-                WhenSafeContainer.AttachNewParent(Parent);
-                WhenUnsafeContainer.AttachNewParent(Parent);
 
                 if (Parent.Status == SequenceEntityStatus.RUNNING) {
                     SequenceBlockInitialize();
@@ -181,8 +171,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             AfterWaitContainer.ResetProgress();
             BeforeTargetContainer.ResetProgress();
             AfterTargetContainer.ResetProgress();
-            WhenSafeContainer.ResetProgress();
-            WhenUnsafeContainer.ResetProgress();
 
             if (SchedulerProgress != null) {
                 SchedulerProgress.Reset();
@@ -528,15 +516,11 @@ namespace Assistant.NINAPlugin.Sequencer {
             clone.AfterWaitContainer = (InstructionContainer)AfterWaitContainer.Clone();
             clone.BeforeTargetContainer = (InstructionContainer)BeforeTargetContainer.Clone();
             clone.AfterTargetContainer = (InstructionContainer)AfterTargetContainer.Clone();
-            clone.WhenSafeContainer = (InstructionContainer)WhenSafeContainer.Clone();
-            clone.WhenUnsafeContainer = (InstructionContainer)WhenUnsafeContainer.Clone();
 
             clone.BeforeWaitContainer.AttachNewParent(clone);
             clone.AfterWaitContainer.AttachNewParent(clone);
             clone.BeforeTargetContainer.AttachNewParent(clone);
             clone.AfterTargetContainer.AttachNewParent(clone);
-            clone.WhenSafeContainer.AttachNewParent(clone);
-            clone.WhenUnsafeContainer.AttachNewParent(clone);
 
             foreach (var item in clone.Items) {
                 item.AttachNewParent(clone);
