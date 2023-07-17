@@ -94,7 +94,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
             IPlanTarget pt2 = pp.Targets[1];
             pt2.Rejected.Should().BeTrue();
-            pt2.RejectedReason.Should().Be(Reasons.TargetAllExposurePlans);
+            pt2.RejectedReason.Should().Be(Reasons.TargetComplete);
 
             IPlanExposure pf2 = pt2.ExposurePlans[0];
             pf2.Rejected.Should().BeTrue();
@@ -134,7 +134,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             IPlanTarget pt2 = pp.Targets[1];
             pt2.ExposurePlans.Count.Should().Be(0);
             pt2.Rejected.Should().BeTrue();
-            pt2.RejectedReason.Should().Be(Reasons.TargetAllExposurePlans);
+            pt2.RejectedReason.Should().Be(Reasons.TargetComplete);
         }
 
         [Test]

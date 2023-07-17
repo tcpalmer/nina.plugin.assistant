@@ -5,6 +5,7 @@ using FluentAssertions;
 using Moq;
 using NINA.Core.Enum;
 using NINA.Core.Utility;
+using NINA.Plugin.Assistant.Test.Astrometry;
 using NINA.Profile.Interfaces;
 using NUnit.Framework;
 using System;
@@ -28,7 +29,8 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring {
             sut.RuleWeights = ruleWeights;
             sut.Rules = rules;
 
-            sut.ScoreTarget(null).Should().BeApproximately(0.375, 0.00001);
+            Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
+            sut.ScoreTarget(pt.Object).Should().BeApproximately(0.375, 0.00001);
         }
 
         [Test]
@@ -47,7 +49,8 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring {
             sut.RuleWeights = ruleWeights;
             sut.Rules = rules;
 
-            sut.ScoreTarget(null).Should().BeApproximately(1.25, 0.00001);
+            Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
+            sut.ScoreTarget(pt.Object).Should().BeApproximately(1.25, 0.00001);
         }
     }
 

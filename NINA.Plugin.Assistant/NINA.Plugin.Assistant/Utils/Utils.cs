@@ -6,6 +6,8 @@ namespace Assistant.NINAPlugin.Util {
 
     public class Utils {
 
+        public static readonly string DateFMT = "yyyy-MM-dd HH:mm:ss";
+
         public static string MtoHM(int minutes) {
             decimal hours = Math.Floor((decimal)minutes / 60);
             int min = minutes % 60;

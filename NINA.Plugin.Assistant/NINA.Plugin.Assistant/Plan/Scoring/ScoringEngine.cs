@@ -36,14 +36,17 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
                 Rules = AddAllRules(RuleWeights);
             }
 
+            planTarget.ScoringResults = new ScoringResults();
+
             double totalScore = 0;
             foreach (ScoringRule rule in Rules) {
                 double weight = RuleWeights[rule.Name] / ScoringRule.WEIGHT_SCALE;
                 double score = rule.Score(this, planTarget);
                 totalScore += weight * score;
-                TSLogger.Debug($"scoring rule {rule.Name}: raw score={score}, weight={weight * ScoringRule.WEIGHT_SCALE}, new total={totalScore}");
+                planTarget.ScoringResults.AddRuleResult(new RuleResult(rule, weight, score));
             }
 
+            planTarget.ScoringResults.TotalScore = totalScore;
             return totalScore;
         }
 

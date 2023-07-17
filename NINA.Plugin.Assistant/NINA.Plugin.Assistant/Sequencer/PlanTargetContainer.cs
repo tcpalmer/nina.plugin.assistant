@@ -128,7 +128,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 base.Execute(progress, token).Wait();
             }
             catch (Exception ex) {
-                throw ex;
+                throw;
             }
             finally {
                 ImageSaveWatcher.Stop();

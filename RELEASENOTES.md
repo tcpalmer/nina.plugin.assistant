@@ -1,5 +1,11 @@
 # Release Notes
 
+## 3.1.1.0 - 2023-07-18
+
+### Scheduler Preview Details
+
+Scheduler Preview now provides a 'View Details' button to display details about the planning and decision-making process.
+
 ## 3.1.0.0 - 2023-07-13
 
 ### Custom Event Instructions

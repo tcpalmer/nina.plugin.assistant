@@ -11,6 +11,7 @@ using NINA.Profile.Interfaces;
 using Serilog.Events;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Assistant.NINAPlugin.Plan {
 
@@ -75,7 +76,7 @@ namespace Assistant.NINAPlugin.Plan {
 
                     DateTime? waitForVisibleNow = CheckForVisibleNow(projects);
                     if (waitForVisibleNow != null) {
-                        return new SchedulerPlan((DateTime)waitForVisibleNow);
+                        return new SchedulerPlan(atTime, projects, (DateTime)waitForVisibleNow);
                     }
 
                     ScoringEngine scoringEngine = new ScoringEngine(activeProfile, atTime, previousPlanTarget);
@@ -89,7 +90,8 @@ namespace Assistant.NINAPlugin.Plan {
 
                         TimeInterval targetWindow = GetTargetTimeWindow(atTime, planTarget);
                         List<IPlanInstruction> planInstructions = PlanInstructions(planTarget, previousPlanTarget, targetWindow);
-                        return new SchedulerPlan(planTarget, targetWindow, planInstructions);
+
+                        return new SchedulerPlan(atTime, projects, planTarget, targetWindow, planInstructions);
                     }
                     else {
                         TSLogger.Debug("Scheduler Planner: no target selected");
@@ -98,7 +100,7 @@ namespace Assistant.NINAPlugin.Plan {
                 }
                 catch (Exception ex) {
                     if (ex is SequenceEntityFailedException) {
-                        throw ex;
+                        throw;
                     }
 
                     TSLogger.Error($"exception generating plan: {ex.StackTrace}");
@@ -160,6 +162,7 @@ namespace Assistant.NINAPlugin.Plan {
                 planProject.Rejected = false;
                 planProject.RejectedReason = null;
                 foreach (IPlanTarget planTarget in planProject.Targets) {
+                    planTarget.ScoringResults = null;
                     planTarget.Rejected = false;
                     planTarget.RejectedReason = null;
                     foreach (IPlanExposure planExposure in planTarget.ExposurePlans) {
@@ -471,15 +474,20 @@ namespace Assistant.NINAPlugin.Plan {
                     if (planTarget.Rejected) { continue; }
                     bool targetRejected = true;
 
+                    bool allExposurePlansComplete = true;
                     foreach (IPlanExposure planExposure in planTarget.ExposurePlans) {
                         if (!planExposure.Rejected) {
                             targetRejected = false;
                             break;
                         }
+
+                        if (planExposure.Rejected && planExposure.RejectedReason != Reasons.FilterComplete) {
+                            allExposurePlansComplete = false;
+                        }
                     }
 
                     if (targetRejected) {
-                        SetRejected(planTarget, Reasons.TargetAllExposurePlans);
+                        SetRejected(planTarget, allExposurePlansComplete ? Reasons.TargetComplete : Reasons.TargetAllExposurePlans);
                     }
 
                     if (!planTarget.Rejected) {

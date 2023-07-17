@@ -204,7 +204,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 if (plan.WaitForNextTargetTime != null) {
                     TSLogger.Info("planner waiting for next target to become available");
 
-                    SchedulerProgress.WaitStart();
+                    SchedulerProgress.WaitStart(plan.WaitForNextTargetTime);
                     ExecuteEventContainer(BeforeWaitContainer, "", progress, token);
                     SchedulerProgress.Add("Wait");
 

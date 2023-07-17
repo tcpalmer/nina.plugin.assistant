@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
 using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan.Scoring.Rules;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Model.Equipment;
@@ -13,22 +14,120 @@ namespace Assistant.NINAPlugin.Plan {
     public class SchedulerPlan {
         public string PlanId { get; private set; }
         public TimeInterval TimeInterval { get; private set; }
+        public DateTime PlanTime { get; private set; }
+        public List<IPlanProject> Projects { get; private set; }
         public IPlanTarget PlanTarget { get; private set; }
         public List<IPlanInstruction> PlanInstructions { get; private set; }
         public DateTime? WaitForNextTargetTime { get; private set; }
         public bool IsEmulator { get; set; }
+        public string DetailsLog { get; private set; }
 
-        public SchedulerPlan(IPlanTarget planTarget, TimeInterval timeInterval, List<IPlanInstruction> planInstructions) {
+        public SchedulerPlan(DateTime planTime, List<IPlanProject> projects, IPlanTarget planTarget, TimeInterval timeInterval, List<IPlanInstruction> planInstructions) {
             this.PlanId = Guid.NewGuid().ToString();
+            this.PlanTime = planTime;
+            this.Projects = projects;
             this.PlanTarget = planTarget;
             this.TimeInterval = timeInterval;
             this.PlanInstructions = planInstructions;
             this.WaitForNextTargetTime = null;
+
+            string log = LogPlanResults();
+            DetailsLog = DetailsLog + log;
+            TSLogger.Info(log);
         }
 
-        public SchedulerPlan(DateTime waitForNextTargetTime) {
+        public SchedulerPlan(DateTime planTime, List<IPlanProject> projects, DateTime waitForNextTargetTime) {
             this.PlanId = Guid.NewGuid().ToString();
+            this.PlanTime = planTime;
+            this.Projects = projects;
             this.WaitForNextTargetTime = waitForNextTargetTime;
+
+            string log = LogPlanResults();
+            DetailsLog = DetailsLog + log;
+            TSLogger.Info(log);
+        }
+
+        public string LogPlanResults() {
+            StringBuilder sb = new StringBuilder();
+            string type = WaitForNextTargetTime != null ? "WAIT" : "TARGET";
+
+            sb.AppendLine("\n" + String.Format("{0,-6}", type) + " ==========================================================================================");
+
+            if (type == "WAIT") {
+                sb.AppendLine($"Plan Start:      {DateFmt(PlanTime)}");
+                sb.AppendLine($"Wait Until:      {DateFmt(WaitForNextTargetTime)}");
+            }
+
+            if (type == "TARGET") {
+                sb.AppendLine($"Selected Target: {PlanTarget.Project.Name}/{PlanTarget.Name}");
+                sb.AppendLine($"Plan Start:      {DateFmt(PlanTime)}");
+                sb.AppendLine($"Plan Stop:       {DateFmt(PlanTime.AddSeconds(TimeInterval.Duration))}");
+                sb.AppendLine($"Hard Stop:       {DateFmt(PlanTarget.EndTime)} (target sets)");
+            }
+
+            bool haveScoringRuns = false;
+
+            if (Projects != null) {
+                sb.AppendLine(String.Format("\n{0,-40} {1,-27} {2,6}   {3,19}", "TARGETS CONSIDERED", "REJECTED FOR", "SCORE", "POTENTIAL START"));
+                foreach (IPlanProject project in Projects) {
+                    foreach (IPlanTarget target in project.Targets) {
+                        string score = "";
+                        string startTime = GetStartTime(target);
+
+                        if (target.ScoringResults != null && target.ScoringResults.Results.Count > 0) {
+                            haveScoringRuns = true;
+                            score = String.Format("{0:0.00}", target.ScoringResults.TotalScore * ScoringRule.WEIGHT_SCALE);
+                        }
+
+                        sb.AppendLine(String.Format("{0,-40} {1,-27} {2,6}   {3}", $"{project.Name}/{target.Name}", target.RejectedReason, score, startTime));
+                    }
+                }
+
+                if (haveScoringRuns) {
+                    sb.AppendLine("\nSCORING RUNS");
+                    foreach (IPlanProject project in Projects) {
+                        foreach (IPlanTarget target in project.Targets) {
+                            if (target.ScoringResults != null && target.ScoringResults.Results.Count > 0) {
+                                sb.AppendLine($"\n{project.Name}/{target.Name}");
+                                sb.AppendLine(String.Format("{0,-30} {1,-9} {2,11} {3,11}", "RULE", "RAW SCORE", "WEIGHT", "SCORE"));
+                                foreach (RuleResult result in target.ScoringResults.Results) {
+                                    sb.AppendLine(String.Format("{0,-30} {1,9:0.00} {2,10:0.00}%  {3,10:0.00}",
+                                        result.ScoringRule.Name,
+                                        result.Score * ScoringRule.WEIGHT_SCALE,
+                                        result.Weight * ScoringRule.WEIGHT_SCALE,
+                                        result.Score * result.Weight * ScoringRule.WEIGHT_SCALE));
+                                }
+
+                                sb.AppendLine("----------------------------------------------------------------");
+                                sb.AppendLine(String.Format("{0,57} {1,6:0.00}", "TOTAL SCORE", target.ScoringResults.TotalScore * ScoringRule.WEIGHT_SCALE));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        private string GetStartTime(IPlanTarget target) {
+            if (target.Rejected) {
+                switch (target.RejectedReason) {
+                    case Reasons.TargetNotYetVisible:
+                    case Reasons.TargetBeforeMeridianWindow:
+                    case Reasons.TargetLowerScore:
+                        return DateFmt(target.StartTime);
+                }
+            }
+
+            return "";
+        }
+
+        private string DateFmt(DateTime? dateTime) {
+            if (dateTime == null || dateTime == DateTime.MinValue) {
+                return "";
+            }
+
+            return ((DateTime)dateTime).ToString(Utils.DateFMT);
         }
 
         public string PlanSummary() {
@@ -227,6 +326,7 @@ namespace Assistant.NINAPlugin.Plan {
         IPlanProject Project { get; set; }
         bool Rejected { get; set; }
         string RejectedReason { get; set; }
+        ScoringResults ScoringResults { get; set; }
         DateTime StartTime { get; set; }
         DateTime EndTime { get; set; }
         DateTime CulminationTime { get; set; }
@@ -249,6 +349,7 @@ namespace Assistant.NINAPlugin.Plan {
         public IPlanProject Project { get; set; }
         public bool Rejected { get; set; }
         public string RejectedReason { get; set; }
+        public ScoringResults ScoringResults { get; set; }
 
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
@@ -329,6 +430,31 @@ namespace Assistant.NINAPlugin.Plan {
             hash = hash * 23 + this.Coordinates.DecString.GetHashCode();
             hash = hash * 23 + this.Rotation.ToString().GetHashCode();
             return hash;
+        }
+    }
+
+    public class ScoringResults {
+        public double TotalScore { get; set; }
+        public List<RuleResult> Results { get; private set; }
+
+        public ScoringResults() {
+            Results = new List<RuleResult>();
+        }
+
+        public void AddRuleResult(RuleResult ruleResult) {
+            Results.Add(ruleResult);
+        }
+    }
+
+    public class RuleResult {
+        public ScoringRule ScoringRule { get; private set; }
+        public double Weight { get; private set; }
+        public double Score { get; private set; }
+
+        public RuleResult(ScoringRule scoringRule, double weight, double score) {
+            ScoringRule = scoringRule;
+            Weight = weight;
+            Score = score;
         }
     }
 
@@ -459,8 +585,8 @@ namespace Assistant.NINAPlugin.Plan {
 
         public const string TargetComplete = "complete";
         public const string TargetNeverRises = "never rises at location";
-        public const string TargetNotVisible = "not visible at this time";
-        public const string TargetNotYetVisible = "not yet visible at this time";
+        public const string TargetNotVisible = "not visible";
+        public const string TargetNotYetVisible = "not yet visible";
         public const string TargetMeridianWindowClipped = "clipped by meridian window";
         public const string TargetBeforeMeridianWindow = "before meridian window";
         public const string TargetMoonAvoidance = "moon avoidance";
