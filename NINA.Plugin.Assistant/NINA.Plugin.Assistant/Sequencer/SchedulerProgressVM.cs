@@ -1,4 +1,5 @@
-﻿using NINA.Core.Utility;
+﻿using Assistant.NINAPlugin.Util;
+using NINA.Core.Utility;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -45,14 +46,14 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        public void WaitStart() {
+        public void WaitStart(DateTime? waitUntil) {
             EndCurrent();
-            CurrentGroup = $"Waiting : {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}";
+            CurrentGroup = $"Waiting : {DateTime.Now.ToString(Utils.DateFMT)} -> {waitUntil?.ToString(Utils.DateFMT)}";
         }
 
         public void TargetStart(string projectName, string targetName) {
             EndCurrent();
-            CurrentGroup = $"{projectName} / {targetName} : {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}";
+            CurrentGroup = $"{projectName} / {targetName} : {DateTime.Now.ToString(Utils.DateFMT)}";
         }
 
         public void Add(string name, string filter = "") {

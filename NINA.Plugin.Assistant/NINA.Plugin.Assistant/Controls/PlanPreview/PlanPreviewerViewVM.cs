@@ -15,6 +15,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace Assistant.NINAPlugin.Controls.PlanPreview {
@@ -33,6 +34,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
             InitializeCriteria();
 
             PlanPreviewCommand = new RelayCommand(RunPlanPreview);
+            PlanPreviewResultsCommand = new RelayCommand(RunPlanPreviewResults);
         }
 
         private void ProfileService_ProfileChanged(object sender, EventArgs e) {
@@ -45,6 +47,9 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
             PlanDate = DateTime.Now.Date;
             SelectedProfileId = profileService.ActiveProfile.Id.ToString();
             ProfileChoices = GetProfileChoices();
+
+            ShowPlanPreview = true;
+            ShowPlanPreviewResults = false;
         }
 
         private DateTime planDate = DateTime.MinValue;
@@ -52,6 +57,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
             get => planDate;
             set {
                 planDate = value;
+                SchedulerPlans = null;
                 RaisePropertyChanged(nameof(PlanDate));
             }
         }
@@ -61,6 +67,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
             get => planHours;
             set {
                 planHours = value;
+                SchedulerPlans = null;
                 RaisePropertyChanged(nameof(PlanHours));
             }
         }
@@ -70,6 +77,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
             get => planMinutes;
             set {
                 planMinutes = value;
+                SchedulerPlans = null;
                 RaisePropertyChanged(nameof(PlanMinutes));
             }
         }
@@ -79,6 +87,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
             get => planSeconds;
             set {
                 planSeconds = value;
+                SchedulerPlans = null;
                 RaisePropertyChanged(nameof(PlanSeconds));
             }
         }
@@ -90,6 +99,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
             }
             set {
                 profileChoices = value;
+                SchedulerPlans = null;
                 RaisePropertyChanged(nameof(ProfileChoices));
             }
         }
@@ -99,6 +109,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
             get => selectedProfileId;
             set {
                 selectedProfileId = value;
+                SchedulerPlans = null;
                 RaisePropertyChanged(nameof(SelectedProfileId));
             }
         }
@@ -112,7 +123,74 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
             }
         }
 
+        private List<SchedulerPlan> SchedulerPlans { get; set; }
+
+        private bool showPlanPreview;
+        public bool ShowPlanPreview {
+            get => showPlanPreview;
+            set {
+                showPlanPreview = value;
+                RaisePropertyChanged(nameof(ShowPlanPreview));
+            }
+        }
+
+        private bool showPlanPreviewResults;
+        public bool ShowPlanPreviewResults {
+            get => showPlanPreviewResults;
+            set {
+                showPlanPreviewResults = value;
+                RaisePropertyChanged(nameof(ShowPlanPreviewResults));
+            }
+        }
+
         public ICommand PlanPreviewCommand { get; private set; }
+        public ICommand PlanPreviewResultsCommand { get; private set; }
+
+        private void LoadSchedulerPlans(DateTime atDateTime, IProfileService profileService) {
+
+            if (SchedulerPlans != null) {
+                return;
+            }
+
+            try {
+                TSLogger.Debug($"running plan preview for {Utils.FormatDateTimeFull(atDateTime)}, profileId={SelectedProfileId}");
+
+                SchedulerPlanLoader loader = new SchedulerPlanLoader(GetProfile(SelectedProfileId));
+                List<IPlanProject> projects = loader.LoadActiveProjects(database.GetContext());
+                ProfilePreference profilePreference = loader.GetProfilePreferences(database.GetContext());
+
+                ObservableCollection<TreeViewItem> list = new ObservableCollection<TreeViewItem>();
+                string profileName = ProfileChoices.First(p => p.Key == selectedProfileId).Value;
+
+                if (projects == null) {
+                    TSLogger.Debug($"no active projects for preview at {atDateTime}, profileId={SelectedProfileId}");
+                    InstructionList = list;
+
+                    MyMessageBox.Show($"No active projects/targets were returned by the planner for {Utils.FormatDateTimeFull(atDateTime)} and{Environment.NewLine}profile '{profileName}' - or no active targets were found with active exposure plans.", "Oops");
+                    SchedulerPlans = null;
+                    return;
+                }
+
+                List<SchedulerPlan> schedulerPlans = Planner.GetPerfectPlan(atDateTime, profileService, profilePreference, projects);
+                if (schedulerPlans.Count == 0) {
+                    TSLogger.Debug($"no imagable projects for preview at {atDateTime}, profileId={SelectedProfileId}");
+                    InstructionList = list;
+
+                    MyMessageBox.Show($"No imagable projects/targets were returned by the planner for {Utils.FormatDateTimeFull(atDateTime)} and{Environment.NewLine}profile '{profileName}'.", "Oops");
+                    SchedulerPlans = null;
+                    return;
+                }
+
+                SchedulerPlans = schedulerPlans;
+                return;
+            }
+            catch (Exception ex) {
+                TSLogger.Error($"failed to run plan preview: {ex.Message} {ex.StackTrace}");
+                MyMessageBox.Show($"Exception running plan preview - see the TS log for details.", "Oops");
+                SchedulerPlans = null;
+                return;
+            }
+        }
 
         private void RunPlanPreview(object obj) {
             ObservableCollection<TreeViewItem> list = new ObservableCollection<TreeViewItem>();
@@ -123,29 +201,17 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
 
             try {
                 DateTime atDateTime = PlanDate.Date.AddHours(PlanHours).AddMinutes(PlanMinutes).AddSeconds(PlanSeconds);
-                TSLogger.Debug($"running plan preview for {Utils.FormatDateTimeFull(atDateTime)}, profileId={SelectedProfileId}");
+                LoadSchedulerPlans(atDateTime, profileService);
 
-                SchedulerPlanLoader loader = new SchedulerPlanLoader(GetProfile(SelectedProfileId));
-                List<IPlanProject> projects = loader.LoadActiveProjects(database.GetContext());
-                ProfilePreference profilePreference = loader.GetProfilePreferences(database.GetContext());
-
-                if (projects == null) {
-                    TSLogger.Debug($"no active projects for {atDateTime}, profileId={SelectedProfileId}");
-                    InstructionList = list;
-
-                    string profileName = ProfileChoices.First(p => p.Key == selectedProfileId).Value;
-                    MyMessageBox.Show($"No active projects/targets were returned by the planner for {Utils.FormatDateTimeFull(atDateTime)} and{Environment.NewLine}profile '{profileName}' - or no active targets were found with active exposure plans.", "Oops");
+                if (SchedulerPlans == null || SchedulerPlans.Count == 0) {
                     return;
                 }
 
-                List<SchedulerPlan> assistantPlans = Planner.GetPerfectPlan(atDateTime, profileService, profilePreference, projects);
-
-                foreach (SchedulerPlan plan in assistantPlans) {
+                foreach (SchedulerPlan plan in SchedulerPlans) {
                     TreeViewItem planItem = new TreeViewItem();
 
                     if (plan.WaitForNextTargetTime != null) {
                         planItem.Header = $"Wait until {Utils.FormatDateTimeFull(plan.WaitForNextTargetTime)}";
-
                         list.Add(planItem);
                         continue;
                     }
@@ -153,12 +219,11 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                     planItem.Header = GetTargetLabel(plan);
                     planItem.IsExpanded = false;
                     list.Add(planItem);
-                    int ditherTrigger = 0;
 
                     foreach (IPlanInstruction instruction in plan.PlanInstructions) {
                         TreeViewItem instructionItem = new TreeViewItem();
 
-                        if (instruction is PlanMessage) {
+                        if (instruction is PlanMessage || instruction is PlanBeforeTargetContainer) {
                             continue;
                         }
 
@@ -201,10 +266,50 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                 }
 
                 InstructionList = list;
+                ShowPlanPreviewResults = false;
+                ShowPlanPreview = true;
             }
             catch (Exception ex) {
                 TSLogger.Error($"failed to run plan preview: {ex.Message} {ex.StackTrace}");
                 InstructionList.Clear();
+            }
+        }
+
+        private string planPreviewResultsLog;
+        public string PlanPreviewResultsLog {
+            get => planPreviewResultsLog;
+            set {
+                planPreviewResultsLog = value;
+                RaisePropertyChanged(nameof(PlanPreviewResultsLog));
+            }
+        }
+
+        private void RunPlanPreviewResults(object obj) {
+
+            if (PlanDate == DateTime.MinValue || SelectedProfileId == null) {
+                return;
+            }
+
+            try {
+                DateTime atDateTime = PlanDate.Date.AddHours(PlanHours).AddMinutes(PlanMinutes).AddSeconds(PlanSeconds);
+                LoadSchedulerPlans(atDateTime, profileService);
+
+                if (SchedulerPlans == null || SchedulerPlans.Count == 0) {
+                    return;
+                }
+
+                StringBuilder sb = new StringBuilder();
+                foreach (SchedulerPlan plan in SchedulerPlans) {
+                    sb.Append(plan.DetailsLog);
+                }
+
+                PlanPreviewResultsLog = sb.ToString();
+                ShowPlanPreview = false;
+                ShowPlanPreviewResults = true;
+            }
+            catch (Exception ex) {
+                TSLogger.Error($"failed to run plan preview results: {ex.Message} {ex.StackTrace}");
+                PlanPreviewResultsLog = string.Empty;
             }
         }
 

@@ -126,21 +126,35 @@
                         ItemsSource="{Binding ProfileChoices}"
                         SelectedValue="{Binding SelectedProfileId}"
                         SelectedValuePath="Key" />
-                    <Button
+                    <StackPanel
                         Grid.Row="2"
                         Grid.Column="1"
-                        Width="50"
-                        Height="25"
-                        Margin="0,3,0,0"
-                        HorizontalAlignment="Left"
-                        Command="{Binding PlanPreviewCommand}"
-                        Content="Run"
-                        ToolTip="Run the planner preview" />
+                        Orientation="Horizontal">
+                        <Button
+                            Width="50"
+                            Height="25"
+                            Margin="0,3,0,0"
+                            HorizontalAlignment="Left"
+                            Command="{Binding PlanPreviewCommand}"
+                            Content="Run"
+                            ToolTip="Run the planner preview" />
+                        <Button
+                            Width="100"
+                            Height="25"
+                            Margin="4,3,0,0"
+                            HorizontalAlignment="Left"
+                            Command="{Binding PlanPreviewResultsCommand}"
+                            Content="View Details"
+                            ToolTip="View planner details" />
+                    </StackPanel>
                 </Grid>
             </StackPanel>
         </Border>
 
-        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+        <Border
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            Visibility="{Binding ShowPlanPreview, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
             <TreeView BorderThickness="0" ItemsSource="{Binding InstructionList}">
                 <TreeView.Template>
                     <ControlTemplate>
@@ -169,7 +183,14 @@
 
             </TreeView>
         </Border>
-
+        <Border
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            Visibility="{Binding ShowPlanPreviewResults, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+            <ScrollViewer Height="300" VerticalScrollBarVisibility="Auto">
+                <TextBlock FontFamily="Courier New" Text="{Binding PlanPreviewResultsLog}" />
+            </ScrollViewer>
+        </Border>
     </StackPanel>
 
 </UserControl>

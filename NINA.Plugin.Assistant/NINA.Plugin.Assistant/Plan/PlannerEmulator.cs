@@ -43,7 +43,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         private SchedulerPlan WaitForTime(DateTime waitFor) {
-            return new SchedulerPlan(waitFor);
+            return new SchedulerPlan(atTime, null, waitFor);
         }
 
         private SchedulerPlan Plan1() {
@@ -97,7 +97,7 @@ namespace Assistant.NINAPlugin.Plan {
             instructions.Add(new PlanTakeExposure(lum));
             */
 
-            return new SchedulerPlan(planTarget, timeInterval, instructions);
+            return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions);
         }
 
         private SchedulerPlan Plan2() {
@@ -141,7 +141,7 @@ namespace Assistant.NINAPlugin.Plan {
             instructions.Add(new PlanTakeExposure(lum));
             instructions.Add(new PlanDither());
 
-            return new SchedulerPlan(planTarget, timeInterval, instructions);
+            return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions);
         }
 
         private SchedulerPlan Plan3() {
@@ -192,7 +192,7 @@ namespace Assistant.NINAPlugin.Plan {
             //instructions.Add(new PlanTakeExposure(blu));
             //instructions.Add(new PlanTakeExposure(blu));
 
-            return new SchedulerPlan(planTarget, timeInterval, instructions);
+            return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions);
         }
 
         private IPlanExposure GetExposurePlan(string name, int exposure, int? gain, int? offset, int desired, int databaseId) {
@@ -278,6 +278,7 @@ namespace Assistant.NINAPlugin.Plan {
         public Epoch Epoch { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public bool Rejected { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public string RejectedReason { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public ScoringResults ScoringResults { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DateTime CulminationTime { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public TimeInterval MeridianWindow { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 

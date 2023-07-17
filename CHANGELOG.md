@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 3.1.1.0 - 2023-07-18
+* Added a 'View Details' button to the Scheduler Preview to show details of the planning process.  The same information is available in the TS log for actual runs via the sequencer.
+
 ## 3.1.0.0 - 2023-07-13
 Limited release only.
 * Added support for inserting arbitrary instructions to run at various points during scheduler operation: before/after each wait period and before/after each target plan.
