@@ -32,7 +32,8 @@ namespace Assistant.NINAPlugin.Plan {
             switch (CallNumber) {
                 case 1: plan = WaitForTime(DateTime.Now.AddSeconds(10)); break;
                 case 2: plan = Plan1(); break;
-                case 3: plan = Plan2(); break;
+                case 3: plan = Plan1(); break;
+                // case 4: plan = Plan3(); break;
                 default:
                     CallNumber = 0;
                     return null;
@@ -145,52 +146,45 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         private SchedulerPlan Plan3() {
-
             DateTime endTime = atTime.AddMinutes(5);
             TimeInterval timeInterval = new TimeInterval(atTime, endTime);
 
             IPlanProject planProject = new PlanProjectEmulator();
-            planProject.Name = "P03";
+            planProject.Name = "M31 Andromeda";
             planProject.UseCustomHorizon = false;
             planProject.MinimumAltitude = 10;
             planProject.DitherEvery = 0;
-            planProject.EnableGrader = true;
-            planProject.DatabaseId = 2;
+            planProject.EnableGrader = false;
 
-            IPlanTarget planTarget = GetBasePlanTarget("T03", planProject, Cp1525);
+            IPlanTarget planTarget = GetBasePlanTarget("M31 Andromeda Panel 1", planProject, Cp1525);
             planTarget.EndTime = endTime;
 
-            IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3, 1);
-            IPlanExposure red = GetExposurePlan("R", 4, null, null, 3, 2);
-            //IPlanExposure grn = GetExposurePlan("G", 4, null, null, 3, 103);
-            //IPlanExposure blu = GetExposurePlan("B", 4, null, null, 3, 104);
+            IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3, 101);
+            lum.ReadoutMode = 0;
+            IPlanExposure red = GetExposurePlan("R", 4, null, null, 3, 102);
+            IPlanExposure grn = GetExposurePlan("G", 4, null, null, 3, 103);
+            IPlanExposure blu = GetExposurePlan("B", 4, null, null, 3, 104);
             planTarget.ExposurePlans.Add(lum);
+            planTarget.ExposurePlans.Add(red);
+            planTarget.ExposurePlans.Add(grn);
+            planTarget.ExposurePlans.Add(blu);
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             instructions.Add(new PlanMessage("planner emulator: Plan3"));
+            instructions.Add(new PlanBeforeTargetContainer());
+            instructions.Add(new PlanSetReadoutMode(lum));
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
-            instructions.Add(new PlanTakeExposure(lum));
-            //instructions.Add(new PlanTakeExposure(lum));
-            //instructions.Add(new PlanTakeExposure(lum));
-
             instructions.Add(new PlanSwitchFilter(red));
             instructions.Add(new PlanTakeExposure(red));
-            instructions.Add(new PlanTakeExposure(red));
-            //instructions.Add(new PlanTakeExposure(red));
-            //instructions.Add(new PlanTakeExposure(red));
-
-            ///instructions.Add(new PlanSwitchFilter(grn));
-            ///instructions.Add(new PlanTakeExposure(grn));
-            ///instructions.Add(new PlanTakeExposure(grn));
-            //instructions.Add(new PlanTakeExposure(grn));
-            //instructions.Add(new PlanTakeExposure(grn));
-
-            ///instructions.Add(new PlanSwitchFilter(blu));
-            ///instructions.Add(new PlanTakeExposure(blu));
-            ///instructions.Add(new PlanTakeExposure(blu));
-            //instructions.Add(new PlanTakeExposure(blu));
-            //instructions.Add(new PlanTakeExposure(blu));
+            instructions.Add(new PlanSwitchFilter(grn));
+            instructions.Add(new PlanTakeExposure(grn));
+            instructions.Add(new PlanSwitchFilter(blu));
+            instructions.Add(new PlanTakeExposure(blu));
+            instructions.Add(new PlanDither());
+            instructions.Add(new PlanSwitchFilter(lum));
+            instructions.Add(new PlanTakeExposure(lum));
+            instructions.Add(new PlanDither());
 
             return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions);
         }
@@ -262,33 +256,11 @@ namespace Assistant.NINAPlugin.Plan {
         }
     }
 
-    class PlanTargetEmulator : IPlanTarget {
+    class PlanTargetEmulator : PlanTarget {
 
-        public string PlanId { get; set; }
-        public int DatabaseId { get; set; }
-        public string Name { get; set; }
-        public IPlanProject Project { get; set; }
-        public Coordinates Coordinates { get; set; }
-        public double Rotation { get; set; }
-        public double ROI { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
-        public List<IPlanExposure> ExposurePlans { get; set; }
-
-        public Epoch Epoch { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public bool Rejected { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string RejectedReason { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public ScoringResults ScoringResults { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public DateTime CulminationTime { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public TimeInterval MeridianWindow { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        public PlanTargetEmulator() {
+        public PlanTargetEmulator() : base() {
             this.PlanId = Guid.NewGuid().ToString();
             this.ExposurePlans = new List<IPlanExposure>();
-        }
-
-        public void SetCircumstances(bool isVisible, DateTime startTime, DateTime culminationTime, DateTime endTime) {
-            throw new NotImplementedException();
         }
     }
 

@@ -555,7 +555,7 @@
 
                             <ninactrl:DetachingExpander>
                                 <ninactrl:DetachingExpander.Header>
-                                    <TextBlock Text="Before Target Instructions" />
+                                    <TextBlock Text="Before New Target Instructions" />
                                 </ninactrl:DetachingExpander.Header>
                                 <StackPanel Orientation="Vertical">
                                     <Border
@@ -572,7 +572,7 @@
                                                 VerticalAlignment="Top"
                                                 FontStyle="Italic"
                                                 Opacity="0.4"
-                                                Text="Drop instructions here to run BEFORE each target imaging start"
+                                                Text="Drop instructions here to run BEFORE each new/changed target imaging start"
                                                 Visibility="{Binding Items.Count, Converter={StaticResource InverseZeroToVisibilityConverter}}" />
                                             <i:Interaction.Behaviors>
                                                 <behaviors:DragOverBehavior DragAboveSize="0" DragBelowSize="0" />
@@ -585,7 +585,7 @@
 
                             <ninactrl:DetachingExpander>
                                 <ninactrl:DetachingExpander.Header>
-                                    <TextBlock Text="After Target Instructions" />
+                                    <TextBlock Text="After New Target Instructions" />
                                 </ninactrl:DetachingExpander.Header>
                                 <StackPanel Orientation="Vertical">
                                     <Border
@@ -602,7 +602,7 @@
                                                 VerticalAlignment="Top"
                                                 FontStyle="Italic"
                                                 Opacity="0.4"
-                                                Text="Drop instructions here to run AFTER each target imaging completes"
+                                                Text="Drop instructions here to run AFTER each new/changed target imaging completes"
                                                 Visibility="{Binding Items.Count, Converter={StaticResource InverseZeroToVisibilityConverter}}" />
                                             <i:Interaction.Behaviors>
                                                 <behaviors:DragOverBehavior DragAboveSize="0" DragBelowSize="0" />

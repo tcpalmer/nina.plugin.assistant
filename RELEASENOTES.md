@@ -1,6 +1,10 @@
 # Release Notes
 
-## 3.1.1.0 - 2023-07-18
+## 3.1.2.0 - 2023-07-20
+
+## Handling of Before/After Target
+
+The execution of the Before/After Target containers was changed to mean run only for new or changed targets.
 
 ### Scheduler Preview Details
 

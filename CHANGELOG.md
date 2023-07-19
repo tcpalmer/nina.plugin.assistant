@@ -1,6 +1,7 @@
 # Target Scheduler
 
-## 3.1.1.0 - 2023-07-18
+## 3.1.2.0 - 2023-07-20
+* The execution of the Before/After Target containers was changed to mean run only for new or changed targets. 
 * Added a 'View Details' button to the Scheduler Preview to show details of the planning process.  The same information is available in the TS log for actual runs via the sequencer.
 
 ## 3.1.0.0 - 2023-07-13
