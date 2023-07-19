@@ -414,12 +414,11 @@ namespace Assistant.NINAPlugin.Plan {
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
 
-            // If this target is different from the previous, add the slew instruction
+            // If this target is different from the previous, add the slew and 'Before Target' instructions
             if (!planTarget.Equals(previousPlanTarget)) {
                 instructions.Add(new PlanSlew(true));
+                instructions.Add(new PlanBeforeTargetContainer());
             }
-
-            instructions.Add(new PlanBeforeTargetContainer());
 
             NighttimeCircumstances nighttimeCircumstances = NighttimeCircumstances.AdjustNighttimeCircumstances(observerInfo, atTime);
             instructions.AddRange(new ExposurePlanner(profilePreferences, planTarget, targetWindow, nighttimeCircumstances).Plan());

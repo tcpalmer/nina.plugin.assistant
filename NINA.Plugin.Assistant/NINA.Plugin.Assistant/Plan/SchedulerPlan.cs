@@ -378,6 +378,8 @@ namespace Assistant.NINAPlugin.Plan {
             }
         }
 
+        public PlanTarget() { } // for PlanTargetEmulator only
+
         public void SetCircumstances(bool isVisible, DateTime startTime, DateTime culminationTime, DateTime endTime) {
             if (isVisible) {
                 StartTime = startTime;
@@ -426,6 +428,7 @@ namespace Assistant.NINAPlugin.Plan {
 
         public override int GetHashCode() {
             int hash = 17;
+            hash = hash * 23 + this.Name.GetHashCode();
             hash = hash * 23 + this.Coordinates.RAString.GetHashCode();
             hash = hash * 23 + this.Coordinates.DecString.GetHashCode();
             hash = hash * 23 + this.Rotation.ToString().GetHashCode();

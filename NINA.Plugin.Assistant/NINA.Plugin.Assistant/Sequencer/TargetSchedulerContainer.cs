@@ -197,25 +197,42 @@ namespace Assistant.NINAPlugin.Sequencer {
                 SchedulerPlan plan = new Planner(atTime, profileService, profilePreferences).GetPlan(previousPlanTarget);
 
                 if (plan == null) {
+                    if (previousPlanTarget != null) {
+                        ExecuteEventContainer(AfterTargetContainer, progress, token);
+                    }
+
+                    SchedulerProgress.End();
+
                     TSLogger.Info("planner returned empty plan, done");
                     return Task.CompletedTask;
                 }
 
                 if (plan.WaitForNextTargetTime != null) {
+                    if (previousPlanTarget != null) {
+                        ExecuteEventContainer(AfterTargetContainer, progress, token);
+                    }
+
                     TSLogger.Info("planner waiting for next target to become available");
 
                     SchedulerProgress.WaitStart(plan.WaitForNextTargetTime);
-                    ExecuteEventContainer(BeforeWaitContainer, "", progress, token);
+                    ExecuteEventContainer(BeforeWaitContainer, progress, token);
                     SchedulerProgress.Add("Wait");
 
                     WaitForNextTarget(plan.WaitForNextTargetTime, progress, token);
 
-                    ExecuteEventContainer(AfterWaitContainer, "", progress, token);
+                    ExecuteEventContainer(AfterWaitContainer, progress, token);
                     SchedulerProgress.End();
                 }
                 else {
                     try {
                         IPlanTarget planTarget = plan.PlanTarget;
+
+                        if (previousPlanTarget != null && !planTarget.Equals(previousPlanTarget)) {
+                            ExecuteEventContainer(AfterTargetContainer, progress, token);
+                        }
+
+                        SchedulerProgress.End();
+
                         TSLogger.Info("--BEGIN PLAN EXECUTION--------------------------------------------------------");
                         TSLogger.Info($"plan target: {planTarget.Name}");
                         SetTarget(atTime, planTarget);
@@ -241,20 +258,16 @@ namespace Assistant.NINAPlugin.Sequencer {
                         throw new SequenceEntityFailedException($"exception executing plan: {ex.Message}", ex);
                     }
                     finally {
-                        if (!token.IsCancellationRequested) {
-                            ExecuteEventContainer(AfterTargetContainer, plan.PlanTarget.PlanId, progress, token);
-                        }
-
                         ClearTarget();
-                        SchedulerProgress.End();
                         TSLogger.Info("-- END PLAN EXECUTION ----------------------------------------------------------");
                     }
                 }
             }
         }
 
-        public void ExecuteEventContainer(InstructionContainer container, string planId, IProgress<ApplicationStatus> progress, CancellationToken token) {
+        public void ExecuteEventContainer(InstructionContainer container, IProgress<ApplicationStatus> progress, CancellationToken token) {
             if (container.Items?.Count > 0) {
+                // TODO: for AfterTarget, we need the name of the container for the previous target
                 SchedulerProgress.Add(container.Name);
 
                 try {
