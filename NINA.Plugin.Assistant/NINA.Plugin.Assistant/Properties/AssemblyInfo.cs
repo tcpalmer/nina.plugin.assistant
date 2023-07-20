@@ -21,6 +21,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyMetadata("License", "MPL-2.0")]
 [assembly: AssemblyMetadata("LicenseURL", "https://www.mozilla.org/en-US/MPL/2.0/")]
 [assembly: AssemblyMetadata("Repository", "https://github.com/tcpalmer/nina.plugin.assistant/")]
+[assembly: AssemblyMetadata("Homepage", "https://tcpalmer.github.io/nina-scheduler/")]
+[assembly: AssemblyMetadata("Tags", "Automation,Scheduling,Sequencer")]
 [assembly: AssemblyMetadata("FeaturedImageURL", "https://raw.githubusercontent.com/tcpalmer/nina.plugin.assistant/main/NINA.Plugin.Assistant/assets/target-scheduler-logo.png?raw=true")]
 [assembly: AssemblyMetadata("ScreenshotURL", "https://raw.githubusercontent.com/tcpalmer/nina.plugin.assistant/main/NINA.Plugin.Assistant/assets/screenshot-1.png?raw=true")]
 [assembly: AssemblyMetadata("AltScreenshotURL", "https://raw.githubusercontent.com/tcpalmer/nina.plugin.assistant/main/NINA.Plugin.Assistant/assets/screenshot-2.png?raw=true")]
@@ -32,7 +34,7 @@ If you like this plugin and it saves you time, please consider [Buying Me a Beer
 ## Documentation
 The [plugin documentation](https://tcpalmer.github.io/nina-scheduler/) provides a detailed description of the plugin and how to use it.  See the [release notes](https://tcpalmer.github.io/nina-scheduler/release.html) for changes in recent versions.
 
-## Acknowledgements ## 
+## Acknowledgements
 * Chris Woodhouse has been involved since the beginning and was instrumental in hashing out the initial design and requirements.
 * Matt Nudi also provided design feedback and critical early beta testing.
 * Linda Thomas-Fowler and Chris Kagy continue to provide invaluable early testing and feedback on features.
@@ -46,7 +48,6 @@ The [plugin documentation](https://tcpalmer.github.io/nina-scheduler/) provides 
 * [Plugin source code](https://github.com/tcpalmer/nina.plugin.assistant)
 * [Change log](https://github.com/tcpalmer/nina.plugin.assistant/blob/main/CHANGELOG.md)
 
-The Sequence Scheduler plugin is provided 'as is' under the terms of the [Mozilla Public License 2.0](https://github.com/tcpalmer/nina.plugin.assistant/blob/main/LICENSE.txt)
-")]
+The Target Scheduler plugin is provided 'as is' under the terms of the [Mozilla Public License 2.0](https://github.com/tcpalmer/nina.plugin.assistant/blob/main/LICENSE.txt)")]
 
 [assembly: ComVisible(false)]

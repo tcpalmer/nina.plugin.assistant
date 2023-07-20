@@ -32,7 +32,7 @@ namespace Assistant.NINAPlugin.Plan {
             switch (CallNumber) {
                 case 1: plan = WaitForTime(DateTime.Now.AddSeconds(10)); break;
                 case 2: plan = Plan1(); break;
-                case 3: plan = Plan1(); break;
+                case 3: plan = Plan2(); break;
                 // case 4: plan = Plan3(); break;
                 default:
                     CallNumber = 0;
