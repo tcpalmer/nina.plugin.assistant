@@ -307,7 +307,7 @@ namespace Assistant.NINAPlugin.Plan {
 
         private HorizonDefinition DetermineHorizon(IProfile profile, Project project) {
             if (project.UseCustomHorizon) {
-                return new HorizonDefinition(profile.AstrometrySettings.Horizon, project.HorizonOffset);
+                return new HorizonDefinition(profile.AstrometrySettings.Horizon, project.HorizonOffset, project.MinimumAltitude);
             }
 
             return new HorizonDefinition(project.MinimumAltitude);

@@ -212,12 +212,10 @@
             <TextBlock
                 VerticalAlignment="Center"
                 FontWeight="Bold"
-                IsEnabled="{Binding ProjectProxy.Project.UseCustomHorizon, Converter={StaticResource InverseBooleanConverter}}"
                 Text="Minimum Altitude"
                 ToolTip="Minimum altitude for project targets" />
             <ComboBox
                 MaxHeight="20"
-                IsEnabled="{Binding ProjectProxy.Project.UseCustomHorizon, Converter={StaticResource InverseBooleanConverter}}"
                 ItemsSource="{Binding MinimumAltitudeChoices}"
                 SelectedValue="{Binding ProjectProxy.Project.MinimumAltitude, Mode=TwoWay, Converter={StaticResource AltitudeChoicesConverter}}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
@@ -249,7 +247,8 @@
                 FontWeight="Bold"
                 IsEnabled="{Binding ProjectProxy.Project.UseCustomHorizon}"
                 Text="Horizon Offset"
-                ToolTip="Offset from custom horizon" />
+                ToolTip="Offset from custom horizon"
+                ToolTipService.ShowOnDisabled="True" />
             <TextBox
                 MaxHeight="20"
                 IsEnabled="{Binding ProjectProxy.Project.UseCustomHorizon}"

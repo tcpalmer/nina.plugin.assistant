@@ -9,8 +9,7 @@ namespace Assistant.NINAPlugin.Astrometry {
 
     public class HorizonDefinition {
 
-        private static readonly double HORIZON_VALUE = double.MinValue;
-
+        private bool isBasicMinimumAltitude;
         private readonly double minimumAltitude;
         private readonly CustomHorizon horizon;
         private readonly double offset;
@@ -18,13 +17,16 @@ namespace Assistant.NINAPlugin.Astrometry {
         public HorizonDefinition(double minimumAltitude) {
             Assert.isTrue(minimumAltitude >= 0 && minimumAltitude < 90, "minimumAltitude must be >= 0 and < 90");
             this.minimumAltitude = minimumAltitude;
+            this.isBasicMinimumAltitude = true;
         }
 
-        public HorizonDefinition(CustomHorizon customHorizon, double offset) {
+        public HorizonDefinition(CustomHorizon customHorizon, double offset, double minimumAltitude = 0) {
             Assert.isTrue(offset >= 0, "offset must be >= 0");
+            Assert.isTrue(minimumAltitude >= 0 && minimumAltitude < 90, "minimumAltitude must be >= 0 and < 90");
 
             if (customHorizon != null) {
-                this.minimumAltitude = HORIZON_VALUE;
+                this.minimumAltitude = minimumAltitude;
+                this.isBasicMinimumAltitude = false;
                 this.horizon = customHorizon;
                 this.offset = offset;
             }
@@ -35,15 +37,15 @@ namespace Assistant.NINAPlugin.Astrometry {
         }
 
         public double GetTargetAltitude(AltitudeAtTime aat) {
-            if (minimumAltitude != HORIZON_VALUE) {
+            if (isBasicMinimumAltitude) {
                 return minimumAltitude;
             }
 
-            return horizon.GetAltitude(aat.Azimuth) + offset;
+            return Math.Max(horizon.GetAltitude(aat.Azimuth) + offset, minimumAltitude);
         }
 
         public bool IsCustom() {
-            return minimumAltitude == HORIZON_VALUE;
+            return !isBasicMinimumAltitude;
         }
 
         public double GetFixedMinimumAltitude() {
@@ -55,7 +57,7 @@ namespace Assistant.NINAPlugin.Astrometry {
         }
 
         public string GetCacheKey() {
-            if (minimumAltitude != HORIZON_VALUE) {
+            if (isBasicMinimumAltitude) {
                 return minimumAltitude.ToString();
             }
 
@@ -74,7 +76,7 @@ namespace Assistant.NINAPlugin.Astrometry {
         }
 
         public override string ToString() {
-            return minimumAltitude != HORIZON_VALUE ? $"min alt: {minimumAltitude.ToString()}" : "custom";
+            return isBasicMinimumAltitude ? $"min alt: {minimumAltitude.ToString()}" : "custom";
         }
 
         public static CustomHorizon GetConstantHorizon(double altitude) {

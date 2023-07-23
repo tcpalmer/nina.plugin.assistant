@@ -1,5 +1,10 @@
 # Target Scheduler
 
+## 3.1.3.0 - 2023-07-XX
+* Changed the behavior of project minimum altitude: now can be used with or without a custom horizon.  If used with, then the horizon at each azimuth is the greater of (custom horizon + horizon offset) or project minimum altitude.
+* Fixed issue with scheduler preview: wasn't picking up dynamic changes to target database.
+* Added 5/10/20 minute options to project minimum time.
+
 ## 3.1.2.0 - 2023-07-20
 * The execution of the Before/After Target containers was changed to mean run only for new or changed targets. 
 * Added a 'View Details' button to the Scheduler Preview to show details of the planning process.  The same information is available in the TS log for actual runs via the sequencer.

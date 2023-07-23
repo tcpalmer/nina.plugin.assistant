@@ -148,9 +148,12 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
 
         private void LoadSchedulerPlans(DateTime atDateTime, IProfileService profileService) {
 
+            /* While the caching here works and detects changes to the preview parameters (like date/time), it's not picking
+             * up changes to the database.  For now just disable the caching ... doesn't take long to run anyway.
+            
             if (SchedulerPlans != null) {
                 return;
-            }
+            }*/
 
             try {
                 TSLogger.Debug($"running plan preview for {Utils.FormatDateTimeFull(atDateTime)}, profileId={SelectedProfileId}");
