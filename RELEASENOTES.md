@@ -1,8 +1,17 @@
 # Release Notes
 
+## 3.1.3.0 - 2023-07-XX
+
+### Minimum Altitude
+Changed the behavior of project minimum altitude: now can be used with or without a custom horizon.  If used with, then the horizon at each azimuth is the greater of (custom horizon + horizon offset) or project minimum altitude.
+
+### Other
+* Fixed issue with scheduler preview: wasn't picking up dynamic changes to target database.
+* Added 5/10/20 minute options to project minimum time.
+
 ## 3.1.2.0 - 2023-07-20
 
-## Handling of Before/After Target
+### Handling of Before/After Target
 
 The execution of the Before/After Target containers was changed to mean run only for new or changed targets.
 

@@ -82,6 +82,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private void InitializeCombos() {
 
             MinimumTimeChoices = new List<string>();
+            MinimumTimeChoices.Add(Utils.MtoHM(5));
+            MinimumTimeChoices.Add(Utils.MtoHM(10));
+            MinimumTimeChoices.Add(Utils.MtoHM(20));
             for (int i = 30; i <= 240; i += 30) {
                 MinimumTimeChoices.Add(Utils.MtoHM(i));
             }

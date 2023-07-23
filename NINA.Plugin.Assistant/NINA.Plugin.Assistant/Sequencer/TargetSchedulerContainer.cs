@@ -460,6 +460,12 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private CustomHorizon GetCustomHorizon(IProfile activeProfile, IPlanProject project) {
+
+            // For display in the Nighttime altitude chart, we either use the profile's custom horizon as-is or generate
+            // a fixed constant horizon using the project's minimum altitude.  If using the regular custom horizon, we
+            // won't show any modifications due to horizon offset or a base minimum altitude.  Not ideal but core
+            // CustomHorizon is rather locked up so doesn't make it easy to get the interal alt/az values to regen it.
+
             CustomHorizon customHorizon = project.UseCustomHorizon && activeProfile.AstrometrySettings.Horizon != null ?
                 activeProfile.AstrometrySettings.Horizon :
                 HorizonDefinition.GetConstantHorizon(project.MinimumAltitude);
