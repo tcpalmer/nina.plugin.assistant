@@ -404,6 +404,7 @@
             </Grid>
         </Button>
         <DataGrid
+            Name="ExposurePlansDataGrid"
             Grid.Row="0"
             Height="250"
             Margin="12,0,0,0"
@@ -481,8 +482,9 @@
                             <ComboBox
                                 DisplayMemberPath="Value"
                                 ItemsSource="{Binding ElementName=TargetViewPanel, Path=DataContext.ExposureTemplateChoices}"
-                                SelectedValue="{Binding ExposureTemplateId}"
-                                SelectedValuePath="Key" />
+                                SelectedValue="{Binding ExposureTemplateId, UpdateSourceTrigger=LostFocus, Mode=TwoWay}"
+                                SelectedValuePath="Key"
+                                SelectionChanged="ExposureTemplateId_SelectionChanged" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>

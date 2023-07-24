@@ -8,6 +8,7 @@ Changed the behavior of project minimum altitude: now can be used with or withou
 ### Other
 * Fixed issue with scheduler preview: wasn't picking up dynamic changes to target database.
 * Added 5/10/20 minute options to project minimum time.
+* Fixed the annoying bug related to editing Exposure Templates on Target Exposure Plans.
 
 ## 3.1.2.0 - 2023-07-20
 
