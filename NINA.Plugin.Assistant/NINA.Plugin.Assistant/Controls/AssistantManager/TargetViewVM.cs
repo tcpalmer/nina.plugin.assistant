@@ -21,6 +21,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private AssistantManagerVM managerVM;
         private IProfile profile;
+        public List<ExposureTemplate> exposureTemplates;
 
         public TargetViewVM(AssistantManagerVM managerVM,
             IProfileService profileService,
@@ -126,7 +127,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private void InitializeExposureTemplateList(IProfile profile) {
-            List<ExposureTemplate> exposureTemplates = managerVM.GetExposureTemplates(profile);
+            exposureTemplates = managerVM.GetExposureTemplates(profile);
             ExposureTemplateChoices = new AsyncObservableCollection<KeyValuePair<int, string>>();
             exposureTemplates.ForEach(et => {
                 ExposureTemplateChoices.Add(new KeyValuePair<int, string>(et.Id, et.Name));

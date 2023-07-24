@@ -10,13 +10,22 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         [Key] public int Id { get; set; }
         [Required] public string profileId { get; set; }
+        [NotMapped] private int exposureTemplateId;
         [Required] public double exposure { get; set; }
 
         public int desired { get; set; }
         public int acquired { get; set; }
         public int accepted { get; set; }
 
-        [ForeignKey("ExposureTemplate")] public int ExposureTemplateId { get; set; }
+        [ForeignKey("ExposureTemplate")]
+        public int ExposureTemplateId {
+            get { return exposureTemplateId; }
+            set {
+                exposureTemplateId = value;
+                RaisePropertyChanged(nameof(ExposureTemplateId));
+            }
+        }
+
         public virtual ExposureTemplate ExposureTemplate { get; set; }
 
         [ForeignKey("Target")] public int TargetId { get; set; }
