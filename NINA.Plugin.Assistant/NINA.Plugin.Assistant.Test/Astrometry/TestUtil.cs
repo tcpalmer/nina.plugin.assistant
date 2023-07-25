@@ -14,6 +14,8 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
 
         public static readonly Coordinates BETELGEUSE = new Coordinates(AstroUtil.HMSToDegrees("5:55:11"), AstroUtil.DMSToDegrees("7:24:30"), Epoch.J2000, Coordinates.RAType.Degrees);
 
+        public static readonly Coordinates B150 = new Coordinates(AstroUtil.HMSToDegrees("20:51:6"), AstroUtil.DMSToDegrees("60:11:0"), Epoch.J2000, Coordinates.RAType.Degrees);
+
         public static readonly Coordinates SPICA = new Coordinates(AstroUtil.HMSToDegrees("13:26:25.92"), AstroUtil.DMSToDegrees("-11:17:2.6"), Epoch.J2000, Coordinates.RAType.Degrees);
 
         public static readonly Coordinates STAR_NORTH_CIRCP = new Coordinates(AstroUtil.HMSToDegrees("0:0:0"), AstroUtil.DMSToDegrees("80:0:0"), Epoch.J2000, Coordinates.RAType.Degrees);

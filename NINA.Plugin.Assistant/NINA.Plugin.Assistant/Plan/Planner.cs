@@ -17,6 +17,7 @@ namespace Assistant.NINAPlugin.Plan {
 
     public class Planner {
 
+        private bool checkCondition = false;
         private DateTime atTime;
         private IProfile activeProfile;
         private ProfilePreference profilePreferences;
@@ -25,12 +26,14 @@ namespace Assistant.NINAPlugin.Plan {
 
         public static readonly bool USE_EMULATOR = false;
 
-        public Planner(DateTime atTime, IProfileService profileService, ProfilePreference profilePreferences) : this(atTime, profileService, profilePreferences, null) { }
+        public Planner(DateTime atTime, IProfileService profileService, ProfilePreference profilePreferences, bool checkCondition)
+            : this(atTime, profileService, profilePreferences, checkCondition, null) { }
 
-        public Planner(DateTime atTime, IProfileService profileService, ProfilePreference profilePreferences, List<IPlanProject> projects) {
+        public Planner(DateTime atTime, IProfileService profileService, ProfilePreference profilePreferences, bool checkCondition, List<IPlanProject> projects) {
             this.atTime = atTime;
             this.activeProfile = profileService.ActiveProfile;
             this.profilePreferences = profilePreferences;
+            this.checkCondition = checkCondition;
             this.projects = projects;
             this.observerInfo = new ObserverInfo {
                 Latitude = activeProfile.AstrometrySettings.Latitude,
@@ -45,11 +48,15 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         public SchedulerPlan GetPlan(IPlanTarget previousPlanTarget) {
-            TSLogger.Info("-- BEGIN PLANNING ENGINE RUN ---------------------------------------------------");
+            string type = checkCondition ? "CONDITION" : "EXECUTE";
+            string title = $"PLANNING ENGINE RUN ({type})";
+
+            TSLogger.Info($"-- BEGIN {title} ---------------------------------------------------");
             TSLogger.Debug($"getting current plan for {Utils.FormatDateTimeFull(atTime)}");
 
             if (USE_EMULATOR) {
                 Notification.ShowInformation("REMINDER: running plan emulation");
+                TSLogger.Info($"-- END {title} -----------------------------------------------------");
                 return new PlannerEmulator(atTime, activeProfile).GetPlan(previousPlanTarget);
             }
 
@@ -76,7 +83,7 @@ namespace Assistant.NINAPlugin.Plan {
 
                     DateTime? waitForVisibleNow = CheckForVisibleNow(projects);
                     if (waitForVisibleNow != null) {
-                        return new SchedulerPlan(atTime, projects, (DateTime)waitForVisibleNow);
+                        return new SchedulerPlan(atTime, projects, (DateTime)waitForVisibleNow, !checkCondition);
                     }
 
                     ScoringEngine scoringEngine = new ScoringEngine(activeProfile, atTime, previousPlanTarget);
@@ -91,7 +98,7 @@ namespace Assistant.NINAPlugin.Plan {
                         TimeInterval targetWindow = GetTargetTimeWindow(atTime, planTarget);
                         List<IPlanInstruction> planInstructions = PlanInstructions(planTarget, previousPlanTarget, targetWindow);
 
-                        return new SchedulerPlan(atTime, projects, planTarget, targetWindow, planInstructions);
+                        return new SchedulerPlan(atTime, projects, planTarget, targetWindow, planInstructions, !checkCondition);
                     }
                     else {
                         TSLogger.Debug("Scheduler Planner: no target selected");
@@ -107,7 +114,7 @@ namespace Assistant.NINAPlugin.Plan {
                     throw new SequenceEntityFailedException($"Scheduler: exception generating plan: {ex.Message}", ex);
                 }
                 finally {
-                    TSLogger.Info("-- END PLANNING ENGINE RUN -----------------------------------------------------");
+                    TSLogger.Info($"-- END {title} -----------------------------------------------------");
                 }
             }
         }
@@ -138,7 +145,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             try {
                 SchedulerPlan plan;
-                while ((plan = new Planner(currentTime, profileService, profilePreferences, projects).GetPlan(previousPlanTarget)) != null) {
+                while ((plan = new Planner(currentTime, profileService, profilePreferences, true, projects).GetPlan(previousPlanTarget)) != null) {
                     plans.Add(plan);
                     previousPlanTarget = plan.WaitForNextTargetTime != null ? null : plan.PlanTarget;
                     currentTime = plan.WaitForNextTargetTime != null ? (DateTime)plan.WaitForNextTargetTime : plan.TimeInterval.EndTime;
@@ -236,6 +243,7 @@ namespace Assistant.NINAPlugin.Plan {
                     // Clip time span to optional meridian window
                     TimeInterval meridianClippedSpan = null;
                     if (planProject.MeridianWindow > 0) {
+                        TSLogger.Info($"checking meridian window for {planProject.Name}/{planTarget.Name}");
                         meridianClippedSpan = new MeridianWindowClipper().Clip(
                                            targetStartTime,
                                            targetCircumstances.CulminationTime,

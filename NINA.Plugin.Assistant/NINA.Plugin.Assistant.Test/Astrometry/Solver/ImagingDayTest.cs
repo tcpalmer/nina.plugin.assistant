@@ -68,6 +68,16 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
         }
 
         [Test]
+        public void TestTransitTimeNorth() {
+            DateTime start = new DateTime(2023, 7, 25, 18, 0, 0);
+            DateTime end = new DateTime(2023, 7, 26, 6, 0, 0);
+
+            ImagingDay imagingDay = new ImagingDay(start, end, TestUtil.TEST_LOCATION_4, TestUtil.B150, TestUtil.getHD(0));
+            DateTime transitTime = imagingDay.GetTransitTime();
+            TestUtil.AssertTime(end, transitTime, 1, 53, 6);
+        }
+
+        [Test]
         public void TestGetRiseAboveMinimumTime() {
             DateTime start = new DateTime(2022, 10, 15, 18, 0, 0);
             DateTime end = new DateTime(2022, 10, 16, 6, 0, 0);
