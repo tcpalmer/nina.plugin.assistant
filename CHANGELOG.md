@@ -4,6 +4,7 @@
 * Changed the behavior of project minimum altitude: now can be used with or without a custom horizon.  If used with, then the horizon at each azimuth is the greater of (custom horizon + horizon offset) or project minimum altitude.
 * Fixed issue with scheduler preview: wasn't picking up dynamic changes to target database.
 * Added 5/10/20 minute options to project minimum time.
+* Will automatically unpark the scope if parked before a target slew.
 * Fixed the annoying bug related to editing Exposure Templates on Target Exposure Plans.
 
 ## 3.1.2.0 - 2023-07-20
