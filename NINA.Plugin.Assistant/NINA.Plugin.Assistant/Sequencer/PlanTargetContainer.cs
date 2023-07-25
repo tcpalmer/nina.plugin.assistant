@@ -18,7 +18,6 @@ using NINA.Sequencer.SequenceItem.Imaging;
 using NINA.Sequencer.SequenceItem.Platesolving;
 using NINA.Sequencer.SequenceItem.Telescope;
 using NINA.Sequencer.Trigger;
-using NINA.Sequencer.Trigger.Guider;
 using NINA.Sequencer.Utility;
 using NINA.Sequencer.Utility.DateTimeProvider;
 using NINA.WPF.Base.Interfaces.Mediator;
@@ -123,6 +122,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 AddEndTimeTrigger(plan.PlanTarget);
                 AddParentTriggers();
                 AddInstructions(plan);
+                EnsureUnparked(progress, token);
 
                 ImageSaveWatcher.Start();
                 base.Execute(progress, token).Wait();
@@ -318,6 +318,19 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private void AddWait(DateTime waitForTime, IPlanTarget planTarget) {
             Add(new PlanWaitInstruction(guiderMediator, telescopeMediator, waitForTime));
+        }
+
+        private void EnsureUnparked(IProgress<ApplicationStatus> progress, CancellationToken token) {
+            if (telescopeMediator.GetInfo().AtPark) {
+                TSLogger.Info("telescope is parked before potential target slew: unparking");
+                try {
+                    telescopeMediator.UnparkTelescope(progress, token).Wait();
+                }
+                catch (Exception ex) {
+                    TSLogger.Error($"failed to unpark telescope: {ex.Message}");
+                    throw new SequenceEntityFailedException("Failed to unpark telescope");
+                }
+            }
         }
 
         private void SetItemDefaults(ISequenceItem item, string name) {
