@@ -10,6 +10,7 @@ Changed the behavior of project minimum altitude: now can be used with or withou
 * Added 5/10/20 minute options to project minimum time.
 * Will automatically unpark the scope if parked before a target slew.
 * Fixed the annoying bug related to editing Exposure Templates on Target Exposure Plans.
+* Now skips useless Target Scheduler Condition checks.
 
 ## 3.1.2.0 - 2023-07-20
 

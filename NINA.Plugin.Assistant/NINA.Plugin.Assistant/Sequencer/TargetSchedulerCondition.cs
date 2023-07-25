@@ -11,6 +11,7 @@ using NINA.Sequencer.SequenceItem;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
@@ -70,12 +71,17 @@ namespace Assistant.NINAPlugin.Sequencer {
                 return true;
             }
 
+            if (CalledFromSchedulerStrategy()) {
+                //TSLogger.Debug("skipping TargetSchedulerCondition, called from PlanTargetContainerStrategy");
+                return true;
+            }
+
             return SelectedMode == TARGETS_REMAIN ? HasRemainingTargets() : HasActiveProjects();
         }
 
         private bool HasRemainingTargets() {
             try {
-                Planner planner = new Planner(DateTime.Now, profileService, GetProfilePreferences());
+                Planner planner = new Planner(DateTime.Now, profileService, GetProfilePreferences(), true);
 
                 bool result = planner.GetPlan(null) != null;
                 TSLogger.Info($"TargetSchedulerCondition check for remaining targets, continue={result}");
@@ -89,7 +95,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private bool HasActiveProjects() {
             try {
-                Planner planner = new Planner(DateTime.Now, profileService, GetProfilePreferences());
+                Planner planner = new Planner(DateTime.Now, profileService, GetProfilePreferences(), true);
                 bool result = planner.HasActiveProjects(null);
                 TSLogger.Info($"TargetSchedulerCondition check for active projects, continue={result}");
                 return result;
@@ -98,6 +104,23 @@ namespace Assistant.NINAPlugin.Sequencer {
                 TSLogger.Error($"exception determining active projects: {ex.StackTrace}");
                 throw new SequenceEntityFailedException($"TargetSchedulerCondition: exception determining active projects: {ex.Message}", ex);
             }
+        }
+
+        private bool CalledFromSchedulerStrategy() {
+
+            // Not a thing of beauty but a decent way to determine if we're being invoked as part of a target plan execution.
+            // If so, we don't want to run the condition check but will instead let it only run when it's being checked as part
+            // of an outer container.  Seems reasonably fast - much faster than a useless planner run at least.
+
+            StackTrace stackTrace = new StackTrace();
+            StackFrame[] stackFrames = stackTrace.GetFrames();
+            foreach (StackFrame stackFrame in stackFrames) {
+                if (stackFrame.GetMethod().DeclaringType == typeof(PlanTargetContainerStrategy)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private ProfilePreference GetProfilePreferences() {

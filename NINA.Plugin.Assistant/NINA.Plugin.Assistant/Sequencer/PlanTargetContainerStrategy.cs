@@ -281,18 +281,10 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private bool CanContinue(ISequenceContainer container, ISequenceItem previousItem, ISequenceItem nextItem) {
 
-            // Check conditions here (shouldn't be any on PlanTargetContainer)
-            var conditionable = container as IConditionable;
-            var canContinue = false;
-            var conditions = conditionable?.GetConditionsSnapshot()?.Where(x => x.Status != SequenceEntityStatus.DISABLED).ToList();
-            if (conditions != null && conditions.Count > 0) {
-                canContinue = conditionable.CheckConditions(previousItem, nextItem);
-            }
-            else {
-                canContinue = container.Iterations < 1;
-            }
+            // There can't be any conditions directly on PlanTargetContainer so no need to check
 
             // Check conditions on ancestor containers above our parent
+            var canContinue = container.Iterations < 1;
             if (parentContainer.Parent != null) {
                 canContinue = canContinue && AncestorsCanContinue(parentContainer.Parent, previousItem, nextItem);
             }
@@ -304,6 +296,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             var conditionable = container as IConditionable;
             var canContinue = false;
             var conditions = conditionable?.GetConditionsSnapshot()?.Where(x => x.Status != SequenceEntityStatus.DISABLED).ToList();
+
             if (conditions != null && conditions.Count > 0) {
                 canContinue = conditionable.CheckConditions(previousItem, nextItem);
             }

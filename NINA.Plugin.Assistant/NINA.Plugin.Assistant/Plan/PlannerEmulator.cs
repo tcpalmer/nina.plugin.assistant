@@ -44,7 +44,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         private SchedulerPlan WaitForTime(DateTime waitFor) {
-            return new SchedulerPlan(atTime, null, waitFor);
+            return new SchedulerPlan(atTime, null, waitFor, true);
         }
 
         private SchedulerPlan Plan1() {
@@ -98,7 +98,7 @@ namespace Assistant.NINAPlugin.Plan {
             instructions.Add(new PlanTakeExposure(lum));
             */
 
-            return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions);
+            return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions, false);
         }
 
         private SchedulerPlan Plan2() {
@@ -142,7 +142,7 @@ namespace Assistant.NINAPlugin.Plan {
             instructions.Add(new PlanTakeExposure(lum));
             instructions.Add(new PlanDither());
 
-            return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions);
+            return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions, false);
         }
 
         private SchedulerPlan Plan3() {
@@ -186,7 +186,7 @@ namespace Assistant.NINAPlugin.Plan {
             instructions.Add(new PlanTakeExposure(lum));
             instructions.Add(new PlanDither());
 
-            return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions);
+            return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions, false);
         }
 
         private IPlanExposure GetExposurePlan(string name, int exposure, int? gain, int? offset, int desired, int databaseId) {

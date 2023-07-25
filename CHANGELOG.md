@@ -6,6 +6,7 @@
 * Added 5/10/20 minute options to project minimum time.
 * Will automatically unpark the scope if parked before a target slew.
 * Fixed the annoying bug related to editing Exposure Templates on Target Exposure Plans.
+* Now skips useless Target Scheduler Condition checks.
 
 ## 3.1.2.0 - 2023-07-20
 * The execution of the Before/After Target containers was changed to mean run only for new or changed targets. 

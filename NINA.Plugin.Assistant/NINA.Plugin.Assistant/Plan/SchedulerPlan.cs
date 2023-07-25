@@ -22,7 +22,7 @@ namespace Assistant.NINAPlugin.Plan {
         public bool IsEmulator { get; set; }
         public string DetailsLog { get; private set; }
 
-        public SchedulerPlan(DateTime planTime, List<IPlanProject> projects, IPlanTarget planTarget, TimeInterval timeInterval, List<IPlanInstruction> planInstructions) {
+        public SchedulerPlan(DateTime planTime, List<IPlanProject> projects, IPlanTarget planTarget, TimeInterval timeInterval, List<IPlanInstruction> planInstructions, bool logPlan) {
             this.PlanId = Guid.NewGuid().ToString();
             this.PlanTime = planTime;
             this.Projects = projects;
@@ -31,20 +31,24 @@ namespace Assistant.NINAPlugin.Plan {
             this.PlanInstructions = planInstructions;
             this.WaitForNextTargetTime = null;
 
-            string log = LogPlanResults();
-            DetailsLog = DetailsLog + log;
-            TSLogger.Info(log);
+            if (logPlan) {
+                string log = LogPlanResults();
+                DetailsLog = DetailsLog + log;
+                TSLogger.Info(log);
+            }
         }
 
-        public SchedulerPlan(DateTime planTime, List<IPlanProject> projects, DateTime waitForNextTargetTime) {
+        public SchedulerPlan(DateTime planTime, List<IPlanProject> projects, DateTime waitForNextTargetTime, bool logPlan) {
             this.PlanId = Guid.NewGuid().ToString();
             this.PlanTime = planTime;
             this.Projects = projects;
             this.WaitForNextTargetTime = waitForNextTargetTime;
 
-            string log = LogPlanResults();
-            DetailsLog = DetailsLog + log;
-            TSLogger.Info(log);
+            if (logPlan) {
+                string log = LogPlanResults();
+                DetailsLog = DetailsLog + log;
+                TSLogger.Info(log);
+            }
         }
 
         public string LogPlanResults() {
