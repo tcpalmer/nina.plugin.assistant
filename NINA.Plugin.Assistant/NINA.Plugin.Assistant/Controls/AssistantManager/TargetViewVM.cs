@@ -21,6 +21,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private AssistantManagerVM managerVM;
         private IProfile profile;
+        private string profileId;
         public List<ExposureTemplate> exposureTemplates;
 
         public TargetViewVM(AssistantManagerVM managerVM,
@@ -32,6 +33,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             Target target) : base(profileService) {
 
             this.managerVM = managerVM;
+            profileId = target.Project.ProfileId;
             TargetProxy = new TargetProxy(target);
             TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
 
@@ -50,6 +52,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
             ShowTargetImportViewCommand = new RelayCommand(ShowTargetImportViewCmd);
             AddExposurePlanCommand = new RelayCommand(AddExposurePlan);
+            CopyExposurePlansCommand = new RelayCommand(CopyExposurePlans);
+            PasteExposurePlansCommand = new RelayCommand(PasteExposurePlans);
             DeleteExposurePlanCommand = new RelayCommand(DeleteExposurePlan);
 
             SendCoordinatesToFramingAssistantCommand = new AsyncCommand<bool>(async () => {
@@ -152,6 +156,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             set {
                 showEditView = value;
                 RaisePropertyChanged(nameof(ShowEditView));
+                RaisePropertyChanged(nameof(ExposurePlansCopyEnabled));
+                RaisePropertyChanged(nameof(ExposurePlansPasteEnabled));
             }
         }
 
@@ -171,6 +177,14 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 itemEdited = value;
                 RaisePropertyChanged(nameof(ItemEdited));
             }
+        }
+
+        public bool ExposurePlansCopyEnabled {
+            get => !ShowEditView && TargetProxy.Original.ExposurePlans?.Count > 0;
+        }
+
+        public bool ExposurePlansPasteEnabled {
+            get => !ShowEditView && ExposurePlansClipboard.HasCopyItem();
         }
 
         private TargetImportVM targetImportVM;
@@ -197,6 +211,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand ShowTargetImportViewCommand { get; private set; }
 
         public ICommand AddExposurePlanCommand { get; private set; }
+        public ICommand CopyExposurePlansCommand { get; private set; }
+        public ICommand PasteExposurePlansCommand { get; private set; }
         public ICommand DeleteExposurePlanCommand { get; private set; }
 
         private void Edit(object obj) {
@@ -252,10 +268,19 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        private void AddExposurePlan(object obj) {
+        private ExposureTemplate GetDefaultExposureTemplate() {
             ExposureTemplate exposureTemplate = managerVM.GetDefaultExposureTemplate(profile);
             if (exposureTemplate == null) {
                 MyMessageBox.Show("Can't find a default Exposure Template.  You must create some Exposure Templates for this profile before creating an Exposure Plan.", "Oops");
+                return null;
+            }
+
+            return exposureTemplate;
+        }
+
+        private void AddExposurePlan(object obj) {
+            ExposureTemplate exposureTemplate = GetDefaultExposureTemplate();
+            if (exposureTemplate == null) {
                 return;
             }
 
@@ -268,6 +293,53 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             proxy.ExposurePlans.Add(exposurePlan);
             InitializeExposurePlans(proxy);
             ItemEdited = true;
+        }
+
+        private void CopyExposurePlans(object obj) {
+            if (ExposurePlans?.Count > 0) {
+                List<ExposurePlan> exposurePlans = new List<ExposurePlan>(ExposurePlans.Count);
+                foreach (ExposurePlan item in ExposurePlans) {
+                    exposurePlans.Add(item);
+                }
+
+                ExposurePlansClipboard.SetItem(exposurePlans);
+                RaisePropertyChanged(nameof(ExposurePlansPasteEnabled));
+            }
+        }
+
+        private void PasteExposurePlans(object obj) {
+            List<ExposurePlan> copiedExposurePlans = ExposurePlansClipboard.GetItem();
+            if (copiedExposurePlans?.Count == 0) {
+                return;
+            }
+
+            ExposureTemplate exposureTemplate = null;
+            if (copiedExposurePlans[0].ExposureTemplate.ProfileId != profileId) {
+                MyMessageBox.Show("The copied Exposure Plans reference Exposure Templates from a different profile.  They will be defaulted to the default (first) Exposure Template for this profile.");
+                exposureTemplate = GetDefaultExposureTemplate();
+                if (exposureTemplate == null) {
+                    return;
+                }
+            }
+
+            foreach (ExposurePlan copy in copiedExposurePlans) {
+                ExposurePlan ep = copy.GetPasteCopy(profileId);
+                ep.TargetId = TargetProxy.Original.Id;
+
+                if (exposureTemplate != null) {
+                    ep.ExposureTemplateId = exposureTemplate.Id;
+                    ep.ExposureTemplate = exposureTemplate;
+                }
+
+                ExposurePlans.Add(ep);
+            }
+
+            TargetProxy.Proxy.ExposurePlans = ExposurePlans;
+            managerVM.SaveTarget(TargetProxy.Proxy);
+            TargetProxy.OnSave();
+            InitializeExposurePlans(TargetProxy.Proxy);
+            RaisePropertyChanged(nameof(ExposurePlans));
+            TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
         }
 
         private void DeleteExposurePlan(object obj) {

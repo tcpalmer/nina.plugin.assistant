@@ -1,9 +1,12 @@
 # Release Notes
 
-## 3.1.3.0 - 2023-07-XX
+## 3.1.4.0 - 2023-07-XX
 
 ### Minimum Altitude
 Changed the behavior of project minimum altitude: now can be used with or without a custom horizon.  If used with, then the horizon at each azimuth is the greater of (custom horizon + horizon offset) or project minimum altitude.
+
+### Copy/Paste Exposure Plans
+You can now copy the exposure plans from one target and paste to another - even a target associated with a different profile.
 
 ### Other
 * Fixed issue with scheduler preview: wasn't picking up dynamic changes to target database.
