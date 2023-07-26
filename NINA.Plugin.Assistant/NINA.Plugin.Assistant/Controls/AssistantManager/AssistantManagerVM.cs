@@ -965,5 +965,27 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private Clipboard() { }
     }
+
+    public class ExposurePlansClipboard {
+
+        private static readonly ExposurePlansClipboard Instance = new ExposurePlansClipboard();
+        private List<ExposurePlan> item { get; set; }
+
+        public static bool HasCopyItem() {
+            return Instance.item != null;
+        }
+
+        public static void SetItem(List<ExposurePlan> item) {
+            if (item?.Count > 0) {
+                Instance.item = item;
+            }
+        }
+
+        public static List<ExposurePlan> GetItem() {
+            return Instance.item;
+        }
+
+        private ExposurePlansClipboard() { }
+    }
 }
 

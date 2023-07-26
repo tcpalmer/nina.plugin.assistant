@@ -383,26 +383,70 @@
                 </Grid>
             </Button>
         </StackPanel>
-        <Button
-            Width="25"
-            Height="25"
-            Margin="10,0,0,6"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Center"
-            HorizontalContentAlignment="Left"
-            Command="{Binding AddExposurePlanCommand}"
-            IsEnabled="{Binding ShowEditView}"
-            Style="{StaticResource BackgroundButton}"
-            ToolTip="Add exposure plan"
-            ToolTipService.ShowOnDisabled="True">
-            <Grid>
-                <Path
-                    Margin="5"
-                    Data="{StaticResource SS_NewSVG}"
-                    Fill="{StaticResource ButtonForegroundBrush}"
-                    Stretch="Uniform" />
-            </Grid>
-        </Button>
+
+        <StackPanel Orientation="Horizontal">
+            <Button
+                Width="25"
+                Height="25"
+                Margin="10,0,0,6"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Left"
+                Command="{Binding AddExposurePlanCommand}"
+                IsEnabled="{Binding ShowEditView}"
+                Style="{StaticResource BackgroundButton}"
+                ToolTip="Add exposure plan"
+                ToolTipService.ShowOnDisabled="True">
+                <Grid>
+                    <Path
+                        Margin="5"
+                        Data="{StaticResource SS_NewSVG}"
+                        Fill="{StaticResource ButtonForegroundBrush}"
+                        Stretch="Uniform" />
+                </Grid>
+            </Button>
+            <Button
+                Width="25"
+                Height="25"
+                Margin="10,0,0,6"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Left"
+                Command="{Binding CopyExposurePlansCommand}"
+                IsEnabled="{Binding ExposurePlansCopyEnabled}"
+                Style="{StaticResource BackgroundButton}"
+                ToolTip="Copy exposure plans"
+                ToolTipService.ShowOnDisabled="True">
+                <Grid>
+                    <Path
+                        Margin="5"
+                        Data="{StaticResource SS_CopySVG}"
+                        Fill="{StaticResource ButtonForegroundBrush}"
+                        Stretch="Uniform" />
+                </Grid>
+            </Button>
+            <Button
+                Width="25"
+                Height="25"
+                Margin="10,0,0,6"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Left"
+                Command="{Binding PasteExposurePlansCommand}"
+                IsEnabled="{Binding ExposurePlansPasteEnabled}"
+                Style="{StaticResource BackgroundButton}"
+                ToolTip="Paste exposure plans"
+                ToolTipService.ShowOnDisabled="True">
+                <Grid>
+                    <Path
+                        Margin="5"
+                        Data="{StaticResource SS_PasteSVG}"
+                        Fill="{StaticResource ButtonForegroundBrush}"
+                        Stretch="Uniform" />
+                </Grid>
+            </Button>
+        </StackPanel>
+
         <DataGrid
             Name="ExposurePlansDataGrid"
             Grid.Row="0"
