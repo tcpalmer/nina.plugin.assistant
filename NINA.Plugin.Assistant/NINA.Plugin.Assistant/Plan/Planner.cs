@@ -145,7 +145,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             try {
                 SchedulerPlan plan;
-                while ((plan = new Planner(currentTime, profileService, profilePreferences, true, projects).GetPlan(previousPlanTarget)) != null) {
+                while ((plan = new Planner(currentTime, profileService, profilePreferences, false, projects).GetPlan(previousPlanTarget)) != null) {
                     plans.Add(plan);
                     previousPlanTarget = plan.WaitForNextTargetTime != null ? null : plan.PlanTarget;
                     currentTime = plan.WaitForNextTargetTime != null ? (DateTime)plan.WaitForNextTargetTime : plan.TimeInterval.EndTime;
