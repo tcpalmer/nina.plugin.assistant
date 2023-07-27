@@ -18,14 +18,14 @@ namespace Assistant.NINAPlugin.Sequencer {
     [ExportMetadata("Icon", "Pen_NoFill_SVG")]
     [Export(typeof(ISequenceContainer))]
     [JsonObject(MemberSerialization.OptIn)]
-    public class InstructionContainer : SequentialContainer, ISequenceContainer, IValidatable {
+    public class InstructionContainer : SequenceContainer, ISequenceContainer, IValidatable {
 
         private Object lockObj = new Object();
 
         [ImportingConstructor]
-        public InstructionContainer() : base() { }
+        public InstructionContainer() : base(new InstructionContainerStrategy()) { }
 
-        public InstructionContainer(string name, ISequenceContainer parent) : base() {
+        public InstructionContainer(string name, ISequenceContainer parent) : base(new InstructionContainerStrategy()) {
             Name = name;
             AttachNewParent(Parent);
         }

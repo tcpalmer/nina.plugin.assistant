@@ -1,6 +1,5 @@
 ﻿using Assistant.NINAPlugin.Util;
 using NINA.Core.Model;
-using NINA.Core.Utility;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
 using NINA.Sequencer.Trigger;
@@ -32,7 +31,12 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public override bool ShouldTrigger(ISequenceItem previousItem, ISequenceItem nextItem) {
             double nextDuration = nextItem?.GetEstimatedDuration().TotalSeconds ?? 0;
-            return DateTime.Now.AddSeconds(nextDuration) > EndTime;
+            bool shouldTrigger = DateTime.Now.AddSeconds(nextDuration) > EndTime;
+            if (shouldTrigger) {
+                TSLogger.Info($"will trigger scheduler target plan stop: now plus next duration {nextDuration} > endTime {Utils.FormatDateTimeFull(EndTime)}");
+            }
+
+            return shouldTrigger;
         }
     }
 
