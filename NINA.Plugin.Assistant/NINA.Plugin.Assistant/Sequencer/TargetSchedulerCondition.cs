@@ -72,7 +72,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             if (CalledFromSchedulerStrategy()) {
-                //TSLogger.Debug("skipping TargetSchedulerCondition, called from PlanTargetContainerStrategy");
                 return true;
             }
 
@@ -108,14 +107,21 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private bool CalledFromSchedulerStrategy() {
 
-            // Not a thing of beauty but a decent way to determine if we're being invoked as part of a target plan execution.
-            // If so, we don't want to run the condition check but will instead let it only run when it's being checked as part
-            // of an outer container.  Seems reasonably fast - much faster than a useless planner run at least.
+            // Not a thing of beauty but a decent way to determine if we're being invoked as part of a TS.  If so, we
+            // don't want to run the condition check but will instead let it only run when it's being checked as part
+            // of an outer container.  Seems reasonably fast - much faster than a useless planner run at least and keeps
+            // the TS logs much cleaner.
+
+            // An alternative would be to use the ConditionWatchdog approach but that still means you'd have to run the
+            // check every few seconds - almost certainly much more than this approach.  No watchdog in core NINA uses
+            // more than 5s.
 
             StackTrace stackTrace = new StackTrace();
             StackFrame[] stackFrames = stackTrace.GetFrames();
             foreach (StackFrame stackFrame in stackFrames) {
-                if (stackFrame.GetMethod().DeclaringType == typeof(PlanTargetContainerStrategy)) {
+                Type declaringType = stackFrame.GetMethod().DeclaringType;
+                if (declaringType == typeof(PlanTargetContainerStrategy) ||
+                    declaringType == typeof(InstructionContainerStrategy)) {
                     return true;
                 }
             }

@@ -288,7 +288,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void AddTakeExposure(IPlanTarget planTarget, IPlanExposure planExposure) {
-            TSLogger.Info($"adding take exposure: {planExposure.FilterName}");
+            TSLogger.Info($"adding take exposure: {planExposure.FilterName} {planExposure.ExposureLength}s");
 
             PlanTakeExposure takeExposure = new PlanTakeExposure(parentContainer,
                         profileService,
