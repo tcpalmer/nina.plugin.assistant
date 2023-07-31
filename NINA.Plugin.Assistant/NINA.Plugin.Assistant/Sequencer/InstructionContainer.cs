@@ -1,6 +1,4 @@
-﻿using Assistant.NINAPlugin.Util;
-using Newtonsoft.Json;
-using NINA.Core.Model;
+﻿using Newtonsoft.Json;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
 using NINA.Sequencer.Validations;
@@ -8,8 +6,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
@@ -28,14 +24,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         public InstructionContainer(string name, ISequenceContainer parent) : base(new InstructionContainerStrategy()) {
             Name = name;
             AttachNewParent(Parent);
-        }
-
-        public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-            TSLogger.Info($"begin executing '{Name}' event instructions");
-            Task t = base.Execute(progress, token);
-            TSLogger.Info($"done executing '{Name}' event instructions, resetting progress for next execution");
-            base.ResetAll();
-            return t;
         }
 
         public override object Clone() {
