@@ -83,7 +83,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             bool accepted = false;
-            string rejectReason = "";
+            string rejectReason = "not graded";
             if (enableGrader) {
                 (accepted, rejectReason) = new ImageGrader(profile).GradeImage(planTarget, msg);
             }

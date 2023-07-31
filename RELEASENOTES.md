@@ -13,6 +13,7 @@ You can now copy the exposure plans from one target and paste to another - even 
 * Added 5/10/20 minute options to project minimum time.
 * Will automatically unpark the scope if parked before a target slew.
 * Fixed the annoying bug related to editing Exposure Templates on Target Exposure Plans.
+* Images in the acquired images table will now show 'not graded' as the Reject Reason if grading was disabled when the image completed.
 * Now skips useless Target Scheduler Condition checks.
 
 ## 3.1.2.0 - 2023-07-20
