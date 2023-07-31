@@ -1,6 +1,6 @@
 # Target Scheduler
 
-## 3.1.4.0 - 2023-07-XX
+## 3.1.4.1 - 2023-07-XX
 * Changed the behavior of project minimum altitude: now can be used with or without a custom horizon.  If used with, then the horizon at each azimuth is the greater of (custom horizon + horizon offset) or project minimum altitude.
 * Added ability to copy/paste exposure plans.
 * Fixed issue with scheduler preview: wasn't picking up dynamic changes to target database.
