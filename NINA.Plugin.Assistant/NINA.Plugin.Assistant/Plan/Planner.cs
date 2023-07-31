@@ -243,7 +243,7 @@ namespace Assistant.NINAPlugin.Plan {
                     // Clip time span to optional meridian window
                     TimeInterval meridianClippedSpan = null;
                     if (planProject.MeridianWindow > 0) {
-                        TSLogger.Info($"checking meridian window for {planProject.Name}/{planTarget.Name}");
+                        TSLogger.Debug($"checking meridian window for {planProject.Name}/{planTarget.Name}");
                         meridianClippedSpan = new MeridianWindowClipper().Clip(
                                            targetStartTime,
                                            targetCircumstances.CulminationTime,
@@ -369,7 +369,7 @@ namespace Assistant.NINAPlugin.Plan {
                 foreach (IPlanTarget planTarget in planProject.Targets) {
                     if (planTarget.Rejected) { continue; }
 
-                    TSLogger.Debug($"running scoring engine for project/target {planProject.Name}/{planTarget.Name}");
+                    TSLogger.Trace($"running scoring engine for project/target {planProject.Name}/{planTarget.Name}");
                     double score = scoringEngine.ScoreTarget(planTarget);
                     if (score > highScore) {
                         highScoreTarget = planTarget;
@@ -546,7 +546,7 @@ namespace Assistant.NINAPlugin.Plan {
                 planExposure.MoonAvoidanceSeparation, planExposure.MoonAvoidanceWidth);
 
             bool rejected = moonSeparation < moonAvoidanceSeparation;
-            TSLogger.Debug($"moon avoidance {planTarget.Name}/{planExposure.FilterName} rejected={rejected}, midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
+            TSLogger.Trace($"moon avoidance {planTarget.Name}/{planExposure.FilterName} rejected={rejected}, midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
 
             return rejected;
         }

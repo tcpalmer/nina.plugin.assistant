@@ -186,7 +186,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             base.Teardown();
         }
 
-        public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
+        public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
             TSLogger.Debug("Scheduler instruction: Execute");
 
             IPlanTarget previousPlanTarget = null;
@@ -198,30 +198,30 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 if (plan == null) {
                     if (previousPlanTarget != null) {
-                        ExecuteEventContainer(AfterTargetContainer, progress, token);
+                        await ExecuteEventContainer(AfterTargetContainer, progress, token);
                     }
 
                     SchedulerProgress.End();
 
                     TSLogger.Info("planner returned empty plan, done");
-                    return Task.CompletedTask;
+                    return;
                 }
 
                 if (plan.WaitForNextTargetTime != null) {
                     if (previousPlanTarget != null) {
-                        ExecuteEventContainer(AfterTargetContainer, progress, token);
+                        await ExecuteEventContainer(AfterTargetContainer, progress, token);
                         previousPlanTarget = null;
                     }
 
                     TSLogger.Info($"planner waiting for next target to become available: {Utils.FormatDateTimeFull(plan.WaitForNextTargetTime)}");
 
                     SchedulerProgress.WaitStart(plan.WaitForNextTargetTime);
-                    ExecuteEventContainer(BeforeWaitContainer, progress, token);
+                    await ExecuteEventContainer(BeforeWaitContainer, progress, token);
                     SchedulerProgress.Add("Wait");
 
                     WaitForNextTarget(plan.WaitForNextTargetTime, progress, token);
 
-                    ExecuteEventContainer(AfterWaitContainer, progress, token);
+                    await ExecuteEventContainer(AfterWaitContainer, progress, token);
                     SchedulerProgress.End();
                 }
                 else {
@@ -229,7 +229,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         IPlanTarget planTarget = plan.PlanTarget;
 
                         if (previousPlanTarget != null && !planTarget.Equals(previousPlanTarget)) {
-                            ExecuteEventContainer(AfterTargetContainer, progress, token);
+                            await ExecuteEventContainer(AfterTargetContainer, progress, token);
                         }
 
                         SchedulerProgress.End();
@@ -266,13 +266,13 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        public void ExecuteEventContainer(InstructionContainer container, IProgress<ApplicationStatus> progress, CancellationToken token) {
+        public async Task ExecuteEventContainer(InstructionContainer container, IProgress<ApplicationStatus> progress, CancellationToken token) {
             if (container.Items?.Count > 0) {
-                // TODO: for AfterTarget, we need the name of the container for the previous target
                 SchedulerProgress.Add(container.Name);
+                TSLogger.Info($"begin executing '{container.Name}' event instructions");
 
                 try {
-                    container.Execute(progress, token).Wait();
+                    await container.Execute(progress, token);
                 }
                 catch (Exception ex) {
                     SchedulerProgress.End();
@@ -283,6 +283,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
 
                     throw new SequenceEntityFailedException($"exception executing {container.Name} instruction container: {ex.Message}", ex);
+                }
+                finally {
+                    TSLogger.Info($"done executing '{container.Name}' event instructions, resetting progress for next execution");
+                    container.ResetAll();
                 }
             }
         }
