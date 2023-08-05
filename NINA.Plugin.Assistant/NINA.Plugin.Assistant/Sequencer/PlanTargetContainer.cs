@@ -258,7 +258,9 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void AddBeforeTargetInstructions() {
-            if (parentContainer.BeforeTargetContainer.Items?.Count > 0) {
+            int? numInstructions = parentContainer.BeforeTargetContainer.Items?.Count;
+            if (numInstructions != null && numInstructions > 0) {
+                TSLogger.Info($"adding BeforeNewTarget container with {numInstructions} instruction(s)");
                 parentContainer.BeforeTargetContainer.ResetAll();
                 Add(parentContainer.BeforeTargetContainer);
             }
