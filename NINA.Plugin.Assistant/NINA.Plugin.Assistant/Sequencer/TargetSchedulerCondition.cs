@@ -116,17 +116,24 @@ namespace Assistant.NINAPlugin.Sequencer {
             // check every few seconds - almost certainly much more than this approach.  No watchdog in core NINA uses
             // more than 5s.
 
-            StackTrace stackTrace = new StackTrace();
-            StackFrame[] stackFrames = stackTrace.GetFrames();
-            foreach (StackFrame stackFrame in stackFrames) {
-                Type declaringType = stackFrame.GetMethod().DeclaringType;
-                if (declaringType == typeof(PlanTargetContainerStrategy) ||
-                    declaringType == typeof(InstructionContainerStrategy)) {
-                    return true;
+            try {
+                StackTrace stackTrace = new StackTrace();
+                StackFrame[] stackFrames = stackTrace.GetFrames();
+                foreach (StackFrame stackFrame in stackFrames) {
+                    Type declaringType = stackFrame.GetMethod().DeclaringType;
+                    if (declaringType == typeof(PlanTargetContainerStrategy) ||
+                        declaringType == typeof(InstructionContainerStrategy)) {
+                        return true;
+                    }
                 }
-            }
 
-            return false;
+                return false;
+            }
+            catch (Exception ex) {
+                TSLogger.Error($"exception determining origin of call for TargetSchedulerCondition: {ex.Message}");
+                TSLogger.Error(ex);
+                return false;
+            }
         }
 
         private ProfilePreference GetProfilePreferences() {
