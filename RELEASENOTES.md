@@ -1,6 +1,6 @@
 # Release Notes
 
-## 3.2.0.0 - 2023-08-XX
+## 3.2.0.0 - 2023-08-07
 
 ### Minimum Altitude
 Changed the behavior of project minimum altitude: now can be used with or without a custom horizon.  If used with, then the horizon at each azimuth is the greater of (custom horizon + horizon offset) or project minimum altitude.
