@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ninactrl="clr-namespace:NINA.CustomControlLibrary;assembly=NINA.CustomControlLibrary"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -18,14 +19,16 @@
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1">
             <Grid
-                Width="350"
-                Margin="5,20,5,12"
+                Width="600"
+                Margin="15,20,5,12"
                 HorizontalAlignment="Left">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="130" />
                     <ColumnDefinition Width="260" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
+                    <RowDefinition MinHeight="25" />
+                    <RowDefinition MinHeight="25" />
                     <RowDefinition MinHeight="25" />
                     <RowDefinition MinHeight="25" />
                     <RowDefinition MinHeight="25" />
@@ -35,13 +38,35 @@
                 <TextBlock
                     Grid.Row="0"
                     Grid.Column="0"
-                    MaxWidth="80"
+                    MaxWidth="120"
+                    HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     FontWeight="Bold"
-                    Text="Date Range" />
-                <StackPanel
+                    Text="Fixed Date Range" />
+                <ComboBox
                     Grid.Row="0"
                     Grid.Column="1"
+                    MinWidth="233"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    DisplayMemberPath="Value"
+                    ItemsSource="{Binding FixedDateRangeChoices}"
+                    SelectedValue="{Binding SelectedFixedDateRange, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    SelectedValuePath="Key" />
+
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    MaxWidth="120"
+                    Margin="0,0,0,12"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
+                    Text="Custom Date Range" />
+                <StackPanel
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="0,0,0,12"
                     Orientation="Horizontal">
                     <DatePicker VerticalAlignment="Center" SelectedDate="{Binding FromDate}" />
                     <TextBlock
@@ -53,16 +78,17 @@
                 </StackPanel>
 
                 <TextBlock
-                    Grid.Row="1"
+                    Grid.Row="2"
                     Grid.Column="0"
                     MaxWidth="80"
+                    HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     FontWeight="Bold"
                     Text="Project" />
                 <ComboBox
-                    Grid.Row="1"
+                    Grid.Row="2"
                     Grid.Column="1"
-                    Width="180"
+                    MinWidth="233"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     DisplayMemberPath="Value"
@@ -71,16 +97,17 @@
                     SelectedValuePath="Key" />
 
                 <TextBlock
-                    Grid.Row="2"
+                    Grid.Row="3"
                     Grid.Column="0"
                     MaxWidth="80"
+                    HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     FontWeight="Bold"
                     Text="Target" />
                 <ComboBox
-                    Grid.Row="2"
+                    Grid.Row="3"
                     Grid.Column="1"
-                    Width="180"
+                    MinWidth="233"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     DisplayMemberPath="Value"
@@ -88,8 +115,27 @@
                     SelectedValue="{Binding SelectedTargetId}"
                     SelectedValuePath="Key" />
 
+                <TextBlock
+                    Grid.Row="4"
+                    Grid.Column="0"
+                    MaxWidth="80"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
+                    Text="Filter" />
+                <ComboBox
+                    Grid.Row="4"
+                    Grid.Column="1"
+                    MinWidth="233"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    DisplayMemberPath="Value"
+                    ItemsSource="{Binding FilterChoices}"
+                    SelectedValue="{Binding SelectedFilterId}"
+                    SelectedValuePath="Key" />
+
                 <Button
-                    Grid.Row="3"
+                    Grid.Row="5"
                     Grid.Column="0"
                     Width="18"
                     Height="18"
@@ -119,6 +165,17 @@
             FontStyle="Italic"
             Text="Click the table headers to sort, select a row to show details" />
 
+        <Grid Height="350" Visibility="{Binding TableLoading, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+            <ninactrl:LoadingControl
+                MaxWidth="100"
+                MaxHeight="100"
+                Margin="0,30,0,0"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                LoadingImageBrush="{StaticResource PrimaryBrush}"
+                Visibility="{Binding TableLoading, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+        </Grid>
+
         <DataGrid
             Grid.Row="0"
             Height="350"
@@ -133,7 +190,8 @@
             ItemsSource="{Binding ItemsView}"
             RowHeight="25"
             SelectedItem="{Binding SelectedItem}"
-            VerticalScrollBarVisibility="Auto">
+            VerticalScrollBarVisibility="Auto"
+            Visibility="{Binding TableLoading, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}">
 
             <DataGrid.ColumnHeaderStyle>
                 <Style TargetType="{x:Type DataGridColumnHeader}">
