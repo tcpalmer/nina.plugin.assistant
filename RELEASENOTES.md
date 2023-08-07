@@ -1,6 +1,6 @@
 # Release Notes
 
-## 3.1.4.1 - 2023-07-XX
+## 3.2.0.0 - 2023-08-XX
 
 ### Minimum Altitude
 Changed the behavior of project minimum altitude: now can be used with or without a custom horizon.  If used with, then the horizon at each azimuth is the greater of (custom horizon + horizon offset) or project minimum altitude.
@@ -8,12 +8,17 @@ Changed the behavior of project minimum altitude: now can be used with or withou
 ### Copy/Paste Exposure Plans
 You can now copy the exposure plans from one target and paste to another - even a target associated with a different profile.
 
+### Acquired Images
+* Added fixed date range options.
+* Added ability to select images by filter used.
+* Images in the table will now show 'not graded' as the Reject Reason if grading was disabled when the image completed.
+* Improved search and display performance.
+
 ### Other
 * Fixed issue with scheduler preview: wasn't picking up dynamic changes to target database.
 * Added 5/10/20 minute options to project minimum time.
 * Will automatically unpark the scope if parked before a target slew.
 * Fixed the annoying bug related to editing Exposure Templates on Target Exposure Plans.
-* Images in the acquired images table will now show 'not graded' as the Reject Reason if grading was disabled when the image completed.
 * Now skips useless Target Scheduler Condition checks.
 
 ## 3.1.2.0 - 2023-07-20
