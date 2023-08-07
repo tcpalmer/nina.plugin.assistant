@@ -124,10 +124,8 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
                 RaisePropertyChanged(nameof(SelectedFixedDateRange));
 
                 if (selectedFixedDateRange != FIXED_DATE_RANGE_OFF) {
-                    // OK ... but not setting the TIME properly.  Refactor out from and to functions
-                    // Sure?
-                    fromDate = DateTime.Now.AddDays((-1 * selectedFixedDateRange) + 1);
-                    toDate = DateTime.Now;
+                    fromDate = DateTime.Now.Date.AddDays((-1 * selectedFixedDateRange) + 1);
+                    toDate = DateTime.Now.Date.AddDays(1).Date.AddSeconds(-1);
                     RaisePropertyChanged(nameof(FromDate));
                     RaisePropertyChanged(nameof(ToDate));
                     _ = LoadRecords();
@@ -382,7 +380,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
     }
 
-    public class RangeAsyncObservableCollection<T> : ObservableCollection<T> {
+    public class RangeObservableCollection<T> : ObservableCollection<T> {
         private bool _suppressNotification = false;
 
         protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e) {
@@ -413,7 +411,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
     }
 
-    public class AcquiredImageCollection : RangeAsyncObservableCollection<AcquiredImageVM> { }
+    public class AcquiredImageCollection : RangeObservableCollection<AcquiredImageVM> { }
 
     public class AcquiredImageVM : BaseINPC {
 
