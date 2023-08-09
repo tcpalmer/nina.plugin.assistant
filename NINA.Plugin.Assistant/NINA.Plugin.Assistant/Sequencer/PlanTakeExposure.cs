@@ -1,5 +1,4 @@
 ﻿using Assistant.NINAPlugin.Util;
-using Newtonsoft.Json;
 using NINA.Astrometry;
 using NINA.Core.Model;
 using NINA.Core.Utility;
@@ -43,9 +42,10 @@ namespace Assistant.NINAPlugin.Sequencer {
         public double ROI {
             get => roi;
             set {
-                if (value <= 0) { value = 1; }
-                if (value > 1) { value = 1; }
-                roi = value;
+                // ROI is stored as a percentage in the database
+                if (value <= 0) { value = 100; }
+                if (value > 100) { value = 100; }
+                roi = value / 100;
                 RaisePropertyChanged();
             }
         }
@@ -134,6 +134,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             ObservableRectangle rect = null;
 
             if (ROI < 1 && info.CanSubSample) {
+                TSLogger.Info($"applying ROI for subframe exposure: {ROI}");
                 var centerX = info.XSize / 2d;
                 var centerY = info.YSize / 2d;
                 var subWidth = info.XSize * ROI;
