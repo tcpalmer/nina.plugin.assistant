@@ -6,6 +6,9 @@
 
 TBD
 
+## 3.2.1.0 - 2023-08-09
+* Fixed bug preventing target ROI from being applied properly.
+
 ## 3.2.0.0 - 2023-08-07
 
 ### Minimum Altitude
