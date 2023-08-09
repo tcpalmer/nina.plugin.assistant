@@ -1,4 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.Plan.Scoring;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Enum;
@@ -9,9 +11,11 @@ using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using NINA.WPF.Base.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 
@@ -20,6 +24,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
     public class TargetViewVM : BaseVM {
 
         private AssistantManagerVM managerVM;
+        private Project project;
         private IProfile profile;
         private string profileId;
         public List<ExposureTemplate> exposureTemplates;
@@ -30,14 +35,17 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             IFramingAssistantVM framingAssistantVM,
             IDeepSkyObjectSearchVM deepSkyObjectSearchVM,
             IPlanetariumFactory planetariumFactory,
-            Target target) : base(profileService) {
+            Target target,
+            Project project) : base(profileService) {
 
             this.managerVM = managerVM;
-            profileId = target.Project.ProfileId;
+            this.project = project;
+
+            profileId = project.ProfileId;
             TargetProxy = new TargetProxy(target);
             TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
 
-            profile = managerVM.GetProfile(target.Project.ProfileId);
+            profile = managerVM.GetProfile(profileId);
             profileService.ProfileChanged += ProfileService_ProfileChanged;
 
             InitializeExposurePlans(TargetProxy.Proxy);
@@ -123,6 +131,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             set {
                 exposurePlans = value;
                 RaisePropertyChanged(nameof(ExposurePlans));
+                DefaultExposureOrder = GetDefaultExposureOrder();
             }
         }
 
@@ -360,5 +369,49 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        private string defaultExposureOrder;
+        public string DefaultExposureOrder {
+            get {
+                return defaultExposureOrder;
+            }
+            set {
+                defaultExposureOrder = value;
+                RaisePropertyChanged(nameof(DefaultExposureOrder));
+            }
+        }
+
+        private string GetDefaultExposureOrder() {
+            StringBuilder sb = new StringBuilder();
+            List<string> exposureInstructions = new List<string>();
+
+            int filterSwitchFrequency = project.FilterSwitchFrequency;
+            int ditherEvery = project.DitherEvery;
+
+            ExposurePlans.ForEach((plan) => {
+                if (filterSwitchFrequency == 0) {
+                    sb.Append(plan.ExposureTemplate.Name).Append("..., ");
+                }
+                else {
+                    for (int i = 0; i < filterSwitchFrequency; i++) {
+                        sb.Append(plan.ExposureTemplate.Name).Append(", ");
+                        exposureInstructions.Add(plan.ExposureTemplate.Name);
+                    }
+                }
+            });
+
+            if (filterSwitchFrequency == 0 || ditherEvery == 0) {
+                return sb.ToString().TrimEnd().TrimEnd(new Char[] { ',' });
+            }
+
+            List<string> dithered = new DitherInjector(exposureInstructions, ditherEvery).ExposureOrderInject();
+            StringBuilder sb2 = new StringBuilder();
+            foreach (string item in dithered) {
+                sb2.Append(item).Append(", ");
+            }
+
+            TSLogger.Debug($"WITH DITHER: {sb2.ToString()}");
+
+            return sb2.ToString().TrimEnd().TrimEnd(new Char[] { ',' });
+        }
     }
 }

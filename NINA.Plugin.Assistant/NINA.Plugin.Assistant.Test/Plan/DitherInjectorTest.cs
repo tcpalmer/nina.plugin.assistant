@@ -16,7 +16,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanInstruction> dithered = new DitherInjector(GetSequence("LLLsLLLsLLL"), 0).Inject();
             ExtractInstructions(dithered).Should().Be("LLLsLLLsLLL");
 
-            Assert.IsNull(new DitherInjector(null, 1).Inject());
+            Assert.IsNull(new DitherInjector(null as List<IPlanInstruction>, 1).Inject());
 
             dithered = new DitherInjector(GetSequence(""), 1).Inject();
             ExtractInstructions(dithered).Should().Be("");

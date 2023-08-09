@@ -1,5 +1,11 @@
 # Release Notes
 
+## 3.3.0.0 - 2023-08-XX
+
+### Exposure Ordering
+
+TBD
+
 ## 3.2.0.0 - 2023-08-07
 
 ### Minimum Altitude

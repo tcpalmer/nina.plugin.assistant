@@ -253,8 +253,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
                     case TreeDataType.Target:
                         activeTreeDataItem = item;
+                        project = (Project)item.TreeParent.Data;
                         Target target = (Target)item.Data;
-                        TargetViewVM = new TargetViewVM(this, profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory, target);
+                        TargetViewVM = new TargetViewVM(this, profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory, target, project);
                         CollapseAllViews();
                         ShowTargetView = Visibility.Visible;
                         break;

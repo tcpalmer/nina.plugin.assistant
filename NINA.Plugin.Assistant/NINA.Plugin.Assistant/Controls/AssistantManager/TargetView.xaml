@@ -450,7 +450,7 @@
         <DataGrid
             Name="ExposurePlansDataGrid"
             Grid.Row="0"
-            Height="250"
+            Height="180"
             Margin="12,0,0,0"
             AutoGenerateColumns="False"
             BorderThickness="0"
@@ -685,6 +685,22 @@
 
             </DataGrid.Columns>
         </DataGrid>
+
+        <TextBlock
+            Margin="12,5,0,6"
+            VerticalAlignment="Center"
+            FontSize="14"
+            FontWeight="Bold"
+            Text="Exposure Order" />
+
+        <TextBlock
+            Margin="12,0,0,12"
+            HorizontalAlignment="Left"
+            FontStyle="Italic"
+            Text="Exposure ordering based on the Filter Switch Frequency and Dither settings on the Project.  Complete exposure plans will be dropped from the rotation and the pattern will repeat until all are complete.  If Filter Switch Frequency is 0, then '...' implies repeat until done and dithers will not be shown."
+            TextWrapping="Wrap" />
+
+        <TextBlock Margin="12,5,0,0" Text="{Binding DefaultExposureOrder}" />
 
     </StackPanel>
 </UserControl>
