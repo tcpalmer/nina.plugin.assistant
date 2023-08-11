@@ -686,48 +686,107 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <StackPanel Name="ExposureOrder" Orientation="Horizontal">
+        <StackPanel Visibility="{Binding HaveOverrideExposureOrder, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}">
+            <StackPanel Name="ExposureOrderDefault" Orientation="Horizontal">
+                <TextBlock
+                    Margin="12,5,0,6"
+                    VerticalAlignment="Center"
+                    FontSize="14"
+                    FontWeight="Bold"
+                    Text="Exposure Order: Default" />
+                <Button
+                    Width="25"
+                    Height="25"
+                    Margin="6,0,3,6"
+                    VerticalAlignment="Bottom"
+                    Command="{Binding OverrideExposureOrderCommand}"
+                    IsEnabled="{Binding ElementName=TargetViewPanel, Path=DataContext.ShowEditView, Converter={StaticResource InverseBooleanConverter}}"
+                    Style="{StaticResource BackgroundButton}"
+                    ToolTip="Override default exposure order"
+                    ToolTipService.ShowOnDisabled="True">
+                    <Grid>
+                        <Path
+                            Margin="5"
+                            Data="{StaticResource SS_SettingsSVG}"
+                            Fill="{StaticResource ButtonForegroundBrush}"
+                            Stretch="Uniform" />
+                    </Grid>
+                </Button>
+                <uc:DocumentationLink URL="target-management/exposure-plans.html#exposure-order" />
+            </StackPanel>
+
             <TextBlock
-                Margin="12,5,0,6"
-                VerticalAlignment="Center"
-                FontSize="14"
-                FontWeight="Bold"
-                Text="Exposure Order" />
-            <Button
-                Width="25"
-                Height="25"
-                Margin="6,0,3,6"
-                VerticalAlignment="Bottom"
-                Command="{Binding OverrideExposureOrderCommand}"
-                IsEnabled="{Binding ElementName=TargetViewPanel, Path=DataContext.ShowEditView, Converter={StaticResource InverseBooleanConverter}}"
-                Style="{StaticResource BackgroundButton}"
-                ToolTip="Override default exposure order"
-                ToolTipService.ShowOnDisabled="True">
-                <Grid>
-                    <Path
-                        Margin="5"
-                        Data="{StaticResource SS_SettingsSVG}"
-                        Fill="{StaticResource ButtonForegroundBrush}"
-                        Stretch="Uniform" />
-                </Grid>
-            </Button>
-            <uc:DocumentationLink URL="target-management/exposure-plans.html#exposure-order" />
+                Margin="12,0,12,12"
+                HorizontalAlignment="Left"
+                FontStyle="Italic"
+                Text="Exposure ordering based on the Filter Switch Frequency and Dither settings on the Project.  Complete exposure plans will be dropped from the rotation and the pattern will repeat until all are complete.  If Filter Switch Frequency is 0, then '...' implies repeat until done and dithers will not be shown.  This is only representative - the ultimate ordering of exposures by the planner depends on many factors."
+                TextWrapping="Wrap" />
+
+            <TextBlock Margin="12,5,0,0" Text="{Binding DefaultExposureOrder}" />
         </StackPanel>
 
-        <TextBlock
-            Margin="12,0,0,12"
-            HorizontalAlignment="Left"
-            FontStyle="Italic"
-            Text="Exposure ordering based on the Filter Switch Frequency and Dither settings on the Project.  Complete exposure plans will be dropped from the rotation and the pattern will repeat until all are complete.  If Filter Switch Frequency is 0, then '...' implies repeat until done and dithers will not be shown."
-            TextWrapping="Wrap" />
+        <StackPanel Visibility="{Binding HaveOverrideExposureOrder, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+            <StackPanel Name="ExposureOrderOverride" Orientation="Horizontal">
+                <TextBlock
+                    Margin="12,5,0,6"
+                    VerticalAlignment="Center"
+                    FontSize="14"
+                    FontWeight="Bold"
+                    Text="Exposure Order: Override" />
+                <Button
+                    Width="25"
+                    Height="25"
+                    Margin="6,0,3,6"
+                    VerticalAlignment="Bottom"
+                    Command="{Binding OverrideExposureOrderCommand}"
+                    IsEnabled="{Binding ElementName=TargetViewPanel, Path=DataContext.ShowEditView, Converter={StaticResource InverseBooleanConverter}}"
+                    Style="{StaticResource BackgroundButton}"
+                    ToolTip="Edit override exposure order"
+                    ToolTipService.ShowOnDisabled="True">
+                    <Grid>
+                        <Path
+                            Margin="5"
+                            Data="{StaticResource SS_SettingsSVG}"
+                            Fill="{StaticResource ButtonForegroundBrush}"
+                            Stretch="Uniform" />
+                    </Grid>
+                </Button>
+                <Button
+                    Width="25"
+                    Height="25"
+                    Margin="0,0,3,6"
+                    VerticalAlignment="Bottom"
+                    Command="{Binding CancelOverrideExposureOrderCommand}"
+                    IsEnabled="{Binding ElementName=TargetViewPanel, Path=DataContext.ShowEditView, Converter={StaticResource InverseBooleanConverter}}"
+                    Style="{StaticResource BackgroundButton}"
+                    ToolTip="Cancel override exposure order"
+                    ToolTipService.ShowOnDisabled="True">
+                    <Grid>
+                        <Path
+                            Margin="5"
+                            Data="{StaticResource SS_CancelSVG}"
+                            Fill="{StaticResource ButtonForegroundBrush}"
+                            Stretch="Uniform" />
+                    </Grid>
+                </Button>
+                <uc:DocumentationLink URL="target-management/exposure-plans.html#exposure-order" />
+            </StackPanel>
 
-        <TextBlock Margin="12,5,0,0" Text="{Binding DefaultExposureOrder}" />
+            <TextBlock
+                Margin="12,0,12,12"
+                HorizontalAlignment="Left"
+                FontStyle="Italic"
+                Text="Exposure order based on manual override.  Complete exposure plans will be dropped from the rotation and the pattern will repeat until all are complete.  This is only representative - the ultimate ordering of exposures by the planner depends on many factors."
+                TextWrapping="Wrap" />
+
+            <TextBlock Margin="12,5,0,0" Text="{Binding OverrideExposureOrderDisplay}" />
+        </StackPanel>
 
         <Popup
-            IsOpen="{Binding ShowOverrideExposureOrder}"
+            IsOpen="{Binding ShowOverrideExposureOrderPopup}"
             Placement="Top"
-            PlacementTarget="{Binding ElementName=ExposureOrder}"
-            VerticalOffset="-140">
+            PlacementTarget="{Binding ElementName=ExposureOrderDefault}"
+            VerticalOffset="-60">
             <local:OverrideExposureOrderView DataContext="{Binding OverrideExposureOrderVM}" />
         </Popup>
 

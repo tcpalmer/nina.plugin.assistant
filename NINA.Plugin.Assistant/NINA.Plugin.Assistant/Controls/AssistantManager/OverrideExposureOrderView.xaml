@@ -69,7 +69,7 @@
             </StackPanel>
 
             <TextBlock
-                Margin="12,0,0,12"
+                Margin="12,0,12,12"
                 HorizontalAlignment="Left"
                 FontStyle="Italic"
                 Text="Move, add, or delete items to manually specify the exposure order.  Click the Dither button to insert a dither."

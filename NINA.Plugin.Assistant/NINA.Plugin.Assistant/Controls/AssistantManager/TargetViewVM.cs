@@ -64,6 +64,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             DeleteExposurePlanCommand = new RelayCommand(DeleteExposurePlan);
 
             OverrideExposureOrderCommand = new RelayCommand(DisplayOverrideExposureOrder);
+            CancelOverrideExposureOrderCommand = new RelayCommand(CancelOverrideExposureOrder);
+
             OverrideExposureOrderVM = new OverrideExposureOrderViewVM(this, profileService);
 
             SendCoordinatesToFramingAssistantCommand = new AsyncCommand<bool>(async () => {
@@ -227,6 +229,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand DeleteExposurePlanCommand { get; private set; }
 
         public ICommand OverrideExposureOrderCommand { get; private set; }
+        public ICommand CancelOverrideExposureOrderCommand { get; private set; }
 
         private void Edit(object obj) {
             TargetProxy.PropertyChanged += TargetProxy_PropertyChanged;
@@ -384,12 +387,23 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        private bool showOverrideExposureOrder = false;
-        public bool ShowOverrideExposureOrder {
-            get => showOverrideExposureOrder;
+        private string overrideExposureOrderDisplay;
+        public string OverrideExposureOrderDisplay {
+            get {
+                return overrideExposureOrderDisplay;
+            }
             set {
-                showOverrideExposureOrder = value;
-                RaisePropertyChanged(nameof(ShowOverrideExposureOrder));
+                overrideExposureOrderDisplay = value;
+                RaisePropertyChanged(nameof(OverrideExposureOrderDisplay));
+            }
+        }
+
+        private bool showOverrideExposureOrderPopup = false;
+        public bool ShowOverrideExposureOrderPopup {
+            get => showOverrideExposureOrderPopup;
+            set {
+                showOverrideExposureOrderPopup = value;
+                RaisePropertyChanged(nameof(ShowOverrideExposureOrderPopup));
             }
         }
 
@@ -407,9 +421,13 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             get => overrideExposureOrder;
             set {
                 overrideExposureOrder = value;
+                OverrideExposureOrderDisplay = GetOverrideExposureOrder();
                 RaisePropertyChanged(nameof(OverrideExposureOrder));
+                RaisePropertyChanged(nameof(HaveOverrideExposureOrder));
             }
         }
+
+        public bool HaveOverrideExposureOrder { get => OverrideExposureOrder != null; private set { } }
 
         private string GetDefaultExposureOrder() {
             StringBuilder sb = new StringBuilder();
@@ -443,16 +461,38 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             return sb2.ToString().TrimEnd().TrimEnd(new Char[] { ',' });
         }
 
+        private string GetOverrideExposureOrder() {
+
+            if (OverrideExposureOrder == null || OverrideExposureOrder.OverrideItems.Count == 0) {
+                return "";
+            }
+
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in OverrideExposureOrder.OverrideItems) {
+                sb.Append(item.Name).Append(", ");
+            }
+
+            return sb.ToString().TrimEnd().TrimEnd(new Char[] { ',' });
+        }
+
         private void DisplayOverrideExposureOrder(object obj) {
 
             if (OverrideExposureOrder == null) {
                 OverrideExposureOrderVM.OverrideExposureOrder = new OverrideExposureOrder(TargetProxy.Proxy.ExposurePlans);
             }
             else {
+                // Clone it for popup
                 OverrideExposureOrderVM.OverrideExposureOrder = new OverrideExposureOrder(OverrideExposureOrder.Serialize(), TargetProxy.Proxy.ExposurePlans);
             }
 
-            ShowOverrideExposureOrder = true;
+            ShowOverrideExposureOrderPopup = true;
+        }
+
+        private void CancelOverrideExposureOrder(object obj) {
+            string message = $"Clear override exposure order?  This cannot be undone.";
+            if (MyMessageBox.Show(message, "Clear?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
+                OverrideExposureOrder = null;
+            }
         }
     }
 }

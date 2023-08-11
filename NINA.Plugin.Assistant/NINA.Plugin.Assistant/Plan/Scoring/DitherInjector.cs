@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Assistant.NINAPlugin.Controls.AssistantManager;
+using System.Collections.Generic;
 
 namespace Assistant.NINAPlugin.Plan.Scoring {
 
@@ -65,6 +66,9 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
                 return exposureOrder;
             }
 
+            // Add first filter to the end to mimic a cycle and capture a final dither if needed
+            exposureOrder.Add(exposureOrder[0]);
+
             uniqueFilters = ExposureOrderGetUniqueFilters();
             List<string> dithered = new List<string>();
 
@@ -83,9 +87,12 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
                     dithered.Add(exposureOrder[i]);
                 }
 
-                dithered.Add("DITHER");
+                dithered.Add(OverrideExposureOrder.DITHER);
                 pos = ditherPos;
             }
+
+            // Remove duplicate first item from the end that we added above
+            dithered.RemoveAt(dithered.Count - 1);
 
             return dithered;
         }

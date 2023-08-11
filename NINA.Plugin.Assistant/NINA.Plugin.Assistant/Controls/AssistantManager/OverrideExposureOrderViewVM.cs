@@ -128,11 +128,11 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private void Save() {
             targetViewVM.OverrideExposureOrder = OverrideExposureOrder;
-            targetViewVM.ShowOverrideExposureOrder = false;
+            targetViewVM.ShowOverrideExposureOrderPopup = false;
         }
 
         private void Cancel() {
-            targetViewVM.ShowOverrideExposureOrder = false;
+            targetViewVM.ShowOverrideExposureOrderPopup = false;
         }
 
     }
