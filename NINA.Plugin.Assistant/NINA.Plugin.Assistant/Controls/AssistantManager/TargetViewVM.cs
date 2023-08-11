@@ -1,5 +1,4 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Plan.Scoring;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
@@ -63,6 +62,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             CopyExposurePlansCommand = new RelayCommand(CopyExposurePlans);
             PasteExposurePlansCommand = new RelayCommand(PasteExposurePlans);
             DeleteExposurePlanCommand = new RelayCommand(DeleteExposurePlan);
+
+            OverrideExposureOrderCommand = new RelayCommand(DisplayOverrideExposureOrder);
+            OverrideExposureOrderVM = new OverrideExposureOrderViewVM(this, profileService);
 
             SendCoordinatesToFramingAssistantCommand = new AsyncCommand<bool>(async () => {
                 applicationMediator.ChangeTab(ApplicationTab.FRAMINGASSISTANT);
@@ -224,6 +226,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand PasteExposurePlansCommand { get; private set; }
         public ICommand DeleteExposurePlanCommand { get; private set; }
 
+        public ICommand OverrideExposureOrderCommand { get; private set; }
+
         private void Edit(object obj) {
             TargetProxy.PropertyChanged += TargetProxy_PropertyChanged;
             managerVM.SetEditMode(true);
@@ -380,6 +384,33 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        private bool showOverrideExposureOrder = false;
+        public bool ShowOverrideExposureOrder {
+            get => showOverrideExposureOrder;
+            set {
+                showOverrideExposureOrder = value;
+                RaisePropertyChanged(nameof(ShowOverrideExposureOrder));
+            }
+        }
+
+        private OverrideExposureOrderViewVM overrideExposureOrderVM;
+        public OverrideExposureOrderViewVM OverrideExposureOrderVM {
+            get => overrideExposureOrderVM;
+            set {
+                overrideExposureOrderVM = value;
+                RaisePropertyChanged(nameof(OverrideExposureOrderVM));
+            }
+        }
+
+        private OverrideExposureOrder overrideExposureOrder;
+        public OverrideExposureOrder OverrideExposureOrder {
+            get => overrideExposureOrder;
+            set {
+                overrideExposureOrder = value;
+                RaisePropertyChanged(nameof(OverrideExposureOrder));
+            }
+        }
+
         private string GetDefaultExposureOrder() {
             StringBuilder sb = new StringBuilder();
             List<string> exposureInstructions = new List<string>();
@@ -409,9 +440,19 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 sb2.Append(item).Append(", ");
             }
 
-            TSLogger.Debug($"WITH DITHER: {sb2.ToString()}");
-
             return sb2.ToString().TrimEnd().TrimEnd(new Char[] { ',' });
+        }
+
+        private void DisplayOverrideExposureOrder(object obj) {
+
+            if (OverrideExposureOrder == null) {
+                OverrideExposureOrderVM.OverrideExposureOrder = new OverrideExposureOrder(TargetProxy.Proxy.ExposurePlans);
+            }
+            else {
+                OverrideExposureOrderVM.OverrideExposureOrder = new OverrideExposureOrder(OverrideExposureOrder.Serialize(), TargetProxy.Proxy.ExposurePlans);
+            }
+
+            ShowOverrideExposureOrder = true;
         }
     }
 }

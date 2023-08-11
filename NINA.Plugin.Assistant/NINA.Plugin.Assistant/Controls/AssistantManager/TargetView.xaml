@@ -686,12 +686,33 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <TextBlock
-            Margin="12,5,0,6"
-            VerticalAlignment="Center"
-            FontSize="14"
-            FontWeight="Bold"
-            Text="Exposure Order" />
+        <StackPanel Name="ExposureOrder" Orientation="Horizontal">
+            <TextBlock
+                Margin="12,5,0,6"
+                VerticalAlignment="Center"
+                FontSize="14"
+                FontWeight="Bold"
+                Text="Exposure Order" />
+            <Button
+                Width="25"
+                Height="25"
+                Margin="6,0,3,6"
+                VerticalAlignment="Bottom"
+                Command="{Binding OverrideExposureOrderCommand}"
+                IsEnabled="{Binding ElementName=TargetViewPanel, Path=DataContext.ShowEditView, Converter={StaticResource InverseBooleanConverter}}"
+                Style="{StaticResource BackgroundButton}"
+                ToolTip="Override default exposure order"
+                ToolTipService.ShowOnDisabled="True">
+                <Grid>
+                    <Path
+                        Margin="5"
+                        Data="{StaticResource SS_SettingsSVG}"
+                        Fill="{StaticResource ButtonForegroundBrush}"
+                        Stretch="Uniform" />
+                </Grid>
+            </Button>
+            <uc:DocumentationLink URL="target-management/exposure-plans.html#exposure-order" />
+        </StackPanel>
 
         <TextBlock
             Margin="12,0,0,12"
@@ -701,6 +722,14 @@
             TextWrapping="Wrap" />
 
         <TextBlock Margin="12,5,0,0" Text="{Binding DefaultExposureOrder}" />
+
+        <Popup
+            IsOpen="{Binding ShowOverrideExposureOrder}"
+            Placement="Top"
+            PlacementTarget="{Binding ElementName=ExposureOrder}"
+            VerticalOffset="-140">
+            <local:OverrideExposureOrderView DataContext="{Binding OverrideExposureOrderVM}" />
+        </Popup>
 
     </StackPanel>
 </UserControl>
