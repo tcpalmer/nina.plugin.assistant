@@ -326,6 +326,7 @@ namespace Assistant.NINAPlugin.Plan {
         Epoch Epoch { get; set; }
         double Rotation { get; set; }
         double ROI { get; set; }
+        string OverrideExposureOrder { get; set; }
         List<IPlanExposure> ExposurePlans { get; set; }
         IPlanProject Project { get; set; }
         bool Rejected { get; set; }
@@ -349,6 +350,7 @@ namespace Assistant.NINAPlugin.Plan {
         public Epoch Epoch { get; set; }
         public double Rotation { get; set; }
         public double ROI { get; set; }
+        public string OverrideExposureOrder { get; set; }
         public List<IPlanExposure> ExposurePlans { get; set; }
         public IPlanProject Project { get; set; }
         public bool Rejected { get; set; }
@@ -368,6 +370,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.Epoch = target.Epoch;
             this.Rotation = target.Rotation;
             this.ROI = target.ROI;
+            this.OverrideExposureOrder = target.OverrideExposureOrder;
             this.Project = planProject;
             this.Rejected = false;
 
@@ -399,6 +402,7 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"Coords: {Coordinates.RAString} {Coordinates.DecString} {Epoch}");
             sb.AppendLine($"Rotation: {Rotation}");
             sb.AppendLine($"ROI: {ROI}");
+            sb.AppendLine($"Override exp order: {OverrideExposureOrder}");
             sb.AppendLine($"StartTime: {Utils.FormatDateTimeFull(StartTime)}");
             sb.AppendLine($"EndTime: {Utils.FormatDateTimeFull(EndTime)}");
             sb.AppendLine($"CulminationTime: {Utils.FormatDateTimeFull(CulminationTime)}");

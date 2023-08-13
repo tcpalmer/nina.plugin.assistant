@@ -1,4 +1,6 @@
-﻿using Assistant.NINAPlugin.Database.Schema;
+﻿using Accord.IO;
+using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Util;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,8 +19,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public OverrideExposureOrder(List<ExposurePlan> exposurePlans) {
-            foreach (ExposurePlan item in exposurePlans) {
-                OverrideItems.Add(new OverrideItem(item));
+            for (int i = 0; i < exposurePlans.Count; i++) {
+                OverrideItems.Add(new OverrideItem(exposurePlans[i], i));
             }
         }
 
@@ -34,9 +36,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     OverrideItems.Add(new OverrideItem());
                 }
                 else {
-                    int id = 0;
-                    Int32.TryParse(item, out id);
-                    OverrideItems.Add(new OverrideItem(Lookup(id, exposurePlans)));
+                    int index = 0;
+                    Int32.TryParse(item, out index);
+                    OverrideItems.Add(new OverrideItem(exposurePlans[index], index));
                 }
             }
         }
@@ -57,51 +59,36 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ObservableCollection<OverrideItem> GetDisplayList() {
             return new ObservableCollection<OverrideItem>(OverrideItems);
         }
-
-        private ExposurePlan Lookup(int id, List<ExposurePlan> exposurePlans) {
-            foreach (ExposurePlan item in exposurePlans) {
-                if (item.Id == id) {
-                    return item;
-                }
-            }
-
-            throw new Exception($"failed to find exposure plan for override order: {id}");
-        }
     }
 
     public class OverrideItem {
 
-        private ExposurePlan exposurePlan;
-        public ExposurePlan ExposurePlan { get => exposurePlan; set => exposurePlan = value; }
-
-        private bool isDither;
-        public bool IsDither { get => isDither; set => isDither = value; }
+        public int ExposurePlanIndex { get; private set; }
+        public bool IsDither { get; private set; }
+        public string Name { get; private set; }
 
         public OverrideItem() {
             IsDither = true;
-            ExposurePlan = null;
+            ExposurePlanIndex = -1;
+            Name = OverrideExposureOrder.DITHER;
         }
 
-        public OverrideItem(ExposurePlan exposurePlan) {
+        public OverrideItem(ExposurePlan exposurePlan, int exposurePlanIndex) {
             IsDither = false;
-            ExposurePlan = exposurePlan;
+            ExposurePlanIndex = exposurePlanIndex;
+            Name = exposurePlan.ExposureTemplate.Name;
         }
 
         public OverrideItem Clone() {
             return new OverrideItem {
                 IsDither = IsDither,
-                ExposurePlan = ExposurePlan
+                ExposurePlanIndex = ExposurePlanIndex,
+                Name = Name
             };
         }
 
-        public string Name {
-            get {
-                return IsDither ? OverrideExposureOrder.DITHER : ExposurePlan.ExposureTemplate.Name;
-            }
-        }
-
         public string Serialize() {
-            return IsDither ? OverrideExposureOrder.DITHER : ExposurePlan.Id.ToString();
+            return IsDither ? OverrideExposureOrder.DITHER : ExposurePlanIndex.ToString();
         }
     }
 }

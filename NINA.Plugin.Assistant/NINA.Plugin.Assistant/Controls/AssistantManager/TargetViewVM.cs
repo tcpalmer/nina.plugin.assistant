@@ -66,6 +66,10 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             OverrideExposureOrderCommand = new RelayCommand(DisplayOverrideExposureOrder);
             CancelOverrideExposureOrderCommand = new RelayCommand(CancelOverrideExposureOrder);
 
+            if (target.OverrideExposureOrder != null) {
+                OverrideExposureOrder = new OverrideExposureOrder(target.OverrideExposureOrder, target.ExposurePlans);
+            }
+
             OverrideExposureOrderVM = new OverrideExposureOrderViewVM(this, profileService);
 
             SendCoordinatesToFramingAssistantCommand = new AsyncCommand<bool>(async () => {
@@ -244,6 +248,13 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private void Save(object obj) {
             TargetProxy.Proxy.ExposurePlans = ExposurePlans;
+
+            // If exposure plans have been added or removed, we have to clear any override exposure order
+            if (TargetProxy.Proxy.ExposurePlans.Count != TargetProxy.Original.ExposurePlans.Count) {
+                OverrideExposureOrder = null;
+                TargetProxy.Proxy.OverrideExposureOrder = null;
+            }
+
             managerVM.SaveTarget(TargetProxy.Proxy);
             TargetProxy.OnSave();
             InitializeExposurePlans(TargetProxy.Proxy);
@@ -251,6 +262,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ShowEditView = false;
             ItemEdited = false;
             ShowTargetImportView = false;
+
+            if (TargetProxy.Original.OverrideExposureOrder != null) {
+                OverrideExposureOrder = new OverrideExposureOrder(TargetProxy.Original.OverrideExposureOrder, ExposurePlans);
+                OverrideExposureOrderDisplay = GetOverrideExposureOrder();
+            }
+            else {
+                DefaultExposureOrder = GetDefaultExposureOrder();
+            }
+
             managerVM.SetEditMode(false);
         }
 
@@ -318,15 +338,23 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     exposurePlans.Add(item);
                 }
 
-                ExposurePlansClipboard.SetItem(exposurePlans);
+                string overrideExposureOrder = OverrideExposureOrder == null ? null : OverrideExposureOrder.Serialize();
+                ExposurePlansClipboard.SetItem(exposurePlans, overrideExposureOrder);
                 RaisePropertyChanged(nameof(ExposurePlansPasteEnabled));
             }
         }
 
         private void PasteExposurePlans(object obj) {
-            List<ExposurePlan> copiedExposurePlans = ExposurePlansClipboard.GetItem();
+            ExposurePlansSpec spec = ExposurePlansClipboard.GetItem();
+            List<ExposurePlan> copiedExposurePlans = spec.ExposurePlans;
+            string overrideExposureOrder = spec.OverrideExposureOrder;
+
             if (copiedExposurePlans?.Count == 0) {
                 return;
+            }
+
+            if (ExposurePlans.Count > 0 && overrideExposureOrder != null) {
+                overrideExposureOrder = null;
             }
 
             ExposureTemplate exposureTemplate = null;
@@ -336,6 +364,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 if (exposureTemplate == null) {
                     return;
                 }
+
+                overrideExposureOrder = null;
             }
 
             foreach (ExposurePlan copy in copiedExposurePlans) {
@@ -351,10 +381,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
 
             TargetProxy.Proxy.ExposurePlans = ExposurePlans;
+            TargetProxy.Proxy.OverrideExposureOrder = overrideExposureOrder;
+
             managerVM.SaveTarget(TargetProxy.Proxy);
             TargetProxy.OnSave();
             InitializeExposurePlans(TargetProxy.Proxy);
+            OverrideExposureOrder = overrideExposureOrder == null ? null : new OverrideExposureOrder(overrideExposureOrder, ExposurePlans);
+
             RaisePropertyChanged(nameof(ExposurePlans));
+
             TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
         }
 
@@ -364,10 +399,17 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             if (exposurePlan != null) {
                 string message = $"Delete exposure plan using template '{exposurePlan.ExposureTemplate?.Name}'?  This cannot be undone.";
                 if (MyMessageBox.Show(message, "Delete Exposure Plan?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
+
+                    // Have to clear any over exposure order on deleted exposure plan
+                    TargetProxy.Original.OverrideExposureOrder = null;
+
                     Target updatedTarget = managerVM.DeleteExposurePlan(TargetProxy.Original, exposurePlan);
                     if (updatedTarget != null) {
                         TargetProxy = new TargetProxy(updatedTarget);
                         InitializeExposurePlans(TargetProxy.Proxy);
+
+                        OverrideExposureOrder = null;
+                        DefaultExposureOrder = GetDefaultExposureOrder();
                     }
                 }
             }
@@ -491,8 +533,20 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private void CancelOverrideExposureOrder(object obj) {
             string message = $"Clear override exposure order?  This cannot be undone.";
             if (MyMessageBox.Show(message, "Clear?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
+                TargetProxy.Proxy.OverrideExposureOrder = null;
+                managerVM.SaveTarget(TargetProxy.Proxy);
+                TargetProxy.OnSave();
+
                 OverrideExposureOrder = null;
             }
+        }
+
+        public void SaveOverrideExposureOrder(OverrideExposureOrder overrideExposureOrder) {
+            TargetProxy.Proxy.OverrideExposureOrder = overrideExposureOrder.Serialize();
+            managerVM.SaveTarget(TargetProxy.Proxy);
+            TargetProxy.OnSave();
+
+            OverrideExposureOrder = overrideExposureOrder;
         }
     }
 }

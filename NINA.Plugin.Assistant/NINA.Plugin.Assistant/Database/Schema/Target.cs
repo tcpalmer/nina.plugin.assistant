@@ -23,6 +23,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         [Required] public int epochCode { get; set; }
         public double rotation { get; set; }
         public double roi { get; set; }
+        public string overrideExposureOrder { get; set; }
 
         [ForeignKey("Project")] public int ProjectId { get; set; }
         public virtual Project Project { get; set; }
@@ -36,6 +37,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             epochCode = (int)Epoch.J2000;
             rotation = 0;
             roi = 100;
+            overrideExposureOrder = null;
             ExposurePlans = new List<ExposurePlan>();
         }
 
@@ -266,6 +268,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
             }
         }
 
+        [NotMapped]
+        public string OverrideExposureOrder {
+            get => overrideExposureOrder;
+            set {
+                overrideExposureOrder = value;
+                RaisePropertyChanged(nameof(OverrideExposureOrder));
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -295,6 +306,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             target.epochCode = epochCode;
             target.rotation = rotation;
             target.roi = roi;
+            target.overrideExposureOrder = overrideExposureOrder;
             ExposurePlans.ForEach(item => target.ExposurePlans.Add(item.GetPasteCopy(profileId)));
 
             return target;
@@ -310,6 +322,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"Epoch: {Epoch}");
             sb.AppendLine($"Rotation: {Rotation}");
             sb.AppendLine($"ROI: {ROI}");
+            sb.AppendLine($"Override exposure order: {OverrideExposureOrder}");
 
             return sb.ToString();
         }
