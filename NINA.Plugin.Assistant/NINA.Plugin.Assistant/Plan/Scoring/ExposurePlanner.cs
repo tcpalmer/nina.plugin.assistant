@@ -1,7 +1,10 @@
-﻿using Assistant.NINAPlugin.Astrometry;
+﻿using Accord.IO;
+using Assistant.NINAPlugin.Astrometry;
+using Assistant.NINAPlugin.Controls.AssistantManager;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan.Scoring;
 using Assistant.NINAPlugin.Util;
+using NINA.Sequencer.SequenceItem.Guider;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +30,7 @@ namespace Assistant.NINAPlugin.Plan {
         private IPlanTarget planTarget;
         private TimeInterval planInterval;
         private NighttimeCircumstances nighttimeCircumstances;
+        private List<PlanOverrideItem> planOverrideItems;
         public int filterSwitchFrequency;
 
         public ExposurePlanner(ProfilePreference profilePreferences, IPlanTarget planTarget, TimeInterval planInterval, NighttimeCircumstances nighttimeCircumstances) {
@@ -35,12 +39,38 @@ namespace Assistant.NINAPlugin.Plan {
             this.planInterval = planInterval;
             this.nighttimeCircumstances = nighttimeCircumstances;
             this.filterSwitchFrequency = planTarget.Project.FilterSwitchFrequency;
+
+            if (!string.IsNullOrEmpty(planTarget.OverrideExposureOrder)) {
+                planOverrideItems = GetPlanOverrideList();
+            }
+        }
+
+        private List<PlanOverrideItem> GetPlanOverrideList() {
+            List<PlanOverrideItem> list = new List<PlanOverrideItem>();
+
+            string[] items = planTarget.OverrideExposureOrder.Split(OverrideExposureOrder.SEP);
+            foreach (string item in items) {
+                if (item == OverrideExposureOrder.DITHER) {
+                    list.Add(new PlanOverrideItem());
+                }
+                else {
+                    int index = 0;
+                    Int32.TryParse(item, out index);
+                    list.Add(new PlanOverrideItem(planTarget.ExposurePlans[index]));
+                }
+            }
+
+            return list;
         }
 
         public List<IPlanInstruction> Plan() {
             List<IPlanInstruction> instructions = new List<IPlanInstruction> {
                 new PlanMessage($"start exposure plan for target {planTarget.Name} in window: {planInterval}")
             };
+
+            if (planOverrideItems != null) {
+                instructions.Add(new PlanMessage("override exposure ordering applied"));
+            }
 
             // Nighttime: civil but no nautical twilight
             if (nighttimeCircumstances.HasCivilTwilight() && !nighttimeCircumstances.HasNauticalTwilight()) {
@@ -75,7 +105,12 @@ namespace Assistant.NINAPlugin.Plan {
                 instructions.Clear();
             }
 
-            return new DitherInjector(Cleanup(instructions), planTarget.Project.DitherEvery).Inject();
+            if (planOverrideItems == null) {
+                return new DitherInjector(Cleanup(instructions), planTarget.Project.DitherEvery).Inject();
+            }
+            else {
+                return Cleanup(instructions);
+            }
         }
 
         public static List<IPlanInstruction> Cleanup(List<IPlanInstruction> instructions) {
@@ -90,6 +125,15 @@ namespace Assistant.NINAPlugin.Plan {
                 IPlanInstruction i1 = instructions[i];
                 IPlanInstruction i2 = instructions[i + 1];
                 if (i1.GetType() == typeof(PlanSwitchFilter) && i2.GetType() == typeof(PlanSwitchFilter)) {
+                    instructions.RemoveAt(i);
+                }
+            }
+
+            for (int i = 0; i < instructions.Count - 1; i++) {
+                IPlanInstruction i1 = instructions[i];
+                IPlanInstruction i2 = instructions[i + 1];
+
+                if (i1.GetType() == typeof(PlanDither) && i2.GetType() == typeof(PlanDither)) {
                     instructions.RemoveAt(i);
                 }
             }
@@ -117,11 +161,20 @@ namespace Assistant.NINAPlugin.Plan {
             if (twilightWindow != null) {
                 TimeInterval overlap = twilightWindow.Overlap(planInterval);
                 if (overlap != null && overlap.Duration > 0) {
-                    List<IPlanExposure> planExposures = GetPlanExposuresForTwilightLevel(twilightLevel);
-                    List<IPlanInstruction> added = GetPlanInstructions(planExposures, overlap);
+                    if (planOverrideItems == null) {
+                        List<IPlanExposure> planExposures = GetPlanExposuresForTwilightLevel(twilightLevel);
+                        List<IPlanInstruction> added = GetPlanInstructions(planExposures, overlap);
 
-                    if (HasActionableInstructions(added)) {
-                        instructions.AddRange(added);
+                        if (HasActionableInstructions(added)) {
+                            instructions.AddRange(added);
+                        }
+                    }
+                    else {
+                        List<IPlanInstruction> added = GetOverridePlanInstructions(overlap, twilightLevel);
+
+                        if (HasActionableInstructions(added)) {
+                            instructions.AddRange(added);
+                        }
                     }
                 }
             }
@@ -181,6 +234,43 @@ namespace Assistant.NINAPlugin.Plan {
             return instructions;
         }
 
+        private List<IPlanInstruction> GetOverridePlanInstructions(TimeInterval timeWindow, TwilightLevel twilightLevel) {
+            List<IPlanInstruction> instructions = new List<IPlanInstruction>();
+            long timeRemaining = timeWindow.Duration;
+            string lastFilter = null;
+
+            while (timeRemaining > 0) {
+                if (AllPlanExposuresAreComplete(planOverrideItems)) { break; }
+
+                foreach (PlanOverrideItem item in planOverrideItems) {
+                    if (item.IsDither) {
+                        instructions.Add(new PlanDither());
+                        continue;
+                    }
+
+                    IPlanExposure planExposure = item.PlanExposure;
+                    if (planExposure.TwilightLevel < twilightLevel || planExposure.Rejected || IsPlanExposureComplete(planExposure)) {
+                        continue;
+                    }
+
+                    if (planExposure.FilterName != lastFilter) {
+                        instructions.Add(new PlanSwitchFilter(planExposure));
+                        instructions.Add(new PlanSetReadoutMode(planExposure));
+                        lastFilter = planExposure.FilterName;
+                    }
+
+                    timeRemaining -= (long)planExposure.ExposureLength;
+                    if (timeRemaining <= 0) { break; }
+                    instructions.Add(new PlanTakeExposure(planExposure));
+                    planExposure.PlannedExposures++;
+                }
+
+                if (timeRemaining <= 0) { break; }
+            }
+
+            return instructions;
+        }
+
         private bool HasActionableInstructions(List<IPlanInstruction> instructions) {
             if (instructions == null || instructions.Count == 0) { return false; }
 
@@ -196,6 +286,20 @@ namespace Assistant.NINAPlugin.Plan {
         private bool AllPlanExposuresAreComplete(List<IPlanExposure> planExposures) {
             foreach (IPlanExposure planExposure in planExposures) {
                 if (!IsPlanExposureComplete(planExposure)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool AllPlanExposuresAreComplete(List<PlanOverrideItem> planOverrideItems) {
+            foreach (PlanOverrideItem item in planOverrideItems) {
+                if (item.IsDither) {
+                    continue;
+                }
+
+                if (!IsPlanExposureComplete(item.PlanExposure)) {
                     return false;
                 }
             }
@@ -347,4 +451,22 @@ namespace Assistant.NINAPlugin.Plan {
         }
     }
 
+    public class PlanOverrideItem {
+        public bool IsDither { get; private set; }
+        public IPlanExposure PlanExposure { get; private set; }
+
+        public PlanOverrideItem() {
+            IsDither = true;
+            PlanExposure = null;
+        }
+
+        public PlanOverrideItem(IPlanExposure planExposure) {
+            IsDither = false;
+            PlanExposure = planExposure;
+        }
+
+        public override string ToString() {
+            return IsDither ? OverrideExposureOrder.DITHER : PlanExposure.FilterName;
+        }
+    }
 }
