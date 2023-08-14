@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
+using Assistant.NINAPlugin.Controls.AssistantManager;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using FluentAssertions;
@@ -219,6 +220,64 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             ExposurePlanner.Cleanup(list).Count.Should().Be(4);
         }
 
+        [Test]
+        public void testOverrideExposureOrder1() {
+            DateTime dateTime = DateTime.Now;
+            TestNighttimeCircumstances ntc = TestNighttimeCircumstances.GetNormal(dateTime);
+
+            int nbExposures = 50;
+            int nbExposureLength = 180;
+            int wbExposures = 10;
+            int wbExposureLength = 120;
+
+            Mock<IPlanProject> pp = GetTestProject(dateTime, 0, nbExposures, nbExposureLength, wbExposures, wbExposureLength);
+            IPlanTarget pt = pp.Object.Targets[0];
+
+            string[] items = { "0", "1", "2", OverrideExposureOrder.DITHER, "3", "4", "5", "6", OverrideExposureOrder.DITHER };
+            pt.OverrideExposureOrder = string.Join(OverrideExposureOrder.SEP, items);
+
+            TimeInterval window = new TimeInterval((DateTime)ntc.AstronomicalTwilightStart, (DateTime)ntc.AstronomicalTwilightEnd);
+            List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt, window, ntc).Plan();
+
+            AssertPlan(GetExpectedTestOverride1(ntc), list);
+            Assert.AreEqual(nbExposures, pt.ExposurePlans[0].PlannedExposures);
+            Assert.AreEqual(nbExposures, pt.ExposurePlans[1].PlannedExposures);
+            Assert.AreEqual(nbExposures, pt.ExposurePlans[2].PlannedExposures);
+            Assert.AreEqual(wbExposures, pt.ExposurePlans[3].PlannedExposures);
+            Assert.AreEqual(wbExposures, pt.ExposurePlans[4].PlannedExposures);
+            Assert.AreEqual(wbExposures, pt.ExposurePlans[5].PlannedExposures);
+            Assert.AreEqual(wbExposures, pt.ExposurePlans[6].PlannedExposures);
+        }
+
+        [Test]
+        public void testOverrideExposureOrder2() {
+            DateTime dateTime = DateTime.Now;
+            TestNighttimeCircumstances ntc = TestNighttimeCircumstances.GetNormal(dateTime);
+
+            int nbExposures = 12;
+            int nbExposureLength = 180;
+            int wbExposures = 6;
+            int wbExposureLength = 120;
+
+            Mock<IPlanProject> pp = GetTestProject(dateTime, 0, nbExposures, nbExposureLength, wbExposures, wbExposureLength);
+            IPlanTarget pt = pp.Object.Targets[0];
+
+            string[] items = { "0", "0", "1", "1", "2", "2", OverrideExposureOrder.DITHER, "3", "4", "5", "6", OverrideExposureOrder.DITHER };
+            pt.OverrideExposureOrder = string.Join(OverrideExposureOrder.SEP, items);
+
+            TimeInterval window = new TimeInterval((DateTime)ntc.AstronomicalTwilightStart, (DateTime)ntc.AstronomicalTwilightEnd);
+            List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt, window, ntc).Plan();
+
+            AssertPlan(GetExpectedTestOverride2(ntc), list);
+            Assert.AreEqual(nbExposures, pt.ExposurePlans[0].PlannedExposures);
+            Assert.AreEqual(nbExposures, pt.ExposurePlans[1].PlannedExposures);
+            Assert.AreEqual(nbExposures, pt.ExposurePlans[2].PlannedExposures);
+            Assert.AreEqual(wbExposures, pt.ExposurePlans[3].PlannedExposures);
+            Assert.AreEqual(wbExposures, pt.ExposurePlans[4].PlannedExposures);
+            Assert.AreEqual(wbExposures, pt.ExposurePlans[5].PlannedExposures);
+            Assert.AreEqual(wbExposures, pt.ExposurePlans[6].PlannedExposures);
+        }
+
         private ProfilePreference GetPrefs(string profileId = "abcd-1234") {
             return new ProfilePreference(profileId);
         }
@@ -282,6 +341,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
         private void AssertPlan(List<IPlanInstruction> expectedPlan, List<IPlanInstruction> actualPlan) {
 
+            /*
             TestContext.WriteLine("EXPECTED:");
             for (int i = 0; i < expectedPlan.Count; i++) {
                 TestContext.WriteLine($"{expectedPlan[i]}");
@@ -291,6 +351,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             for (int i = 0; i < actualPlan.Count; i++) {
                 TestContext.WriteLine($"{actualPlan[i]}");
             }
+            */
 
             Assert.AreEqual(expectedPlan.Count, actualPlan.Count);
 
@@ -510,6 +571,128 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             return actual;
         }
 
+        private List<IPlanInstruction> GetExpectedTestOverride1(TestNighttimeCircumstances ntc) {
+            List<IPlanInstruction> actual = new List<IPlanInstruction>();
+
+            Mock<IPlanExposure> Ha = PlanMocks.GetMockPlanExposure("Ha", 10, 0, 180);
+            Mock<IPlanExposure> OIII = PlanMocks.GetMockPlanExposure("OIII", 10, 0, 180);
+            Mock<IPlanExposure> SII = PlanMocks.GetMockPlanExposure("SII", 10, 0, 180);
+            Mock<IPlanExposure> L = PlanMocks.GetMockPlanExposure("L", 10, 0, 120);
+            Mock<IPlanExposure> R = PlanMocks.GetMockPlanExposure("R", 10, 0, 120);
+            Mock<IPlanExposure> G = PlanMocks.GetMockPlanExposure("G", 10, 0, 120);
+            Mock<IPlanExposure> B = PlanMocks.GetMockPlanExposure("B", 10, 0, 120);
+
+            actual.Add(new PlanMessage(""));
+            actual.Add(new PlanMessage(""));
+            actual.Add(new PlanMessage(""));
+
+            for (int i = 0; i < 6; i++) {
+                AddActualExposures(actual, Ha.Object, 1);
+                AddActualExposures(actual, OIII.Object, 1);
+                AddActualExposures(actual, SII.Object, 1);
+                actual.Add(new PlanDither());
+            }
+
+            AddActualExposures(actual, Ha.Object, 1);
+            actual.Add(new PlanSwitchFilter(OIII.Object));
+            actual.Add(new PlanSetReadoutMode(OIII.Object));
+
+            actual.Add(new PlanMessage(""));
+
+            for (int i = 0; i < 10; i++) {
+                AddActualExposures(actual, Ha.Object, 1);
+                AddActualExposures(actual, OIII.Object, 1);
+                AddActualExposures(actual, SII.Object, 1);
+                actual.Add(new PlanDither());
+                AddActualExposures(actual, L.Object, 1);
+                AddActualExposures(actual, R.Object, 1);
+                AddActualExposures(actual, G.Object, 1);
+                AddActualExposures(actual, B.Object, 1);
+                actual.Add(new PlanDither());
+            }
+
+            for (int i = 0; i < 27; i++) {
+                AddActualExposures(actual, Ha.Object, 1);
+                AddActualExposures(actual, OIII.Object, 1);
+                AddActualExposures(actual, SII.Object, 1);
+                actual.Add(new PlanDither());
+            }
+
+            AddActualExposures(actual, Ha.Object, 1);
+            AddActualExposures(actual, OIII.Object, 1);
+            actual.Add(new PlanSwitchFilter(SII.Object));
+            actual.Add(new PlanSetReadoutMode(SII.Object));
+            actual.Add(new PlanMessage(""));
+
+            for (int i = 0; i < 5; i++) {
+                AddActualExposures(actual, Ha.Object, 1);
+                AddActualExposures(actual, OIII.Object, 1);
+                AddActualExposures(actual, SII.Object, 1);
+                actual.Add(new PlanDither());
+            }
+
+            AddActualExposures(actual, OIII.Object, 1);
+            AddActualExposures(actual, SII.Object, 1);
+            actual.Add(new PlanDither());
+            actual.Add(new PlanTakeExposure(SII.Object));
+            actual.Add(new PlanDither());
+
+            return actual;
+        }
+
+        private List<IPlanInstruction> GetExpectedTestOverride2(TestNighttimeCircumstances ntc) {
+            List<IPlanInstruction> actual = new List<IPlanInstruction>();
+
+            Mock<IPlanExposure> Ha = PlanMocks.GetMockPlanExposure("Ha", 10, 0, 180);
+            Mock<IPlanExposure> OIII = PlanMocks.GetMockPlanExposure("OIII", 10, 0, 180);
+            Mock<IPlanExposure> SII = PlanMocks.GetMockPlanExposure("SII", 10, 0, 180);
+            Mock<IPlanExposure> L = PlanMocks.GetMockPlanExposure("L", 10, 0, 120);
+            Mock<IPlanExposure> R = PlanMocks.GetMockPlanExposure("R", 10, 0, 120);
+            Mock<IPlanExposure> G = PlanMocks.GetMockPlanExposure("G", 10, 0, 120);
+            Mock<IPlanExposure> B = PlanMocks.GetMockPlanExposure("B", 10, 0, 120);
+
+            actual.Add(new PlanMessage(""));
+            actual.Add(new PlanMessage(""));
+            actual.Add(new PlanMessage(""));
+
+            for (int i = 0; i < 3; i++) {
+                AddActualExposures(actual, Ha.Object, 2);
+                AddActualExposures(actual, OIII.Object, 2);
+                AddActualExposures(actual, SII.Object, 2);
+                actual.Add(new PlanDither());
+            }
+
+            AddActualExposures(actual, Ha.Object, 1);
+            actual.Add(new PlanMessage(""));
+
+            for (int i = 0; i < 2; i++) {
+                AddActualExposures(actual, Ha.Object, 2);
+                AddActualExposures(actual, OIII.Object, 2);
+                AddActualExposures(actual, SII.Object, 2);
+                actual.Add(new PlanDither());
+                AddActualExposures(actual, L.Object, 1);
+                AddActualExposures(actual, R.Object, 1);
+                AddActualExposures(actual, G.Object, 1);
+                AddActualExposures(actual, B.Object, 1);
+                actual.Add(new PlanDither());
+            }
+
+            AddActualExposures(actual, Ha.Object, 1);
+            AddActualExposures(actual, OIII.Object, 2);
+            AddActualExposures(actual, SII.Object, 2);
+            actual.Add(new PlanDither());
+
+            for (int i = 0; i < 4; i++) {
+                AddActualExposures(actual, L.Object, 1);
+                AddActualExposures(actual, R.Object, 1);
+                AddActualExposures(actual, G.Object, 1);
+                AddActualExposures(actual, B.Object, 1);
+                actual.Add(new PlanDither());
+            }
+
+            return actual;
+        }
+
         private void AddActualExposures(List<IPlanInstruction> actual, IPlanExposure planFilter, int count, int dither = 0) {
             actual.Add(new PlanSwitchFilter(planFilter));
             actual.Add(new PlanSetReadoutMode(planFilter));
@@ -517,7 +700,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
                 actual.Add(new PlanTakeExposure(planFilter));
                 if (dither > 0) {
                     if ((i + 1) % dither == 0) {
-                        // if ((i + 1) != count && (i + 1) % dither == 0) {
                         actual.Add(new PlanDither());
                     }
                 }

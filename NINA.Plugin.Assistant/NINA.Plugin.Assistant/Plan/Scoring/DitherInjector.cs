@@ -1,16 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using Assistant.NINAPlugin.Controls.AssistantManager;
+using System.Collections.Generic;
 
 namespace Assistant.NINAPlugin.Plan.Scoring {
 
     public class DitherInjector {
 
         private List<IPlanInstruction> instructions;
+        private List<string> exposureOrder;
         private int ditherEvery;
 
         private List<string> uniqueFilters;
 
         public DitherInjector(List<IPlanInstruction> instructions, int ditherEvery) {
             this.instructions = instructions;
+            this.ditherEvery = ditherEvery;
+        }
+
+        public DitherInjector(List<string> exposureOrder, int ditherEvery) {
+            this.exposureOrder = exposureOrder;
             this.ditherEvery = ditherEvery;
         }
 
@@ -49,6 +56,47 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
             return dithered;
         }
 
+        public List<string> ExposureOrderInject() {
+
+            if (ditherEvery == 0) {
+                return exposureOrder;
+            }
+
+            if (exposureOrder is null || exposureOrder.Count == 0) {
+                return exposureOrder;
+            }
+
+            // Add first filter to the end to mimic a cycle and capture a final dither if needed
+            exposureOrder.Add(exposureOrder[0]);
+
+            uniqueFilters = ExposureOrderGetUniqueFilters();
+            List<string> dithered = new List<string>();
+
+            int pos = 0;
+            while (pos < exposureOrder.Count) {
+                int ditherPos = ExposureOrderFindNextDither(pos);
+                if (ditherPos < 0) {
+                    for (int i = pos; i < exposureOrder.Count; i++) {
+                        dithered.Add(exposureOrder[i]);
+                    }
+
+                    break;
+                }
+
+                for (int i = pos; i < ditherPos; i++) {
+                    dithered.Add(exposureOrder[i]);
+                }
+
+                dithered.Add(OverrideExposureOrder.DITHER);
+                pos = ditherPos;
+            }
+
+            // Remove duplicate first item from the end that we added above
+            dithered.RemoveAt(dithered.Count - 1);
+
+            return dithered;
+        }
+
         private int FindNextDither(int start) {
             Dictionary<string, int> filterCounts = GetFilterDictionary();
 
@@ -64,7 +112,23 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
                     }
                 }
             }
-            // TODO: what if you never hit D+1?  Then done?
+
+            return pos;
+        }
+
+        private int ExposureOrderFindNextDither(int start) {
+            Dictionary<string, int> filterCounts = GetFilterDictionary();
+
+            // Walk the list, incrementing when each filter occurs.  Injection point is when a filter is seen ditherEvery+1 times.
+            int pos = -1;
+            for (int i = start; i < exposureOrder.Count; i++) {
+                string filterName = (exposureOrder[i]);
+                filterCounts[filterName]++;
+                if (filterCounts[filterName] == ditherEvery + 1) {
+                    pos = i;
+                    break;
+                }
+            }
 
             return pos;
         }
@@ -77,6 +141,17 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
                     if (!filters.Contains(filterName)) {
                         filters.Add(filterName);
                     }
+                }
+            }
+
+            return filters;
+        }
+
+        private List<string> ExposureOrderGetUniqueFilters() {
+            List<string> filters = new List<string>();
+            foreach (string exposure in exposureOrder) {
+                if (!filters.Contains(exposure)) {
+                    filters.Add(exposure);
                 }
             }
 

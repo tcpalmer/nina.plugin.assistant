@@ -1,5 +1,11 @@
 # Release Notes
 
+## 3.3.0.0 - 2023-08-XX
+
+### Exposure Ordering Override
+
+You can now override the default exposure ordering (which is based on the Filter Switch Frequency and Dither settings on the project) and specify a manual override ordering, including dithers.
+
 ## 3.2.1.0 - 2023-08-09
 * Fixed bug preventing target ROI from being applied properly.
 

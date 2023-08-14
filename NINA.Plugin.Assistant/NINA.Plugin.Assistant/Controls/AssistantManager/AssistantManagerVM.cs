@@ -253,8 +253,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
                     case TreeDataType.Target:
                         activeTreeDataItem = item;
+                        project = (Project)item.TreeParent.Data;
                         Target target = (Target)item.Data;
-                        TargetViewVM = new TargetViewVM(this, profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory, target);
+                        TargetViewVM = new TargetViewVM(this, profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory, target, project);
                         CollapseAllViews();
                         ShowTargetView = Visibility.Visible;
                         break;
@@ -969,23 +970,33 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
     public class ExposurePlansClipboard {
 
         private static readonly ExposurePlansClipboard Instance = new ExposurePlansClipboard();
-        private List<ExposurePlan> item { get; set; }
+        private ExposurePlansSpec item { get; set; }
 
         public static bool HasCopyItem() {
             return Instance.item != null;
         }
 
-        public static void SetItem(List<ExposurePlan> item) {
-            if (item?.Count > 0) {
-                Instance.item = item;
+        public static void SetItem(List<ExposurePlan> exposurePlans, string overrideExposureOrder) {
+            if (exposurePlans?.Count > 0) {
+                Instance.item = new ExposurePlansSpec(exposurePlans, overrideExposureOrder);
             }
         }
 
-        public static List<ExposurePlan> GetItem() {
+        public static ExposurePlansSpec GetItem() {
             return Instance.item;
         }
 
         private ExposurePlansClipboard() { }
+    }
+
+    public class ExposurePlansSpec {
+        public List<ExposurePlan> ExposurePlans { get; private set; }
+        public string OverrideExposureOrder { get; private set; }
+
+        public ExposurePlansSpec(List<ExposurePlan> exposurePlans, string overrideExposureOrder) {
+            ExposurePlans = exposurePlans;
+            OverrideExposureOrder = overrideExposureOrder;
+        }
     }
 }
 

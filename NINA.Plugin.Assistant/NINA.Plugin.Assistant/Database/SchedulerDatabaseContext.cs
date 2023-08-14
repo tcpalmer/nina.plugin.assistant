@@ -361,6 +361,7 @@ namespace Assistant.NINAPlugin.Database {
         public Target DeleteExposurePlan(Target target, ExposurePlan exposurePlan) {
             using (var transaction = Database.BeginTransaction()) {
                 try {
+                    TargetSet.AddOrUpdate(target);
                     exposurePlan = GetExposurePlan(exposurePlan.Id);
                     ExposurePlanSet.Remove(exposurePlan);
                     SaveChanges();
@@ -551,7 +552,7 @@ namespace Assistant.NINAPlugin.Database {
                 catch (Exception ex) {
                     Logger.Error($"failed to load Scheduler database initial SQL: {ex.Message}");
                     TSLogger.Error($"failed to load database initial SQL: {ex.Message}");
-                    throw ex;
+                    throw;
                 }
             }
 
@@ -572,7 +573,7 @@ namespace Assistant.NINAPlugin.Database {
                 catch (Exception ex) {
                     Logger.Error($"failed to load Scheduler database migration scripts: {ex.Message}");
                     TSLogger.Error($"failed to load database migration scripts: {ex.Message}");
-                    throw ex;
+                    throw;
                 }
             }
 
