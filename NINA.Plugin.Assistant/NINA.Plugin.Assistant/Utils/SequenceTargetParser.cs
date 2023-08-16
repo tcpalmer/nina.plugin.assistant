@@ -24,7 +24,7 @@ namespace Assistant.NINAPlugin.Util {
             bool inObject = false;
             foreach (string line in File.ReadAllLines(pathToFile)) {
 
-                if (line.Contains("TargetName") || line.Contains("Rotation")) {
+                if (line.Contains("TargetName") || line.Contains("PositionAngle")) {
                     sb.Append(line);
                 }
 
@@ -64,7 +64,7 @@ namespace Assistant.NINAPlugin.Util {
 
         public SequenceTarget(int raHours, int raMinutes, double raSeconds,
             bool negativeDec, int decDegrees, int decMinutes, double decSeconds,
-            string targetName, double rotation) {
+            string targetName, double positionAngle) {
 
             RAHours = raHours;
             RAMinutes = raMinutes;
@@ -74,7 +74,7 @@ namespace Assistant.NINAPlugin.Util {
             DecMinutes = decMinutes;
             DecSeconds = decSeconds;
             TargetName = targetName;
-            Rotation = rotation;
+            Rotation = positionAngle;
         }
 
         public Coordinates GetCoordinates() {
