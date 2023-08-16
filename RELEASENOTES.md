@@ -6,6 +6,9 @@
 
 You can now override the default exposure ordering (which is based on the Filter Switch Frequency and Dither settings on the project) and specify a manual override ordering, including dithers.
 
+### Other
+* Fixed bug with rotation not being set when importing from a saved Sequence Target.
+
 ## 3.2.1.0 - 2023-08-09
 * Fixed bug preventing target ROI from being applied properly.
 
