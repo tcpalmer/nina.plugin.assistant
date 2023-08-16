@@ -32,7 +32,7 @@ namespace NINA.Plugin.Assistant.Test.Util {
     ""$type"": ""NINA.Astrometry.InputTarget, NINA.Astrometry"",
     ""Expanded"": true,
     ""TargetName"": ""M 42"",
-    ""Rotation"": 123.4,
+    ""PositionAngle"": 123.4,
     ""InputCoordinates"": {
       ""$id"": ""3"",
       ""$type"": ""NINA.Astrometry.InputCoordinates, NINA.Astrometry"",
