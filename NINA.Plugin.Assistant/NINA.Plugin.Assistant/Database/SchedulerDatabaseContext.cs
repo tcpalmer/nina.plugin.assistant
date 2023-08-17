@@ -604,6 +604,7 @@ namespace Assistant.NINAPlugin.Database {
 
                 // Convert NINA 2 rotation to NINA 3 position angle
                 if (oldVersion == 5 && newVersion == 6) {
+                    projects = context.GetAllProjects();
                     if (projects != null && projects.Count > 0) {
                         bool updated = false;
                         foreach (Project project in projects) {
