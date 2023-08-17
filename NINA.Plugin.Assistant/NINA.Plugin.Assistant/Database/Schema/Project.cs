@@ -30,6 +30,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public long createDate { get; set; }
         public long? activeDate { get; set; }
         public long? inactiveDate { get; set; }
+        public int isMosaic { get; set; }
 
         public int minimumTime { get; set; }
         public double minimumAltitude { get; set; }
@@ -59,6 +60,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             FilterSwitchFrequency = 0;
             DitherEvery = 0;
             EnableGrader = true;
+            IsMosaic = false;
 
             ruleWeights = GetDefaultRuleWeights();
             Targets = new List<Target>();
@@ -124,6 +126,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 inactiveDate = SchedulerDatabaseContext.DateTimeToUnixSeconds(value);
                 RaisePropertyChanged(nameof(InactiveDate));
+            }
+        }
+
+        [NotMapped]
+        public bool IsMosaic {
+            get { return isMosaic == 1; }
+            set {
+                isMosaic = value ? 1 : 0;
+                RaisePropertyChanged(nameof(IsMosaic));
             }
         }
 
@@ -270,6 +281,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             project.filterSwitchFrequency = filterSwitchFrequency;
             project.ditherEvery = ditherEvery;
             project.enableGrader = enableGrader;
+            project.isMosaic = isMosaic;
 
             project.Targets = new List<Target>(Targets.Count);
             Targets.ForEach(item => project.Targets.Add(item.GetPasteCopy(newProfileId)));
@@ -308,6 +320,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"FilterSwitchFrequency: {FilterSwitchFrequency}");
             sb.AppendLine($"DitherEvery: {DitherEvery}");
             sb.AppendLine($"EnableGrader: {EnableGrader}");
+            sb.AppendLine($"IsMosaic: {IsMosaic}");
             sb.AppendLine($"RuleWeights:");
             foreach (var item in RuleWeights) {
                 sb.AppendLine($"  {item.Name} {item.Weight}");

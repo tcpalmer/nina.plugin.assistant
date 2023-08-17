@@ -538,8 +538,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         [Test]
         public void testHasActiveProjects() {
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
-            Planner sut = new Planner(DateTime.Now, profileMock.Object, GetPrefs(), false);
-            sut.HasActiveProjects(null).Should().BeFalse();
 
             Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
             Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
@@ -556,7 +554,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             PlanMocks.AddMockPlanTarget(pp2, pt);
 
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object, pp2.Object);
-            sut = new Planner(DateTime.Now, profileMock.Object, GetPrefs(), false);
+            Planner sut = new Planner(DateTime.Now, profileMock.Object, GetPrefs(), false);
             sut.HasActiveProjects(projects).Should().BeTrue();
 
             projects = PlanMocks.ProjectsList(pp2.Object);

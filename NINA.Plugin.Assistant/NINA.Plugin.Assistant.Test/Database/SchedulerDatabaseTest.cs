@@ -60,6 +60,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 p1.FilterSwitchFrequency.Should().Be(12);
                 p1.DitherEvery.Should().Be(14);
                 p1.EnableGrader.Should().BeFalse();
+                p1.IsMosaic.Should().BeTrue();
 
                 p1.RuleWeights[0].Name.Should().Be("a");
                 p1.RuleWeights[1].Name.Should().Be("b");
@@ -92,6 +93,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 p2.FilterSwitchFrequency.Should().Be(14);
                 p2.DitherEvery.Should().Be(16);
                 p2.EnableGrader.Should().BeFalse();
+                p2.IsMosaic.Should().BeFalse();
 
                 p2.RuleWeights[0].Name.Should().Be("d");
                 p2.RuleWeights[1].Name.Should().Be("e");
@@ -321,6 +323,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p1.FilterSwitchFrequency = 12;
                     p1.DitherEvery = 14;
                     p1.EnableGrader = false;
+                    p1.IsMosaic = true;
 
                     p1.RuleWeights = new List<RuleWeight> {
                         {new RuleWeight("a", .1) },
@@ -373,6 +376,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p2.FilterSwitchFrequency = 14;
                     p2.DitherEvery = 16;
                     p2.EnableGrader = false;
+                    p2.IsMosaic = false;
 
                     p2.RuleWeights = new List<RuleWeight> {
                         {new RuleWeight("d", .4) },

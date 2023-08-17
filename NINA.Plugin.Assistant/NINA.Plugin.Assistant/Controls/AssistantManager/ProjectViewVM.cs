@@ -235,6 +235,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 }
 
                 managerVM.AddTargets(ProjectProxy.Project, targets);
+                ProjectProxy.Proxy.IsMosaic = true;
+                Save(null);
             }
         }
 
