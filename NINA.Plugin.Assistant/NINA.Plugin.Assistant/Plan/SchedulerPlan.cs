@@ -184,6 +184,7 @@ namespace Assistant.NINAPlugin.Plan {
         int FilterSwitchFrequency { get; set; }
         int DitherEvery { get; set; }
         bool EnableGrader { get; set; }
+        bool IsMosaic { get; set; }
         Dictionary<string, double> RuleWeights { get; set; }
 
         List<IPlanTarget> Targets { get; set; }
@@ -214,6 +215,7 @@ namespace Assistant.NINAPlugin.Plan {
         public int FilterSwitchFrequency { get; set; }
         public int DitherEvery { get; set; }
         public bool EnableGrader { get; set; }
+        public bool IsMosaic { get; set; }
         public Dictionary<string, double> RuleWeights { get; set; }
 
         public List<IPlanTarget> Targets { get; set; }
@@ -241,6 +243,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.FilterSwitchFrequency = project.FilterSwitchFrequency;
             this.DitherEvery = project.DitherEvery;
             this.EnableGrader = project.EnableGrader;
+            this.IsMosaic = project.IsMosaic;
             this.RuleWeights = GetRuleWeightsDictionary(project.RuleWeights);
 
             this.HorizonDefinition = DetermineHorizon(profile, project);
@@ -279,6 +282,7 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"FilterSwitchFrequency: {FilterSwitchFrequency}");
             sb.AppendLine($"DitherEvery: {DitherEvery}");
             sb.AppendLine($"EnableGrader: {EnableGrader}");
+            sb.AppendLine($"IsMosaic: {IsMosaic}");
             sb.AppendLine($"RuleWeights:");
             foreach (KeyValuePair<string, double> entry in RuleWeights) {
                 sb.AppendLine($"  {entry.Key}: {entry.Value}");

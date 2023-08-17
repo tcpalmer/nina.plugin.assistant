@@ -224,6 +224,7 @@ namespace Assistant.NINAPlugin.Plan {
         public double MinimumAltitude { get; set; }
         public int DitherEvery { get; set; }
         public bool EnableGrader { get; set; }
+        public bool IsMosaic { get; set; }
 
         public string Description { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public ProjectState State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
