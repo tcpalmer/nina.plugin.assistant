@@ -315,6 +315,12 @@ namespace Assistant.NINAPlugin.Plan {
 
         private HorizonDefinition DetermineHorizon(IProfile profile, Project project) {
             if (project.UseCustomHorizon) {
+
+                if (profile.AstrometrySettings.Horizon == null) {
+                    TSLogger.Warning("project 'Use Custom Horizon' is enabled but no custom horizon was found in the profile, defaulting to Minimum Altitude");
+                    return new HorizonDefinition(project.MinimumAltitude);
+                }
+
                 return new HorizonDefinition(profile.AstrometrySettings.Horizon, project.HorizonOffset, project.MinimumAltitude);
             }
 
