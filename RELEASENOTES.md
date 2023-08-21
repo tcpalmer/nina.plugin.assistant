@@ -1,6 +1,6 @@
 # Release Notes
 
-## 3.3.0.0 - 2023-08-XX
+## 3.3.1.0 - 2023-08-XX
 
 ### Exposure Ordering Override
 
@@ -14,6 +14,7 @@ This is supported by a new flag on Projects to indicate if they are for mosaics 
 
 ### Other
 * Fixed bug with rotation not being set when importing from a saved Sequence Target.
+* Fixed bug related to non-existant custom horizon
 
 ## 3.2.1.0 - 2023-08-09
 * Fixed bug preventing target ROI from being applied properly.
