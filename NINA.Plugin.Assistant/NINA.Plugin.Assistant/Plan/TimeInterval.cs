@@ -29,23 +29,12 @@ namespace Assistant.NINAPlugin.Plan {
                 return null;
             }
 
-            if (ti2.StartTime < StartTime && ti2.EndTime <= EndTime) {
-                return new TimeInterval(StartTime, ti2.EndTime);
-            }
+            DateTime start = ti2.StartTime;
+            DateTime end = ti2.EndTime;
+            start = start > StartTime ? start : StartTime;
+            end = end < EndTime ? end : EndTime;
 
-            if (StartTime < ti2.StartTime && EndTime <= ti2.EndTime) {
-                return new TimeInterval(ti2.StartTime, EndTime);
-            }
-
-            if (StartTime < ti2.StartTime && ti2.EndTime <= EndTime) {
-                return new TimeInterval(ti2.StartTime, ti2.EndTime);
-            }
-
-            if (ti2.StartTime < StartTime && EndTime <= ti2.EndTime) {
-                return new TimeInterval(StartTime, EndTime);
-            }
-
-            return new TimeInterval(StartTime, EndTime);
+            return new TimeInterval(start, end);
         }
 
         public override string ToString() {

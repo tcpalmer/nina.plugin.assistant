@@ -6,6 +6,12 @@
 
 You can now override the default exposure ordering (which is based on the Filter Switch Frequency and Dither settings on the project) and specify a manual override ordering, including dithers.
 
+### Mosaic Completion Scoring Rule
+
+Added a new rule to score mosaic projects based on completion ratio, intended to support balancing of exposures across panels.
+
+This is supported by a new flag on Projects to indicate if they are for mosaics or not.  This defaults to false and can be manually changed to true.  It will also be automatically set to true if you import mosaic panels from the Framing Assistant.
+
 ### Other
 * Fixed bug with rotation not being set when importing from a saved Sequence Target.
 
