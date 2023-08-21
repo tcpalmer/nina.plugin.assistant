@@ -47,6 +47,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pp.SetupProperty(m => m.FilterSwitchFrequency, 0);
             pp.SetupProperty(m => m.DitherEvery, 0);
             pp.SetupProperty(m => m.EnableGrader, false);
+            pp.SetupProperty(m => m.IsMosaic, false);
 
             Dictionary<string, double> rw = new Dictionary<string, double>();
             Dictionary<string, IScoringRule> allRules = ScoringRule.GetAllScoringRules();
