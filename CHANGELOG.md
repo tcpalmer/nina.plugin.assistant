@@ -1,10 +1,10 @@
 # Target Scheduler
 
-## 3.3.1.0 - 2023-08-XX
+## 3.3.1.0 - 2023-08-22
 * Added ability to override exposure ordering.
 * Added Mosaic Completion scoring rule
 * Fixed bug with rotation not being set when importing from a saved Sequence Target.
-* Fixed bug related to non-existant custom horizon
+* Fixed bug related to non-existent custom horizon
 
 ## 3.2.1.0 - 2023-08-09
 * Fixed bug preventing target ROI from being applied properly.
