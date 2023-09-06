@@ -1,5 +1,8 @@
 # Release Notes
 
+## 3.3.2.0 - 2023-09-XX
+* Fixed problem with override exposure ordering.
+
 ## 3.3.1.0 - 2023-08-22
 
 ### Exposure Ordering Override
