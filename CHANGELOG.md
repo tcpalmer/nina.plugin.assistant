@@ -1,7 +1,7 @@
 # Target Scheduler
 
-## 3.3.2.0 - 2023-09-XX
-* Fixed problem with override exposure ordering.
+## 3.3.2.0 - 2023-09-07
+* Fixed problem with override exposure ordering. Unfortunately, any existing override order had to be cleared (automatically) for this fix.  You'll have to manually redo any that you had already created.
 
 ## 3.3.1.0 - 2023-08-22
 * Added ability to override exposure ordering.

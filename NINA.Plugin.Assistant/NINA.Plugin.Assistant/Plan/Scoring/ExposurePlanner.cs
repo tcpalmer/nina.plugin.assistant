@@ -1,11 +1,8 @@
-﻿using Accord.IO;
-using Assistant.NINAPlugin.Astrometry;
+﻿using Assistant.NINAPlugin.Astrometry;
 using Assistant.NINAPlugin.Controls.AssistantManager;
-using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan.Scoring;
 using Assistant.NINAPlugin.Util;
-using NINA.Sequencer.SequenceItem.Guider;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,28 +45,6 @@ namespace Assistant.NINAPlugin.Plan {
 
         private List<PlanOverrideItem> GetPlanOverrideList() {
 
-            /* Since some of the exposure plans could have been culled due to complete, twilight, or moon avoidance
-             * we have to remap the override indices using the corresponding database IDs.  Two dictionaries
-             * provide the lookups. */
-
-            // ALTERNATIVE: instead store DB ids in the override ordering BUT that means everyone has to redo them
-
-            Target target;
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
-                target = context.GetTarget(planTarget.Project.DatabaseId, planTarget.DatabaseId);
-            }
-
-            int idx = 0;
-            Dictionary<int, int> epMap = new Dictionary<int, int>(target.ExposurePlans.Count);
-            foreach (ExposurePlan ep in target.ExposurePlans) {
-                epMap[idx++] = ep.Id;
-            }
-
-            Dictionary<int, IPlanExposure> pepMap = new Dictionary<int, IPlanExposure>(planTarget.ExposurePlans.Count);
-            foreach (IPlanExposure pep in planTarget.ExposurePlans) {
-                pepMap[pep.DatabaseId] = pep;
-            }
-
             List<PlanOverrideItem> list = new List<PlanOverrideItem>();
             string[] items = planTarget.OverrideExposureOrder.Split(OverrideExposureOrder.SEP);
             foreach (string item in items) {
@@ -77,12 +52,12 @@ namespace Assistant.NINAPlugin.Plan {
                     list.Add(new PlanOverrideItem());
                 }
                 else {
-                    int index = 0;
-                    Int32.TryParse(item, out index);
+                    int databaseId = 0;
+                    Int32.TryParse(item, out databaseId);
 
-                    int epDBId = epMap[index];
-                    if (pepMap.ContainsKey(epDBId)) {
-                        list.Add(new PlanOverrideItem(pepMap[epDBId]));
+                    IPlanExposure pe = planTarget.ExposurePlans.Find(ep => ep.DatabaseId == databaseId);
+                    if (pe != null) {
+                        list.Add(new PlanOverrideItem(pe));
                     }
                 }
             }
@@ -312,7 +287,7 @@ namespace Assistant.NINAPlugin.Plan {
 
         private bool AllPlanExposuresAreComplete(List<IPlanExposure> planExposures) {
             foreach (IPlanExposure planExposure in planExposures) {
-                if (!IsPlanExposureComplete(planExposure)) {
+                if (!planExposure.Rejected && !IsPlanExposureComplete(planExposure)) {
                     return false;
                 }
             }
@@ -326,7 +301,7 @@ namespace Assistant.NINAPlugin.Plan {
                     continue;
                 }
 
-                if (!IsPlanExposureComplete(item.PlanExposure)) {
+                if (!item.PlanExposure.Rejected && !IsPlanExposureComplete(item.PlanExposure)) {
                     return false;
                 }
             }

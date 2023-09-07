@@ -233,6 +233,11 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             Mock<IPlanProject> pp = GetTestProject(dateTime, 0, nbExposures, nbExposureLength, wbExposures, wbExposureLength);
             IPlanTarget pt = pp.Object.Targets[0];
 
+            int id = 0;
+            foreach (IPlanExposure pe in pt.ExposurePlans) {
+                pe.DatabaseId = id++;
+            }
+
             string[] items = { "0", "1", "2", OverrideExposureOrder.DITHER, "3", "4", "5", "6", OverrideExposureOrder.DITHER };
             pt.OverrideExposureOrder = string.Join(OverrideExposureOrder.SEP, items);
 
@@ -261,6 +266,11 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
             Mock<IPlanProject> pp = GetTestProject(dateTime, 0, nbExposures, nbExposureLength, wbExposures, wbExposureLength);
             IPlanTarget pt = pp.Object.Targets[0];
+
+            int id = 0;
+            foreach (IPlanExposure pe in pt.ExposurePlans) {
+                pe.DatabaseId = id++;
+            }
 
             string[] items = { "0", "0", "1", "1", "2", "2", OverrideExposureOrder.DITHER, "3", "4", "5", "6", OverrideExposureOrder.DITHER };
             pt.OverrideExposureOrder = string.Join(OverrideExposureOrder.SEP, items);

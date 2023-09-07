@@ -623,6 +623,27 @@ namespace Assistant.NINAPlugin.Database {
                         }
                     }
                 }
+
+                // Clear override exposure order (meaning changed with bug fix)
+                if (oldVersion == 8 && newVersion == 9) {
+                    projects = context.GetAllProjects();
+                    if (projects != null && projects.Count > 0) {
+                        bool updated = false;
+                        foreach (Project project in projects) {
+                            foreach (Target target in project.Targets) {
+                                if (!string.IsNullOrEmpty(target.OverrideExposureOrder)) {
+                                    target.OverrideExposureOrder = null;
+                                    updated = true;
+                                }
+                            }
+                        }
+
+                        if (updated) {
+                            context.SaveChanges();
+                            TSLogger.Info("cleared override exposure ordering for bug fix");
+                        }
+                    }
+                }
             }
 
         }

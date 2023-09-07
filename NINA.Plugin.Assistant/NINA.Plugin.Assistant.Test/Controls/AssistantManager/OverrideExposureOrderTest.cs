@@ -28,35 +28,35 @@ namespace NINA.Plugin.Assistant.Test.Controls.AssistantManager {
 
             OverrideItem oi = sut.OverrideItems[0];
             oi.IsDither.Should().BeFalse();
-            oi.ExposurePlanIndex.Should().Be(0);
+            oi.ExposurePlanDatabaseId.Should().Be(0);
 
             oi = sut.OverrideItems[1];
             oi.IsDither.Should().BeFalse();
-            oi.ExposurePlanIndex.Should().Be(0);
+            oi.ExposurePlanDatabaseId.Should().Be(0);
 
             oi = sut.OverrideItems[2];
             oi.IsDither.Should().BeFalse();
-            oi.ExposurePlanIndex.Should().Be(0);
+            oi.ExposurePlanDatabaseId.Should().Be(0);
 
             oi = sut.OverrideItems[3];
             oi.IsDither.Should().BeTrue();
-            oi.ExposurePlanIndex.Should().Be(-1);
+            oi.ExposurePlanDatabaseId.Should().Be(-1);
 
             oi = sut.OverrideItems[4];
             oi.IsDither.Should().BeFalse();
-            oi.ExposurePlanIndex.Should().Be(1);
+            oi.ExposurePlanDatabaseId.Should().Be(1);
 
             oi = sut.OverrideItems[5];
             oi.IsDither.Should().BeFalse();
-            oi.ExposurePlanIndex.Should().Be(2);
+            oi.ExposurePlanDatabaseId.Should().Be(2);
 
             oi = sut.OverrideItems[6];
             oi.IsDither.Should().BeFalse();
-            oi.ExposurePlanIndex.Should().Be(3);
+            oi.ExposurePlanDatabaseId.Should().Be(3);
 
             oi = sut.OverrideItems[7];
             oi.IsDither.Should().BeTrue();
-            oi.ExposurePlanIndex.Should().Be(-1);
+            oi.ExposurePlanDatabaseId.Should().Be(-1);
         }
 
         [Test]
@@ -75,7 +75,7 @@ namespace NINA.Plugin.Assistant.Test.Controls.AssistantManager {
         }
 
         private List<ExposurePlan> GetEPList() {
-            int i = 1;
+            int i = 0;
             List<ExposurePlan> list = new List<ExposurePlan>();
 
             ExposurePlan ep = new ExposurePlan("PID");

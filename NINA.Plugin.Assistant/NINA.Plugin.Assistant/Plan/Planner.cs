@@ -11,7 +11,6 @@ using NINA.Profile.Interfaces;
 using Serilog.Events;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Assistant.NINAPlugin.Plan {
 
