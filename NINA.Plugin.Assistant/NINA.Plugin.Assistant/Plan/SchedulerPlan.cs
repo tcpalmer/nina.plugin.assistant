@@ -385,7 +385,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.Rejected = false;
 
             this.ExposurePlans = new List<IPlanExposure>();
-            foreach (ExposurePlan plan in target.ExposurePlans) {
+            foreach (ExposurePlan plan in GetActiveExposurePlans(target)) {
                 PlanExposure planExposure = new PlanExposure(this, plan, plan.ExposureTemplate);
 
                 // add only if the plan is incomplete
@@ -396,6 +396,31 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         public PlanTarget() { } // for PlanTargetEmulator only
+
+        private List<ExposurePlan> GetActiveExposurePlans(Target target) {
+            if (string.IsNullOrEmpty(target.OverrideExposureOrder)) {
+                return target.ExposurePlans;
+            }
+
+            List<ExposurePlan> list = new List<ExposurePlan>();
+            string[] items = target.OverrideExposureOrder.Split(Controls.AssistantManager.OverrideExposureOrder.SEP);
+            foreach (string item in items) {
+                if (item == Controls.AssistantManager.OverrideExposureOrder.DITHER) {
+                    continue;
+                }
+                else {
+                    int databaseId = 0;
+                    Int32.TryParse(item, out databaseId);
+
+                    ExposurePlan exposurePlan = target.ExposurePlans.Find(ep => ep.Id == databaseId);
+                    if (exposurePlan != null && !list.Contains(exposurePlan)) {
+                        list.Add(exposurePlan);
+                    }
+                }
+            }
+
+            return list;
+        }
 
         public void SetCircumstances(bool isVisible, DateTime startTime, DateTime culminationTime, DateTime endTime) {
             if (isVisible) {

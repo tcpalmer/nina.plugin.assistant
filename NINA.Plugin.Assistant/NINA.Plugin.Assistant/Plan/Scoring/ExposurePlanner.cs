@@ -1,10 +1,8 @@
-﻿using Accord.IO;
-using Assistant.NINAPlugin.Astrometry;
+﻿using Assistant.NINAPlugin.Astrometry;
 using Assistant.NINAPlugin.Controls.AssistantManager;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan.Scoring;
 using Assistant.NINAPlugin.Util;
-using NINA.Sequencer.SequenceItem.Guider;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,17 +44,21 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         private List<PlanOverrideItem> GetPlanOverrideList() {
-            List<PlanOverrideItem> list = new List<PlanOverrideItem>();
 
+            List<PlanOverrideItem> list = new List<PlanOverrideItem>();
             string[] items = planTarget.OverrideExposureOrder.Split(OverrideExposureOrder.SEP);
             foreach (string item in items) {
                 if (item == OverrideExposureOrder.DITHER) {
                     list.Add(new PlanOverrideItem());
                 }
                 else {
-                    int index = 0;
-                    Int32.TryParse(item, out index);
-                    list.Add(new PlanOverrideItem(planTarget.ExposurePlans[index]));
+                    int databaseId = 0;
+                    Int32.TryParse(item, out databaseId);
+
+                    IPlanExposure pe = planTarget.ExposurePlans.Find(ep => ep.DatabaseId == databaseId);
+                    if (pe != null) {
+                        list.Add(new PlanOverrideItem(pe));
+                    }
                 }
             }
 
@@ -285,7 +287,7 @@ namespace Assistant.NINAPlugin.Plan {
 
         private bool AllPlanExposuresAreComplete(List<IPlanExposure> planExposures) {
             foreach (IPlanExposure planExposure in planExposures) {
-                if (!IsPlanExposureComplete(planExposure)) {
+                if (!planExposure.Rejected && !IsPlanExposureComplete(planExposure)) {
                     return false;
                 }
             }
@@ -299,7 +301,7 @@ namespace Assistant.NINAPlugin.Plan {
                     continue;
                 }
 
-                if (!IsPlanExposureComplete(item.PlanExposure)) {
+                if (!item.PlanExposure.Rejected && !IsPlanExposureComplete(item.PlanExposure)) {
                     return false;
                 }
             }

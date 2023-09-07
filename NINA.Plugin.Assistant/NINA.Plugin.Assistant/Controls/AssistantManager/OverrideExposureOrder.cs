@@ -1,6 +1,4 @@
-﻿using Accord.IO;
-using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.Util;
+﻿using Assistant.NINAPlugin.Database.Schema;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,7 +18,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         public OverrideExposureOrder(List<ExposurePlan> exposurePlans) {
             for (int i = 0; i < exposurePlans.Count; i++) {
-                OverrideItems.Add(new OverrideItem(exposurePlans[i], i));
+                OverrideItems.Add(new OverrideItem(exposurePlans[i], exposurePlans[i].Id));
             }
         }
 
@@ -36,9 +34,12 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     OverrideItems.Add(new OverrideItem());
                 }
                 else {
-                    int index = 0;
-                    Int32.TryParse(item, out index);
-                    OverrideItems.Add(new OverrideItem(exposurePlans[index], index));
+                    int databaseId = 0;
+                    Int32.TryParse(item, out databaseId);
+                    ExposurePlan ep = exposurePlans.Find(e => e.Id == databaseId);
+                    if (ep != null) {
+                        OverrideItems.Add(new OverrideItem(ep, databaseId));
+                    }
                 }
             }
         }
@@ -63,32 +64,32 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class OverrideItem {
 
-        public int ExposurePlanIndex { get; private set; }
+        public int ExposurePlanDatabaseId { get; private set; }
         public bool IsDither { get; private set; }
         public string Name { get; private set; }
 
         public OverrideItem() {
             IsDither = true;
-            ExposurePlanIndex = -1;
+            ExposurePlanDatabaseId = -1;
             Name = OverrideExposureOrder.DITHER;
         }
 
-        public OverrideItem(ExposurePlan exposurePlan, int exposurePlanIndex) {
+        public OverrideItem(ExposurePlan exposurePlan, int exposurePlanDatabaseId) {
             IsDither = false;
-            ExposurePlanIndex = exposurePlanIndex;
+            ExposurePlanDatabaseId = exposurePlanDatabaseId;
             Name = exposurePlan.ExposureTemplate.Name;
         }
 
         public OverrideItem Clone() {
             return new OverrideItem {
                 IsDither = IsDither,
-                ExposurePlanIndex = ExposurePlanIndex,
+                ExposurePlanDatabaseId = ExposurePlanDatabaseId,
                 Name = Name
             };
         }
 
         public string Serialize() {
-            return IsDither ? OverrideExposureOrder.DITHER : ExposurePlanIndex.ToString();
+            return IsDither ? OverrideExposureOrder.DITHER : ExposurePlanDatabaseId.ToString();
         }
     }
 }
