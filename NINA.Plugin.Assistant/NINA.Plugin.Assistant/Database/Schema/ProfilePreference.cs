@@ -13,6 +13,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public int parkOnWait { get; set; }
         public double exposureThrottle { get; set; }
+        public int enableSynchronization { get; set; }
 
         public int enableGradeRMS { get; set; }
         public int enableGradeStars { get; set; }
@@ -30,6 +31,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             ProfileId = profileId;
             ParkOnWait = false;
             ExposureThrottle = 125;
+            EnableSynchronization = false;
             EnableGradeRMS = true;
             EnableGradeStars = true;
             EnableGradeHFR = true;
@@ -56,6 +58,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 exposureThrottle = value;
                 RaisePropertyChanged(nameof(ExposureThrottle));
+            }
+        }
+
+        [NotMapped]
+        public bool EnableSynchronization {
+            get { return enableSynchronization == 1; }
+            set {
+                enableSynchronization = value ? 1 : 0;
+                RaisePropertyChanged(nameof(EnableSynchronization));
             }
         }
 
