@@ -18,6 +18,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public int Gain { get; set; }
         public int Offset { get; set; }
         public string Binning { get; set; }
+        public double ROI { get; set; }
 
         public int DetectedStars { get; set; }
         public double HFR { get; set; }
@@ -47,7 +48,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public ImageMetadata() { }
 
-        public ImageMetadata(ImageSavedEventArgs msg) {
+        public ImageMetadata(ImageSavedEventArgs msg, double roi) {
             Assert.notNull(msg, "msg cannot be null");
 
             FileName = msg.PathToImage.LocalPath;
@@ -55,6 +56,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             ExposureStartTime = msg.MetaData.Image.ExposureStart;
             ExposureDuration = msg.Duration;
             Binning = msg.MetaData.Image.Binning?.ToString();
+            ROI = roi;
 
             Gain = msg.MetaData.Camera.Gain;
             Offset = msg.MetaData.Camera.Offset;
@@ -115,6 +117,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"Gain: {Gain}");
             sb.AppendLine($"Offset: {Offset}");
             sb.AppendLine($"Binning: {Binning}");
+            sb.AppendLine($"ROI: {ROI}");
             sb.AppendLine($"DetectedStars: {DetectedStars}");
             sb.AppendLine($"HFR: {HFR}");
             sb.AppendLine($"HFRStDev: {HFRStDev}");

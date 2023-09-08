@@ -51,7 +51,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 // Get comparable images to compare against; if we don't have at least 3 to compare against, assume this one is acceptable
-                List<AcquiredImage> images = GetSampleImageData(planTarget.DatabaseId, msg.Filter, msg);
+                List<AcquiredImage> images = GetSampleImageData(planTarget, msg.Filter, msg);
                 if (images == null) {
                     TSLogger.Info("image grading: not enough matching images => accepted");
                     return (true, "");
@@ -149,16 +149,25 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        public List<AcquiredImage> GetSampleImageData(int targetId, string filterName, ImageSavedEventArgs msg) {
-            TSLogger.Info($"image grading: comparing against like images, filter={filterName}, exp={msg.Duration}, gain={msg.MetaData.Camera.Gain}, offset={msg.MetaData.Camera.Offset}, bin={msg.MetaData.Image.Binning}");
-            List<AcquiredImage> rawList = GetAcquiredImages(targetId, filterName);
+        public List<AcquiredImage> GetSampleImageData(IPlanTarget planTarget, string filterName, ImageSavedEventArgs msg) {
+            TSLogger.Info($"image grading: comparing against like images, filter={filterName}, exp={msg.Duration}, gain={msg.MetaData.Camera.Gain}, offset={msg.MetaData.Camera.Offset}, bin={msg.MetaData.Image.Binning}, rot={msg.MetaData.Rotator.Position}, roi={planTarget.ROI}");
+            List<AcquiredImage> rawList = GetAcquiredImages(planTarget.DatabaseId, filterName);
+
+            /*
+             * TODO: Note that rotation and ROI filtering are currently disabled.  Will enable in a future release when users
+             * have the data saved.  We might have to filter for those values outside of the Where to catch saved rotation=NaN
+             * and ROI=0 issues.
+             */
 
             // Filter for matching duration/gain/offset/binning
+
             List<AcquiredImage> list = rawList.Where(i =>
                 i.Metadata.ExposureDuration == msg.Duration &&
                 i.Metadata.Gain == msg.MetaData.Camera.Gain &&
                 i.Metadata.Offset == msg.MetaData.Camera.Offset &&
                 i.Metadata.Binning == msg.MetaData.Image.Binning
+            //i.Metadata.RotatorPosition == planTarget.Rotation &&
+            //i.Metadata.ROI == planTarget.ROI
             ).ToList();
 
             if (list.Count < 3) {

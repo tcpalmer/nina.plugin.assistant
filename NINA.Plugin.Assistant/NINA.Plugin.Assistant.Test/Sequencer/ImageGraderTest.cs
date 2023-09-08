@@ -3,8 +3,6 @@ using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Sequencer;
 using FluentAssertions;
-using Google.Protobuf.WellKnownTypes;
-using Grpc.Core;
 using Moq;
 using NINA.Core.Model;
 using NINA.Image.ImageData;
@@ -16,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace NINA.Plugin.Assistant.Test.Sequencer {
 
@@ -85,6 +82,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
             Mock<IPlanTarget> planTargetMock = new Mock<IPlanTarget>();
             planTargetMock.SetupProperty(m => m.DatabaseId, 1);
+            planTargetMock.SetupProperty(m => m.ROI, 100);
 
             ImageSavedEventArgs msg = GetMockMsg(0, 0, "L", 500, 0);
             (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
@@ -114,6 +112,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
             Mock<IPlanTarget> planTargetMock = new Mock<IPlanTarget>();
             planTargetMock.SetupProperty(m => m.DatabaseId, 1);
+            planTargetMock.SetupProperty(m => m.ROI, 100);
 
             ImageSavedEventArgs msg = GetMockMsg(0, 0, "L", 1000, 0); // way outside variance but an improvement
             (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
@@ -143,6 +142,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
             Mock<IPlanTarget> planTargetMock = new Mock<IPlanTarget>();
             planTargetMock.SetupProperty(m => m.DatabaseId, 1);
+            planTargetMock.SetupProperty(m => m.ROI, 100);
 
             ImageSavedEventArgs msg = GetMockMsg(0, 0, "L", 0, 1.5);
             (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
@@ -172,6 +172,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
             Mock<IPlanTarget> planTargetMock = new Mock<IPlanTarget>();
             planTargetMock.SetupProperty(m => m.DatabaseId, 1);
+            planTargetMock.SetupProperty(m => m.ROI, 100);
 
             ImageSavedEventArgs msg = GetMockMsg(0, 0, "L", 0, 0.1);
             (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
@@ -199,10 +200,11 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
             Mock<IPlanTarget> planTargetMock = new Mock<IPlanTarget>();
             planTargetMock.SetupProperty(m => m.DatabaseId, 1);
+            planTargetMock.SetupProperty(m => m.ROI, 100);
 
             ImageSavedEventArgs msg = GetMockMsg(0.6, 1, "L", 0, 0, 70); // duration mismatch
 
-            List<AcquiredImage> samples = sut.GetSampleImageData(1, "L", msg);
+            List<AcquiredImage> samples = sut.GetSampleImageData(planTargetMock.Object, "L", msg);
             samples.Should().BeNull();
         }
 
@@ -221,10 +223,11 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
             Mock<IPlanTarget> planTargetMock = new Mock<IPlanTarget>();
             planTargetMock.SetupProperty(m => m.DatabaseId, 1);
+            planTargetMock.SetupProperty(m => m.ROI, 100);
 
             ImageSavedEventArgs msg = GetMockMsg(0.6, 1, "L", 0, 0);
 
-            List<AcquiredImage> samples = sut.GetSampleImageData(1, "L", msg);
+            List<AcquiredImage> samples = sut.GetSampleImageData(planTargetMock.Object, "L", msg);
             samples.Should().NotBeNull();
             samples.Count.Should().Be(10);
         }
@@ -245,10 +248,11 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
             Mock<IPlanTarget> planTargetMock = new Mock<IPlanTarget>();
             planTargetMock.SetupProperty(m => m.DatabaseId, 1);
+            planTargetMock.SetupProperty(m => m.ROI, 100);
 
             ImageSavedEventArgs msg = GetMockMsg(0.6, 1, "L", 0, 0, 60, 100, 200, "1x1");
 
-            List<AcquiredImage> samples = sut.GetSampleImageData(1, "L", msg);
+            List<AcquiredImage> samples = sut.GetSampleImageData(planTargetMock.Object, "L", msg);
             samples.Should().NotBeNull();
             samples.Count.Should().Be(5);
         }
@@ -271,7 +275,8 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
                                               GradeHFR, HFRSigmaFactor);
         }
 
-        private ImageSavedEventArgs GetMockMsg(double rmsTotal, double rmsScale, string filter, int detectedStars, double HFR, double duration = 60, int gain = 10, int offset = 20, string binning = "1x1") {
+        private ImageSavedEventArgs GetMockMsg(double rmsTotal, double rmsScale, string filter, int detectedStars, double HFR, double duration = 60,
+                                               int gain = 10, int offset = 20, string binning = "1x1", double rotation = 0) {
             ImageSavedEventArgs msg = new ImageSavedEventArgs();
             ImageMetaData metadata = new ImageMetaData();
             ImageParameter imageParameter = new ImageParameter();
@@ -282,6 +287,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
             imageParameter.RecordedRMS = rms;
             imageParameter.Binning = binning;
+            metadata.Rotator.Position = rotation;
             metadata.Image = imageParameter;
 
             cameraParameter.Gain = gain;
@@ -300,7 +306,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             return msg;
         }
 
-        private List<AcquiredImage> GetTestImages(int count, int targetId, string filterName, double duration = 60, int gain = 10, int offset = 20, string binning = "1x1") {
+        private List<AcquiredImage> GetTestImages(int count, int targetId, string filterName, double duration = 60, int gain = 10, int offset = 20, string binning = "1x1", double roi = 100) {
 
             DateTime dateTime = DateTime.Now.Date;
             List<AcquiredImage> images = new List<AcquiredImage>();
@@ -313,7 +319,8 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
                     HFR = 1 + (double)i / 10,
                     Gain = gain,
                     Offset = offset,
-                    Binning = binning
+                    Binning = binning,
+                    ROI = roi
                 };
 
                 images.Add(new AcquiredImage(0, targetId, dateTime, filterName, true, "", metaData));

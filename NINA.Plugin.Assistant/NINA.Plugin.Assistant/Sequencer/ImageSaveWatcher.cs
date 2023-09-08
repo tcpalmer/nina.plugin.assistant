@@ -142,7 +142,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                             filterName,
                             accepted,
                             rejectReason,
-                            new ImageMetadata(msg));
+                            new ImageMetadata(msg, planTarget.ROI));
                         context.AcquiredImageSet.Add(acquiredImage);
 
                         context.SaveChanges();

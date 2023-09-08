@@ -1,5 +1,8 @@
 # Release Notes
 
+## 3.4.0.0 - 2023-09-XX
+* Added target rotation and ROI to the set of data saved for acquired images.  A future release will use these values when selecting 'like' images for grading.
+
 ## 3.3.2.0 - 2023-09-07
 * Fixed problem with override exposure ordering. Unfortunately, any existing override order had to be cleared (automatically) for this fix.  You'll have to manually redo any that you had already created.
 

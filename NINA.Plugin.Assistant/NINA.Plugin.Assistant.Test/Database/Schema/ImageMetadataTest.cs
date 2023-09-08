@@ -15,7 +15,7 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
         public void TestImageMetadata() {
             DateTime saveDate = new DateTime(2023, 1, 17, 13, 2, 3);
             ImageSavedEventArgs msg = PlanMocks.GetImageSavedEventArgs(saveDate, "Ha");
-            var sut = new ImageMetadata(msg);
+            var sut = new ImageMetadata(msg, 100);
 
             sut.FileName.Should().Be("\\\\path\\to\\image.fits");
             sut.FilterName.Should().Be("Ha");
@@ -24,6 +24,7 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
             sut.Gain.Should().Be(306);
             sut.Offset.Should().Be(307);
             sut.Binning.Should().Be("1x1");
+            sut.ROI.Should().Be(100);
             sut.DetectedStars.Should().Be(100);
             sut.HFR.Should().Be(101);
             sut.HFRStDev.Should().Be(102);
