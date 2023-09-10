@@ -1,0 +1,37 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Scheduler.SyncService";
+
+package schedulersync;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service SchedulerSync {
+	rpc Register (RegistrationRequest) returns (StatusResponse);
+	rpc Unregister (ClientIdRequest) returns (StatusResponse);
+	rpc Keepalive (ClientIdRequest) returns (StatusResponse);
+}
+
+enum ClientState {
+	STARTING = 0;
+	WAITING = 1;
+	ENDING = 2;
+}
+
+message RegistrationRequest {
+  string guid = 1;
+  string profileId = 2;
+  int32 pid = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+message ClientIdRequest {
+  string guid = 1;
+  ClientState clientState = 2;
+}
+
+message StatusResponse {
+	bool success = 1;
+	string message = 2;
+}
