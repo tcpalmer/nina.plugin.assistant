@@ -34,7 +34,7 @@
     <PackageReference Include="LinqKit" Version="1.2.4" />
     <PackageReference Include="LinqKit.Core" Version="1.2.4" />
     <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
-    <PackageReference Include="NINA.Plugin" Version="3.0.0.1022-nightly" />
+    <PackageReference Include="NINA.Plugin" Version="3.0.0.1032-nightly" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Settings.Designer.cs">

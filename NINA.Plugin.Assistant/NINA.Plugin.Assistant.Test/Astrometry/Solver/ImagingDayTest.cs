@@ -216,6 +216,18 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
         }
 
         [Test]
+        public void TestWeird() {
+
+            DateTime start = new DateTime(2023, 9, 18, 18, 0, 0);
+            DateTime end = new DateTime(2023, 9, 19, 6, 0, 0);
+            HorizonDefinition hd = new HorizonDefinition(TestUtil.GetTestHorizon(4), 10);
+
+            ImagingDay imagingDay = new ImagingDay(start, end, TestUtil.TEST_LOCATION_7, TestUtil.M31, hd);
+            DateTime transitTime = imagingDay.GetTransitTime();
+            DateTime setBelowMin = imagingDay.GetSetBelowMinimumTime();
+        }
+
+        [Test]
         public void TestBad() {
             DateTime dt = DateTime.Now;
 
