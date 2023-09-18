@@ -1,5 +1,4 @@
-﻿using Assistant.NINAPlugin.Util;
-using NINA.Core.Utility;
+﻿using NINA.Plugin.Assistant.Shared.Utility;
 using System;
 using System.Diagnostics;
 using System.Windows;

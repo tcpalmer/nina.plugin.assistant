@@ -2,6 +2,7 @@
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;
 using System;

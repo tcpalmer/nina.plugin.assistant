@@ -4,6 +4,7 @@ using Assistant.NINAPlugin.Plan.Scoring.Rules;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Model.Equipment;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using System;
 using System.Collections.Generic;

@@ -1,6 +1,6 @@
-﻿using Assistant.NINAPlugin.Util;
-using NINA.Core.Utility;
+﻿using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
+using NINA.Plugin.Assistant.Shared.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,7 +22,7 @@ namespace Assistant.NINAPlugin.Database {
         private string connectionString;
 
         public SchedulerDatabaseInteraction()
-            : this(string.Format(@"Data Source={0};", Environment.ExpandEnvironmentVariables($@"{AssistantPlugin.PLUGIN_HOME}\{DATABASE_FILENAME}"))) {
+            : this(string.Format(@"Data Source={0};", Environment.ExpandEnvironmentVariables($@"{Common.PLUGIN_HOME}\{DATABASE_FILENAME}"))) {
         }
 
         public SchedulerDatabaseInteraction(string connectionString) {
@@ -34,19 +34,19 @@ namespace Assistant.NINAPlugin.Database {
         }
 
         public static void BackupDatabase() {
-            string sourceFile = Path.Combine(AssistantPlugin.PLUGIN_HOME, DATABASE_FILENAME);
+            string sourceFile = Path.Combine(Common.PLUGIN_HOME, DATABASE_FILENAME);
             if (!File.Exists(sourceFile)) {
                 return;
             }
 
             try {
                 string renamed = $"{DATABASE_BASENAME}-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}-backup.{DATABASE_SUFFIX}";
-                string newFileName = Path.Combine(AssistantPlugin.PLUGIN_HOME, renamed);
+                string newFileName = Path.Combine(Common.PLUGIN_HOME, renamed);
                 TSLogger.Debug($"backing up Target Scheduler database to {newFileName}");
                 File.Copy(sourceFile, newFileName);
 
                 // Keep only the most recent N backups
-                List<FileInfo> dbFiles = new DirectoryInfo(AssistantPlugin.PLUGIN_HOME).GetFiles($"*-backup.{DATABASE_SUFFIX}")
+                List<FileInfo> dbFiles = new DirectoryInfo(Common.PLUGIN_HOME).GetFiles($"*-backup.{DATABASE_SUFFIX}")
                     .OrderByDescending(f => f.CreationTime)
                     .ToList();
 

@@ -1,8 +1,8 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan.Scoring.Rules;
-using Assistant.NINAPlugin.Util;
 using NINA.Core.Utility;
+using NINA.Plugin.Assistant.Shared.Utility;
 using System;
 using System.Collections;
 using System.Collections.Generic;

@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Util;
 using NINA.Core.Model;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
 using NINA.Sequencer.Trigger;

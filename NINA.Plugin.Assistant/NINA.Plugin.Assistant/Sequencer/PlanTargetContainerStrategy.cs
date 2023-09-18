@@ -1,7 +1,7 @@
 ﻿using Assistant.NINAPlugin.Plan;
-using Assistant.NINAPlugin.Util;
 using NINA.Core.Enum;
 using NINA.Core.Model;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Sequencer.Conditions;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.Container.ExecutionStrategy;

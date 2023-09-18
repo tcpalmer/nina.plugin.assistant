@@ -7,6 +7,7 @@ using NINA.Astrometry;
 using NINA.Core.Model;
 using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using Serilog.Events;
 using System;

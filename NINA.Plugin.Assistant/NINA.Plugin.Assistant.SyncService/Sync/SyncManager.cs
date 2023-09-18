@@ -1,0 +1,155 @@
+﻿using Assistant.NINAPlugin.Sync;
+using GrpcDotNetNamedPipes;
+using NINA.Plugin.Assistant.Shared.Utility;
+using Scheduler.SyncService;
+using System.IO.Pipes;
+using System.Runtime.InteropServices;
+using System.Security.AccessControl;
+using System.Security.Principal;
+
+namespace NINA.Plugin.Assistant.SyncService.Sync {
+
+    public class SyncManager {
+
+        private static readonly Lazy<SyncManager> lazy = new Lazy<SyncManager>(() => new SyncManager());
+        public static SyncManager Instance { get => lazy.Value; }
+
+        public static readonly string PIPE_NAME = "TargetScheduler.Sync";
+        public static readonly int CLIENT_KEEPALIVE_PERIOD = 3000;
+
+        private NamedPipeServer? pipe;
+        private string? mutexid;
+
+        private bool isServer = false;
+        public bool IsServer { get => isServer; private set { isServer = value; } }
+
+        private bool isRunning = false;
+        public bool IsRunning { get => isRunning; private set { isRunning = value; } }
+
+        private SyncManager() { }
+
+        public void Start() {
+
+            try {
+                TryStartServer();
+
+                if (!IsServer) {
+                    SyncClient.Instance.Register();
+                }
+            }
+            catch (Exception ex) {
+                TSLogger.Error("SYNC failed to start synchronization server ", ex);
+            }
+        }
+
+        public void Shutdown() {
+            if (!IsServer) {
+                SyncClient.Instance.Unregister();
+            }
+
+            try {
+                if (pipe != null) {
+                    TSLogger.Info("SYNC shutting down server");
+                    pipe.Kill();
+                    pipe.Dispose();
+                    pipe = null;
+
+                    IsRunning = false;
+                    IsServer = false;
+                }
+            }
+            catch (Exception ex) {
+                TSLogger.Error("SYNC failed to shutdown pipe", ex);
+            }
+        }
+
+        private void TryStartServer() {
+
+            TSLogger.Info($"SYNC trying to start server for PID {Environment.ProcessId}");
+
+            var allowEveryoneRule = new MutexAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), MutexRights.FullControl, AccessControlType.Allow);
+            var securitySettings = new MutexSecurity();
+            securitySettings.AddAccessRule(allowEveryoneRule);
+
+            // Ensure that only one server will be spawned when multiple application instances are started
+            // Ref: https://docs.microsoft.com/en-us/dotnet/api/system.threading.mutex?redirectedfrom=MSDN&view=net-5.0
+
+            using (var mutex = new Mutex(false, mutexid, out var createNew)) {
+                var hasHandle = false;
+                try {
+                    try {
+                        // Wait for 5 seconds to receive the mutex
+                        hasHandle = mutex.WaitOne(5000, false);
+                        if (hasHandle == false) {
+                            throw new TimeoutException("SYNC timeout waiting for exclusive access");
+                        }
+
+                        try {
+                            var pipeName = PIPE_NAME;
+
+                            if (!NamedPipeExist(pipeName)) {
+                                var user = WindowsIdentity.GetCurrent().User;
+                                var security = new PipeSecurity();
+                                security.AddAccessRule(new PipeAccessRule(user, PipeAccessRights.FullControl, AccessControlType.Allow));
+                                security.SetOwner(user);
+                                security.SetGroup(user);
+
+                                pipe = new NamedPipeServer(pipeName, new NamedPipeServerOptions() { PipeSecurity = security });
+                                SchedulerSync.BindService(pipe.ServiceBinder, SyncServer.Instance);
+                                pipe.Start();
+                                IsRunning = true;
+                                IsServer = true;
+
+                                TSLogger.Info($"SYNC started synchronization server on pipe {pipeName}");
+                                TSLogger.Info("SYNC running as sync server");
+                            }
+                            else {
+                                IsRunning = true;
+                                TSLogger.Info($"SYNC named pipe already exists: {pipeName}");
+                                TSLogger.Info("SYNC running as sync client");
+                            }
+                        }
+                        catch (Exception ex) {
+                            TSLogger.Error("SYNC failed to start synchronization server ", ex);
+                        }
+                    }
+                    catch (AbandonedMutexException) {
+                        hasHandle = true;
+                    }
+                }
+                finally {
+                    if (hasHandle) {
+                        mutex.ReleaseMutex();
+                    }
+                }
+            }
+        }
+
+        [return: MarshalAs(UnmanagedType.Bool)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern bool WaitNamedPipe(string name, int timeout);
+
+        public static bool NamedPipeExist(string pipeName) {
+            try {
+                int timeout = 0;
+                string normalizedPath = Path.GetFullPath(string.Format(@"\\.\pipe\{0}", pipeName));
+                bool exists = WaitNamedPipe(normalizedPath, timeout);
+                if (!exists) {
+                    int error = Marshal.GetLastWin32Error();
+                    if (error == 0) {
+                        return false; // pipe does not exist
+                    }
+                    else if (error == 2) {
+                        return false; // win32 error code for file not found
+                                      // all other errors indicate other issues
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception) {
+                return false; // assume it doesn't exist
+            }
+        }
+    }
+}

@@ -1,6 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
-using Assistant.NINAPlugin.Util;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using System;
 using System.Collections.Generic;

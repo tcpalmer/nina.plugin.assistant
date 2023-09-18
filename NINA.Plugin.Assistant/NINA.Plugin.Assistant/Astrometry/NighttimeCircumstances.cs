@@ -1,9 +1,8 @@
 ﻿using Assistant.NINAPlugin.Astrometry.Solver;
 using Assistant.NINAPlugin.Plan;
-using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Astrometry.Body;
-using NINA.Core.Utility;
+using NINA.Plugin.Assistant.Shared.Utility;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

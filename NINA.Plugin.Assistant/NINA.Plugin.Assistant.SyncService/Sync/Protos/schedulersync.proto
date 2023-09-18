@@ -15,8 +15,9 @@ service SchedulerSync {
 
 enum ClientState {
 	STARTING = 0;
-	WAITING = 1;
-	ENDING = 2;
+	READY = 1;
+	WAITING = 2;
+	ENDING = 3;
 }
 
 message RegistrationRequest {

@@ -1,8 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.Util;
 using NINA.Core.Model.Equipment;
-using NINA.Core.Utility;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
 using System.Collections.Generic;

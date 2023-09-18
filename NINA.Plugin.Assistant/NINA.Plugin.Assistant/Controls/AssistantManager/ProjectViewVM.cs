@@ -3,6 +3,7 @@ using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using NINA.WPF.Base.ViewModel;

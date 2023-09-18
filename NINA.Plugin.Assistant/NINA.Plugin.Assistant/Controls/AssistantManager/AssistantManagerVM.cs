@@ -1,12 +1,12 @@
 ﻿using Assistant.NINAPlugin.Controls.Util;
 using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.Util;
 using LinqKit;
 using NINA.Core.Model.Equipment;
 using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
 using NINA.Equipment.Interfaces;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;

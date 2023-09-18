@@ -1,7 +1,7 @@
-﻿using Assistant.NINAPlugin.Util;
-using NINA.Core.Model;
+﻿using NINA.Core.Model;
 using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
+using NINA.Plugin.Assistant.Shared.Utility;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
+[assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("windows")]
 
 [assembly: AssemblyVersion("3.4.0.0")]
 [assembly: AssemblyFileVersion("3.4.0.0")]

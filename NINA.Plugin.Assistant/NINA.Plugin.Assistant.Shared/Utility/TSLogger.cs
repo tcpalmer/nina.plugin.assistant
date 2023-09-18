@@ -4,14 +4,12 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.File;
-using System;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Assistant.NINAPlugin.Util {
+namespace NINA.Plugin.Assistant.Shared.Utility {
 
     /// <summary>
     /// Cribbed from NINA.Core.Logger
@@ -23,7 +21,7 @@ namespace Assistant.NINAPlugin.Util {
 
         static TSLogger() {
             var logDate = DateTime.Now.ToString("yyyyMMdd-HHmmss");
-            var logDir = Path.Combine(AssistantPlugin.PLUGIN_HOME, "Logs");
+            var logDir = Path.Combine(Common.PLUGIN_HOME, "Logs");
             var processId = System.Diagnostics.Process.GetCurrentProcess().Id;
             var logFilePath = Path.Combine(logDir, $"TS-{logDate}-{CoreUtil.Version}.{processId}.log");
 

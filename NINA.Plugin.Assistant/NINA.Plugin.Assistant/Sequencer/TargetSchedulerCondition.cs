@@ -1,10 +1,10 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
-using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
 using NINA.Core.Model;
 using NINA.Core.Utility.Notification;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Conditions;
 using NINA.Sequencer.SequenceItem;

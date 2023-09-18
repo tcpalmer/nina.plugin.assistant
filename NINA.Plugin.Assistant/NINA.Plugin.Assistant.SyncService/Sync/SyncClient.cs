@@ -1,4 +1,6 @@
 ﻿using GrpcDotNetNamedPipes;
+using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Plugin.Assistant.SyncService.Sync;
 using Scheduler.SyncService;
 
 namespace Assistant.NINAPlugin.Sync {
@@ -11,10 +13,11 @@ namespace Assistant.NINAPlugin.Sync {
         public static SyncClient Instance { get => lazy.Value; }
 
         private string Id = Guid.NewGuid().ToString();
+        private ClientState ClientState = ClientState.Starting;
         private bool keepaliveRunning = false;
         private CancellationTokenSource keepaliveCts;
 
-        private SyncClient() : base(new NamedPipeChannel(".", SyncServer.PIPE_NAME, new NamedPipeChannelOptions() { ConnectionTimeout = 300000 })) {
+        private SyncClient() : base(new NamedPipeChannel(".", SyncManager.PIPE_NAME, new NamedPipeChannelOptions() { ConnectionTimeout = 300000 })) {
         }
 
         public StatusResponse Register() {
@@ -28,13 +31,14 @@ namespace Assistant.NINAPlugin.Sync {
             try {
                 StatusResponse response = base.Register(request, null, deadline: DateTime.UtcNow.AddSeconds(5));
                 if (response.Success) {
+                    ClientState = ClientState.Ready;
                     StartKeepalive();
                 }
 
                 return response;
             }
             catch (Exception ex) {
-                Console.WriteLine($"exception registering client with server: {ex.Message} {ex}");
+                TSLogger.Error($"SYNC exception registering client with server: {ex.Message} {ex}");
                 return new StatusResponse { Success = false, Message = ex.Message };
             }
         }
@@ -49,7 +53,7 @@ namespace Assistant.NINAPlugin.Sync {
                 StatusResponse response = base.Unregister(request, null, deadline: DateTime.UtcNow.AddSeconds(5));
             }
             catch (Exception ex) {
-                Console.WriteLine($"exception unregistering client with server: {ex.Message} {ex}");
+                TSLogger.Info($"SYNC exception unregistering client with server: {ex.Message} {ex}");
             }
             finally {
                 StopKeepalive();
@@ -59,11 +63,15 @@ namespace Assistant.NINAPlugin.Sync {
         public async Task<StatusResponse> Keepalive(CancellationToken ct) {
             ClientIdRequest request = new ClientIdRequest {
                 Guid = Id,
-                ClientState = ClientState.Waiting // this state isn't really appropriate for keepalive since client could be doing anything
+                ClientState = ClientState
             };
 
             StatusResponse response = await base.KeepaliveAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: ct);
             return response;
+        }
+
+        public void StartSyncWait() {
+            ClientState = ClientState.Waiting;
         }
 
         private Task StartKeepalive() {
@@ -72,24 +80,24 @@ namespace Assistant.NINAPlugin.Sync {
                 lock (lockObj) {
                     if (!keepaliveRunning) {
                         keepaliveRunning = true;
-                        Console.WriteLine($"Starting keepalive for {Id}");
+                        TSLogger.Info($"SYNC starting keepalive for {Id}");
 
                         return Task.Run(async () => {
                             using (keepaliveCts = new CancellationTokenSource()) {
                                 var token = keepaliveCts.Token;
                                 while (!token.IsCancellationRequested) {
                                     try {
-                                        await Task.Delay(1000, token);
+                                        await Task.Delay(SyncManager.CLIENT_KEEPALIVE_PERIOD, token);
                                         StatusResponse response = await Keepalive(token);
                                         if (!response.Success) {
-                                            Console.WriteLine($"Error in keepalive for {Id}: {response.Message}");
+                                            TSLogger.Error($"SYNC error in keepalive for {Id}: {response.Message}");
                                         }
                                     }
                                     catch (OperationCanceledException) {
-                                        Console.WriteLine($"Stopping keepalive for {Id}");
+                                        TSLogger.Info($"SYNC stopping keepalive for {Id}");
                                     }
                                     catch (Exception ex) {
-                                        Console.WriteLine($"An error occurred during keepalive for {Id}", ex);
+                                        TSLogger.Error($"SYNC an error occurred during keepalive for {Id}", ex);
                                     }
                                 }
                             }
@@ -110,7 +118,7 @@ namespace Assistant.NINAPlugin.Sync {
             if (keepaliveRunning) {
                 lock (lockObj) {
                     if (keepaliveRunning) {
-                        Console.WriteLine($"stopping sync client keepalive for {Id}");
+                        TSLogger.Info($"SYNC stopping sync client keepalive for {Id}");
                         try {
                             keepaliveCts?.Cancel();
                         }

@@ -4,12 +4,21 @@ VisualStudioVersion = 17.3.32819.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NINA.Plugin.Assistant", "NINA.Plugin.Assistant\NINA.Plugin.Assistant.csproj", "{141704E0-505C-492C-9E74-3B85F1C05D12}"
 	ProjectSection(ProjectDependencies) = postProject
+		{0F00963A-FBA3-4562-93DF-474B153DCA4A} = {0F00963A-FBA3-4562-93DF-474B153DCA4A}
 		{EC169DD5-ECA5-4C0E-910F-47826BF33848} = {EC169DD5-ECA5-4C0E-910F-47826BF33848}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NINA.Plugin.Assistant.Test", "NINA.Plugin.Assistant.Test\NINA.Plugin.Assistant.Test.csproj", "{9E8F3BBB-26A7-4DFB-8574-C1259405FCE0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0F00963A-FBA3-4562-93DF-474B153DCA4A} = {0F00963A-FBA3-4562-93DF-474B153DCA4A}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NINA.Plugin.Assistant.SyncService", "NINA.Plugin.Assistant.SyncService\NINA.Plugin.Assistant.SyncService.csproj", "{EC169DD5-ECA5-4C0E-910F-47826BF33848}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NINA.Plugin.Assistant.SyncService", "NINA.Plugin.Assistant.SyncService\NINA.Plugin.Assistant.SyncService.csproj", "{EC169DD5-ECA5-4C0E-910F-47826BF33848}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0F00963A-FBA3-4562-93DF-474B153DCA4A} = {0F00963A-FBA3-4562-93DF-474B153DCA4A}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NINA.Plugin.Assistant.Shared", "NINA.Plugin.Assistant.Shared\NINA.Plugin.Assistant.Shared.csproj", "{0F00963A-FBA3-4562-93DF-474B153DCA4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +38,10 @@ Global
 		{EC169DD5-ECA5-4C0E-910F-47826BF33848}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC169DD5-ECA5-4C0E-910F-47826BF33848}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC169DD5-ECA5-4C0E-910F-47826BF33848}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F00963A-FBA3-4562-93DF-474B153DCA4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F00963A-FBA3-4562-93DF-474B153DCA4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F00963A-FBA3-4562-93DF-474B153DCA4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F00963A-FBA3-4562-93DF-474B153DCA4A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
