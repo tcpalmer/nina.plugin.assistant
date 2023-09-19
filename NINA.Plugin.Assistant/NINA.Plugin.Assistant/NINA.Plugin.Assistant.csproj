@@ -26,7 +26,9 @@
     <Compile Remove="Properties\Resources.Designer.cs" />
     <EmbeddedResource Remove="Properties\Resources.resx" />
   </ItemGroup>
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
@@ -50,6 +52,6 @@
     </None>
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="      if not exist &quot;%25localappdata%25\NINA\Plugins&quot; (&#xD;&#xA;      echo &quot;Creating $(PlatformName) Plugins folder&quot;&#xD;&#xA;      mkdir  &quot;%25localappdata%25\NINA\Plugins&quot;&#xD;&#xA;      )&#xD;&#xA;      if not exist &quot;%25localappdata%25\NINA\Plugins\$(TargetName)&quot; (&#xD;&#xA;      echo &quot;Creating $(PlatformName) Plugins $(TargetName) folder&quot;&#xD;&#xA;      mkdir  &quot;%25localappdata%25\NINA\Plugins\$(TargetName)&quot;&#xD;&#xA;      )&#xD;&#xA;&#xD;&#xA;      echo &quot;Copying $(PlatformName) $(TargetFileName)&quot;&#xD;&#xA;      xcopy &quot;$(TargetPath)&quot; &quot;%25localappdata%25\NINA\Plugins\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)LinqKit.Core.dll&quot; &quot;%25localappdata%25\NINA\Plugins\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)LinqKit.dll&quot; &quot;%25localappdata%25\NINA\Plugins\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)Microsoft.WindowsAPICodePack.dll&quot; &quot;%25localappdata%25\NINA\Plugins\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)Microsoft.WindowsAPICodePack.Shell.dll&quot; &quot;%25localappdata%25\NINA\Plugins\$(TargetName)&quot; /h/i/c/k/e/r/y" />
+    <Exec Command="      if not exist &quot;%25localappdata%25\NINA\Plugins\3.0.0&quot; (&#xD;&#xA;      echo &quot;Creating $(PlatformName) Plugins folder&quot;&#xD;&#xA;      mkdir  &quot;%25localappdata%25\NINA\Plugins\3.0.0&quot;&#xD;&#xA;      )&#xD;&#xA;      if not exist &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; (&#xD;&#xA;      echo &quot;Creating $(PlatformName) Plugins $(TargetName) folder&quot;&#xD;&#xA;      mkdir  &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot;&#xD;&#xA;      )&#xD;&#xA;&#xD;&#xA;      echo &quot;Copying $(PlatformName) $(TargetFileName)&quot;&#xD;&#xA;      xcopy &quot;$(TargetPath)&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)LinqKit.Core.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)LinqKit.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)Microsoft.WindowsAPICodePack.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)Microsoft.WindowsAPICodePack.Shell.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y" />
   </Target>
 </Project>

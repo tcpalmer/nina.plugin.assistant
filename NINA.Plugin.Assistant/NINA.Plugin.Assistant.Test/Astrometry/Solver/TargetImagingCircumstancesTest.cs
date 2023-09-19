@@ -1,4 +1,5 @@
-﻿using Assistant.NINAPlugin.Astrometry.Solver;
+﻿using Assistant.NINAPlugin.Astrometry;
+using Assistant.NINAPlugin.Astrometry.Solver;
 using FluentAssertions;
 using NINA.Astrometry;
 using NUnit.Framework;
@@ -32,6 +33,21 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
             TestUtil.AssertTime(start, tic.RiseAboveMinimumTime, 19, 18, 12);
             TestUtil.AssertTime(end, tic.TransitTime, 0, 0, 21);
             TestUtil.AssertTime(end, tic.SetBelowMinimumTime, 4, 42, 29);
+        }
+
+        [Test]
+        public void Test3() {
+            DateTime start = new DateTime(2023, 12, 18, 18, 0, 0);
+            DateTime end = new DateTime(2023, 12, 19, 6, 0, 0);
+
+            // With my horizon and M42, this tests the old 'SW tree' problem
+            HorizonDefinition hd = new HorizonDefinition(TestUtil.GetTestHorizon(3), 0, 0);
+            TargetImagingCircumstances tic = new TargetImagingCircumstances(TestUtil.TEST_LOCATION_1, TestUtil.M42, start, end, hd);
+            tic.Analyze();
+
+            TestUtil.AssertTime(start, tic.RiseAboveMinimumTime, 19, 49, 12);
+            TestUtil.AssertTime(end, tic.TransitTime, 0, 1, 7);
+            TestUtil.AssertTime(end, tic.SetBelowMinimumTime, 0, 26, 33);
         }
 
         [Test]

@@ -121,10 +121,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
             DateTime start = DateTime.Now.Date;
             List<AltitudeAtTime> alts = new List<AltitudeAtTime>();
 
-            alts.Add(new AltitudeAtTime(0, 180, start));
-            alts.Add(new AltitudeAtTime(10, 180, start.AddSeconds(60)));
-
-            alts.Clear();
             alts.Add(new AltitudeAtTime(50, 180, start));
             alts.Add(new AltitudeAtTime(10, 180, start.AddSeconds(60)));
 

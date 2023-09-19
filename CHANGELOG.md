@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 3.3.3.0 - 2023-09-19
+* Fixed edge case bug with custom horizons.
+
 ## 3.3.2.0 - 2023-09-07
 * Fixed problem with override exposure ordering. Unfortunately, any existing override order had to be cleared (automatically) for this fix.  You'll have to manually redo any that you had already created.
 

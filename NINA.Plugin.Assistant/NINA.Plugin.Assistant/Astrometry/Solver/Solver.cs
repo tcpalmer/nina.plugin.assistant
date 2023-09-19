@@ -208,30 +208,25 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
             Assert.isTrue(altitudes.AltitudeList.Count > 1, "altitudes must have at least two points");
 
             List<AltitudeAtTime> list = altitudes.AltitudeList;
+            AltitudeAtTime aat;
+            int pos = 0;
 
-            // If rising at the end, we need to find minimum and continue search (backwards) from there.
-            int pos = altitudes.AltitudeList.Count - 1;
-            if (altitudes.IsRisingAtEnd()) {
-                Tuple<int, AltitudeAtTime> min = altitudes.FindMinimumAltitude();
-                pos = min.Item1;
-
-            }
-            else {
-                // If not rising at end and last sample is above, there can't be a minimum crossing
-                double targetAltitude = horizonDefinition.GetTargetAltitude(list[altitudes.AltitudeList.Count - 1]);
-                if (list[altitudes.AltitudeList.Count - 1].Altitude > targetAltitude) {
-                    return null;
+            // Find start (rise above) point
+            for (int i = 0; i < list.Count; i++) {
+                aat = list[i];
+                if (aat.Altitude > horizonDefinition.GetTargetAltitude(aat)) {
+                    pos = i;
+                    break;
                 }
             }
 
-            // Walk the list backwards looking for the minimum crossing
-            for (int i = pos; i > 0; i--) {
-                double targetAltitude = horizonDefinition.GetTargetAltitude(list[i - 1]);
-
-                if (list[i - 1].Altitude > targetAltitude) {
-                    List<AltitudeAtTime> step = new List<AltitudeAtTime>(2);
-                    step.Add(list[i - 1]);
-                    step.Add(list[i]);
+            for (int i = pos; i < list.Count - 1; i++) {
+                aat = list[i + 1];
+                if (aat.Altitude <= horizonDefinition.GetTargetAltitude(aat)) {
+                    List<AltitudeAtTime> step = new List<AltitudeAtTime>(2) {
+                        list[i],
+                        list[i + 1]
+                    };
                     return new Altitudes(step);
                 }
             }
@@ -258,9 +253,10 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
                 currentIsPositive = currentAltitude >= 0;
 
                 if (lastIsPositive != currentIsPositive && lastIsPositive) {
-                    List<AltitudeAtTime> step = new List<AltitudeAtTime>(2);
-                    step.Add(list[i - 1]);
-                    step.Add(list[i]);
+                    List<AltitudeAtTime> step = new List<AltitudeAtTime>(2) {
+                        list[i - 1],
+                        list[i]
+                    };
                     return new Altitudes(step);
                 }
 

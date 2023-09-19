@@ -50,6 +50,26 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
             return false;
         }
 
+        /*
+        public DateTime GetRiseAboveMinimumTimeNEW() {
+            List<AltitudeAtTime> list = SamplePositions.AltitudeList;
+
+            // Already above at start?
+            AltitudeAtTime aat = list[0];
+            if (aat.Altitude > aat.HorizonAltitude) {
+                return aat.AtTime;
+            }
+
+            for (int i = 0; i < list.Count; i++) {
+                aat = list[i];
+                if (aat.Altitude > aat.HorizonAltitude) {
+                    return aat.AtTime; // HACK: need to refine this span
+                }
+            }
+
+            return DateTime.MinValue;
+        }*/
+
         public DateTime GetRiseAboveMinimumTime() {
             Altitudes startStep = new RiseAboveMinimumFunction(horizonDefinition).determineStep(SamplePositions);
             if (startStep == null) {
@@ -72,6 +92,32 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
                 return DateTime.MinValue;
             }
         }
+
+        /*
+        public DateTime GetSetBelowMinimumTimeNEW() {
+
+            List<AltitudeAtTime> list = SamplePositions.AltitudeList;
+            AltitudeAtTime aat;
+            int pos = 0;
+
+            // Find start point (again ...)
+            for (int i = 0; i < list.Count; i++) {
+                aat = list[i];
+                if (aat.Altitude > aat.HorizonAltitude) {
+                    pos = i;
+                    break;
+                }
+            }
+
+            for (int i = pos; i < list.Count; i++) {
+                aat = list[i];
+                if (aat.Altitude <= aat.HorizonAltitude) {
+                    return aat.AtTime; // HACK: need to refine this span
+                }
+            }
+
+            return DateTime.MinValue;
+        }*/
 
         public DateTime GetSetBelowMinimumTime() {
             Altitudes startStep = new SetBelowMinimumFunction(horizonDefinition).determineStep(SamplePositions);
