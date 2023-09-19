@@ -41,7 +41,8 @@ namespace Assistant.NINAPlugin.Astrometry {
                 return minimumAltitude;
             }
 
-            return Math.Max(horizon.GetAltitude(aat.Azimuth) + offset, minimumAltitude);
+            double raw = Math.Max(horizon.GetAltitude(aat.Azimuth) + offset, minimumAltitude);
+            return raw > 90 ? 90 : raw;
         }
 
         public bool IsCustom() {

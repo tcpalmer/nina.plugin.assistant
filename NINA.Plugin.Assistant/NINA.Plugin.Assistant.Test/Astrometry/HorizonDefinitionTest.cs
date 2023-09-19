@@ -112,6 +112,16 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
             sut.GetTargetAltitude(GetAAT(301)).Should().BeApproximately(25.0, 0.001);
         }
 
+        [Test]
+        public void TestOverflow() {
+            HorizonDefinition sut = new HorizonDefinition(TestUtil.GetTestHorizon(4), 10);
+
+            sut.GetTargetAltitude(GetAAT(10)).Should().BeApproximately(24.672, 0.001);
+            sut.GetTargetAltitude(GetAAT(36)).Should().BeApproximately(22.265, 0.001);
+            sut.GetTargetAltitude(GetAAT(188)).Should().BeApproximately(90.0, 0.001);
+            sut.GetTargetAltitude(GetAAT(301)).Should().BeApproximately(80.663, 0.001);
+        }
+
         private AltitudeAtTime GetAAT(double azimuth) {
             return new AltitudeAtTime(0, azimuth, DateTime.MinValue);
         }
