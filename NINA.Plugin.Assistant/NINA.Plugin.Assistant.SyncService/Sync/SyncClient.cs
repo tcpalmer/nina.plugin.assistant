@@ -2,6 +2,7 @@
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.SyncService.Sync;
 using Scheduler.SyncService;
+using System.Diagnostics;
 
 namespace Assistant.NINAPlugin.Sync {
 
@@ -50,13 +51,11 @@ namespace Assistant.NINAPlugin.Sync {
             };
 
             try {
+                StopKeepalive();
                 StatusResponse response = base.Unregister(request, null, deadline: DateTime.UtcNow.AddSeconds(5));
             }
             catch (Exception ex) {
                 TSLogger.Info($"SYNC exception unregistering client with server: {ex.Message} {ex}");
-            }
-            finally {
-                StopKeepalive();
             }
         }
 
@@ -70,8 +69,35 @@ namespace Assistant.NINAPlugin.Sync {
             return response;
         }
 
-        public void StartSyncWait() {
-            ClientState = ClientState.Waiting;
+        public async Task StartSyncWait(CancellationToken ct, TimeSpan timeout) {
+            try {
+                ClientState = ClientState.Waiting;
+                ClientIdRequest request = new ClientIdRequest {
+                    Guid = Id,
+                    ClientState = ClientState
+                };
+
+                TSLogger.Info($"SYNC client syncwait starting, timeout is {timeout.TotalSeconds}s");
+                Stopwatch stopwatch = Stopwatch.StartNew();
+
+                while (true) {
+                    SyncWaitResponse response = await base.SyncWaitAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: ct);
+                    if (!response.Continue) {
+                        TSLogger.Info("SYNC client syncwait completed");
+                        break;
+                    }
+                    else {
+                        await Task.Delay(SyncManager.CLIENT_WAIT_POLL_PERIOD, ct);
+                    }
+
+                    if (stopwatch.Elapsed > timeout) {
+                        TSLogger.Warning($"SYNC client timed out after {timeout.TotalSeconds} seconds");
+                        break;
+                    }
+                }
+            }
+            catch (Exception) { throw; }
+            finally { ClientState = ClientState.Ready; }
         }
 
         private Task StartKeepalive() {

@@ -12,7 +12,7 @@ namespace Assistant.NINAPlugin.Sync {
         public DateTime LastAliveDate { get; private set; }
 
         public SyncClientInstance(RegistrationRequest request) {
-            ClientState = ClientState.Starting;
+            ClientState = ClientState.Ready;
             Guid = request.Guid;
             Pid = request.Pid;
             ProfileId = request.ProfileId;
@@ -21,8 +21,8 @@ namespace Assistant.NINAPlugin.Sync {
             LastAliveDate = dateTime;
         }
 
-        public void SetState(ClientIdRequest request) {
-            ClientState = request.ClientState;
+        public void SetState(ClientState state) {
+            ClientState = state;
         }
 
         public void SetLastAliveDate(ClientIdRequest request) {

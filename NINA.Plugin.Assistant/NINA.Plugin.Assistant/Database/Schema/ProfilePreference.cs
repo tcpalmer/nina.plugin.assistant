@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using NINA.Plugin.Assistant.SyncService.Sync;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
@@ -12,7 +13,9 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public int parkOnWait { get; set; }
         public double exposureThrottle { get; set; }
+
         public int enableSynchronization { get; set; }
+        public int syncWaitTimeout { get; set; }
 
         public int enableGradeRMS { get; set; }
         public int enableGradeStars { get; set; }
@@ -31,6 +34,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             ParkOnWait = false;
             ExposureThrottle = 125;
             EnableSynchronization = false;
+            SyncWaitTimeout = SyncManager.DEFAULT_SYNC_WAIT_TIMEOUT;
             EnableGradeRMS = true;
             EnableGradeStars = true;
             EnableGradeHFR = true;
@@ -66,6 +70,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 enableSynchronization = value ? 1 : 0;
                 RaisePropertyChanged(nameof(EnableSynchronization));
+            }
+        }
+
+        [NotMapped]
+        public int SyncWaitTimeout {
+            get { return syncWaitTimeout; }
+            set {
+                syncWaitTimeout = value;
+                RaisePropertyChanged(nameof(SyncWaitTimeout));
             }
         }
 

@@ -10,6 +10,7 @@ import "google/protobuf/empty.proto";
 service SchedulerSync {
 	rpc Register (RegistrationRequest) returns (StatusResponse);
 	rpc Unregister (ClientIdRequest) returns (StatusResponse);
+	rpc SyncWait (ClientIdRequest) returns (SyncWaitResponse);
 	rpc Keepalive (ClientIdRequest) returns (StatusResponse);
 }
 
@@ -17,7 +18,8 @@ enum ClientState {
 	STARTING = 0;
 	READY = 1;
 	WAITING = 2;
-	ENDING = 3;
+	IMAGING = 3;
+	ENDING = 4;
 }
 
 message RegistrationRequest {
@@ -35,4 +37,9 @@ message ClientIdRequest {
 message StatusResponse {
 	bool success = 1;
 	string message = 2;
+}
+
+message SyncWaitResponse {
+	bool success = 1;
+	bool continue = 2;
 }
