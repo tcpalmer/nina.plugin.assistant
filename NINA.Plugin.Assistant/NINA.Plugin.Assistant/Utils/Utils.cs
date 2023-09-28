@@ -1,4 +1,7 @@
 ﻿using NINA.Astrometry;
+using NINA.Core.Model;
+using NINA.Core.Model.Equipment;
+using NINA.Profile.Interfaces;
 using System;
 using System.Text.RegularExpressions;
 
@@ -7,6 +10,16 @@ namespace Assistant.NINAPlugin.Util {
     public class Utils {
 
         public static readonly string DateFMT = "yyyy-MM-dd HH:mm:ss";
+
+        public static FilterInfo LookupFilter(IProfileService profileService, string filterName) {
+            foreach (FilterInfo filterInfo in profileService?.ActiveProfile?.FilterWheelSettings?.FilterWheelFilters) {
+                if (filterInfo.Name == filterName) {
+                    return filterInfo;
+                }
+            }
+
+            throw new SequenceEntityFailedException($"failed to find FilterInfo for filter: {filterName}");
+        }
 
         public static string MtoHM(int minutes) {
             decimal hours = Math.Floor((decimal)minutes / 60);
@@ -93,6 +106,8 @@ namespace Assistant.NINAPlugin.Util {
 
             return string.Format(pattern, degree, arcmin, arcsec);
         }
+
+        private Utils() { }
 
     }
 

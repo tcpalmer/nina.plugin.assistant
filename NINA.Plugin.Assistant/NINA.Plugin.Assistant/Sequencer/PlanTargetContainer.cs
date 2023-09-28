@@ -1,4 +1,6 @@
-﻿using Assistant.NINAPlugin.Plan;
+﻿using Assistant.NINAPlugin.Database;
+using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Enum;
@@ -9,6 +11,7 @@ using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.PlateSolving.Interfaces;
 using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Plugin.Assistant.SyncService.Sync;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
@@ -58,6 +61,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private IImageSaveWatcher ImageSaveWatcher;
 
+        private bool synchronizationEnabled;
+        private int syncExposureTimeout;
+
         public PlanTargetContainer(
                 TargetSchedulerContainer parentContainer,
                 IProfileService profileService,
@@ -74,6 +80,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 IDomeFollower domeFollower,
                 IPlateSolverFactory plateSolverFactory,
                 IWindowServiceFactory windowServiceFactory,
+                bool synchronizationEnabled,
                 IPlanTarget previousPlanTarget,
                 SchedulerPlan plan,
                 SchedulerProgressVM schedulerProgress) : base(new PlanTargetContainerStrategy()) {
@@ -97,6 +104,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.plateSolverFactory = plateSolverFactory;
             this.windowServiceFactory = windowServiceFactory;
 
+            this.synchronizationEnabled = synchronizationEnabled;
             this.schedulerProgress = schedulerProgress;
             this.previousPlanTarget = previousPlanTarget;
             this.plan = plan;
@@ -105,6 +113,10 @@ namespace Assistant.NINAPlugin.Sequencer {
             PlanTargetContainerStrategy containerStrategy = Strategy as PlanTargetContainerStrategy;
             containerStrategy.SetContext(parentContainer, plan, schedulerProgress);
             AttachNewParent(parentContainer);
+
+            if (synchronizationEnabled) {
+                syncExposureTimeout = GetSyncExposureTimeout();
+            }
 
             if (!plan.IsEmulator)
                 ImageSaveWatcher = new ImageSaveWatcher(activeProfile, imageSaveMediator, plan.PlanTarget);
@@ -273,7 +285,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator);
             SetItemDefaults(switchFilter, nameof(SwitchFilter));
 
-            switchFilter.Filter = LookupFilter(planExposure.FilterName);
+            switchFilter.Filter = Utils.LookupFilter(profileService, planExposure.FilterName);
             Add(switchFilter);
         }
 
@@ -293,7 +305,10 @@ namespace Assistant.NINAPlugin.Sequencer {
         private void AddTakeExposure(IPlanTarget planTarget, IPlanExposure planExposure) {
             TSLogger.Info($"adding take exposure: {planExposure.FilterName} {planExposure.ExposureLength}s");
 
-            PlanTakeExposure takeExposure = new PlanTakeExposure(parentContainer,
+            PlanTakeExposure takeExposure = new PlanTakeExposure(
+                        parentContainer,
+                        synchronizationEnabled,
+                        syncExposureTimeout,
                         profileService,
                         cameraMediator,
                         imagingMediator,
@@ -336,6 +351,18 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
+        private int GetSyncExposureTimeout() {
+            ProfilePreference profilePreference;
+            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+                profilePreference = context.GetProfilePreference(profileService.ActiveProfile.Id.ToString());
+                if (profilePreference == null) {
+                    return SyncManager.DEFAULT_SYNC_EXPOSURE_TIMEOUT;
+                }
+            }
+
+            return profilePreference.SyncExposureTimeout;
+        }
+
         private void SetItemDefaults(ISequenceItem item, string name) {
             if (name != null) {
                 item.Name = name;
@@ -350,16 +377,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         private int GetExposureCount() {
             parentContainer.TotalExposureCount++;
             return parentContainer.TotalExposureCount;
-        }
-
-        private FilterInfo LookupFilter(string filterName) {
-            foreach (FilterInfo filterInfo in activeProfile.FilterWheelSettings.FilterWheelFilters) {
-                if (filterInfo.Name == filterName) {
-                    return filterInfo;
-                }
-            }
-
-            throw new SequenceEntityFailedException($"failed to find FilterInfo for filter: {filterName}");
         }
 
         private int GetGain(int? gain) {

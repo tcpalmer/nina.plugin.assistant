@@ -16,6 +16,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public int enableSynchronization { get; set; }
         public int syncWaitTimeout { get; set; }
+        public int syncExposureTimeout { get; set; }
 
         public int enableGradeRMS { get; set; }
         public int enableGradeStars { get; set; }
@@ -35,6 +36,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             ExposureThrottle = 125;
             EnableSynchronization = false;
             SyncWaitTimeout = SyncManager.DEFAULT_SYNC_WAIT_TIMEOUT;
+            SyncExposureTimeout = SyncManager.DEFAULT_SYNC_EXPOSURE_TIMEOUT;
             EnableGradeRMS = true;
             EnableGradeStars = true;
             EnableGradeHFR = true;
@@ -79,6 +81,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 syncWaitTimeout = value;
                 RaisePropertyChanged(nameof(SyncWaitTimeout));
+            }
+        }
+
+        [NotMapped]
+        public int SyncExposureTimeout {
+            get { return syncExposureTimeout; }
+            set {
+                syncExposureTimeout = value;
+                RaisePropertyChanged(nameof(SyncExposureTimeout));
             }
         }
 

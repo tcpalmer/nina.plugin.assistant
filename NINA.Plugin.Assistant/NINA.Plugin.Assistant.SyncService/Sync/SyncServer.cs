@@ -1,13 +1,20 @@
 ﻿using Grpc.Core;
+using NINA.Astrometry;
 using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Plugin.Assistant.SyncService.Sync;
 using Scheduler.SyncService;
+using System.Diagnostics;
+using System.Text;
 
 namespace Assistant.NINAPlugin.Sync {
 
     public enum ServerState {
         Ready,
         Waiting,
-        WaitComplete
+        WaitComplete,
+        PlanWait,
+        ExposureReady,
+        EndSyncContainers
     }
 
     public class SyncServer : SchedulerSync.SchedulerSyncBase {
@@ -19,6 +26,7 @@ namespace Assistant.NINAPlugin.Sync {
 
         private Dictionary<string, SyncClientInstance> registeredClients;
         public ServerState State { get; set; }
+        private ExposureResponse activeExposureResponse;
 
         public SyncServer() {
             registeredClients = new Dictionary<string, SyncClientInstance>();
@@ -78,6 +86,31 @@ namespace Assistant.NINAPlugin.Sync {
             }
         }
 
+        public override Task<ExposureResponse> RequestExposure(ClientIdRequest request, ServerCallContext context) {
+            lock (lockobj) {
+                if (registeredClients.ContainsKey(request.Guid)) {
+                    TSLogger.Info($"SYNC server received client exposure request {request.Guid}");
+
+                    if (State == ServerState.EndSyncContainers) {
+                        TSLogger.Info($"SYNC server ending sync container {request.Guid}");
+                        return Task.FromResult(new ExposureResponse { Success = true, Terminate = true });
+                    }
+
+                    ClientState newState = (State == ServerState.ExposureReady) ? ClientState.Exposing : ClientState.Exposureready;
+                    registeredClients[request.Guid].SetState(newState);
+                    ExposureResponse response = (State == ServerState.ExposureReady) ?
+                        activeExposureResponse : new ExposureResponse { Success = true, ExposureReady = false, Terminate = false };
+
+                    LogRegisteredClients();
+                    return Task.FromResult(response);
+                }
+                else {
+                    TSLogger.Warning($"SYNC client does not exist: {request.Guid}");
+                    return Task.FromResult(new ExposureResponse { Success = false, Terminate = true });
+                }
+            }
+        }
+
         public override Task<StatusResponse> Keepalive(ClientIdRequest request, ServerCallContext context) {
             TSLogger.Info($"SYNC keepalive {request.Guid} {request.ClientState}");
 
@@ -94,19 +127,47 @@ namespace Assistant.NINAPlugin.Sync {
             }
         }
 
-        public bool AllClientsReady() {
-            foreach (SyncClientInstance client in registeredClients.Values) {
-                if (client.ClientState != ClientState.Ready) {
-                    return false;
-                }
-            }
+        public async Task SyncExposure(InputTarget target, CancellationToken token, int exposurePlanDatabaseId, int syncExposureTimeout) {
+            activeExposureResponse = new ExposureResponse {
+                Success = true,
+                ExposureReady = true,
+                Terminate = false,
+                TargetName = target.DeepSkyObject.NameAsAscii,
+                TargetRa = target.InputCoordinates.Coordinates.RAString,
+                TargetDec = target.InputCoordinates.Coordinates.DecString,
+                TargetPositionAngle = target.PositionAngle,
+                ExposurePlanDatabaseId = exposurePlanDatabaseId
+            };
 
-            return true;
+            State = ServerState.ExposureReady;
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            TimeSpan timeout = TimeSpan.FromSeconds(syncExposureTimeout);
+
+            TSLogger.Info($"SYNC server informing clients of available exposure, timeout is {timeout.TotalSeconds}s");
+
+            while (NotTimedOut(stopwatch, timeout)) {
+                bool allExposing = true;
+                foreach (SyncClientInstance client in registeredClients.Values) {
+                    if (client.ClientState != ClientState.Exposing) {
+                        allExposing = false;
+                        break;
+                    }
+                }
+
+                if (allExposing) {
+                    TSLogger.Info("SYNC server all clients now have the exposure, continuing");
+                    State = ServerState.Ready;
+                    activeExposureResponse = new ExposureResponse { Success = true, ExposureReady = false, Terminate = false };
+                    return;
+                }
+
+                await Task.Delay(SyncManager.SERVER_AWAIT_EXPOSURE_POLL_PERIOD, token);
+            }
         }
 
-        public bool AllClientsWaiting() {
+        public bool AllClientsInState(ClientState state) {
             foreach (SyncClientInstance client in registeredClients.Values) {
-                if (client.ClientState != ClientState.Waiting) {
+                if (client.ClientState != state) {
                     return false;
                 }
             }
@@ -115,10 +176,26 @@ namespace Assistant.NINAPlugin.Sync {
         }
 
         private void LogRegisteredClients() {
-            TSLogger.Debug("SYNC CLIENTS: ");
-            foreach (SyncClientInstance client in registeredClients.Values) {
-                TSLogger.Debug($"    {client}");
+
+            if (registeredClients.Count == 0) {
+                return;
             }
+
+            StringBuilder sb = new StringBuilder();
+            foreach (SyncClientInstance client in registeredClients.Values) {
+                sb.AppendLine($"    {client.Guid} state={client.ClientState} lastAlive={client.LastAliveDate}");
+            }
+
+            TSLogger.Debug($"SYNC CLIENTS:\n{sb}");
+        }
+
+        private bool NotTimedOut(Stopwatch stopwatch, TimeSpan timeout) {
+            if (stopwatch.Elapsed > timeout) {
+                TSLogger.Warning($"SYNC server exposure hand offs timed out after {timeout.TotalSeconds} seconds");
+                return false;
+            }
+
+            return true;
         }
     }
 }

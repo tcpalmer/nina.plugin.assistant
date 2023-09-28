@@ -111,6 +111,12 @@ namespace Assistant.NINAPlugin.Database {
                 .FirstOrDefault();
         }
 
+        public Target GetTargetOnly(int targetId) {
+            return TargetSet
+                .Where(t => t.Id == targetId)
+                .FirstOrDefault();
+        }
+
         public Target GetTarget(int projectId, int targetId) {
             return TargetSet
                 .Include("exposureplans.exposuretemplate")

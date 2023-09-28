@@ -31,8 +31,8 @@ namespace Assistant.NINAPlugin.Plan {
 
             switch (CallNumber) {
                 case 1: plan = WaitForTime(DateTime.Now.AddSeconds(10)); break;
-                case 2: plan = Plan1(); break;
-                case 3: plan = Plan2(); break;
+                case 2: plan = SyncPlan1(); break;
+                //case 3: plan = Plan2(); break;
                 // case 4: plan = Plan3(); break;
                 default:
                     CallNumber = 0;
@@ -185,6 +185,37 @@ namespace Assistant.NINAPlugin.Plan {
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
             instructions.Add(new PlanDither());
+
+            return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions, false);
+        }
+
+        private SchedulerPlan SyncPlan1() {
+            DateTime endTime = atTime.AddMinutes(5);
+            TimeInterval timeInterval = new TimeInterval(atTime, endTime);
+
+            IPlanProject planProject = new PlanProjectEmulator();
+            planProject.Name = "M31";
+            planProject.UseCustomHorizon = false;
+            planProject.MinimumAltitude = 10;
+            planProject.DitherEvery = 0;
+            planProject.EnableGrader = true;
+
+            IPlanTarget planTarget = GetBasePlanTarget("M31", planProject, Cp5n5);
+            planTarget.EndTime = endTime;
+            planTarget.ROI = 100;
+
+            IPlanExposure lum = GetExposurePlan("Lum", 20, null, null, 3, 50);
+            lum.ReadoutMode = 0;
+            planTarget.ExposurePlans.Add(lum);
+
+            List<IPlanInstruction> instructions = new List<IPlanInstruction>();
+            instructions.Add(new PlanMessage("planner emulator: SyncPlan1"));
+            instructions.Add(new PlanBeforeTargetContainer());
+            instructions.Add(new PlanSetReadoutMode(lum));
+            instructions.Add(new PlanSwitchFilter(lum));
+            instructions.Add(new PlanTakeExposure(lum));
+            instructions.Add(new PlanTakeExposure(lum));
+            instructions.Add(new PlanTakeExposure(lum));
 
             return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions, false);
         }

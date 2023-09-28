@@ -9,6 +9,7 @@ using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
+using Scheduler.SyncService;
 using System;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
@@ -43,6 +44,11 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
 
+            if (!AssistantPlugin.SyncEnabled(profileService)) {
+                TSLogger.Info("TargetSchedulerSyncWait execute but sync is not enabled on profile");
+                return;
+            }
+
             if (!SyncManager.Instance.IsRunning) {
                 TSLogger.Info("TargetSchedulerSyncWait execute but sync server not running");
                 return;
@@ -59,14 +65,17 @@ namespace Assistant.NINAPlugin.Sequencer {
                     SyncServer.Instance.State = ServerState.Waiting;
                     Stopwatch stopwatch = Stopwatch.StartNew();
 
-                    while (!SyncServer.Instance.AllClientsWaiting() && NotTimedOut(stopwatch, timeout)) {
+                    while (!SyncServer.Instance.AllClientsInState(ClientState.Waiting) && NotTimedOut(stopwatch, timeout)) {
                         await Task.Delay(SyncManager.SERVER_WAIT_POLL_PERIOD, token);
                     }
 
                     TSLogger.Info("TargetSchedulerSyncWait: server detected all clients are waiting");
                     SyncServer.Instance.State = ServerState.WaitComplete;
 
-                    while (!SyncServer.Instance.AllClientsReady() && NotTimedOut(stopwatch, timeout)) {
+                    // Allow time for updated client state to propagate
+                    await Task.Delay(SyncManager.CLIENT_KEEPALIVE_PERIOD + 500, token);
+
+                    while (!SyncServer.Instance.AllClientsInState(ClientState.Ready) && NotTimedOut(stopwatch, timeout)) {
                         await Task.Delay(SyncManager.SERVER_WAIT_POLL_PERIOD, token);
                     }
 
@@ -92,6 +101,9 @@ namespace Assistant.NINAPlugin.Sequencer {
                     TSLogger.Info("TargetSchedulerSyncWait: setting client to sync wait");
                     progress?.Report(new ApplicationStatus() { Status = "Target Scheduler: waiting for primary to sync" });
                     await SyncClient.Instance.StartSyncWait(token, timeout);
+
+                    // Allow time for updated client state to propagate
+                    await Task.Delay(SyncManager.CLIENT_KEEPALIVE_PERIOD + 500, token);
                 }
                 catch (Exception e) {
                     if (e is TaskCanceledException) {
@@ -120,7 +132,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private bool NotTimedOut(Stopwatch stopwatch, TimeSpan timeout) {
-            TSLogger.Debug($"NOT TIMED OUT: {stopwatch.Elapsed} >? {timeout}");
             if (stopwatch.Elapsed > timeout) {
                 TSLogger.Warning($"TargetSchedulerSyncWait: server timed out after {timeout.TotalSeconds} seconds");
                 return false;

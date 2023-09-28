@@ -1,9 +1,11 @@
-﻿using NINA.Astrometry;
+﻿using Assistant.NINAPlugin.Database;
+using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Sync;
+using NINA.Astrometry;
 using NINA.Core.Model;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.Equipment.Model;
-using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem.Imaging;
@@ -27,31 +29,18 @@ namespace Assistant.NINAPlugin.Sequencer {
     /// until this code was updated.  Ideally, NINA would provide a way to track some metadata or id all the way
     /// through the image pipeline to the save operation.
     /// </summary>
-    public class PlanTakeExposure : TakeExposure {
+    public class PlanTakeExposure : SchedulerTakeExposure {
 
-        private ICameraMediator cameraMediator;
-        private IImagingMediator imagingMediator;
-        private IImageSaveMediator imageSaveMediator;
-        private IImageHistoryVM imageHistoryVM;
+        private bool synchronizationEnabled;
+        private int syncExposureTimeout;
         private IImageSaveWatcher imageSaveWatcher;
         private IDeepSkyObjectContainer dsoContainer;
         private int exposureDatabaseId;
 
-        private double roi;
-
-        public double ROI {
-            get => roi;
-            set {
-                // ROI is stored as a percentage in the database
-                if (value <= 0) { value = 100; }
-                if (value > 100) { value = 100; }
-                roi = value / 100;
-                RaisePropertyChanged();
-            }
-        }
-
         public PlanTakeExposure(
             IDeepSkyObjectContainer dsoContainer,
+            bool synchronizationEnabled,
+            int syncExposureTimeout,
             IProfileService profileService,
             ICameraMediator cameraMediator,
             IImagingMediator imagingMediator,
@@ -61,12 +50,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             int exposureDatabaseId) : base(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM) {
 
             this.dsoContainer = dsoContainer;
-
-            this.cameraMediator = cameraMediator;
-            this.imagingMediator = imagingMediator;
-            this.imageSaveMediator = imageSaveMediator;
-            this.imageHistoryVM = imageHistoryVM;
-
+            this.synchronizationEnabled = synchronizationEnabled;
+            this.syncExposureTimeout = syncExposureTimeout;
             this.imageSaveWatcher = imageSaveWatcher;
             this.exposureDatabaseId = exposureDatabaseId;
         }
@@ -83,7 +68,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                 TotalExposureCount = ExposureCount + 1,
             };
 
-            // From NINA TakeSubframeExposure
             ObservableRectangle rect = GetObservableRectangle();
             if (rect != null) {
                 capture.EnableSubSample = true;
@@ -96,6 +80,10 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             var target = RetrieveTarget(dsoContainer);
+
+            if (synchronizationEnabled) {
+                await TrySendExposureToSecondaries(target, token);
+            }
 
             var exposureData = await imagingMediator.CaptureImage(capture, token, progress);
 
@@ -129,31 +117,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             ExposureCount++;
         }
 
-        private ObservableRectangle GetObservableRectangle() {
-            var info = cameraMediator.GetInfo();
-            ObservableRectangle rect = null;
-
-            if (ROI < 1 && info.CanSubSample) {
-                TSLogger.Info($"applying ROI for subframe exposure: {ROI}");
-                var centerX = info.XSize / 2d;
-                var centerY = info.YSize / 2d;
-                var subWidth = info.XSize * ROI;
-                var subHeight = info.YSize * ROI;
-                var startX = centerX - subWidth / 2d;
-                var startY = centerY - subHeight / 2d;
-                rect = new ObservableRectangle(startX, startY, subWidth, subHeight);
-            }
-
-            if (ROI < 1 && !info.CanSubSample) {
-                TSLogger.Warning($"ROI {ROI} was specified, but the camera is not able to take sub frames");
-                Logger.Warning($"ROI {ROI} was specified, but the camera is not able to take sub frames");
-            }
-
-            return rect;
-        }
-
-        private bool IsLightSequence() {
-            return ImageType == CaptureSequence.ImageTypes.SNAPSHOT || ImageType == CaptureSequence.ImageTypes.LIGHT;
+        private async Task TrySendExposureToSecondaries(InputTarget target, CancellationToken token) {
+            await SyncServer.Instance.SyncExposure(target, token, exposureDatabaseId, syncExposureTimeout);
         }
 
         private InputTarget RetrieveTarget(ISequenceContainer parent) {

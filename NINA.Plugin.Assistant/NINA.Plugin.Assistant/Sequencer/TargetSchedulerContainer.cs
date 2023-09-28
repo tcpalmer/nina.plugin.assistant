@@ -2,6 +2,7 @@
 using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.Sync;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
 using NINA.Astrometry;
@@ -14,6 +15,7 @@ using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.PlateSolving.Interfaces;
 using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Plugin.Assistant.SyncService.Sync;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Conditions;
 using NINA.Sequencer.Container;
@@ -63,6 +65,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IWindowServiceFactory windowServiceFactory;
         private readonly IFramingAssistantVM framingAssistantVM;
         private readonly IApplicationMediator applicationMediator;
+        private bool synchronizationEnabled;
 
         [JsonProperty]
         public InstructionContainer BeforeWaitContainer { get; set; }
@@ -191,11 +194,13 @@ namespace Assistant.NINAPlugin.Sequencer {
             TSLogger.Debug("Scheduler instruction: Execute");
 
             IPlanTarget previousPlanTarget = null;
+            synchronizationEnabled = IsSynchronizationEnabled();
 
             while (true) {
                 DateTime atTime = DateTime.Now;
                 profilePreferences = GetProfilePreferences();
                 SchedulerPlan plan = new Planner(atTime, profileService, profilePreferences, false).GetPlan(previousPlanTarget);
+                SetSyncServerState(ServerState.Ready);
 
                 if (plan == null) {
                     if (previousPlanTarget != null) {
@@ -203,6 +208,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
 
                     SchedulerProgress.End();
+                    SetSyncServerState(ServerState.EndSyncContainers);
 
                     TSLogger.Info("planner returned empty plan, done");
                     return;
@@ -216,6 +222,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                     TSLogger.Info($"planner waiting for next target to become available: {Utils.FormatDateTimeFull(plan.WaitForNextTargetTime)}");
 
+                    SetSyncServerState(ServerState.PlanWait);
                     SchedulerProgress.WaitStart(plan.WaitForNextTargetTime);
                     await ExecuteEventContainer(BeforeWaitContainer, progress, token);
                     SchedulerProgress.Add("Wait");
@@ -267,6 +274,12 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
+        private void SetSyncServerState(ServerState state) {
+            if (synchronizationEnabled) {
+                SyncServer.Instance.State = state;
+            }
+        }
+
         public async Task ExecuteEventContainer(InstructionContainer container, IProgress<ApplicationStatus> progress, CancellationToken token) {
             if (container.Items?.Count > 0) {
                 SchedulerProgress.Add(container.Name);
@@ -290,6 +303,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                     container.ResetAll();
                 }
             }
+        }
+
+        private bool IsSynchronizationEnabled() {
+            return AssistantPlugin.SyncEnabled(profileService) && SyncManager.Instance.IsServer;
         }
 
         private ProfilePreference GetProfilePreferences() {
@@ -326,7 +343,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             PlanTargetContainer targetContainer = new PlanTargetContainer(this, profileService, dateTimeProviders, telescopeMediator,
             rotatorMediator, guiderMediator, cameraMediator, imagingMediator, imageSaveMediator,
             imageHistoryVM, filterWheelMediator, domeMediator, domeFollower,
-                plateSolverFactory, windowServiceFactory, previousPlanTarget, plan, schedulerProgress);
+                plateSolverFactory, windowServiceFactory, synchronizationEnabled, previousPlanTarget, plan, schedulerProgress);
             return targetContainer;
         }
 

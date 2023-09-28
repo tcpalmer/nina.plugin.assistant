@@ -17,9 +17,12 @@ namespace NINA.Plugin.Assistant.SyncService.Sync {
         public static readonly string PIPE_NAME = "TargetScheduler.Sync";
 
         public static readonly int SERVER_WAIT_POLL_PERIOD = 500;
+        public static readonly int SERVER_AWAIT_EXPOSURE_POLL_PERIOD = 1000;
         public static readonly int CLIENT_KEEPALIVE_PERIOD = 3000;
         public static readonly int CLIENT_WAIT_POLL_PERIOD = 1000;
+        public static readonly int CLIENT_EXPOSURE_READY_POLL_PERIOD = 3000;
         public static readonly int DEFAULT_SYNC_WAIT_TIMEOUT = 300;
+        public static readonly int DEFAULT_SYNC_EXPOSURE_TIMEOUT = 300;
 
         private NamedPipeServer? pipe;
         private string? mutexid;
@@ -32,13 +35,13 @@ namespace NINA.Plugin.Assistant.SyncService.Sync {
 
         private SyncManager() { }
 
-        public void Start() {
+        public void Start(string profileId) {
 
             try {
                 TryStartServer();
 
                 if (!IsServer) {
-                    SyncClient.Instance.Register();
+                    SyncClient.Instance.Register(profileId);
                 }
             }
             catch (Exception ex) {

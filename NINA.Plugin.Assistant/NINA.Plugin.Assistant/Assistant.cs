@@ -1,5 +1,4 @@
-﻿using ASCOM.Com;
-using Assistant.NINAPlugin.Controls.AcquiredImages;
+﻿using Assistant.NINAPlugin.Controls.AcquiredImages;
 using Assistant.NINAPlugin.Controls.AssistantManager;
 using Assistant.NINAPlugin.Controls.PlanPreview;
 using Assistant.NINAPlugin.Database;
@@ -59,8 +58,8 @@ namespace Assistant.NINAPlugin {
         public override async Task Initialize() {
             InitPluginHome();
 
-            if (SyncEnabled()) {
-                SyncManager.Instance.Start();
+            if (SyncEnabled(profileService)) {
+                SyncManager.Instance.Start(profileService.ActiveProfile.Id.ToString());
             }
 
             TSLogger.Info("plugin initialized");
@@ -74,7 +73,7 @@ namespace Assistant.NINAPlugin {
             SchedulerDatabaseInteraction.BackupDatabase();
         }
 
-        private bool SyncEnabled() {
+        public static bool SyncEnabled(IProfileService profileService) {
             ProfilePreference profilePreference;
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 profilePreference = context.GetProfilePreference(profileService.ActiveProfile.Id.ToString());
@@ -183,8 +182,8 @@ namespace Assistant.NINAPlugin {
 
                 if (SyncManager.Instance.IsRunning) {
                     SyncManager.Instance.Shutdown();
-                    if (SyncEnabled()) {
-                        SyncManager.Instance.Start();
+                    if (SyncEnabled(profileService)) {
+                        SyncManager.Instance.Start(profileService.ActiveProfile.Id.ToString());
                     }
                 }
             }

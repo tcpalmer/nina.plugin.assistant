@@ -11,6 +11,7 @@ service SchedulerSync {
 	rpc Register (RegistrationRequest) returns (StatusResponse);
 	rpc Unregister (ClientIdRequest) returns (StatusResponse);
 	rpc SyncWait (ClientIdRequest) returns (SyncWaitResponse);
+	rpc RequestExposure (ClientIdRequest) returns (ExposureResponse);
 	rpc Keepalive (ClientIdRequest) returns (StatusResponse);
 }
 
@@ -18,8 +19,9 @@ enum ClientState {
 	STARTING = 0;
 	READY = 1;
 	WAITING = 2;
-	IMAGING = 3;
-	ENDING = 4;
+	EXPOSUREREADY = 3;
+	EXPOSING = 4;
+	ENDING = 5;
 }
 
 message RegistrationRequest {
@@ -42,4 +44,15 @@ message StatusResponse {
 message SyncWaitResponse {
 	bool success = 1;
 	bool continue = 2;
+}
+
+message ExposureResponse {
+	bool success = 1;
+	bool exposureReady = 2;
+	bool terminate = 3;
+	string targetName = 4;
+	string targetRa = 5;
+	string targetDec = 6;
+	double targetPositionAngle = 7;
+	int32 exposurePlanDatabaseId = 8;
 }

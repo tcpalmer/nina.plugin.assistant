@@ -2,6 +2,7 @@
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.SyncService.Sync;
 using Scheduler.SyncService;
+using System;
 using System.Diagnostics;
 
 namespace Assistant.NINAPlugin.Sync {
@@ -14,6 +15,7 @@ namespace Assistant.NINAPlugin.Sync {
         public static SyncClient Instance { get => lazy.Value; }
 
         private string Id = Guid.NewGuid().ToString();
+        public string ProfileId { get; private set; }
         private ClientState ClientState = ClientState.Starting;
         private bool keepaliveRunning = false;
         private CancellationTokenSource keepaliveCts;
@@ -21,11 +23,12 @@ namespace Assistant.NINAPlugin.Sync {
         private SyncClient() : base(new NamedPipeChannel(".", SyncManager.PIPE_NAME, new NamedPipeChannelOptions() { ConnectionTimeout = 300000 })) {
         }
 
-        public StatusResponse Register() {
+        public StatusResponse Register(string profileId) {
+            ProfileId = profileId;
             RegistrationRequest request = new RegistrationRequest {
                 Guid = Id,
                 Pid = Environment.ProcessId,
-                ProfileId = "profileId",
+                ProfileId = ProfileId,
                 Timestamp = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTime(DateTime.UtcNow)
             };
 
@@ -100,6 +103,44 @@ namespace Assistant.NINAPlugin.Sync {
             finally { ClientState = ClientState.Ready; }
         }
 
+        public async Task<SyncedExposure?> StartRequestExposure(CancellationToken ct) {
+            ClientState = ClientState.Exposureready;
+            ClientIdRequest request = new ClientIdRequest {
+                Guid = Id,
+                ClientState = ClientState
+            };
+
+            TSLogger.Info($"SYNC client sync container starting polling for exposures");
+
+            while (true) {
+                try {
+                    ExposureResponse response = await base.RequestExposureAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: ct);
+
+                    if (response.Terminate) {
+                        TSLogger.Info("SYNC client sync container completed");
+                        ClientState = ClientState.Ready;
+                        return null;
+                    }
+
+                    if (response.ExposureReady) {
+                        TSLogger.Info("SYNC client sync container received exposure request");
+                        ClientState = ClientState.Exposing;
+                        return new SyncedExposure(response.TargetName, response.TargetRa, response.TargetDec, response.TargetPositionAngle, response.ExposurePlanDatabaseId);
+                    }
+
+                    await Task.Delay(SyncManager.CLIENT_EXPOSURE_READY_POLL_PERIOD, ct);
+                }
+                catch (Exception e) {
+                    if (e is TaskCanceledException) {
+                        TSLogger.Info("SYNC client sync container canceled, ending");
+                        return null;
+                    }
+
+                    TSLogger.Error("SYNC client exception in request exposure", e);
+                }
+            }
+        }
+
         private Task StartKeepalive() {
             if (!keepaliveRunning) {
 
@@ -153,6 +194,23 @@ namespace Assistant.NINAPlugin.Sync {
                     }
                 }
             }
+        }
+    }
+
+    public class SyncedExposure {
+
+        public string TargetName { get; private set; }
+        public string TargetRA { get; private set; }
+        public string TargetDec { get; private set; }
+        public double TargetPositionAngle { get; private set; }
+        public int ExposurePlanDatabaseId { get; private set; }
+
+        public SyncedExposure(string targetName, string targetRA, string targetDec, double targetPositionAngle, int exposurePlanDatabaseId) {
+            TargetName = targetName;
+            TargetRA = targetRA;
+            TargetDec = targetDec;
+            TargetPositionAngle = targetPositionAngle;
+            ExposurePlanDatabaseId = exposurePlanDatabaseId;
         }
     }
 }
