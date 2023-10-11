@@ -1,5 +1,8 @@
 # Release Notes
 
+## 3.3.3.1 - 2023-10-11
+* Fixed bug with exposure planner.
+
 ## 3.3.3.0 - 2023-09-19
 * Fixed edge case bug with custom horizons.
 
