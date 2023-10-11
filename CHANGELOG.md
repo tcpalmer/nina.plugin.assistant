@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 3.3.3.1 - 2023-10-11
+* Fixed bug with exposure planner.
+
 ## 3.4.0.0 - 2023-09-XX
 * Added target rotation and ROI to the set of data saved for acquired images.  A future release will use these values when selecting 'like' images for grading.
 

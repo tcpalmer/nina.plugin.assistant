@@ -194,6 +194,8 @@ namespace Assistant.NINAPlugin.Plan {
             string lastFilter = null;
 
             while (timeRemaining > 0) {
+                bool exposuresAdded = false;
+
                 if (AllPlanExposuresAreComplete(planExposures)) { break; }
 
                 foreach (IPlanExposure planExposure in planExposures) {
@@ -215,6 +217,7 @@ namespace Assistant.NINAPlugin.Plan {
                             if (timeRemaining <= 0) { break; }
                             instructions.Add(new PlanTakeExposure(planExposure));
                             planExposure.PlannedExposures++;
+                            exposuresAdded = true;
                         }
                     }
                     else {
@@ -224,6 +227,7 @@ namespace Assistant.NINAPlugin.Plan {
                             if (timeRemaining <= 0) { break; }
                             instructions.Add(new PlanTakeExposure(planExposure));
                             planExposure.PlannedExposures++;
+                            exposuresAdded = true;
 
                             if (IsPlanExposureComplete(planExposure)) { break; }
                         }
@@ -231,6 +235,8 @@ namespace Assistant.NINAPlugin.Plan {
 
                     if (timeRemaining <= 0) { break; }
                 }
+
+                if (!exposuresAdded) { break; }
             }
 
             return instructions;
@@ -242,6 +248,8 @@ namespace Assistant.NINAPlugin.Plan {
             string lastFilter = null;
 
             while (timeRemaining > 0) {
+                bool exposuresAdded = false;
+
                 if (AllPlanExposuresAreComplete(planOverrideItems)) { break; }
 
                 foreach (PlanOverrideItem item in planOverrideItems) {
@@ -265,8 +273,10 @@ namespace Assistant.NINAPlugin.Plan {
                     if (timeRemaining <= 0) { break; }
                     instructions.Add(new PlanTakeExposure(planExposure));
                     planExposure.PlannedExposures++;
+                    exposuresAdded = true;
                 }
 
+                if (!exposuresAdded) { break; }
                 if (timeRemaining <= 0) { break; }
             }
 
