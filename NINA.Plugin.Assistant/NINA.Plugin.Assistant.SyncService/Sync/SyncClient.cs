@@ -1,9 +1,11 @@
-﻿using GrpcDotNetNamedPipes;
+﻿using Grpc.Core;
+using GrpcDotNetNamedPipes;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.SyncService.Sync;
 using Scheduler.SyncService;
 using System;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Assistant.NINAPlugin.Sync {
 
@@ -47,7 +49,7 @@ namespace Assistant.NINAPlugin.Sync {
             }
         }
 
-        public void Unregister() {
+        public async void Unregister() {
             ClientIdRequest request = new ClientIdRequest {
                 Guid = Id,
                 ClientState = ClientState.Ending
@@ -55,7 +57,8 @@ namespace Assistant.NINAPlugin.Sync {
 
             try {
                 StopKeepalive();
-                StatusResponse response = base.Unregister(request, null, deadline: DateTime.UtcNow.AddSeconds(5));
+                var task = Task.Run(() => base.UnregisterAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(2)));
+                await Task.WhenAny(task, Task.Delay(2000));
             }
             catch (Exception ex) {
                 TSLogger.Info($"SYNC exception unregistering client with server: {ex.Message} {ex}");
@@ -131,12 +134,14 @@ namespace Assistant.NINAPlugin.Sync {
                     await Task.Delay(SyncManager.CLIENT_EXPOSURE_READY_POLL_PERIOD, ct);
                 }
                 catch (Exception e) {
-                    if (e is TaskCanceledException) {
+                    if (e is TaskCanceledException || (e is RpcException && e.Message.Contains("Cancelled"))) {
                         TSLogger.Info("SYNC client sync container canceled, ending");
+                        ClientState = ClientState.Ready;
                         return null;
                     }
 
                     TSLogger.Error("SYNC client exception in request exposure", e);
+                    await Task.Delay(2000, ct); // at least slow down exceptions repeating
                 }
             }
         }
@@ -189,7 +194,10 @@ namespace Assistant.NINAPlugin.Sync {
                         try {
                             keepaliveCts?.Cancel();
                         }
-                        catch (Exception) { }
+                        catch (Exception ex) {
+                            TSLogger.Error("exception stopping sync client keepalive", ex);
+                        }
+
                         keepaliveRunning = false;
                     }
                 }

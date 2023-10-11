@@ -42,7 +42,7 @@ namespace Assistant.NINAPlugin.Controls.Util {
             }
             catch (Exception e) {
                 TSLogger.Error($"failed to read profile at {profileMeta.Location}: {e.Message} {e.StackTrace}");
-                return null;
+                throw;
             }
         }
 

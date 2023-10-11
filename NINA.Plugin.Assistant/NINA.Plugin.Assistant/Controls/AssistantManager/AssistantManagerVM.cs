@@ -3,6 +3,7 @@ using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using LinqKit;
 using NINA.Core.Model.Equipment;
+using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
 using NINA.Equipment.Interfaces;
@@ -225,67 +226,74 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             TreeDataItem item = obj as TreeDataItem;
             if (item != null) {
 
-                DeselectOppositeTree(selectedTreeDataItem, item);
-                selectedTreeDataItem = item;
+                try {
+                    DeselectOppositeTree(selectedTreeDataItem, item);
+                    selectedTreeDataItem = item;
 
-                switch (item.Type) {
-                    case TreeDataType.ProjectProfile:
-                        activeTreeDataItem = item;
-                        ProfileViewVM = new ProfileViewVM(this, profileService, item);
-                        CollapseAllViews();
-                        ShowProfileView = Visibility.Visible;
-                        break;
+                    switch (item.Type) {
+                        case TreeDataType.ProjectProfile:
+                            activeTreeDataItem = item;
+                            ProfileViewVM = new ProfileViewVM(this, profileService, item);
+                            CollapseAllViews();
+                            ShowProfileView = Visibility.Visible;
+                            break;
 
-                    case TreeDataType.OrphanedProjects:
-                        activeTreeDataItem = item;
-                        OrphanedProjectsViewVM = new OrphanedProjectsViewVM(this, profileService, item, OrphanedProjects);
-                        CollapseAllViews();
-                        ShowOrphanedProjectsView = Visibility.Visible;
-                        break;
+                        case TreeDataType.OrphanedProjects:
+                            activeTreeDataItem = item;
+                            OrphanedProjectsViewVM = new OrphanedProjectsViewVM(this, profileService, item, OrphanedProjects);
+                            CollapseAllViews();
+                            ShowOrphanedProjectsView = Visibility.Visible;
+                            break;
 
-                    case TreeDataType.Project:
-                        activeTreeDataItem = item;
-                        Project project = (Project)item.Data;
-                        ProjectViewVM = new ProjectViewVM(this, framingAssistantVM, profileService, project);
-                        CollapseAllViews();
-                        ShowProjectView = Visibility.Visible;
-                        break;
+                        case TreeDataType.Project:
+                            activeTreeDataItem = item;
+                            Project project = (Project)item.Data;
+                            ProjectViewVM = new ProjectViewVM(this, framingAssistantVM, profileService, project);
+                            CollapseAllViews();
+                            ShowProjectView = Visibility.Visible;
+                            break;
 
-                    case TreeDataType.Target:
-                        activeTreeDataItem = item;
-                        project = (Project)item.TreeParent.Data;
-                        Target target = (Target)item.Data;
-                        TargetViewVM = new TargetViewVM(this, profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory, target, project);
-                        CollapseAllViews();
-                        ShowTargetView = Visibility.Visible;
-                        break;
+                        case TreeDataType.Target:
+                            activeTreeDataItem = item;
+                            project = (Project)item.TreeParent.Data;
+                            Target target = (Target)item.Data;
+                            TargetViewVM = new TargetViewVM(this, profileService, applicationMediator, framingAssistantVM, deepSkyObjectSearchVM, planetariumFactory, target, project);
+                            CollapseAllViews();
+                            ShowTargetView = Visibility.Visible;
+                            break;
 
-                    case TreeDataType.ExposureTemplateProfile:
-                        activeTreeDataItem = item;
-                        ExposureTemplateProfileViewVM = new ExposureTemplateProfileViewVM(this, profileService, item);
-                        CollapseAllViews();
-                        ShowExposureTemplateProfileView = Visibility.Visible;
-                        break;
+                        case TreeDataType.ExposureTemplateProfile:
+                            activeTreeDataItem = item;
+                            ExposureTemplateProfileViewVM = new ExposureTemplateProfileViewVM(this, profileService, item);
+                            CollapseAllViews();
+                            ShowExposureTemplateProfileView = Visibility.Visible;
+                            break;
 
-                    case TreeDataType.OrphanedExposureTemplates:
-                        activeTreeDataItem = item;
-                        OrphanedExposureTemplatesViewVM = new OrphanedExposureTemplatesViewVM(this, profileService, item, OrphanedExposureTemplates);
-                        CollapseAllViews();
-                        ShowOrphanedExposureTemplatesView = Visibility.Visible;
-                        break;
+                        case TreeDataType.OrphanedExposureTemplates:
+                            activeTreeDataItem = item;
+                            OrphanedExposureTemplatesViewVM = new OrphanedExposureTemplatesViewVM(this, profileService, item, OrphanedExposureTemplates);
+                            CollapseAllViews();
+                            ShowOrphanedExposureTemplatesView = Visibility.Visible;
+                            break;
 
-                    case TreeDataType.ExposureTemplate:
-                        activeTreeDataItem = item;
-                        ExposureTemplate exposureTemplate = (ExposureTemplate)item.Data;
-                        ExposureTemplateViewVM = new ExposureTemplateViewVM(this, profileService, exposureTemplate);
-                        CollapseAllViews();
-                        ShowExposureTemplateView = Visibility.Visible;
-                        break;
+                        case TreeDataType.ExposureTemplate:
+                            activeTreeDataItem = item;
+                            ExposureTemplate exposureTemplate = (ExposureTemplate)item.Data;
+                            ExposureTemplateViewVM = new ExposureTemplateViewVM(this, profileService, exposureTemplate);
+                            CollapseAllViews();
+                            ShowExposureTemplateView = Visibility.Visible;
+                            break;
 
-                    default:
-                        activeTreeDataItem = null;
-                        CollapseAllViews();
-                        break;
+                        default:
+                            activeTreeDataItem = null;
+                            CollapseAllViews();
+                            break;
+                    }
+                }
+                catch (Exception e) {
+                    CollapseAllViews();
+                    TSLogger.Error("Error while changing selected item in nav tree", e);
+                    MyMessageBox.Show("An error occured trying to select an item.  Is it possible you have another instance of NINA running that was locked the associated profile?", "Oops");
                 }
             }
         }
