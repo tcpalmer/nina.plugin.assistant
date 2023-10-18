@@ -17,6 +17,8 @@ namespace NINA.Plugin.Assistant.SyncService.Sync {
         public static readonly string PIPE_NAME = "TargetScheduler.Sync";
 
         public static readonly int SERVER_WAIT_POLL_PERIOD = 500;
+        public static readonly int SERVER_STALE_CLIENT_PURGE_CHECK_PERIOD = 3000;
+        public static readonly int SERVER_STALE_CLIENT_PURGE_TIMEOUT = 10;
         public static readonly int SERVER_AWAIT_EXPOSURE_POLL_PERIOD = 1000;
         public static readonly int CLIENT_KEEPALIVE_PERIOD = 3000;
         public static readonly int CLIENT_WAIT_POLL_PERIOD = 1000;
@@ -50,6 +52,11 @@ namespace NINA.Plugin.Assistant.SyncService.Sync {
         }
 
         public void Shutdown() {
+
+            if (isServer) {
+                SyncServer.Instance.Shutdown();
+            }
+
             if (!IsServer) {
                 SyncClient.Instance.Unregister();
             }

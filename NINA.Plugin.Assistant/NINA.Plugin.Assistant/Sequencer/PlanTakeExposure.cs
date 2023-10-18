@@ -114,6 +114,12 @@ namespace Assistant.NINAPlugin.Sequencer {
                 imageHistoryVM.Add(imageData.MetaData.Image.Id, await imageData.Statistics, ImageType);
             }
 
+            if (synchronizationEnabled) {
+                /* I think we have to wait (with timeout) for each client that accepted the exposure to report back
+                 * that it's done.  We can't continue until then since next operation could be a dither, slew, etc.
+                 */
+            }
+
             ExposureCount++;
         }
 

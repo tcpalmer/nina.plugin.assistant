@@ -5,7 +5,6 @@ using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Enum;
 using NINA.Core.Model;
-using NINA.Core.Model.Equipment;
 using NINA.Core.Utility.WindowService;
 using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;

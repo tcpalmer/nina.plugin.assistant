@@ -1,8 +1,12 @@
 ﻿using Grpc.Core;
 using NINA.Astrometry;
+using NINA.Core.Model;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.SyncService.Sync;
+using NmeaParser.Gnss.Ntrip;
 using Scheduler.SyncService;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
@@ -27,10 +31,14 @@ namespace Assistant.NINAPlugin.Sync {
         private Dictionary<string, SyncClientInstance> registeredClients;
         public ServerState State { get; set; }
         private ExposureResponse activeExposureResponse;
+        private CancellationTokenSource staleClientPurgeCts;
+
+        private ConcurrentQueue<SyncClientExposureResults> clientExposureQueue = new ConcurrentQueue<SyncClientExposureResults>();
 
         public SyncServer() {
             registeredClients = new Dictionary<string, SyncClientInstance>();
             State = ServerState.Ready;
+            StartStaleClientPurge();
         }
 
         public override Task<StatusResponse> Register(RegistrationRequest request, ServerCallContext context) {
@@ -128,10 +136,12 @@ namespace Assistant.NINAPlugin.Sync {
         }
 
         public async Task SyncExposure(InputTarget target, CancellationToken token, int exposurePlanDatabaseId, int syncExposureTimeout) {
+            string exposureId = Guid.NewGuid().ToString();
             activeExposureResponse = new ExposureResponse {
                 Success = true,
                 ExposureReady = true,
                 Terminate = false,
+                ExposureId = exposureId,
                 TargetName = target.DeepSkyObject.NameAsAscii,
                 TargetRa = target.InputCoordinates.Coordinates.RAString,
                 TargetDec = target.InputCoordinates.Coordinates.DecString,
@@ -143,18 +153,10 @@ namespace Assistant.NINAPlugin.Sync {
             Stopwatch stopwatch = Stopwatch.StartNew();
             TimeSpan timeout = TimeSpan.FromSeconds(syncExposureTimeout);
 
-            TSLogger.Info($"SYNC server informing clients of available exposure, timeout is {timeout.TotalSeconds}s");
+            TSLogger.Info($"SYNC server informing clients of available exposure ({exposureId}), timeout is {timeout.TotalSeconds}s");
 
             while (NotTimedOut(stopwatch, timeout)) {
-                bool allExposing = true;
-                foreach (SyncClientInstance client in registeredClients.Values) {
-                    if (client.ClientState != ClientState.Exposing) {
-                        allExposing = false;
-                        break;
-                    }
-                }
-
-                if (allExposing) {
+                if (AllClientsInState(ClientState.Exposing)) {
                     TSLogger.Info("SYNC server all clients now have the exposure, continuing");
                     State = ServerState.Ready;
                     activeExposureResponse = new ExposureResponse { Success = true, ExposureReady = false, Terminate = false };
@@ -163,6 +165,20 @@ namespace Assistant.NINAPlugin.Sync {
 
                 await Task.Delay(SyncManager.SERVER_AWAIT_EXPOSURE_POLL_PERIOD, token);
             }
+
+            TSLogger.Warning("SYNC server timed out waiting for one or more clients to accept exposure, continuing");
+        }
+
+        public override Task<StatusResponse> SubmitExposure(SubmitExposureRequest request, ServerCallContext context) {
+            TSLogger.Info($"SYNC server received exposure ({request.ExposureId}) from client ({request.Guid})");
+            clientExposureQueue.Enqueue(new SyncClientExposureResults(request));
+            return Task.FromResult(new StatusResponse { Success = true, Message = "" });
+        }
+
+        public SyncClientExposureResults? DequeueSyncClientExposure() {
+            SyncClientExposureResults? result;
+            bool success = clientExposureQueue.TryDequeue(out result);
+            return success ? result : null;
         }
 
         public bool AllClientsInState(ClientState state) {
@@ -176,7 +192,6 @@ namespace Assistant.NINAPlugin.Sync {
         }
 
         private void LogRegisteredClients() {
-
             if (registeredClients.Count == 0) {
                 return;
             }
@@ -191,11 +206,76 @@ namespace Assistant.NINAPlugin.Sync {
 
         private bool NotTimedOut(Stopwatch stopwatch, TimeSpan timeout) {
             if (stopwatch.Elapsed > timeout) {
-                TSLogger.Warning($"SYNC server exposure hand offs timed out after {timeout.TotalSeconds} seconds");
                 return false;
             }
 
             return true;
+        }
+
+        public void Shutdown() {
+            try {
+                staleClientPurgeCts?.Cancel();
+            }
+            catch (Exception ex) {
+                TSLogger.Error("exception stopping stale client purge thread", ex);
+            }
+        }
+
+        private Task StartStaleClientPurge() {
+            TSLogger.Info($"SYNC starting stale client purge thread");
+
+            return Task.Run(async () => {
+                using (staleClientPurgeCts = new CancellationTokenSource()) {
+                    var token = staleClientPurgeCts.Token;
+                    while (!token.IsCancellationRequested) {
+                        try {
+                            await Task.Delay(SyncManager.SERVER_STALE_CLIENT_PURGE_CHECK_PERIOD, token);
+
+                            List<String> purgeList = new List<String>();
+                            foreach (SyncClientInstance client in registeredClients.Values) {
+                                TimeSpan timeSpan = DateTime.Now - client.LastAliveDate;
+                                if (timeSpan.TotalSeconds > SyncManager.SERVER_STALE_CLIENT_PURGE_TIMEOUT) {
+                                    purgeList.Add(client.Guid);
+                                }
+                            }
+
+                            for (int i = 0; i < purgeList.Count; i++) {
+                                TSLogger.Warning($"SYNC detected stale client, purging {purgeList[i]}");
+                                registeredClients.Remove(purgeList[i]);
+                            }
+                        }
+                        catch (OperationCanceledException) {
+                            TSLogger.Info($"SYNC stopping stale client purge thread");
+                        }
+                        catch (Exception ex) {
+                            TSLogger.Error($"SYNC an error occurred during stale client purge", ex);
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    public class SyncClientExposureResults {
+
+        public readonly string ClientId;
+        public readonly string ExposureId;
+        public readonly int ProjectDatabaseId;
+        public readonly int TargetDatabaseId;
+        public readonly DateTime AcquiredDate;
+        public readonly string FilterName;
+        // TODO: ImageMetadata
+
+        public SyncClientExposureResults(SubmitExposureRequest request) {
+            ClientId = request.Guid;
+            ExposureId = request.ExposureId;
+            ProjectDatabaseId = request.ProjectDatabaseId;
+            TargetDatabaseId = request.TargetDatabaseId;
+            AcquiredDate = request.AcquiredDate.ToDateTime().ToLocalTime();
+            FilterName = request.FilterName;
+
+            // TODO: ImageMetadata
+
         }
     }
 }

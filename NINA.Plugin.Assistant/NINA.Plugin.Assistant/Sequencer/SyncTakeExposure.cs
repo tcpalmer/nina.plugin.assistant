@@ -3,17 +3,20 @@ using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Sync;
 using Assistant.NINAPlugin.Util;
 using Castle.DynamicProxy.Contributors;
+using Newtonsoft.Json;
 using NINA.Astrometry;
 using NINA.Core.Model;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.Equipment.Model;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.SequenceItem.Camera;
 using NINA.Sequencer.SequenceItem.FilterWheel;
 using NINA.Sequencer.Utility;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
+using Scheduler.SyncService;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -28,12 +31,14 @@ namespace Assistant.NINAPlugin.Sequencer {
         private ExposureTemplate exposureTemplate;
         private Target target;
 
+        private readonly IRotatorMediator rotatorMediator;
         private readonly IFilterWheelMediator filterWheelMediator;
 
         private static int exposureCount = 0;
 
         public SyncTakeExposure(
             IProfileService profileService,
+            IRotatorMediator rotatorMediator,
             ICameraMediator cameraMediator,
             IImagingMediator imagingMediator,
             IImageSaveMediator imageSaveMediator,
@@ -41,6 +46,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             IFilterWheelMediator filterWheelMediator,
             SyncedExposure syncedExposure) : base(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM) {
 
+            this.rotatorMediator = rotatorMediator;
             this.filterWheelMediator = filterWheelMediator;
             this.syncedExposure = syncedExposure;
 
@@ -77,6 +83,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 capture.SubSambleRectangle = rect;
             }
 
+            imageSaveMediator.ImageSaved += ImageSaved;
+
             var exposureData = await imagingMediator.CaptureImage(capture, token, progress);
             var imageData = await exposureData.ToImageData(progress, token);
             var imageParams = new PrepareImageParameters(true, true);
@@ -95,6 +103,24 @@ namespace Assistant.NINAPlugin.Sequencer {
             imageHistoryVM.Add(imageData.MetaData.Image.Id, await imageData.Statistics, ImageType);
 
             ExposureCount++;
+        }
+
+        private async void ImageSaved(object sender, ImageSavedEventArgs msg) {
+            imageSaveMediator.ImageSaved -= ImageSaved;
+
+            string json = JsonConvert.SerializeObject(new ImageMetadata(msg, target.ROI));
+            string metadataEncoded = Utils.Base64Encode(json);
+
+            SubmitExposureRequest request = new SubmitExposureRequest {
+                Guid = SyncClient.Instance.Id,
+                ExposureId = syncedExposure.ExposureId,
+                ProjectDatabaseId = target.ProjectId,
+                TargetDatabaseId = target.Id,
+                AcquiredDate = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTime(msg.MetaData.Image.ExposureStart.ToUniversalTime()),
+                ImageMetadata = metadataEncoded,
+            };
+
+            await SyncClient.Instance.SubmitExposure(request);
         }
 
         private void LoadExposureDetails() {

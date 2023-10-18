@@ -73,6 +73,16 @@ namespace Assistant.NINAPlugin.Util {
             return startTime.AddSeconds(span / 2);
         }
 
+        public static string Base64Encode(string plainText) {
+            var bytes = System.Text.Encoding.UTF8.GetBytes(plainText);
+            return Convert.ToBase64String(bytes);
+        }
+
+        public static string Base64Decode(string encoded) {
+            var bytes = Convert.FromBase64String(encoded);
+            return System.Text.Encoding.UTF8.GetString(bytes);
+        }
+
         // Cobbled from NINA (NINA private)
         public static string GetRAString(double raDegrees) {
             string pattern = "{0:0}h {1:0}m {2:0}s";

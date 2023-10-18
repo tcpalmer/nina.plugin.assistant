@@ -45,7 +45,7 @@ The [plugin documentation](https://tcpalmer.github.io/nina-scheduler/) provides 
 
 # Getting Help #
 * Review the [plugin documentation](https://tcpalmer.github.io/nina-scheduler/)
-* Ask for help (tag @tcpalmer) in the #plugin-discussions channel on the NINA project [Discord server](https://discord.com/invite/rWRbVbw).
+* Ask for help (tag @tcpalmer) in the #target-scheduler channel on the NINA project [Discord server](https://discord.com/invite/rWRbVbw).
 * [Plugin source code](https://github.com/tcpalmer/nina.plugin.assistant)
 * [Change log](https://github.com/tcpalmer/nina.plugin.assistant/blob/main/CHANGELOG.md)
 

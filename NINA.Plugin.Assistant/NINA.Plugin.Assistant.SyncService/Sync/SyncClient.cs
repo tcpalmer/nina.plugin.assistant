@@ -16,7 +16,7 @@ namespace Assistant.NINAPlugin.Sync {
         private static readonly Lazy<SyncClient> lazy = new Lazy<SyncClient>(() => new SyncClient());
         public static SyncClient Instance { get => lazy.Value; }
 
-        private string Id = Guid.NewGuid().ToString();
+        public readonly string Id = Guid.NewGuid().ToString();
         public string ProfileId { get; private set; }
         private ClientState ClientState = ClientState.Starting;
         private bool keepaliveRunning = false;
@@ -126,9 +126,9 @@ namespace Assistant.NINAPlugin.Sync {
                     }
 
                     if (response.ExposureReady) {
-                        TSLogger.Info("SYNC client sync container received exposure request");
+                        TSLogger.Info($"SYNC client sync container received exposure request ({response.ExposureId})");
                         ClientState = ClientState.Exposing;
-                        return new SyncedExposure(response.TargetName, response.TargetRa, response.TargetDec, response.TargetPositionAngle, response.ExposurePlanDatabaseId);
+                        return new SyncedExposure(response.ExposureId, response.TargetName, response.TargetRa, response.TargetDec, response.TargetPositionAngle, response.ExposurePlanDatabaseId);
                     }
 
                     await Task.Delay(SyncManager.CLIENT_EXPOSURE_READY_POLL_PERIOD, ct);
@@ -143,6 +143,19 @@ namespace Assistant.NINAPlugin.Sync {
                     TSLogger.Error("SYNC client exception in request exposure", e);
                     await Task.Delay(2000, ct); // at least slow down exceptions repeating
                 }
+            }
+        }
+
+        public async Task SubmitExposure(SubmitExposureRequest request) {
+            try {
+                TSLogger.Info($"SYNC client submitting exposure to server ({request.Guid})");
+                StatusResponse response = await base.SubmitExposureAsync(request);
+                if (!response.Success) {
+                    TSLogger.Error($"SYNC client problem submitting exposure: {response.Message}");
+                }
+            }
+            catch (Exception e) {
+                TSLogger.Error("SYNC client exception submitting exposure", e);
             }
         }
 
@@ -207,13 +220,15 @@ namespace Assistant.NINAPlugin.Sync {
 
     public class SyncedExposure {
 
+        public string ExposureId { get; private set; }
         public string TargetName { get; private set; }
         public string TargetRA { get; private set; }
         public string TargetDec { get; private set; }
         public double TargetPositionAngle { get; private set; }
         public int ExposurePlanDatabaseId { get; private set; }
 
-        public SyncedExposure(string targetName, string targetRA, string targetDec, double targetPositionAngle, int exposurePlanDatabaseId) {
+        public SyncedExposure(string exposureId, string targetName, string targetRA, string targetDec, double targetPositionAngle, int exposurePlanDatabaseId) {
+            ExposureId = exposureId;
             TargetName = targetName;
             TargetRA = targetRA;
             TargetDec = targetDec;

@@ -1,8 +1,7 @@
-﻿using Assistant.NINAPlugin.Database;
-using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.Sync;
+﻿using Assistant.NINAPlugin.Sync;
 using Newtonsoft.Json;
 using NINA.Core.Model;
+using NINA.Core.Utility.Notification;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.SyncService.Sync;
@@ -11,9 +10,7 @@ using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
-using NINA.WPF.Base.Mediator;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,6 +26,7 @@ namespace Assistant.NINAPlugin.Sequencer {
     public class TargetSchedulerSyncContainer : SequenceItem {
 
         private readonly IProfileService profileService;
+        private readonly IRotatorMediator rotatorMediator;
         private readonly ICameraMediator cameraMediator;
         private readonly IImagingMediator imagingMediator;
         private readonly IImageSaveMediator imageSaveMediator;
@@ -38,12 +36,14 @@ namespace Assistant.NINAPlugin.Sequencer {
         [ImportingConstructor]
         public TargetSchedulerSyncContainer(
             IProfileService profileService,
+            IRotatorMediator rotatorMediator,
             ICameraMediator cameraMediator,
             IImagingMediator imagingMediator,
             IImageSaveMediator imageSaveMediator,
             IImageHistoryVM imageHistoryVM,
             IFilterWheelMediator filterWheelMediator) : base() {
             this.profileService = profileService;
+            this.rotatorMediator = rotatorMediator;
             this.cameraMediator = cameraMediator;
             this.imagingMediator = imagingMediator;
             this.imageSaveMediator = imageSaveMediator;
@@ -53,6 +53,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public TargetSchedulerSyncContainer(TargetSchedulerSyncContainer cloneMe) : this(
             cloneMe.profileService,
+            cloneMe.rotatorMediator,
             cloneMe.cameraMediator,
             cloneMe.imagingMediator,
             cloneMe.imageSaveMediator,
@@ -72,6 +73,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             if (SyncManager.Instance.IsServer) {
+                Notification.ShowWarning("Target Scheduler Sync Container should only be used in a NINA secondary instance, but current instance is the primary.");
                 TSLogger.Info("TargetSchedulerSyncContainer execute but instance is primary, not secondary as expected");
                 return;
             }
@@ -95,7 +97,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private async Task TakeSyncedExposure(SyncedExposure syncedExposure, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            SyncTakeExposure takeExposure = new SyncTakeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM, filterWheelMediator, syncedExposure);
+            SyncTakeExposure takeExposure = new SyncTakeExposure(profileService, rotatorMediator, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM, filterWheelMediator, syncedExposure);
             await takeExposure.Execute(progress, token);
         }
     }
