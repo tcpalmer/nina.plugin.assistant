@@ -1,9 +1,12 @@
 ﻿using NINA.Astrometry;
 using NINA.Core.Model;
 using NINA.Core.Model.Equipment;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using System;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Util {
 
@@ -68,19 +71,15 @@ namespace Assistant.NINAPlugin.Util {
             return coordinates == null ? "n/a" : $"{coordinates.RAString} {coordinates.DecString}";
         }
 
+        public static async void TestWait(int seconds) {
+            TSLogger.Debug($"********** TESTING: waiting for {seconds}s ...");
+            Thread.Sleep(seconds * 1000);
+            TSLogger.Debug("********** TESTING: wait complete");
+        }
+
         public static DateTime GetMidpointTime(DateTime startTime, DateTime endTime) {
             long span = (long)endTime.Subtract(startTime).TotalSeconds;
             return startTime.AddSeconds(span / 2);
-        }
-
-        public static string Base64Encode(string plainText) {
-            var bytes = System.Text.Encoding.UTF8.GetBytes(plainText);
-            return Convert.ToBase64String(bytes);
-        }
-
-        public static string Base64Decode(string encoded) {
-            var bytes = Convert.FromBase64String(encoded);
-            return System.Text.Encoding.UTF8.GetString(bytes);
         }
 
         // Cobbled from NINA (NINA private)

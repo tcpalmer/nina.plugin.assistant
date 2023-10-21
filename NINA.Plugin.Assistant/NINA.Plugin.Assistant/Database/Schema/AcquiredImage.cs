@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using NINA.Plugin.Assistant.Shared.Utility;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

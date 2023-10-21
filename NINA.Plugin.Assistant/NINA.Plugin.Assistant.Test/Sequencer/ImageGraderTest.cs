@@ -7,6 +7,7 @@ using Moq;
 using NINA.Core.Model;
 using NINA.Image.ImageData;
 using NINA.Image.Interfaces;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NUnit.Framework;

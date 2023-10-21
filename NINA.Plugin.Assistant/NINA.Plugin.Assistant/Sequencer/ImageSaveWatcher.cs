@@ -34,13 +34,16 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private IPlanTarget planTarget;
         private bool enableGrader;
+        private bool synchronizationEnabled;
+        private CancellationTokenSource syncClientExposureWatcherCts;
 
-        public ImageSaveWatcher(IProfile profile, IImageSaveMediator imageSaveMediator, IPlanTarget planTarget) {
+        public ImageSaveWatcher(IProfile profile, IImageSaveMediator imageSaveMediator, IPlanTarget planTarget, bool synchronizationEnabled) {
             this.profile = profile;
             this.imageSaveMediator = imageSaveMediator;
             exposureDictionary = new ConcurrentDictionary<int, int>(Environment.ProcessorCount * 2, 31);
             this.planTarget = planTarget;
             this.enableGrader = planTarget.Project.EnableGrader;
+            this.synchronizationEnabled = synchronizationEnabled;
         }
 
         public void Start() {
@@ -73,6 +76,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             imageSaveMediator.ImageSaved -= ImageSaved;
+
             TSLogger.Debug($"stopped watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
         }
 

@@ -1,6 +1,4 @@
-﻿using Assistant.NINAPlugin.Database;
-using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.Sync;
+﻿using Assistant.NINAPlugin.Sync;
 using NINA.Astrometry;
 using NINA.Core.Model;
 using NINA.Core.Utility;
@@ -8,7 +6,6 @@ using NINA.Equipment.Interfaces.Mediator;
 using NINA.Equipment.Model;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Container;
-using NINA.Sequencer.SequenceItem.Imaging;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using System;
@@ -25,6 +22,9 @@ namespace Assistant.NINAPlugin.Sequencer {
     /// 
     /// We also handle ROI < 1 by using parts of TakeSubframeExposure here rather than a separate instruction.
     /// 
+    /// If synchronization is enabled, we handle getting exposures to registered clients and then waiting for
+    /// them to complete.
+    /// 
     /// This is far from ideal.  If the core TakeExposure instruction changes, we'd be doing something different
     /// until this code was updated.  Ideally, NINA would provide a way to track some metadata or id all the way
     /// through the image pipeline to the save operation.
@@ -35,6 +35,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private int syncExposureTimeout;
         private IImageSaveWatcher imageSaveWatcher;
         private IDeepSkyObjectContainer dsoContainer;
+        private int targetDatabaseId;
         private int exposureDatabaseId;
 
         public PlanTakeExposure(
@@ -47,12 +48,14 @@ namespace Assistant.NINAPlugin.Sequencer {
             IImageSaveMediator imageSaveMediator,
             IImageHistoryVM imageHistoryVM,
             IImageSaveWatcher imageSaveWatcher,
+            int targetDatabaseId,
             int exposureDatabaseId) : base(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM) {
 
             this.dsoContainer = dsoContainer;
             this.synchronizationEnabled = synchronizationEnabled;
             this.syncExposureTimeout = syncExposureTimeout;
             this.imageSaveWatcher = imageSaveWatcher;
+            this.targetDatabaseId = targetDatabaseId;
             this.exposureDatabaseId = exposureDatabaseId;
         }
 
@@ -81,14 +84,16 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             var target = RetrieveTarget(dsoContainer);
 
+            string exposureId = "";
             if (synchronizationEnabled) {
-                await TrySendExposureToSecondaries(target, token);
+                exposureId = Guid.NewGuid().ToString();
+                progress?.Report(new ApplicationStatus() { Status = "Target Scheduler: waiting for sync clients to accept exposure" });
+                await TrySendExposureToClients(exposureId, target, token);
+                progress?.Report(new ApplicationStatus() { Status = "" });
             }
 
             var exposureData = await imagingMediator.CaptureImage(capture, token, progress);
-
             var imageData = await exposureData.ToImageData(progress, token);
-
             var prepareTask = imagingMediator.PrepareImage(imageData, imageParams, token);
 
             if (target != null) {
@@ -114,17 +119,18 @@ namespace Assistant.NINAPlugin.Sequencer {
                 imageHistoryVM.Add(imageData.MetaData.Image.Id, await imageData.Statistics, ImageType);
             }
 
+            // If any sync clients accepted this exposure, we have to wait for them to finish before continuing
             if (synchronizationEnabled) {
-                /* I think we have to wait (with timeout) for each client that accepted the exposure to report back
-                 * that it's done.  We can't continue until then since next operation could be a dither, slew, etc.
-                 */
+                progress?.Report(new ApplicationStatus() { Status = "Target Scheduler: waiting for sync clients to complete exposure" });
+                await SyncServer.Instance.WaitForClientExposureCompletion(exposureId, token);
+                progress?.Report(new ApplicationStatus() { Status = "" });
             }
 
             ExposureCount++;
         }
 
-        private async Task TrySendExposureToSecondaries(InputTarget target, CancellationToken token) {
-            await SyncServer.Instance.SyncExposure(target, token, exposureDatabaseId, syncExposureTimeout);
+        private async Task TrySendExposureToClients(string exposureId, InputTarget target, CancellationToken token) {
+            await SyncServer.Instance.SyncExposure(exposureId, target, targetDatabaseId, exposureDatabaseId, syncExposureTimeout, token);
         }
 
         private InputTarget RetrieveTarget(ISequenceContainer parent) {

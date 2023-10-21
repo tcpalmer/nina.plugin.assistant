@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using FluentAssertions;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.Test.Astrometry;
 using NINA.Plugin.Assistant.Test.Plan;
 using NINA.WPF.Base.Interfaces.Mediator;

@@ -118,7 +118,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             if (!plan.IsEmulator)
-                ImageSaveWatcher = new ImageSaveWatcher(activeProfile, imageSaveMediator, plan.PlanTarget);
+                ImageSaveWatcher = new ImageSaveWatcher(activeProfile, imageSaveMediator, plan.PlanTarget, synchronizationEnabled);
             else
                 ImageSaveWatcher = new ImageSaveWatcherEmulator();
 
@@ -314,6 +314,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         imageSaveMediator,
                         imageHistoryVM,
                         ImageSaveWatcher,
+                        planTarget.DatabaseId,
                         planExposure.DatabaseId);
             SetItemDefaults(takeExposure, nameof(TakeExposure));
 
@@ -351,15 +352,10 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private int GetSyncExposureTimeout() {
-            ProfilePreference profilePreference;
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
-                profilePreference = context.GetProfilePreference(profileService.ActiveProfile.Id.ToString());
-                if (profilePreference == null) {
-                    return SyncManager.DEFAULT_SYNC_EXPOSURE_TIMEOUT;
-                }
+                ProfilePreference profilePreference = context.GetProfilePreference(profileService.ActiveProfile.Id.ToString());
+                return profilePreference != null ? profilePreference.SyncExposureTimeout : SyncManager.DEFAULT_SYNC_EXPOSURE_TIMEOUT;
             }
-
-            return profilePreference.SyncExposureTimeout;
         }
 
         private void SetItemDefaults(ISequenceItem item, string name) {

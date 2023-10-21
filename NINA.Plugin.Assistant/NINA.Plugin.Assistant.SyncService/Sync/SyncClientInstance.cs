@@ -1,4 +1,5 @@
-﻿using Scheduler.SyncService;
+﻿using NINA.Plugin.Assistant.Shared.Utility;
+using Scheduler.SyncService;
 using System;
 
 namespace Assistant.NINAPlugin.Sync {
@@ -22,6 +23,10 @@ namespace Assistant.NINAPlugin.Sync {
         }
 
         public void SetState(ClientState state) {
+            if (ClientState != state) {
+                TSLogger.Info($"SYNC server changing state for client {Guid}: {ClientState} -> {state}");
+            }
+
             ClientState = state;
         }
 

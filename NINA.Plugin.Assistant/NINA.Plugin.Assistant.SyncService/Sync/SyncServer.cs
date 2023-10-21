@@ -1,12 +1,9 @@
 ﻿using Grpc.Core;
 using NINA.Astrometry;
-using NINA.Core.Model;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.SyncService.Sync;
-using NmeaParser.Gnss.Ntrip;
 using Scheduler.SyncService;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
@@ -23,28 +20,36 @@ namespace Assistant.NINAPlugin.Sync {
 
     public class SyncServer : SchedulerSync.SchedulerSyncBase {
 
-        private object lockobj = new object();
+        private object lockObj = new object();
 
         private static readonly Lazy<SyncServer> lazy = new Lazy<SyncServer>(() => new SyncServer());
         public static SyncServer Instance { get => lazy.Value; }
 
         private Dictionary<string, SyncClientInstance> registeredClients;
+        private ConcurrentDictionary<string, string> clientActiveExposures;
+
         public ServerState State { get; set; }
         private ExposureResponse activeExposureResponse;
         private CancellationTokenSource staleClientPurgeCts;
 
-        private ConcurrentQueue<SyncClientExposureResults> clientExposureQueue = new ConcurrentQueue<SyncClientExposureResults>();
-
         public SyncServer() {
             registeredClients = new Dictionary<string, SyncClientInstance>();
-            State = ServerState.Ready;
+            clientActiveExposures = new ConcurrentDictionary<string, string>(Environment.ProcessorCount * 2, 31);
+            SetServerState(ServerState.Ready);
             StartStaleClientPurge();
+        }
+
+        private void SetServerState(ServerState state) {
+            lock (lockObj) {
+                TSLogger.Info($"SYNC server setting state {State} -> {state}");
+                State = state;
+            }
         }
 
         public override Task<StatusResponse> Register(RegistrationRequest request, ServerCallContext context) {
             TSLogger.Info($"SYNC server received client registration request {request.Guid} {request.Pid} {request.Timestamp.ToDateTime().ToLocalTime()}");
 
-            lock (lockobj) {
+            lock (lockObj) {
                 if (registeredClients.ContainsKey(request.Guid)) {
                     TSLogger.Warning($"SYNC warning: client {request.Guid} is already registered");
                     return Task.FromResult(new StatusResponse { Success = false, Message = "client is already registered" });
@@ -61,7 +66,7 @@ namespace Assistant.NINAPlugin.Sync {
         public override Task<StatusResponse> Unregister(ClientIdRequest request, ServerCallContext context) {
             TSLogger.Info($"SYNC server received client unregister request {request.Guid}");
 
-            lock (lockobj) {
+            lock (lockObj) {
                 if (registeredClients.ContainsKey(request.Guid)) {
                     TSLogger.Info($"SYNC unregistering client: {request.Guid}");
                     registeredClients.Remove(request.Guid);
@@ -77,9 +82,9 @@ namespace Assistant.NINAPlugin.Sync {
 
         public override Task<SyncWaitResponse> SyncWait(ClientIdRequest request, ServerCallContext context) {
 
-            lock (lockobj) {
+            lock (lockObj) {
                 if (registeredClients.ContainsKey(request.Guid)) {
-                    TSLogger.Info($"SYNC client syncwait: {request.Guid}");
+                    TSLogger.Info($"SYNC client sync wait: {request.Guid}");
                     bool willContinue = State != ServerState.WaitComplete;
                     registeredClients[request.Guid].SetState(willContinue ? ClientState.Waiting : ClientState.Ready);
 
@@ -95,17 +100,17 @@ namespace Assistant.NINAPlugin.Sync {
         }
 
         public override Task<ExposureResponse> RequestExposure(ClientIdRequest request, ServerCallContext context) {
-            lock (lockobj) {
+            lock (lockObj) {
                 if (registeredClients.ContainsKey(request.Guid)) {
-                    TSLogger.Info($"SYNC server received client exposure request {request.Guid}");
-
                     if (State == ServerState.EndSyncContainers) {
                         TSLogger.Info($"SYNC server ending sync container {request.Guid}");
                         return Task.FromResult(new ExposureResponse { Success = true, Terminate = true });
                     }
 
-                    ClientState newState = (State == ServerState.ExposureReady) ? ClientState.Exposing : ClientState.Exposureready;
-                    registeredClients[request.Guid].SetState(newState);
+                    // Don't think we want to do this here/now - instead let client call accept
+                    //ClientState newState = (State == ServerState.ExposureReady) ? ClientState.Exposing : ClientState.Exposureready;
+                    //registeredClients[request.Guid].SetState(newState);
+
                     ExposureResponse response = (State == ServerState.ExposureReady) ?
                         activeExposureResponse : new ExposureResponse { Success = true, ExposureReady = false, Terminate = false };
 
@@ -122,10 +127,11 @@ namespace Assistant.NINAPlugin.Sync {
         public override Task<StatusResponse> Keepalive(ClientIdRequest request, ServerCallContext context) {
             TSLogger.Info($"SYNC keepalive {request.Guid} {request.ClientState}");
 
-            lock (lockobj) {
+            lock (lockObj) {
                 if (registeredClients.ContainsKey(request.Guid)) {
+                    registeredClients[request.Guid].SetState(request.ClientState);
                     registeredClients[request.Guid].SetLastAliveDate(request);
-                    LogRegisteredClients();
+                    //LogRegisteredClients();
                     return Task.FromResult(new StatusResponse { Success = true, Message = "" });
                 }
                 else {
@@ -135,8 +141,7 @@ namespace Assistant.NINAPlugin.Sync {
             }
         }
 
-        public async Task SyncExposure(InputTarget target, CancellationToken token, int exposurePlanDatabaseId, int syncExposureTimeout) {
-            string exposureId = Guid.NewGuid().ToString();
+        public async Task SyncExposure(string exposureId, InputTarget target, int targetDatabaseId, int exposurePlanDatabaseId, int syncExposureTimeout, CancellationToken token) {
             activeExposureResponse = new ExposureResponse {
                 Success = true,
                 ExposureReady = true,
@@ -146,39 +151,48 @@ namespace Assistant.NINAPlugin.Sync {
                 TargetRa = target.InputCoordinates.Coordinates.RAString,
                 TargetDec = target.InputCoordinates.Coordinates.DecString,
                 TargetPositionAngle = target.PositionAngle,
+                TargetDatabaseId = targetDatabaseId,
                 ExposurePlanDatabaseId = exposurePlanDatabaseId
             };
 
-            State = ServerState.ExposureReady;
+            SetServerState(ServerState.ExposureReady);
             Stopwatch stopwatch = Stopwatch.StartNew();
             TimeSpan timeout = TimeSpan.FromSeconds(syncExposureTimeout);
 
-            TSLogger.Info($"SYNC server informing clients of available exposure ({exposureId}), timeout is {timeout.TotalSeconds}s");
+            TSLogger.Info($"SYNC server informing clients of available exposure ({exposureId}), timeout {timeout.TotalSeconds}s");
 
             while (NotTimedOut(stopwatch, timeout)) {
                 if (AllClientsInState(ClientState.Exposing)) {
                     TSLogger.Info("SYNC server all clients now have the exposure, continuing");
-                    State = ServerState.Ready;
+                    SetServerState(ServerState.Ready);
                     activeExposureResponse = new ExposureResponse { Success = true, ExposureReady = false, Terminate = false };
+                    SetClientActiveExposureList(exposureId);
                     return;
                 }
 
                 await Task.Delay(SyncManager.SERVER_AWAIT_EXPOSURE_POLL_PERIOD, token);
             }
 
-            TSLogger.Warning("SYNC server timed out waiting for one or more clients to accept exposure, continuing");
+            TSLogger.Warning($"SYNC server timed out waiting for one or more clients to accept exposure ({exposureId}), continuing");
         }
 
-        public override Task<StatusResponse> SubmitExposure(SubmitExposureRequest request, ServerCallContext context) {
-            TSLogger.Info($"SYNC server received exposure ({request.ExposureId}) from client ({request.Guid})");
-            clientExposureQueue.Enqueue(new SyncClientExposureResults(request));
+        public override Task<StatusResponse> AcceptExposure(ExposureRequest request, ServerCallContext context) {
+            TSLogger.Info($"SYNC server accepted exposure ({request.ExposureId}) from client ({request.Guid})");
+            registeredClients[request.Guid].SetState(ClientState.Exposing);
             return Task.FromResult(new StatusResponse { Success = true, Message = "" });
         }
 
-        public SyncClientExposureResults? DequeueSyncClientExposure() {
-            SyncClientExposureResults? result;
-            bool success = clientExposureQueue.TryDequeue(out result);
-            return success ? result : null;
+        public override Task<StatusResponse> CompleteExposure(ExposureRequest request, ServerCallContext context) {
+            TSLogger.Info($"SYNC server received completed exposure ({request.ExposureId}) from client ({request.Guid})");
+
+            if (RemoveClientFromActiveExposureList(request.Guid, request.ExposureId)) {
+                registeredClients[request.Guid].SetState(ClientState.Exposureready);
+                return Task.FromResult(new StatusResponse { Success = true, Message = "" });
+            }
+            else {
+                TSLogger.Warning($"SYNC server client not found in active exposure list: {request.Guid}");
+                return Task.FromResult(new StatusResponse { Success = false, Message = "client not found in active exposure list" });
+            }
         }
 
         public bool AllClientsInState(ClientState state) {
@@ -191,8 +205,80 @@ namespace Assistant.NINAPlugin.Sync {
             return true;
         }
 
+        public async Task WaitForClientExposureCompletion(string exposureId, CancellationToken token) {
+
+            if (clientActiveExposures.Count == 0) {
+                TSLogger.Warning("SYNC server not waiting on any clients for completed exposures");
+                return;
+            }
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            TimeSpan timeout = TimeSpan.FromSeconds(SyncManager.SERVER_AWAIT_EXPOSURE_COMPLETE_TIMEOUT);
+
+            TSLogger.Info($"SYNC server waiting for all clients to complete exposure: {exposureId}, timeout {SyncManager.SERVER_AWAIT_EXPOSURE_COMPLETE_TIMEOUT}s");
+
+            while (NotTimedOut(stopwatch, timeout)) {
+                if (clientActiveExposures.Count == 0) {
+                    TSLogger.Info($"SYNC server all clients have completed exposure: {exposureId}");
+                    return;
+                }
+
+                await Task.Delay(SyncManager.SERVER_AWAIT_EXPOSURE_COMPLETE_POLL_PERIOD, token);
+            }
+
+            // If we timed out waiting for client exposures, then we need clear the list and let the server continue
+            TSLogger.Warning($"SYNC server timed out waiting for all clients to complete exposure: {exposureId}, clearing wait list and continuing.  Remaining was:");
+            LogClientActiveExposureList();
+            clientActiveExposures.Clear();
+        }
+
+        private void SetClientActiveExposureList(string exposureId) {
+            lock (lockObj) {
+                clientActiveExposures.Clear();
+                foreach (SyncClientInstance client in registeredClients.Values) {
+                    if (client.ClientState == ClientState.Exposing) {
+                        clientActiveExposures.TryAdd(client.Guid, exposureId);
+                    }
+                }
+
+                LogClientActiveExposureList();
+            }
+        }
+
+        private bool RemoveClientFromActiveExposureList(string clientId, string exposureId) {
+            lock (lockObj) {
+                if (clientActiveExposures.ContainsKey(clientId)) {
+                    string eid;
+                    bool success = clientActiveExposures.TryRemove(clientId, out eid);
+                    if (success && eid != exposureId) {
+                        TSLogger.Warning($"SYNC server unexpected exposureId for client ({clientId}: found {eid} but expected {exposureId})");
+                    }
+
+                    LogClientActiveExposureList();
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        private void LogClientActiveExposureList() {
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in clientActiveExposures) {
+                sb.Append($"{item.Key}:{item.Value} ");
+            }
+
+            TSLogger.Debug($"SYNC server active client exposure list: {sb}");
+        }
+
         private void LogRegisteredClients() {
             if (registeredClients.Count == 0) {
+                return;
+            }
+
+            if (registeredClients.Count == 1) {
+                SyncClientInstance client = registeredClients.First().Value;
+                TSLogger.Debug($"SYNC CLIENT: {client.Guid} state={client.ClientState} lastAlive={client.LastAliveDate}");
                 return;
             }
 
@@ -231,17 +317,19 @@ namespace Assistant.NINAPlugin.Sync {
                         try {
                             await Task.Delay(SyncManager.SERVER_STALE_CLIENT_PURGE_CHECK_PERIOD, token);
 
-                            List<String> purgeList = new List<String>();
-                            foreach (SyncClientInstance client in registeredClients.Values) {
-                                TimeSpan timeSpan = DateTime.Now - client.LastAliveDate;
-                                if (timeSpan.TotalSeconds > SyncManager.SERVER_STALE_CLIENT_PURGE_TIMEOUT) {
-                                    purgeList.Add(client.Guid);
+                            lock (lockObj) {
+                                List<String> purgeList = new List<String>();
+                                foreach (SyncClientInstance client in registeredClients.Values) {
+                                    TimeSpan timeSpan = DateTime.Now - client.LastAliveDate;
+                                    if (timeSpan.TotalSeconds > SyncManager.SERVER_STALE_CLIENT_PURGE_TIMEOUT) {
+                                        purgeList.Add(client.Guid);
+                                    }
                                 }
-                            }
 
-                            for (int i = 0; i < purgeList.Count; i++) {
-                                TSLogger.Warning($"SYNC detected stale client, purging {purgeList[i]}");
-                                registeredClients.Remove(purgeList[i]);
+                                for (int i = 0; i < purgeList.Count; i++) {
+                                    TSLogger.Warning($"SYNC detected stale client, purging {purgeList[i]}");
+                                    registeredClients.Remove(purgeList[i]);
+                                }
                             }
                         }
                         catch (OperationCanceledException) {
@@ -260,22 +348,10 @@ namespace Assistant.NINAPlugin.Sync {
 
         public readonly string ClientId;
         public readonly string ExposureId;
-        public readonly int ProjectDatabaseId;
-        public readonly int TargetDatabaseId;
-        public readonly DateTime AcquiredDate;
-        public readonly string FilterName;
-        // TODO: ImageMetadata
 
-        public SyncClientExposureResults(SubmitExposureRequest request) {
+        public SyncClientExposureResults(ExposureRequest request) {
             ClientId = request.Guid;
             ExposureId = request.ExposureId;
-            ProjectDatabaseId = request.ProjectDatabaseId;
-            TargetDatabaseId = request.TargetDatabaseId;
-            AcquiredDate = request.AcquiredDate.ToDateTime().ToLocalTime();
-            FilterName = request.FilterName;
-
-            // TODO: ImageMetadata
-
         }
     }
 }

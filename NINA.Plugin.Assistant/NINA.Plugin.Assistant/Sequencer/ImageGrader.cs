@@ -3,6 +3,7 @@ using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Plugin.Assistant.SyncService.Sync;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;
 using System;
@@ -20,28 +21,31 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public IProfile Profile { get; set; }
         public ImageGraderPreferences Preferences { get; set; }
+        private bool enableGradeRMS;
 
         public ImageGrader() { }
 
         public ImageGrader(IProfile profile) {
             this.Profile = profile;
             this.Preferences = GetPreferences(profile);
+            enableGradeRMS = EnableGradeRMS(Preferences.EnableGradeRMS);
         }
 
         public ImageGrader(IProfile profile, ImageGraderPreferences preferences) {
             this.Profile = profile;
             this.Preferences = preferences;
+            enableGradeRMS = EnableGradeRMS(Preferences.EnableGradeRMS);
         }
 
         public (bool, string) GradeImage(IPlanTarget planTarget, ImageSavedEventArgs msg) {
 
-            if (!Preferences.EnableGradeRMS && !Preferences.EnableGradeStars && !Preferences.EnableGradeHFR) {
+            if (!enableGradeRMS && !Preferences.EnableGradeStars && !Preferences.EnableGradeHFR) {
                 TSLogger.Info("image grading: no metrics enabled => accepted");
                 return (true, "");
             }
 
             try {
-                if (Preferences.EnableGradeRMS && !GradeRMS(msg)) {
+                if (enableGradeRMS && !GradeRMS(msg)) {
                     TSLogger.Info("image grading: failed guiding RMS => NOT accepted");
                     return (false, REJECT_RMS);
                 }
@@ -85,6 +89,15 @@ namespace Assistant.NINAPlugin.Sequencer {
                 TSLogger.Error(e);
                 return (false, "exception");
             }
+        }
+
+        private bool EnableGradeRMS(bool enableGradeRMS) {
+            // Disable RMS grading if running as a sync client since no guiding data will be available
+            if (enableGradeRMS && SyncManager.Instance.IsRunning && !SyncManager.Instance.IsServer) {
+                return false;
+            }
+
+            return enableGradeRMS;
         }
 
         private bool GradeRMS(ImageSavedEventArgs msg) {
@@ -153,6 +166,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         public List<AcquiredImage> GetSampleImageData(IPlanTarget planTarget, string filterName, ImageSavedEventArgs msg) {
             TSLogger.Info($"image grading: comparing against like images, filter={filterName}, exp={msg.Duration}, gain={msg.MetaData.Camera.Gain}, offset={msg.MetaData.Camera.Offset}, bin={msg.MetaData.Image.Binning}, rot={msg.MetaData.Rotator.Position}, roi={planTarget.ROI}");
             List<AcquiredImage> rawList = GetAcquiredImages(planTarget.DatabaseId, filterName);
+
+            // TODO: we also need to filter for the same profile ID as current (for sync support) - profile ID needs to be added to AcquiredImage
 
             /*
              * TODO: Note that rotation and ROI filtering are currently disabled.  Will enable in a future release when users

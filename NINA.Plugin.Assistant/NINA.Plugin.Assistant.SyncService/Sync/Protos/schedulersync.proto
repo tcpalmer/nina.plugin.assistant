@@ -12,7 +12,8 @@ service SchedulerSync {
 	rpc Unregister (ClientIdRequest) returns (StatusResponse);
 	rpc SyncWait (ClientIdRequest) returns (SyncWaitResponse);
 	rpc RequestExposure (ClientIdRequest) returns (ExposureResponse);
-	rpc SubmitExposure (SubmitExposureRequest) returns (StatusResponse);
+	rpc AcceptExposure (ExposureRequest) returns (StatusResponse);
+	rpc CompleteExposure (ExposureRequest) returns (StatusResponse);
 	rpc Keepalive (ClientIdRequest) returns (StatusResponse);
 }
 
@@ -56,15 +57,11 @@ message ExposureResponse {
 	string targetRa = 6;
 	string targetDec = 7;
 	double targetPositionAngle = 8;
-	int32 exposurePlanDatabaseId = 9;
+	int32 targetDatabaseId = 9;
+	int32 exposurePlanDatabaseId = 10;
 }
 
-message SubmitExposureRequest {
+message ExposureRequest {
 	string guid = 1;
 	string exposureId = 2;
-	int32 projectDatabaseId = 3;
-	int32 targetDatabaseId = 4;
-	google.protobuf.Timestamp acquiredDate = 5;
-	string filterName = 6;
-	string imageMetadata = 7;
 }

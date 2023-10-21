@@ -6,6 +6,7 @@ using Scheduler.SyncService;
 using System;
 using System.Diagnostics;
 using System.Threading;
+using static System.Windows.Forms.AxHost;
 
 namespace Assistant.NINAPlugin.Sync {
 
@@ -25,6 +26,13 @@ namespace Assistant.NINAPlugin.Sync {
         private SyncClient() : base(new NamedPipeChannel(".", SyncManager.PIPE_NAME, new NamedPipeChannelOptions() { ConnectionTimeout = 300000 })) {
         }
 
+        public void SetClientState(ClientState state) {
+            lock (lockObj) {
+                TSLogger.Info($"SYNC client setting state {ClientState} -> {state}");
+                ClientState = state;
+            }
+        }
+
         public StatusResponse Register(string profileId) {
             ProfileId = profileId;
             RegistrationRequest request = new RegistrationRequest {
@@ -37,7 +45,7 @@ namespace Assistant.NINAPlugin.Sync {
             try {
                 StatusResponse response = base.Register(request, null, deadline: DateTime.UtcNow.AddSeconds(5));
                 if (response.Success) {
-                    ClientState = ClientState.Ready;
+                    SetClientState(ClientState.Ready);
                     StartKeepalive();
                 }
 
@@ -50,9 +58,10 @@ namespace Assistant.NINAPlugin.Sync {
         }
 
         public async void Unregister() {
+            SetClientState(ClientState.Ending);
             ClientIdRequest request = new ClientIdRequest {
                 Guid = Id,
-                ClientState = ClientState.Ending
+                ClientState = ClientState
             };
 
             try {
@@ -65,35 +74,35 @@ namespace Assistant.NINAPlugin.Sync {
             }
         }
 
-        public async Task<StatusResponse> Keepalive(CancellationToken ct) {
+        public async Task<StatusResponse> Keepalive(CancellationToken token) {
             ClientIdRequest request = new ClientIdRequest {
                 Guid = Id,
                 ClientState = ClientState
             };
 
-            StatusResponse response = await base.KeepaliveAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: ct);
+            StatusResponse response = await base.KeepaliveAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: token);
             return response;
         }
 
-        public async Task StartSyncWait(CancellationToken ct, TimeSpan timeout) {
+        public async Task StartSyncWait(CancellationToken token, TimeSpan timeout) {
             try {
-                ClientState = ClientState.Waiting;
+                SetClientState(ClientState.Waiting);
                 ClientIdRequest request = new ClientIdRequest {
                     Guid = Id,
                     ClientState = ClientState
                 };
 
-                TSLogger.Info($"SYNC client syncwait starting, timeout is {timeout.TotalSeconds}s");
+                TSLogger.Info($"SYNC client sync wait starting, timeout is {timeout.TotalSeconds}s");
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 while (true) {
-                    SyncWaitResponse response = await base.SyncWaitAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: ct);
+                    SyncWaitResponse response = await base.SyncWaitAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: token);
                     if (!response.Continue) {
-                        TSLogger.Info("SYNC client syncwait completed");
+                        TSLogger.Info("SYNC client sync wait completed");
                         break;
                     }
                     else {
-                        await Task.Delay(SyncManager.CLIENT_WAIT_POLL_PERIOD, ct);
+                        await Task.Delay(SyncManager.CLIENT_WAIT_POLL_PERIOD, token);
                     }
 
                     if (stopwatch.Elapsed > timeout) {
@@ -103,59 +112,82 @@ namespace Assistant.NINAPlugin.Sync {
                 }
             }
             catch (Exception) { throw; }
-            finally { ClientState = ClientState.Ready; }
+            finally { SetClientState(ClientState.Ready); }
         }
 
-        public async Task<SyncedExposure?> StartRequestExposure(CancellationToken ct) {
-            ClientState = ClientState.Exposureready;
+        public async Task<SyncedExposure?> StartRequestExposure(CancellationToken token) {
+            SetClientState(ClientState.Exposureready);
             ClientIdRequest request = new ClientIdRequest {
                 Guid = Id,
                 ClientState = ClientState
             };
 
-            TSLogger.Info($"SYNC client sync container starting polling for exposures");
+            TSLogger.Info($"SYNC client starting polling for exposures");
 
             while (true) {
                 try {
-                    ExposureResponse response = await base.RequestExposureAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: ct);
+                    ExposureResponse response = await base.RequestExposureAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: token);
 
                     if (response.Terminate) {
-                        TSLogger.Info("SYNC client sync container completed");
-                        ClientState = ClientState.Ready;
+                        TSLogger.Info("SYNC client completed");
+                        SetClientState(ClientState.Ready);
                         return null;
                     }
 
                     if (response.ExposureReady) {
-                        TSLogger.Info($"SYNC client sync container received exposure request ({response.ExposureId})");
-                        ClientState = ClientState.Exposing;
-                        return new SyncedExposure(response.ExposureId, response.TargetName, response.TargetRa, response.TargetDec, response.TargetPositionAngle, response.ExposurePlanDatabaseId);
+                        await AcceptExposure(response.ExposureId);
+                        SetClientState(ClientState.Exposing);
+                        return new SyncedExposure(response.ExposureId, response.TargetName, response.TargetRa, response.TargetDec, response.TargetPositionAngle, response.TargetDatabaseId, response.ExposurePlanDatabaseId);
                     }
 
-                    await Task.Delay(SyncManager.CLIENT_EXPOSURE_READY_POLL_PERIOD, ct);
+                    await Task.Delay(SyncManager.CLIENT_EXPOSURE_READY_POLL_PERIOD, token);
                 }
                 catch (Exception e) {
                     if (e is TaskCanceledException || (e is RpcException && e.Message.Contains("Cancelled"))) {
-                        TSLogger.Info("SYNC client sync container canceled, ending");
-                        ClientState = ClientState.Ready;
+                        TSLogger.Info("SYNC client sync container cancelled, ending");
+                        SetClientState(ClientState.Ready);
                         return null;
                     }
 
                     TSLogger.Error("SYNC client exception in request exposure", e);
-                    await Task.Delay(2000, ct); // at least slow down exceptions repeating
+                    await Task.Delay(2000, token); // at least slow down exceptions repeating
                 }
             }
         }
 
-        public async Task SubmitExposure(SubmitExposureRequest request) {
+        public async Task AcceptExposure(string exposureId) {
+            ExposureRequest request = new ExposureRequest {
+                Guid = Id,
+                ExposureId = exposureId
+            };
+
             try {
-                TSLogger.Info($"SYNC client submitting exposure to server ({request.Guid})");
-                StatusResponse response = await base.SubmitExposureAsync(request);
+                TSLogger.Info($"SYNC client accepting exposure ({request.ExposureId})");
+                StatusResponse response = await base.AcceptExposureAsync(request);
                 if (!response.Success) {
-                    TSLogger.Error($"SYNC client problem submitting exposure: {response.Message}");
+                    TSLogger.Error($"SYNC client problem accepting exposure: {response.Message}");
                 }
             }
             catch (Exception e) {
-                TSLogger.Error("SYNC client exception submitting exposure", e);
+                TSLogger.Error("SYNC client exception accepting exposure", e);
+            }
+        }
+
+        public async Task SubmitCompletedExposure(string exposureId) {
+            ExposureRequest request = new ExposureRequest {
+                Guid = Id,
+                ExposureId = exposureId
+            };
+
+            try {
+                TSLogger.Info($"SYNC client submitting completed exposure to server ({request.ExposureId})");
+                StatusResponse response = await base.CompleteExposureAsync(request);
+                if (!response.Success) {
+                    TSLogger.Error($"SYNC client problem submitting completed exposure: {response.Message}");
+                }
+            }
+            catch (Exception e) {
+                TSLogger.Error("SYNC client exception submitting completed exposure", e);
             }
         }
 
@@ -225,14 +257,16 @@ namespace Assistant.NINAPlugin.Sync {
         public string TargetRA { get; private set; }
         public string TargetDec { get; private set; }
         public double TargetPositionAngle { get; private set; }
+        public int TargetDatabaseId { get; private set; }
         public int ExposurePlanDatabaseId { get; private set; }
 
-        public SyncedExposure(string exposureId, string targetName, string targetRA, string targetDec, double targetPositionAngle, int exposurePlanDatabaseId) {
+        public SyncedExposure(string exposureId, string targetName, string targetRA, string targetDec, double targetPositionAngle, int targetDatabaseId, int exposurePlanDatabaseId) {
             ExposureId = exposureId;
             TargetName = targetName;
             TargetRA = targetRA;
             TargetDec = targetDec;
             TargetPositionAngle = targetPositionAngle;
+            TargetDatabaseId = targetDatabaseId;
             ExposurePlanDatabaseId = exposurePlanDatabaseId;
         }
     }

@@ -388,7 +388,7 @@
                     VerticalAlignment="Center"
                     FontWeight="Bold"
                     Text="Exposure Timeout"
-                    ToolTip="Maximum number of seconds to wait on secondaries to accept exposures" />
+                    ToolTip="Maximum number of seconds to wait on clients to accept exposures" />
                 <TextBox MaxHeight="20" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                     <TextBox.Text>
                         <Binding Path="ProfilePreferenceProxy.ProfilePreference.SyncExposureTimeout" UpdateSourceTrigger="LostFocus">

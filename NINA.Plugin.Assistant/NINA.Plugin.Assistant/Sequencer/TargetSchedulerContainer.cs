@@ -306,7 +306,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private bool IsSynchronizationEnabled() {
-            return AssistantPlugin.SyncEnabled(profileService) && SyncManager.Instance.IsServer;
+            return AssistantPlugin.SyncEnabled(profileService) && SyncManager.Instance.IsServer && SyncManager.Instance.IsRunning;
         }
 
         private ProfilePreference GetProfilePreferences() {

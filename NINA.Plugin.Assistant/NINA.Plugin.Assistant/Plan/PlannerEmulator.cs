@@ -201,6 +201,7 @@ namespace Assistant.NINAPlugin.Plan {
             planProject.EnableGrader = true;
 
             IPlanTarget planTarget = GetBasePlanTarget("M31", planProject, Cp5n5);
+            planTarget.DatabaseId = 10;
             planTarget.EndTime = endTime;
             planTarget.ROI = 100;
 
@@ -208,14 +209,23 @@ namespace Assistant.NINAPlugin.Plan {
             lum.ReadoutMode = 0;
             planTarget.ExposurePlans.Add(lum);
 
+            IPlanExposure red = GetExposurePlan("Red", 20, null, null, 3, 51);
+            red.ReadoutMode = 0;
+            planTarget.ExposurePlans.Add(red);
+
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             instructions.Add(new PlanMessage("planner emulator: SyncPlan1"));
             instructions.Add(new PlanBeforeTargetContainer());
+
             instructions.Add(new PlanSetReadoutMode(lum));
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
             instructions.Add(new PlanTakeExposure(lum));
-            instructions.Add(new PlanTakeExposure(lum));
+
+            instructions.Add(new PlanSetReadoutMode(red));
+            instructions.Add(new PlanSwitchFilter(red));
+            instructions.Add(new PlanTakeExposure(red));
+            instructions.Add(new PlanTakeExposure(red));
 
             return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions, false);
         }

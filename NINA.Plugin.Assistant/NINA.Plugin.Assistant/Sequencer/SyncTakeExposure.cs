@@ -2,21 +2,17 @@
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Sync;
 using Assistant.NINAPlugin.Util;
-using Castle.DynamicProxy.Contributors;
-using Newtonsoft.Json;
 using NINA.Astrometry;
 using NINA.Core.Model;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.Equipment.Model;
-using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.SequenceItem.Camera;
 using NINA.Sequencer.SequenceItem.FilterWheel;
 using NINA.Sequencer.Utility;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
-using Scheduler.SyncService;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -26,6 +22,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
     class SyncTakeExposure : SchedulerTakeExposure {
 
+        private ISyncImageSaveWatcher syncImageSaveWatcher;
         private SyncedExposure syncedExposure;
         private ExposurePlan exposurePlan;
         private ExposureTemplate exposureTemplate;
@@ -44,10 +41,12 @@ namespace Assistant.NINAPlugin.Sequencer {
             IImageSaveMediator imageSaveMediator,
             IImageHistoryVM imageHistoryVM,
             IFilterWheelMediator filterWheelMediator,
+            ISyncImageSaveWatcher syncImageSaveWatcher,
             SyncedExposure syncedExposure) : base(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM) {
 
             this.rotatorMediator = rotatorMediator;
             this.filterWheelMediator = filterWheelMediator;
+            this.syncImageSaveWatcher = syncImageSaveWatcher;
             this.syncedExposure = syncedExposure;
 
             LoadExposureDetails();
@@ -83,8 +82,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                 capture.SubSambleRectangle = rect;
             }
 
-            imageSaveMediator.ImageSaved += ImageSaved;
-
             var exposureData = await imagingMediator.CaptureImage(capture, token, progress);
             var imageData = await exposureData.ToImageData(progress, token);
             var imageParams = new PrepareImageParameters(true, true);
@@ -99,28 +96,12 @@ namespace Assistant.NINAPlugin.Sequencer {
                 imageData.MetaData.Sequence.Title = root.SequenceTitle;
             }
 
+            syncImageSaveWatcher.WaitForExposure(imageData.MetaData.Image.Id, syncedExposure.TargetDatabaseId, syncedExposure.ExposurePlanDatabaseId, syncedExposure.ExposureId);
+
             await imageSaveMediator.Enqueue(imageData, prepareTask, progress, token);
             imageHistoryVM.Add(imageData.MetaData.Image.Id, await imageData.Statistics, ImageType);
 
             ExposureCount++;
-        }
-
-        private async void ImageSaved(object sender, ImageSavedEventArgs msg) {
-            imageSaveMediator.ImageSaved -= ImageSaved;
-
-            string json = JsonConvert.SerializeObject(new ImageMetadata(msg, target.ROI));
-            string metadataEncoded = Utils.Base64Encode(json);
-
-            SubmitExposureRequest request = new SubmitExposureRequest {
-                Guid = SyncClient.Instance.Id,
-                ExposureId = syncedExposure.ExposureId,
-                ProjectDatabaseId = target.ProjectId,
-                TargetDatabaseId = target.Id,
-                AcquiredDate = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTime(msg.MetaData.Image.ExposureStart.ToUniversalTime()),
-                ImageMetadata = metadataEncoded,
-            };
-
-            await SyncClient.Instance.SubmitExposure(request);
         }
 
         private void LoadExposureDetails() {
@@ -133,19 +114,19 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private ExposureTemplate GetExposureTemplate(SchedulerDatabaseContext context, ExposurePlan exposurePlan) {
 
-            // Get the template being used by the primary instance
-            ExposureTemplate primaryExposureTemplate = context.GetExposureTemplate(exposurePlan.ExposureTemplateId);
+            // Get the template being used by the server instance
+            ExposureTemplate serverExposureTemplate = context.GetExposureTemplate(exposurePlan.ExposureTemplateId);
 
-            // If this (secondary) instance has a template by the same name, use that
+            // If this (client) instance has a template by the same name, use that
             List<ExposureTemplate> list = context.GetExposureTemplates(SyncClient.Instance.ProfileId);
             foreach (ExposureTemplate et in list) {
-                if (et.Name == primaryExposureTemplate.Name) {
+                if (et.Name == serverExposureTemplate.Name) {
                     return et;
                 }
             }
 
-            // Otherwise use the same as the primary
-            return primaryExposureTemplate;
+            // Otherwise use the same as the server
+            return serverExposureTemplate;
         }
 
         private Target GetTarget(SchedulerDatabaseContext context, ExposurePlan exposurePlan) {

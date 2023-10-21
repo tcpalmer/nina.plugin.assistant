@@ -20,6 +20,8 @@ namespace NINA.Plugin.Assistant.SyncService.Sync {
         public static readonly int SERVER_STALE_CLIENT_PURGE_CHECK_PERIOD = 3000;
         public static readonly int SERVER_STALE_CLIENT_PURGE_TIMEOUT = 10;
         public static readonly int SERVER_AWAIT_EXPOSURE_POLL_PERIOD = 1000;
+        public static readonly int SERVER_AWAIT_EXPOSURE_COMPLETE_POLL_PERIOD = 1000;
+        public static readonly int SERVER_AWAIT_EXPOSURE_COMPLETE_TIMEOUT = 20;
         public static readonly int CLIENT_KEEPALIVE_PERIOD = 3000;
         public static readonly int CLIENT_WAIT_POLL_PERIOD = 1000;
         public static readonly int CLIENT_EXPOSURE_READY_POLL_PERIOD = 3000;
@@ -34,6 +36,9 @@ namespace NINA.Plugin.Assistant.SyncService.Sync {
 
         private bool isRunning = false;
         public bool IsRunning { get => isRunning; private set { isRunning = value; } }
+
+        public bool RunningServer { get => isRunning && isServer; }
+        public bool RunningClient { get => isRunning && !isServer; }
 
         private SyncManager() { }
 

@@ -205,7 +205,7 @@
 
                     <DataGridTemplateColumn Width="65" CanUserSort="False">
                         <DataGridTemplateColumn.Header>
-                            <TextBlock Text="Exposure"/>
+                            <TextBlock Text="Exposure" />
                         </DataGridTemplateColumn.Header>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

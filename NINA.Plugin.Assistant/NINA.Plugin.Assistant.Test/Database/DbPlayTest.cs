@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using NINA.Astrometry;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NUnit.Framework;
 using System;
 using System.Data.Entity.Validation;
