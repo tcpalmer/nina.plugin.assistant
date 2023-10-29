@@ -15,12 +15,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Media.Imaging;
 
 namespace NINA.Plugin.Assistant.Test.Sequencer {
 
     [TestFixture]
     public class ImageGraderTest {
 
+        private static readonly Guid DefaultProfileId = new Guid("01234567-0000-0000-0000-000000000000");
         private static readonly double[] Samples = new double[] { 483, 500, 545 };
         private static readonly double[] StarSamples = new double[] { 868, 890, 988, 948, 1013, 1094, 1120, 954, 1036, 1056, 1032, 1026, 875, 902, 941, 936, 963, 952, 972, 973, 892, 934, 1029, 1021, 841, 895, 909, 907, 893, 863, 938, 1024, 1083, 1054, 1047, 1076 };
         private static readonly double[] HFRSamples = new double[] { 2.07448275467066, 2.02349004066137, 2.108197156745, 2.12662384039748, 2.05165263000581, 2.07502324955962, 2.16952583092199, 2.74812292176884, 2.21471864267582, 2.16790525026247, 2.28202492295935, 2.19353441335193, 2.20482453213636, 2.26009082458899, 2.08825430049079, 2.32714283239602, 2.20412515283514, 2.05659297769561, 2.49652371605624, 2.49910139887986, 2.46098277861445, 2.43953469526813, 2.14781489293578, 2.06138954948957, 1.86677209593402, 2.03738728912668, 1.92672664010245, 1.90805895084673, 1.84542395463541, 1.78844121147567, 2.0959273790949, 2.0137358806371, 2.07657629250277, 2.20935904300475, 2.21286485602988, 2.20782001742784 };
@@ -260,7 +262,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
         private IProfile GetMockProfile(double pixelSize, double focalLength) {
             Mock<IProfileService> mock = new Mock<IProfileService>();
-            mock.SetupProperty(m => m.ActiveProfile.Id, new Guid("01234567-0000-0000-0000-000000000000"));
+            mock.SetupProperty(m => m.ActiveProfile.Id, DefaultProfileId);
             mock.SetupProperty(m => m.ActiveProfile.CameraSettings.PixelSize, pixelSize);
             mock.SetupProperty(m => m.ActiveProfile.TelescopeSettings.FocalLength, focalLength);
             return mock.Object.ActiveProfile;
@@ -307,7 +309,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             return msg;
         }
 
-        private List<AcquiredImage> GetTestImages(int count, int targetId, string filterName, double duration = 60, int gain = 10, int offset = 20, string binning = "1x1", double roi = 100) {
+        private List<AcquiredImage> GetTestImages(int count, int targetId, string filterName, double duration = 60, int gain = 10, int offset = 20, string binning = "1x1", double roi = 100, double rotatorPosition = 0) {
 
             DateTime dateTime = DateTime.Now.Date;
             List<AcquiredImage> images = new List<AcquiredImage>();
@@ -321,10 +323,11 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
                     Gain = gain,
                     Offset = offset,
                     Binning = binning,
-                    ROI = roi
+                    ROI = roi,
+                    RotatorPosition = rotatorPosition
                 };
 
-                images.Add(new AcquiredImage(0, targetId, dateTime, filterName, true, "", metaData));
+                images.Add(new AcquiredImage(DefaultProfileId.ToString(), 0, targetId, dateTime, filterName, true, "", metaData));
             }
 
             return images.OrderByDescending(i => i.AcquiredDate).ToList();

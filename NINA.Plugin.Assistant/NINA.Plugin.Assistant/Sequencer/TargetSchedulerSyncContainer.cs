@@ -36,7 +36,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IImageHistoryVM imageHistoryVM;
         private readonly IFilterWheelMediator filterWheelMediator;
 
-        public static readonly bool USE_EMULATOR = false;
         private ISyncImageSaveWatcher syncImageSaveWatcher;
 
         [ImportingConstructor]
@@ -106,7 +105,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 return;
             }
 
-            if (!USE_EMULATOR) {
+            if (!Common.USE_EMULATOR) {
                 syncImageSaveWatcher = new SyncImageSaveWatcher(profileService.ActiveProfile, imageSaveMediator);
                 syncImageSaveWatcher.Start();
             }

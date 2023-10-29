@@ -4,6 +4,7 @@ using Assistant.NINAPlugin.Plan.Scoring;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using Moq;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.Test.Astrometry;
 using NINA.Profile.Interfaces;
 using NUnit.Framework;
@@ -585,7 +586,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         [Test]
         public void testNotEmulator() {
             // prevent commits with emulator on
-            Planner.USE_EMULATOR.Should().BeFalse();
+            Common.USE_EMULATOR.Should().BeFalse();
         }
 
         private ProfilePreference GetPrefs(string profileId = "abcd-1234") {

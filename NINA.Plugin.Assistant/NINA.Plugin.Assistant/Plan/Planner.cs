@@ -24,8 +24,6 @@ namespace Assistant.NINAPlugin.Plan {
         private ObserverInfo observerInfo;
         private List<IPlanProject> projects;
 
-        public static readonly bool USE_EMULATOR = false;
-
         public Planner(DateTime atTime, IProfileService profileService, ProfilePreference profilePreferences, bool checkCondition)
             : this(atTime, profileService, profilePreferences, checkCondition, null) { }
 
@@ -54,7 +52,7 @@ namespace Assistant.NINAPlugin.Plan {
             TSLogger.Info($"-- BEGIN {title} ---------------------------------------------------");
             TSLogger.Debug($"getting current plan for {Utils.FormatDateTimeFull(atTime)}");
 
-            if (USE_EMULATOR) {
+            if (Common.USE_EMULATOR) {
                 Notification.ShowInformation("REMINDER: running plan emulation");
                 TSLogger.Info($"-- END {title} -----------------------------------------------------");
                 return new PlannerEmulator(atTime, activeProfile).GetPlan(previousPlanTarget);

@@ -80,7 +80,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
 
             FocuserPosition = msg.MetaData.Focuser.Position;
             FocuserTemp = msg.MetaData.Focuser.Temperature;
-            RotatorPosition = msg.MetaData.Rotator.Position;
+            RotatorPosition = Double.IsNaN(msg.MetaData.Rotator.Position) ? 0 : msg.MetaData.Rotator.Position;
             PierSide = GetPierSide(msg.MetaData.Telescope.SideOfPier);
 
             CameraTemp = msg.MetaData.Camera.Temperature;

@@ -164,26 +164,26 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public List<AcquiredImage> GetSampleImageData(IPlanTarget planTarget, string filterName, ImageSavedEventArgs msg) {
-            TSLogger.Info($"image grading: comparing against like images, filter={filterName}, exp={msg.Duration}, gain={msg.MetaData.Camera.Gain}, offset={msg.MetaData.Camera.Offset}, bin={msg.MetaData.Image.Binning}, rot={msg.MetaData.Rotator.Position}, roi={planTarget.ROI}");
+            TSLogger.Info($"image grading: comparing against like images, filter={filterName}, exp={msg.Duration}, gain={msg.MetaData.Camera.Gain}, offset={msg.MetaData.Camera.Offset}, bin={msg.MetaData.Image.Binning}, roi={planTarget.ROI}");
             List<AcquiredImage> rawList = GetAcquiredImages(planTarget.DatabaseId, filterName);
 
-            // TODO: we also need to filter for the same profile ID as current (for sync support) - profile ID needs to be added to AcquiredImage
-
-            /*
-             * TODO: Note that rotation and ROI filtering are currently disabled.  Will enable in a future release when users
-             * have the data saved.  We might have to filter for those values outside of the Where to catch saved rotation=NaN
-             * and ROI=0 issues.
+            /* Filter for matching:
+             *   duration
+             *   gain/offset/binning
+             *   rotator position (NOT YET)
+             *   ROI
+             *   acquisition profile ID
              */
 
-            // Filter for matching duration/gain/offset/binning
-
+            string profileId = Profile.Id.ToString();
             List<AcquiredImage> list = rawList.Where(i =>
+                i.ProfileId == profileId &&
                 i.Metadata.ExposureDuration == msg.Duration &&
                 i.Metadata.Gain == msg.MetaData.Camera.Gain &&
                 i.Metadata.Offset == msg.MetaData.Camera.Offset &&
-                i.Metadata.Binning == msg.MetaData.Image.Binning
-            //i.Metadata.RotatorPosition == planTarget.Rotation &&
-            //i.Metadata.ROI == planTarget.ROI
+                i.Metadata.Binning == msg.MetaData.Image.Binning &&
+                i.Metadata.ROI == planTarget.ROI
+            //i.Metadata.RotatorPosition == planTarget.Rotation -> disabled for now
             ).ToList();
 
             if (list.Count < 3) {

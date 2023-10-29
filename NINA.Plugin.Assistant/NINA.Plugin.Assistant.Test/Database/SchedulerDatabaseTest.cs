@@ -143,10 +143,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 context.GetAcquiredImages(1, "nada").Count.Should().Be(0);
 
                 ImageSavedEventArgs msg = PlanMocks.GetImageSavedEventArgs(markDate.AddDays(1), "Ha");
-                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1), "Ha", true, "rr1", new ImageMetadata(msg, 100)));
-                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1).AddMinutes(1), "Ha", true, "rr2", new ImageMetadata(msg, 100)));
-                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1).AddMinutes(2), "Ha", true, "rr3", new ImageMetadata(msg, 100)));
-                context.AcquiredImageSet.Add(new AcquiredImage(1, 1, markDate.AddDays(1).AddMinutes(3), "Ha", true, "rr4", new ImageMetadata(msg, 100)));
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1), "Ha", true, "rr1", new ImageMetadata(msg, 100)));
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(1), "Ha", true, "rr2", new ImageMetadata(msg, 100)));
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(2), "Ha", true, "rr3", new ImageMetadata(msg, 100)));
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(3), "Ha", true, "rr4", new ImageMetadata(msg, 100)));
                 context.SaveChanges();
 
                 List<AcquiredImage> ai = context.GetAcquiredImages(1, "Ha");

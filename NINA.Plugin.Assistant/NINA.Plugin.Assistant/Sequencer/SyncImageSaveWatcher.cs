@@ -117,6 +117,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                         // Save the acquired image record
                         AcquiredImage acquiredImage = new AcquiredImage(
+                            profile.Id.ToString(),
                             planTarget.Project.DatabaseId,
                             planTarget.DatabaseId,
                             msg.MetaData.Image.ExposureStart,

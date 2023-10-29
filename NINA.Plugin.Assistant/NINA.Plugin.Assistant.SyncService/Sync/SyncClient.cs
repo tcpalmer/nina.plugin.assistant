@@ -162,7 +162,7 @@ namespace Assistant.NINAPlugin.Sync {
             };
 
             try {
-                TSLogger.Info($"SYNC client accepting exposure ({request.ExposureId})");
+                TSLogger.Info($"SYNC client accepting exposure: {request.ExposureId}");
                 StatusResponse response = await base.AcceptExposureAsync(request);
                 if (!response.Success) {
                     TSLogger.Error($"SYNC client problem accepting exposure: {response.Message}");
