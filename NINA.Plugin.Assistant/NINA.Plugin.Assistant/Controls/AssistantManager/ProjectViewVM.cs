@@ -31,6 +31,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ProjectViewVM(AssistantManagerVM managerVM, IFramingAssistantVM framingAssistantVM, IProfileService profileService, Project project) : base(profileService) {
             this.managerVM = managerVM;
             this.framingAssistantVM = framingAssistantVM;
+
+            project.RuleWeights.Sort();
             ProjectProxy = new ProjectProxy(project);
             ProjectActive = ProjectProxy.Project.ActiveNowWithActiveTargets;
 

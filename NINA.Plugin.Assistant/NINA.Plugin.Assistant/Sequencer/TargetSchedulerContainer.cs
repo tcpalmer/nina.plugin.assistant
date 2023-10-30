@@ -253,7 +253,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         previousPlanTarget = planTarget;
                     }
                     catch (Exception ex) {
-                        if (ex.InnerException?.Message == "A task was canceled.") {
+                        if (Utils.IsCancelException(ex)) {
                             TSLogger.Warning("sequence was canceled");
                         }
                         else {

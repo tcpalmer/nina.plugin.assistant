@@ -116,8 +116,22 @@ namespace Assistant.NINAPlugin.Util {
             return string.Format(pattern, degree, arcmin, arcsec);
         }
 
-        private Utils() { }
+        public static bool IsCancelException(Exception ex) {
+            if (ex == null) { return false; }
 
+            if (ex is TaskCanceledException) { return true; }
+            if (ex is OperationCanceledException) { return true; }
+            if (ex.Message.Contains("canceled")) { return true; }
+            if (ex.Message.Contains("cancelled")) { return true; }
+
+            if (ex.InnerException != null) {
+                return IsCancelException(ex.InnerException);
+            }
+
+            return false;
+        }
+
+        private Utils() { }
     }
 
 }

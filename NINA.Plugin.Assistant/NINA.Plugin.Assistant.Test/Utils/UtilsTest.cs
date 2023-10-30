@@ -2,6 +2,7 @@
 using FluentAssertions;
 using NUnit.Framework;
 using System;
+using System.Threading.Tasks;
 
 namespace NINA.Plugin.Assistant.Test.Util {
 
@@ -53,6 +54,18 @@ namespace NINA.Plugin.Assistant.Test.Util {
         [TestCase(345.25, "23h 1m 0s")]
         public void TestGetRAString(double raDegrees, string expected) {
             Utils.GetRAString(raDegrees).Should().Be(expected);
+        }
+
+        [Test]
+        public void TestCancelException() {
+            Utils.IsCancelException(null).Should().BeFalse();
+            Utils.IsCancelException(new Exception("foo")).Should().BeFalse();
+
+            Utils.IsCancelException(new TaskCanceledException()).Should().BeTrue();
+            Utils.IsCancelException(new OperationCanceledException()).Should().BeTrue();
+
+            Utils.IsCancelException(new Exception("A task was canceled.")).Should().BeTrue();
+            Utils.IsCancelException(new Exception("cancelled")).Should().BeTrue();
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Util;
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -7,7 +8,7 @@ using System.Text;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public class RuleWeight : INotifyPropertyChanged {
+    public class RuleWeight : INotifyPropertyChanged, IComparable<RuleWeight> {
 
         [Key] public int Id { get; set; }
         [Required] public string name { get; set; }
@@ -55,6 +56,14 @@ namespace Assistant.NINAPlugin.Database.Schema {
             };
 
             return ruleWeight;
+        }
+
+        public int CompareTo(RuleWeight other) {
+            if (other == null) {
+                return 1;
+            }
+
+            return Name.CompareTo(other.Name);
         }
 
         public override string ToString() {
