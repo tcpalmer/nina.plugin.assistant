@@ -27,6 +27,8 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
             sut.DetectedStars.Should().Be(100);
             sut.HFR.Should().Be(101);
             sut.HFRStDev.Should().Be(102);
+            sut.FWHM.Should().Be(Double.NaN);
+            sut.Eccentricity.Should().Be(Double.NaN);
             sut.ADUStDev.Should().Be(0);
             sut.ADUMean.Should().Be(0);
             sut.ADUMedian.Should().Be(0);
