@@ -29,7 +29,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
         [Test]
         public void TestNoGradersEnabled() {
-            ImageGrader sut = new ImageGrader(GetMockProfile(0, 0), GetPreferences(0, false, false, 0, false, 0, false, 0));
+            ImageGrader sut = new ImageGrader(GetMockProfile(0, 0), GetPreferences(0, false, false, 0, false, 0, false, 0, false, 0, false, 0));
             (bool accepted, string rejectReason) = sut.GradeImage(null, null);
             accepted.Should().BeTrue();
             rejectReason.Should().Be("");
@@ -38,7 +38,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         [Test]
         public void TestGradeRMS() {
             IProfile profile = GetMockProfile(3.8, 700);
-            ImageGraderPreferences prefs = GetPreferences(0, false, true, 1, false, 0, false, 0);
+            ImageGraderPreferences prefs = GetPreferences(0, false, true, 1, false, 0, false, 0, false, 0, false, 0);
             ImageGrader sut = new ImageGrader(profile, prefs);
             bool accepted;
             string rejectReason;
@@ -53,16 +53,16 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             accepted.Should().BeFalse();
             rejectReason.Should().Be(ImageGrader.REJECT_RMS);
 
-            prefs = GetPreferences(0, false, true, 1.35, false, 0, false, 0);
+            prefs = GetPreferences(0, false, true, 1.35, false, 0, false, 0, false, 0, false, 0);
             sut = new ImageGrader(profile, prefs);
-            msg = GetMockMsg(0.6, 1, "L", 0, 0, 60, 10, 20, "2x2");
+            msg = GetMockMsg(0.6, 1, "L", 0, 0, 0, 0, 60, 10, 20, "2x2");
             (accepted, rejectReason) = sut.GradeImage(null, msg);
             accepted.Should().BeTrue();
             rejectReason.Should().Be("");
 
-            prefs = GetPreferences(0, false, true, 1.34, false, 0, false, 0);
+            prefs = GetPreferences(0, false, true, 1.34, false, 0, false, 0, false, 0, false, 0);
             sut = new ImageGrader(profile, prefs);
-            msg = GetMockMsg(0.6, 1, "L", 0, 0, 60, 10, 20, "2x2");
+            msg = GetMockMsg(0.6, 1, "L", 0, 0, 0, 0, 60, 10, 20, "2x2");
             (accepted, rejectReason) = sut.GradeImage(null, msg);
             accepted.Should().BeFalse();
             rejectReason.Should().Be(ImageGrader.REJECT_RMS);
@@ -71,7 +71,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         [Test]
         public void TestGradeStars() {
             IProfile profile = GetMockProfile(3.8, 700);
-            ImageGraderPreferences prefs = GetPreferences(10, false, false, 0, true, 2, false, 0);
+            ImageGraderPreferences prefs = GetPreferences(10, false, false, 0, true, 2, false, 0, false, 0, false, 0);
             List<AcquiredImage> images = GetTestImages(10, 1, "L", 60);
             bool accepted;
             string rejectReason;
@@ -101,7 +101,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         [Test]
         public void TestGradeStarsAcceptImprovement() {
             IProfile profile = GetMockProfile(3.8, 700);
-            ImageGraderPreferences prefs = GetPreferences(10, true, false, 0, true, 2, false, 0);
+            ImageGraderPreferences prefs = GetPreferences(10, true, false, 0, true, 2, false, 0, false, 0, false, 0);
             List<AcquiredImage> images = GetTestImages(10, 1, "L", 60);
             bool accepted;
             string rejectReason;
@@ -131,7 +131,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         [Test]
         public void TestGradeHFR() {
             IProfile profile = GetMockProfile(3.8, 700);
-            ImageGraderPreferences prefs = GetPreferences(10, false, false, 0, false, 0, true, 2);
+            ImageGraderPreferences prefs = GetPreferences(10, false, false, 0, false, 0, true, 2, false, 0, false, 0);
             List<AcquiredImage> images = GetTestImages(10, 1, "L", 60);
             bool accepted;
             string rejectReason;
@@ -161,7 +161,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         [Test]
         public void TestGradeHFRAcceptImprovement() {
             IProfile profile = GetMockProfile(3.8, 700);
-            ImageGraderPreferences prefs = GetPreferences(10, true, false, 0, false, 0, true, 2);
+            ImageGraderPreferences prefs = GetPreferences(10, true, false, 0, false, 0, true, 2, false, 0, false, 0);
             List<AcquiredImage> images = GetTestImages(10, 1, "L", 60);
             bool accepted;
             string rejectReason;
@@ -189,9 +189,75 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         }
 
         [Test]
+        public void TestGradeFWHM() {
+            IProfile profile = GetMockProfile(3.8, 700);
+            ImageGraderPreferences prefs = GetPreferences(10, false, false, 0, false, 0, false, 0, true, 2, false, 0);
+            List<AcquiredImage> images = GetTestImages(10, 1, "L", 60);
+            bool accepted;
+            string rejectReason;
+
+            Mock<ImageGrader> mock = new Mock<ImageGrader> { CallBase = true };
+            mock.Setup(m => m.GetAcquiredImages(1, "L")).Returns(images);
+
+            ImageGrader sut = mock.Object;
+            sut.Profile = profile;
+            sut.Preferences = prefs;
+
+            Mock<IPlanTarget> planTargetMock = new Mock<IPlanTarget>();
+            planTargetMock.SetupProperty(m => m.DatabaseId, 1);
+            planTargetMock.SetupProperty(m => m.ROI, 100);
+
+            ImageSavedEventArgs msg = GetMockMsg(0, 0, "L", 0, 0, 1.5, 0);
+            mock.Setup(m => m.GetHocusFocusMetric(msg.StarDetectionAnalysis, "FWHM")).Returns(2.234);
+
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            accepted.Should().BeTrue();
+            rejectReason.Should().Be("");
+
+            msg = GetMockMsg(0, 0, "L", 0, 3);
+            mock.Setup(m => m.GetHocusFocusMetric(msg.StarDetectionAnalysis, "FWHM")).Returns(10.456);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            accepted.Should().BeFalse();
+            rejectReason.Should().Be(ImageGrader.REJECT_FWHM);
+        }
+
+        [Test]
+        public void TestGradeEccentricity() {
+            IProfile profile = GetMockProfile(3.8, 700);
+            ImageGraderPreferences prefs = GetPreferences(10, false, false, 0, false, 0, false, 0, false, 0, true, 2);
+            List<AcquiredImage> images = GetTestImages(10, 1, "L", 60);
+            bool accepted;
+            string rejectReason;
+
+            Mock<ImageGrader> mock = new Mock<ImageGrader> { CallBase = true };
+            mock.Setup(m => m.GetAcquiredImages(1, "L")).Returns(images);
+
+            ImageGrader sut = mock.Object;
+            sut.Profile = profile;
+            sut.Preferences = prefs;
+
+            Mock<IPlanTarget> planTargetMock = new Mock<IPlanTarget>();
+            planTargetMock.SetupProperty(m => m.DatabaseId, 1);
+            planTargetMock.SetupProperty(m => m.ROI, 100);
+
+            ImageSavedEventArgs msg = GetMockMsg(0, 0, "L", 0, 0, 1.5, 0);
+            mock.Setup(m => m.GetHocusFocusMetric(msg.StarDetectionAnalysis, "Eccentricity")).Returns(3.456);
+
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            accepted.Should().BeTrue();
+            rejectReason.Should().Be("");
+
+            msg = GetMockMsg(0, 0, "L", 0, 3);
+            mock.Setup(m => m.GetHocusFocusMetric(msg.StarDetectionAnalysis, "Eccentricity")).Returns(10.456);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            accepted.Should().BeFalse();
+            rejectReason.Should().Be(ImageGrader.REJECT_ECCENTRICITY);
+        }
+
+        [Test]
         public void TestGetSampleImageDataNotEnough() {
             IProfile profile = GetMockProfile(3.8, 700);
-            ImageGraderPreferences prefs = GetPreferences(10, false, false, 0, true, 2, false, 0);
+            ImageGraderPreferences prefs = GetPreferences(10, false, false, 0, true, 2, false, 0, false, 0, false, 0);
             List<AcquiredImage> images = GetTestImages(10, 1, "L", 60);
 
             Mock<ImageGrader> mock = new Mock<ImageGrader> { CallBase = true };
@@ -205,7 +271,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             planTargetMock.SetupProperty(m => m.DatabaseId, 1);
             planTargetMock.SetupProperty(m => m.ROI, 100);
 
-            ImageSavedEventArgs msg = GetMockMsg(0.6, 1, "L", 0, 0, 70); // duration mismatch
+            ImageSavedEventArgs msg = GetMockMsg(0.6, 1, "L", 0, 0, 0, 0, 70); // duration mismatch
 
             List<AcquiredImage> samples = sut.GetSampleImageData(planTargetMock.Object, "L", msg);
             samples.Should().BeNull();
@@ -214,7 +280,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         [Test]
         public void TestGetSampleImageDataSampleSize() {
             IProfile profile = GetMockProfile(3.8, 700);
-            ImageGraderPreferences prefs = GetPreferences(10, false, false, 0, true, 2, false, 0); // sample size = 10
+            ImageGraderPreferences prefs = GetPreferences(10, false, false, 0, true, 2, false, 0, false, 0, false, 0); // sample size = 10
             List<AcquiredImage> images = GetTestImages(20, 1, "L");
 
             Mock<ImageGrader> mock = new Mock<ImageGrader> { CallBase = true };
@@ -238,7 +304,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         [Test]
         public void TestGetSampleImageDataParamsChanged() {
             IProfile profile = GetMockProfile(3.8, 700);
-            ImageGraderPreferences prefs = GetPreferences(10, false, false, 0, true, 2, false, 0);
+            ImageGraderPreferences prefs = GetPreferences(10, false, false, 0, true, 2, false, 0, false, 0, false, 0);
             List<AcquiredImage> images = GetTestImages(5, 1, "L", 60, 100, 200, "1x1");
             images.AddRange(GetTestImages(5, 1, "L", 60, 10, 200, "1x1")); // gain changed
 
@@ -253,11 +319,19 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             planTargetMock.SetupProperty(m => m.DatabaseId, 1);
             planTargetMock.SetupProperty(m => m.ROI, 100);
 
-            ImageSavedEventArgs msg = GetMockMsg(0.6, 1, "L", 0, 0, 60, 100, 200, "1x1");
+            ImageSavedEventArgs msg = GetMockMsg(0.6, 1, "L", 0, 0, 0, 0, 60, 100, 200, "1x1");
 
             List<AcquiredImage> samples = sut.GetSampleImageData(planTargetMock.Object, "L", msg);
             samples.Should().NotBeNull();
             samples.Count.Should().Be(5);
+        }
+
+        [Test]
+        public void TestSamplesHaveData() {
+            ImageGrader sut = new ImageGrader();
+            sut.SamplesHaveData(new List<double>() { 1, 0.1, 2 }).Should().BeTrue();
+            sut.SamplesHaveData(new List<double>() { 1, 0, 2 }).Should().BeFalse();
+            sut.SamplesHaveData(new List<double>() { 1, Double.NaN, 2 }).Should().BeFalse();
         }
 
         private IProfile GetMockProfile(double pixelSize, double focalLength) {
@@ -271,14 +345,17 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         private ImageGraderPreferences GetPreferences(int SampleSize, bool AcceptImprovement,
                                                       bool GradeRMS, double RMSPixelThreshold,
                                                       bool GradeDetectedStars, double DetectedStarsSigmaFactor,
-                                                      bool GradeHFR, double HFRSigmaFactor) {
+                                                      bool GradeHFR, double HFRSigmaFactor,
+                                                      bool GradeFWHM, double FWHMSigmaFactor,
+                                                      bool GradeEccentricity, double EccentricitySigmaFactor) {
             return new ImageGraderPreferences(SampleSize, AcceptImprovement,
                                               GradeRMS, RMSPixelThreshold,
                                               GradeDetectedStars, DetectedStarsSigmaFactor,
-                                              GradeHFR, HFRSigmaFactor);
+                                              GradeHFR, HFRSigmaFactor,
+                                              GradeFWHM, FWHMSigmaFactor, GradeEccentricity, EccentricitySigmaFactor);
         }
 
-        private ImageSavedEventArgs GetMockMsg(double rmsTotal, double rmsScale, string filter, int detectedStars, double HFR, double duration = 60,
+        private ImageSavedEventArgs GetMockMsg(double rmsTotal, double rmsScale, string filter, int detectedStars, double HFR, double FWHM = Double.NaN, double eccentricity = Double.NaN, double duration = 60,
                                                int gain = 10, int offset = 20, string binning = "1x1", double rotation = 0) {
             ImageSavedEventArgs msg = new ImageSavedEventArgs();
             ImageMetaData metadata = new ImageMetaData();
@@ -320,6 +397,8 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
                     ExposureDuration = duration,
                     DetectedStars = 500 + i,
                     HFR = 1 + (double)i / 10,
+                    FWHM = 2 + (double)i / 10,
+                    Eccentricity = 3 + (double)i / 10,
                     Gain = gain,
                     Offset = offset,
                     Binning = binning,

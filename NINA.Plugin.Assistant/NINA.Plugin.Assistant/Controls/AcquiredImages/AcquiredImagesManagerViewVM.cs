@@ -465,6 +465,9 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         public string HFR { get { return fmt(acquiredImage.Metadata.HFR); } }
         public string HFRStDev { get { return fmt(acquiredImage.Metadata.HFRStDev); } }
 
+        public string FWHM { get { return fmtHF(acquiredImage.Metadata.FWHM); } }
+        public string Eccentricity { get { return fmtHF(acquiredImage.Metadata.Eccentricity); } }
+
         public string ADUStDev { get { return fmt(acquiredImage.Metadata.ADUStDev); } }
         public string ADUMean { get { return fmt(acquiredImage.Metadata.ADUMean); } }
         public string ADUMedian { get { return fmt(acquiredImage.Metadata.ADUMedian); } }
@@ -496,6 +499,10 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
         private string fmt(double d, string format) {
             return Double.IsNaN(d) ? "" : String.Format(format, d);
+        }
+
+        private string fmtHF(double d) {
+            return Double.IsNaN(d) || d <= 0 ? "--" : String.Format("{0:0.####}", d);
         }
     }
 
