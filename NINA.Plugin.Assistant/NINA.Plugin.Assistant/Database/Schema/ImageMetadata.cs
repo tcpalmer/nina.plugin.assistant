@@ -1,6 +1,8 @@
 ﻿using Assistant.NINAPlugin.Util;
+using Namotion.Reflection;
 using NINA.Core.Enum;
 using NINA.Image.ImageData;
+using NINA.Image.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;
 using System;
 using System.Text;
@@ -22,6 +24,9 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public int DetectedStars { get; set; }
         public double HFR { get; set; }
         public double HFRStDev { get; set; }
+
+        public double FWHM { get; set; }
+        public double Eccentricity { get; set; }
 
         public double ADUStDev { get; set; }
         public double ADUMean { get; set; }
@@ -69,6 +74,9 @@ namespace Assistant.NINAPlugin.Database.Schema {
             HFR = msg.StarDetectionAnalysis.HFR;
             HFRStDev = msg.StarDetectionAnalysis.HFRStDev;
 
+            FWHM = GetHocusFocusMetric(msg.StarDetectionAnalysis, "FWHM");
+            Eccentricity = GetHocusFocusMetric(msg.StarDetectionAnalysis, "Eccentricity");
+
             GuidingRMS = GetGuidingMetric(msg.MetaData.Image, msg.MetaData.Image?.RecordedRMS?.Total);
             GuidingRMSArcSec = GetGuidingMetricArcSec(msg.MetaData.Image, msg.MetaData.Image?.RecordedRMS?.Total);
             GuidingRMSRA = GetGuidingMetric(msg.MetaData.Image, msg.MetaData.Image?.RecordedRMS?.RA);
@@ -88,6 +96,12 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         private string GetImageFilePath(Uri imageUri) {
             return HttpUtility.UrlDecode(imageUri.AbsolutePath);
+        }
+
+        private double GetHocusFocusMetric(IStarDetectionAnalysis starDetectionAnalysis, string propertyName) {
+            return starDetectionAnalysis.HasProperty(propertyName) ?
+                (Double)starDetectionAnalysis.GetType().GetProperty(propertyName).GetValue(starDetectionAnalysis) :
+                Double.NaN;
         }
 
         private double GetGuidingMetric(ImageParameter image, double? metric) {
