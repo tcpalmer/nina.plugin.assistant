@@ -1,6 +1,7 @@
 # Target Scheduler
 
-## 3.4.0.0 - 2023-11-XX
+## 4.0.0.0 - 2023-11-XX
+* Added image grading on FWHM and Eccentricity (required Hocus Focus plugin)
 * Added experimental support for synchronization across multiple instances of NINA
 * The rule weight list is now sorted when displayed
 * Added target rotation and ROI to the set of data saved for acquired images.  A future release will use these values when selecting 'like' images for grading.

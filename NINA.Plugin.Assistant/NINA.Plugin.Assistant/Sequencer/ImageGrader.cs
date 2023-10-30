@@ -69,7 +69,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 if (Preferences.EnableGradeStars) {
                     List<double> samples = GetSamples(images, i => { return i.Metadata.DetectedStars; });
                     TSLogger.Info("image grading: detected star count ->");
-                    if (!WithinAcceptableVariance(samples, msg.StarDetectionAnalysis.DetectedStars, Preferences.DetectedStarsSigmaFactor, true)) {
+                    int detectedStars = msg.StarDetectionAnalysis.DetectedStars;
+                    if (detectedStars == 0 || !WithinAcceptableVariance(samples, detectedStars, Preferences.DetectedStarsSigmaFactor, true)) {
                         TSLogger.Info("image grading: failed detected star count grading => NOT accepted");
                         return (false, REJECT_STARS);
                     }
@@ -78,7 +79,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 if (Preferences.EnableGradeHFR) {
                     List<double> samples = GetSamples(images, i => { return i.Metadata.HFR; });
                     TSLogger.Info("image grading: HFR ->");
-                    if (!WithinAcceptableVariance(samples, msg.StarDetectionAnalysis.HFR, Preferences.HFRSigmaFactor, false)) {
+                    double hfr = msg.StarDetectionAnalysis.HFR;
+                    if (NearZero(hfr) || !WithinAcceptableVariance(samples, hfr, Preferences.HFRSigmaFactor, false)) {
                         TSLogger.Info("image grading: failed HFR grading => NOT accepted");
                         return (false, REJECT_HFR);
                     }
@@ -152,6 +154,10 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             return true;
+        }
+
+        public bool NearZero(double value) {
+            return Math.Abs(value) <= 0.001;
         }
 
         private bool EnableGradeRMS(bool enableGradeRMS) {

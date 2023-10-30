@@ -44,6 +44,8 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
                 case "Filter": return "FilterName";
                 case "Stars": return "DetectedStars";
                 case "HFR": return "HFR";
+                case "FWHM": return "FWHM";
+                case "Eccentricity": return "Eccentricity";
                 case "Accepted": return "Accepted";
                 case "Reject Reason": return "RejectReason";
                 default: return null;

@@ -230,7 +230,7 @@
                     <Setter Property="VerticalAlignment" Value="Center" />
                     <Style.Triggers>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="{StaticResource SecondaryBackgroundBrush}" />
+                            <Setter Property="Background" Value="{StaticResource TertiaryBackgroundBrush}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="False">
                             <Setter Property="Background" Value="Transparent" />
@@ -514,7 +514,7 @@
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Width="Auto" Text="{Binding AcquiredDate, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
+                            <TextBlock Width="Auto" Text="{Binding AcquiredDate, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -570,6 +570,28 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Width="Auto" Text="{Binding HFR}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Width="*">
+                    <DataGridTemplateColumn.Header>
+                        <TextBlock Text="FWHM" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Width="Auto" Text="{Binding FWHM}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Width="*">
+                    <DataGridTemplateColumn.Header>
+                        <TextBlock Text="Eccentricity" />
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Width="Auto" Text="{Binding Eccentricity}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
