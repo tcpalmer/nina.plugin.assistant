@@ -2,14 +2,12 @@
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Sync;
-using Assistant.NINAPlugin.Util;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;
 using Scheduler.SyncService;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data.Entity.Migrations;
 using System.Text;
 using System.Threading;
