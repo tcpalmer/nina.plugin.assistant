@@ -21,12 +21,16 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public int enableGradeRMS { get; set; }
         public int enableGradeStars { get; set; }
         public int enableGradeHFR { get; set; }
+        public int enableGradeFWHM { get; set; }
+        public int enableGradeEccentricity { get; set; }
         public int acceptimprovement { get; set; }
 
         public int maxGradingSampleSize { get; set; }
         public double rmsPixelThreshold { get; set; }
         public double detectedStarsSigmaFactor { get; set; }
         public double hfrSigmaFactor { get; set; }
+        public double fwhmSigmaFactor { get; set; }
+        public double eccentricitySigmaFactor { get; set; }
 
         public ProfilePreference() { }
 
@@ -40,11 +44,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
             EnableGradeRMS = true;
             EnableGradeStars = true;
             EnableGradeHFR = true;
+            EnableGradeFWHM = false;
+            EnableGradeEccentricity = false;
             AcceptImprovement = true;
             MaxGradingSampleSize = 10;
             RMSPixelThreshold = 8;
             DetectedStarsSigmaFactor = 4;
             HFRSigmaFactor = 4;
+            FWHMSigmaFactor = 4;
+            EccentricitySigmaFactor = 4;
         }
 
         [NotMapped]
@@ -56,7 +64,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
             }
         }
 
-        // exposurethrottle
         [NotMapped]
         public double ExposureThrottle {
             get { return exposureThrottle; }
@@ -121,6 +128,24 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
+        public bool EnableGradeFWHM {
+            get { return enableGradeFWHM == 1; }
+            set {
+                enableGradeFWHM = value ? 1 : 0;
+                RaisePropertyChanged(nameof(EnableGradeFWHM));
+            }
+        }
+
+        [NotMapped]
+        public bool EnableGradeEccentricity {
+            get { return enableGradeEccentricity == 1; }
+            set {
+                enableGradeEccentricity = value ? 1 : 0;
+                RaisePropertyChanged(nameof(EnableGradeEccentricity));
+            }
+        }
+
+        [NotMapped]
         public bool AcceptImprovement {
             get { return acceptimprovement == 1; }
             set {
@@ -162,6 +187,24 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 hfrSigmaFactor = value;
                 RaisePropertyChanged(nameof(HFRSigmaFactor));
+            }
+        }
+
+        [NotMapped]
+        public double FWHMSigmaFactor {
+            get { return fwhmSigmaFactor; }
+            set {
+                fwhmSigmaFactor = value;
+                RaisePropertyChanged(nameof(FWHMSigmaFactor));
+            }
+        }
+
+        [NotMapped]
+        public double EccentricitySigmaFactor {
+            get { return eccentricitySigmaFactor; }
+            set {
+                eccentricitySigmaFactor = value;
+                RaisePropertyChanged(nameof(EccentricitySigmaFactor));
             }
         }
 
