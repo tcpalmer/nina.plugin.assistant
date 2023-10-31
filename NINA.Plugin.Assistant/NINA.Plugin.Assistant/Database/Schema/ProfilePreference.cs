@@ -23,6 +23,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public int enableGradeHFR { get; set; }
         public int enableGradeFWHM { get; set; }
         public int enableGradeEccentricity { get; set; }
+        public int enableMoveRejected { get; set; }
         public int acceptimprovement { get; set; }
 
         public int maxGradingSampleSize { get; set; }
@@ -46,6 +47,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             EnableGradeHFR = true;
             EnableGradeFWHM = false;
             EnableGradeEccentricity = false;
+            EnableMoveRejected = false;
             AcceptImprovement = true;
             MaxGradingSampleSize = 10;
             RMSPixelThreshold = 8;
@@ -142,6 +144,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 enableGradeEccentricity = value ? 1 : 0;
                 RaisePropertyChanged(nameof(EnableGradeEccentricity));
+            }
+        }
+
+        [NotMapped]
+        public bool EnableMoveRejected {
+            get { return enableMoveRejected == 1; }
+            set {
+                enableMoveRejected = value ? 1 : 0;
+                RaisePropertyChanged(nameof(EnableMoveRejected));
             }
         }
 

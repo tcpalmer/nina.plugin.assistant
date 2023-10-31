@@ -17,6 +17,10 @@ namespace Assistant.NINAPlugin.Database {
             profileId = activeProfile.Id.ToString();
         }
 
+        public ProfilePreference GetProfilePreferences() {
+            return GetProfilePreferences(new SchedulerDatabaseInteraction().GetContext());
+        }
+
         public ProfilePreference GetProfilePreferences(SchedulerDatabaseContext context) {
             using (context) {
                 ProfilePreference profilePreference = context.GetProfilePreference(profileId);

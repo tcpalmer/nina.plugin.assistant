@@ -2,6 +2,7 @@
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Sync;
+using Assistant.NINAPlugin.Util;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;
@@ -9,6 +10,7 @@ using Scheduler.SyncService;
 using System;
 using System.Collections.Concurrent;
 using System.Data.Entity.Migrations;
+using System.IO;
 using System.Text;
 using System.Threading;
 
@@ -17,11 +19,13 @@ namespace Assistant.NINAPlugin.Sequencer {
     public class SyncImageSaveWatcher : ISyncImageSaveWatcher {
 
         private IProfile profile;
+        private ProfilePreference profilePreference;
         private IImageSaveMediator imageSaveMediator;
         private ConcurrentDictionary<int, ExposureDetails> exposureDictionary;
 
         public SyncImageSaveWatcher(IProfile profile, IImageSaveMediator imageSaveMediator) {
             this.profile = profile;
+            this.profilePreference = new SchedulerPlanLoader(profile).GetProfilePreferences();
             this.imageSaveMediator = imageSaveMediator;
             exposureDictionary = new ConcurrentDictionary<int, ExposureDetails>(Environment.ProcessorCount * 2, 31);
         }
@@ -74,8 +78,14 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             bool accepted = false;
             string rejectReason = "not graded";
+
             if (enableGrader) {
                 (accepted, rejectReason) = new ImageGrader(profile).GradeImage(planTarget, msg);
+                if (!accepted && profilePreference.EnableMoveRejected) {
+                    string dstDir = Path.Combine(Path.GetDirectoryName(msg.PathToImage.LocalPath), ImageSaveWatcher.REJECTED_SUBDIR);
+                    TSLogger.Debug($"moving rejected image to {dstDir}");
+                    Utils.MoveFile(msg.PathToImage.LocalPath, dstDir);
+                }
             }
 
             TSLogger.Debug($"SYNC client image save for {planTarget.Project.Name}/{planTarget.Name}, filter={msg.Filter}, grader enabled={enableGrader}, accepted={accepted}, rejectReason={rejectReason}, image id={imageId}");

@@ -74,14 +74,7 @@ namespace Assistant.NINAPlugin {
         }
 
         public static bool SyncEnabled(IProfileService profileService) {
-            ProfilePreference profilePreference;
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
-                profilePreference = context.GetProfilePreference(profileService.ActiveProfile.Id.ToString());
-                if (profilePreference == null) {
-                    return false;
-                }
-            }
-
+            ProfilePreference profilePreference = new SchedulerPlanLoader(profileService.ActiveProfile).GetProfilePreferences();
             return profilePreference.EnableSynchronization;
         }
 

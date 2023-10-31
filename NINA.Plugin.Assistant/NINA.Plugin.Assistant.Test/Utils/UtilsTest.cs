@@ -2,6 +2,7 @@
 using FluentAssertions;
 using NUnit.Framework;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace NINA.Plugin.Assistant.Test.Util {
@@ -66,6 +67,36 @@ namespace NINA.Plugin.Assistant.Test.Util {
 
             Utils.IsCancelException(new Exception("A task was canceled.")).Should().BeTrue();
             Utils.IsCancelException(new Exception("cancelled")).Should().BeTrue();
+        }
+
+        [Test]
+        public void TestMoveFile() {
+
+            string tempDir = null;
+            try {
+                tempDir = Path.Combine(Path.GetTempPath(), "movefiletest");
+                Directory.CreateDirectory(tempDir);
+
+                string srcFile1 = Path.Combine(tempDir, "test1.txt");
+                File.WriteAllText(srcFile1, "this is test file 1");
+                string srcFile2 = Path.Combine(tempDir, "test2.txt");
+                File.WriteAllText(srcFile2, "this is test file 2");
+
+                string dstDir = Path.Combine(Path.GetDirectoryName(srcFile1), "rejected");
+                Utils.MoveFile(srcFile1, dstDir).Should().BeTrue();
+                Utils.MoveFile(srcFile2, dstDir).Should().BeTrue();
+
+                string newFile1 = Path.Combine(dstDir, Path.GetFileName(srcFile1));
+                File.Exists(newFile1).Should().BeTrue();
+
+                string newFile2 = Path.Combine(dstDir, Path.GetFileName(srcFile2));
+                File.Exists(newFile2).Should().BeTrue();
+            }
+            finally {
+                Directory.Delete(tempDir, true);
+            }
+
+
         }
     }
 

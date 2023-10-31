@@ -169,7 +169,7 @@
                             FontWeight="Bold" />
                         <UniformGrid
                             Width="320"
-                            Height="300"
+                            Height="325"
                             Margin="12,0,0,6"
                             HorizontalAlignment="Left"
                             Columns="2"
@@ -269,6 +269,22 @@
                                 MaxHeight="20"
                                 Margin="3,3,0,0"
                                 Text="{Binding ProfilePreferenceProxy.ProfilePreference.AcceptImprovement}"
+                                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontWeight="Bold"
+                                Text="Move Rejected Images"
+                                ToolTip="If enabled, move rejected images to 'rejected' folder under image folder" />
+                            <CheckBox
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                IsChecked="{Binding Path=ProfilePreferenceProxy.ProfilePreference.EnableMoveRejected, Mode=TwoWay}"
+                                Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+                            <TextBlock
+                                MaxHeight="20"
+                                Margin="3,3,0,0"
+                                Text="{Binding ProfilePreferenceProxy.ProfilePreference.EnableMoveRejected}"
                                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
                             <TextBlock

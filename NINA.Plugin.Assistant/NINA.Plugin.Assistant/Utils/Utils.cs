@@ -4,6 +4,7 @@ using NINA.Core.Model.Equipment;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using System;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -129,6 +130,22 @@ namespace Assistant.NINAPlugin.Util {
             }
 
             return false;
+        }
+
+        public static bool MoveFile(string srcFile, string dstDir) {
+            try {
+                if (!Directory.Exists(dstDir)) {
+                    Directory.CreateDirectory(dstDir);
+                }
+
+                File.Move(srcFile, Path.Combine(dstDir, Path.GetFileName(srcFile)));
+                return true;
+
+            }
+            catch (Exception ex) {
+                TSLogger.Error($"failed to move file {srcFile} to {dstDir}: {ex.Message}");
+                return false;
+            }
         }
 
         private Utils() { }
