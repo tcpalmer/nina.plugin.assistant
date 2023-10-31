@@ -18,142 +18,241 @@
             Margin="0,10,0,10"
             BorderBrush="{StaticResource BorderBrush}"
             BorderThickness="1">
-            <Grid
-                Width="600"
-                Margin="15,20,5,12"
-                HorizontalAlignment="Left">
+            <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="130" />
-                    <ColumnDefinition Width="260" />
+                    <ColumnDefinition Width="400" />
+                    <ColumnDefinition Width="400" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition MinHeight="25" />
-                    <RowDefinition MinHeight="25" />
-                    <RowDefinition MinHeight="25" />
-                    <RowDefinition MinHeight="25" />
-                    <RowDefinition MinHeight="25" />
-                    <RowDefinition MinHeight="25" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    MaxWidth="120"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Fixed Date Range" />
-                <ComboBox
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    MinWidth="233"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    DisplayMemberPath="Value"
-                    ItemsSource="{Binding FixedDateRangeChoices}"
-                    SelectedValue="{Binding SelectedFixedDateRange, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    SelectedValuePath="Key" />
+                <Border Grid.Column="0">
+                    <Grid
+                        Width="600"
+                        Margin="15,20,5,12"
+                        HorizontalAlignment="Left">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130" />
+                            <ColumnDefinition Width="260" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition MinHeight="25" />
+                            <RowDefinition MinHeight="25" />
+                            <RowDefinition MinHeight="25" />
+                            <RowDefinition MinHeight="25" />
+                            <RowDefinition MinHeight="25" />
+                            <RowDefinition MinHeight="25" />
+                        </Grid.RowDefinitions>
 
-                <TextBlock
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    MaxWidth="120"
-                    Margin="0,0,0,12"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Custom Date Range" />
-                <StackPanel
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Margin="0,0,0,12"
-                    Orientation="Horizontal">
-                    <DatePicker VerticalAlignment="Center" SelectedDate="{Binding FromDate}" />
-                    <TextBlock
-                        Margin="10,0,10,0"
-                        VerticalAlignment="Center"
-                        FontStyle="Italic"
-                        Text="to" />
-                    <DatePicker VerticalAlignment="Center" SelectedDate="{Binding ToDate}" />
-                </StackPanel>
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            MaxWidth="120"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontWeight="Bold"
+                            Text="Fixed Date Range" />
+                        <ComboBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            MinWidth="233"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            DisplayMemberPath="Value"
+                            ItemsSource="{Binding FixedDateRangeChoices}"
+                            SelectedValue="{Binding SelectedFixedDateRange, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            SelectedValuePath="Key" />
 
-                <TextBlock
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    MaxWidth="80"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Project" />
-                <ComboBox
-                    Grid.Row="2"
-                    Grid.Column="1"
-                    MinWidth="233"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    DisplayMemberPath="Value"
-                    ItemsSource="{Binding ProjectChoices}"
-                    SelectedValue="{Binding SelectedProjectId}"
-                    SelectedValuePath="Key" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            MaxWidth="120"
+                            Margin="0,0,0,12"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontWeight="Bold"
+                            Text="Custom Date Range" />
+                        <StackPanel
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Margin="0,0,0,12"
+                            Orientation="Horizontal">
+                            <DatePicker VerticalAlignment="Center" SelectedDate="{Binding FromDate}" />
+                            <TextBlock
+                                Margin="10,0,10,0"
+                                VerticalAlignment="Center"
+                                FontStyle="Italic"
+                                Text="to" />
+                            <DatePicker VerticalAlignment="Center" SelectedDate="{Binding ToDate}" />
+                        </StackPanel>
 
-                <TextBlock
-                    Grid.Row="3"
-                    Grid.Column="0"
-                    MaxWidth="80"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Target" />
-                <ComboBox
-                    Grid.Row="3"
-                    Grid.Column="1"
-                    MinWidth="233"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    DisplayMemberPath="Value"
-                    ItemsSource="{Binding TargetChoices}"
-                    SelectedValue="{Binding SelectedTargetId}"
-                    SelectedValuePath="Key" />
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            MaxWidth="80"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontWeight="Bold"
+                            Text="Project" />
+                        <ComboBox
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            MinWidth="233"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            DisplayMemberPath="Value"
+                            ItemsSource="{Binding ProjectChoices}"
+                            SelectedValue="{Binding SelectedProjectId}"
+                            SelectedValuePath="Key" />
 
-                <TextBlock
-                    Grid.Row="4"
-                    Grid.Column="0"
-                    MaxWidth="80"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    FontWeight="Bold"
-                    Text="Filter" />
-                <ComboBox
-                    Grid.Row="4"
-                    Grid.Column="1"
-                    MinWidth="233"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    DisplayMemberPath="Value"
-                    ItemsSource="{Binding FilterChoices}"
-                    SelectedValue="{Binding SelectedFilterId}"
-                    SelectedValuePath="Key" />
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            MaxWidth="80"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontWeight="Bold"
+                            Text="Target" />
+                        <ComboBox
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            MinWidth="233"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            DisplayMemberPath="Value"
+                            ItemsSource="{Binding TargetChoices}"
+                            SelectedValue="{Binding SelectedTargetId}"
+                            SelectedValuePath="Key" />
 
-                <Button
-                    Grid.Row="5"
-                    Grid.Column="0"
-                    Width="18"
-                    Height="18"
-                    Margin="10,5,0,0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Command="{Binding RefreshTableCommand}"
-                    Style="{StaticResource BackgroundButton}"
-                    ToolTip="Refresh the table to reflect external changes"
-                    ToolTipService.ShowOnDisabled="True">
-                    <Grid>
-                        <Path
-                            Data="{StaticResource SS_RefreshSVG}"
-                            Fill="{StaticResource ButtonForegroundBrush}"
-                            Stretch="Uniform" />
+                        <TextBlock
+                            Grid.Row="4"
+                            Grid.Column="0"
+                            MaxWidth="80"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontWeight="Bold"
+                            Text="Filter" />
+                        <ComboBox
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            MinWidth="233"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            DisplayMemberPath="Value"
+                            ItemsSource="{Binding FilterChoices}"
+                            SelectedValue="{Binding SelectedFilterId}"
+                            SelectedValuePath="Key" />
+
+                        <Button
+                            Grid.Row="5"
+                            Grid.Column="0"
+                            Width="18"
+                            Height="18"
+                            Margin="10,5,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Command="{Binding RefreshTableCommand}"
+                            Style="{StaticResource BackgroundButton}"
+                            ToolTip="Refresh the table to reflect external changes"
+                            ToolTipService.ShowOnDisabled="True">
+                            <Grid>
+                                <Path
+                                    Data="{StaticResource SS_RefreshSVG}"
+                                    Fill="{StaticResource ButtonForegroundBrush}"
+                                    Stretch="Uniform" />
+                            </Grid>
+                        </Button>
+
                     </Grid>
-                </Button>
+                </Border>
+                <Border Grid.Column="1">
+                    <Expander
+                        Margin="15,20,5,12"
+                        ExpandDirection="Down"
+                        IsExpanded="False">
+                        <Expander.Header>
+                            <TextBlock FontWeight="Bold" Text="Purge Records" />
+                        </Expander.Header>
+                        <StackPanel>
+                            <TextBlock
+                                Margin="15,5,0,0"
+                                FontSize="12"
+                                FontStyle="Italic"
+                                Text="Delete acquired image records by date or date and target.  This will not remove image files - only the Target Scheduler database records."
+                                TextWrapping="Wrap" />
+                            <Grid
+                                Width="600"
+                                Margin="15,10,5,12"
+                                HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="130" />
+                                    <ColumnDefinition Width="260" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition MinHeight="25" />
+                                    <RowDefinition MinHeight="25" />
+                                    <RowDefinition MinHeight="25" />
+                                </Grid.RowDefinitions>
 
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    MaxWidth="120"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    FontWeight="Bold"
+                                    Text="Older Than" />
+                                <DatePicker
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Width="200"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    SelectedDate="{Binding PurgeOlderThanDate}" />
+
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    MaxWidth="120"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    FontWeight="Bold"
+                                    Text="Target" />
+                                <ComboBox
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Width="200"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    DisplayMemberPath="Value"
+                                    ItemsSource="{Binding PurgeTargetChoices}"
+                                    SelectedValue="{Binding PurgeSelectedTargetId}"
+                                    SelectedValuePath="Key" />
+
+                                <Button
+                                    Grid.Row="3"
+                                    Grid.Column="0"
+                                    Width="18"
+                                    Height="18"
+                                    Margin="10,5,0,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding PurgeCommand}"
+                                    Style="{StaticResource BackgroundButton}"
+                                    ToolTip="Delete acquired image records based on date/target selections">
+                                    <Grid>
+                                        <Path
+                                            Data="{StaticResource SS_DeleteSVG}"
+                                            Fill="{StaticResource ButtonForegroundBrush}"
+                                            Stretch="Uniform" />
+                                    </Grid>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </Expander>
+
+                </Border>
             </Grid>
         </Border>
 
@@ -620,7 +719,6 @@
 
             </DataGrid.Columns>
         </DataGrid>
-
 
     </StackPanel>
 </UserControl>

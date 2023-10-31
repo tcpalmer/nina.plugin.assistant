@@ -2,6 +2,7 @@
 using Assistant.NINAPlugin.Database.Schema;
 using LinqKit;
 using NINA.Core.Locale;
+using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
@@ -32,6 +33,9 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
             database = new SchedulerDatabaseInteraction();
 
             RefreshTableCommand = new AsyncCommand<bool>(() => RefreshTable());
+            PurgeCommand = new AsyncCommand<bool>(() => PurgeRecords());
+            PurgeTargetChoices = GetPurgeTargetChoices();
+
             InitializeCriteria();
 
             AcquiredImageCollection = new AcquiredImageCollection();
@@ -261,6 +265,53 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
             }
         }
 
+        private DateTime purgeOlderThanDate = DateTime.Now.AddMonths(-9);
+        public DateTime PurgeOlderThanDate {
+            get => purgeOlderThanDate;
+            set {
+                purgeOlderThanDate = value.Date;
+                RaisePropertyChanged(nameof(PurgeOlderThanDate));
+            }
+        }
+
+        private AsyncObservableCollection<KeyValuePair<int, string>> GetPurgeTargetChoices() {
+            List<Target> targets;
+            AsyncObservableCollection<KeyValuePair<int, string>> choices = new AsyncObservableCollection<KeyValuePair<int, string>> {
+                new KeyValuePair<int, string>(0, "All")
+            };
+
+            using (var context = database.GetContext()) {
+                targets = context.TargetSet.AsNoTracking().ToList();
+            }
+
+            targets.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+            targets.ForEach(t => {
+                choices.Add(new KeyValuePair<int, string>(t.Id, t.Name));
+            });
+
+            return choices;
+        }
+
+        private AsyncObservableCollection<KeyValuePair<int, string>> purgeTargetChoices;
+        public AsyncObservableCollection<KeyValuePair<int, string>> PurgeTargetChoices {
+            get {
+                return purgeTargetChoices;
+            }
+            set {
+                purgeTargetChoices = value;
+                RaisePropertyChanged(nameof(PurgeTargetChoices));
+            }
+        }
+
+        private int purgeSelectedTargetId = 0;
+        public int PurgeSelectedTargetId {
+            get => purgeSelectedTargetId;
+            set {
+                purgeSelectedTargetId = value;
+                RaisePropertyChanged(nameof(PurgeSelectedTargetId));
+            }
+        }
+
         public ICommand RefreshTableCommand { get; private set; }
 
         private async Task<bool> RefreshTable() {
@@ -268,6 +319,27 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
             InitializeCriteria();
             await LoadRecords();
             return true;
+        }
+
+        public ICommand PurgeCommand { get; private set; }
+
+        private async Task<bool> PurgeRecords() {
+            using (var context = database.GetContext()) {
+                int count = context.GetAcquiredImagesCount(PurgeOlderThanDate, PurgeSelectedTargetId);
+                if (count == 0) {
+                    MyMessageBox.Show("No records selected for deletion");
+                    return true;
+                }
+
+                if (MyMessageBox.Show($"Delete {count} acquired image records?", "Delete records?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
+                    TSLogger.Info($"deleting {count} acquired images records");
+                    context.DeleteAcquiredImages(PurgeOlderThanDate, PurgeSelectedTargetId);
+                    SearchCriteraKey = null;
+                    _ = LoadRecords();
+                }
+
+                return true;
+            }
         }
 
         private AcquiredImageCollection acquiredImageCollection;
