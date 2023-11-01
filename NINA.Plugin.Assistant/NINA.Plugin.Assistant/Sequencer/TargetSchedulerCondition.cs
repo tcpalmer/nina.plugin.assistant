@@ -18,7 +18,7 @@ namespace Assistant.NINAPlugin.Sequencer {
     [ExportMetadata("Name", "Target Scheduler Condition")]
     [ExportMetadata("Description", "Loop condition for Target Scheduler")]
     [ExportMetadata("Icon", "Scheduler.SchedulerSVG")]
-    [ExportMetadata("Category", "Lbl_SequenceCategory_Condition")]
+    [ExportMetadata("Category", "Target Scheduler")]
     [Export(typeof(ISequenceCondition))]
     [JsonObject(MemberSerialization.OptIn)]
     public class TargetSchedulerCondition : SequenceCondition {

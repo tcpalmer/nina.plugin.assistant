@@ -42,7 +42,7 @@ namespace Assistant.NINAPlugin.Sequencer {
     [ExportMetadata("Name", "Target Scheduler Container")]
     [ExportMetadata("Description", "Container for Target Scheduler")]
     [ExportMetadata("Icon", "Scheduler.SchedulerSVG")]
-    [ExportMetadata("Category", "Lbl_SequenceCategory_Container")]
+    [ExportMetadata("Category", "Target Scheduler")]
     [Export(typeof(ISequenceItem))]
     [Export(typeof(ISequenceContainer))]
     [JsonObject(MemberSerialization.OptIn)]

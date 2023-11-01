@@ -2,10 +2,12 @@
 
 ## 4.0.0.0 - 2023-11-XX
 * Added image grading on FWHM and Eccentricity (requires Hocus Focus plugin)
-* Support for optionally moving rejected images to a 'rejected' directory
-* Added experimental support for synchronization across multiple instances of NINA
+* Added option to move rejected images to a 'rejected' directory
+* Added ability to purge acquired image records by date or date/target
 * The rule weight list is now sorted when displayed
 * Added target rotation and ROI to the set of data saved for acquired images.  A future release will use these values when selecting 'like' images for grading.
+* Added experimental support for synchronization across multiple instances of NINA
+* All sequencer instructions moved to new category "Target Scheduler"
 
 ## 3.3.3.1 - 2023-10-11
 * Fixed bug with exposure planner.

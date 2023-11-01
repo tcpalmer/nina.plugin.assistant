@@ -27,7 +27,7 @@ System.ComponentModel.Composition.CompositionContractMismatchException: Cannot c
     [ExportMetadata("Name", "Target Scheduler Sync Wait")]
     [ExportMetadata("Description", "Target Scheduler synchronized waiting for multiple NINA instances")]
     [ExportMetadata("Icon", "Scheduler.SchedulerSVG")]
-    [ExportMetadata("Category", "Lbl_SequenceCategory_Container")]
+    [ExportMetadata("Category", "Target Scheduler")]
     [Export(typeof(ISequenceItem))]
     [Export(typeof(ISequenceContainer))]
     [JsonObject(MemberSerialization.OptIn)]
