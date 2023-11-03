@@ -13,6 +13,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public int parkOnWait { get; set; }
         public double exposureThrottle { get; set; }
+        public int enableSmartPlanWindow { get; set; }
 
         public int enableSynchronization { get; set; }
         public int syncWaitTimeout { get; set; }
@@ -39,6 +40,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             ProfileId = profileId;
             ParkOnWait = false;
             ExposureThrottle = 125;
+            EnableSmartPlanWindow = true;
             EnableSynchronization = false;
             SyncWaitTimeout = SyncManager.DEFAULT_SYNC_WAIT_TIMEOUT;
             SyncExposureTimeout = SyncManager.DEFAULT_SYNC_EXPOSURE_TIMEOUT;
@@ -72,6 +74,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 exposureThrottle = value;
                 RaisePropertyChanged(nameof(ExposureThrottle));
+            }
+        }
+
+        [NotMapped]
+        public bool EnableSmartPlanWindow {
+            get { return enableSmartPlanWindow == 1; }
+            set {
+                enableSmartPlanWindow = value ? 1 : 0;
+                RaisePropertyChanged(nameof(EnableSmartPlanWindow));
             }
         }
 

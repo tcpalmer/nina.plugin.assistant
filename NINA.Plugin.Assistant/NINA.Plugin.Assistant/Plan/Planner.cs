@@ -65,19 +65,8 @@ namespace Assistant.NINAPlugin.Plan {
                     }
 
                     projects = FilterForIncomplete(projects);
-                    if (TSLogger.IsEnabled(LogEventLevel.Verbose)) {
-                        TSLogger.Trace($"GetPlan after FilterForIncomplete:\n{PlanProject.ListToString(projects)}");
-                    }
-
                     projects = FilterForVisibility(projects);
-                    if (TSLogger.IsEnabled(LogEventLevel.Verbose)) {
-                        TSLogger.Trace($"GetPlan after FilterForVisibility:\n{PlanProject.ListToString(projects)}");
-                    }
-
                     projects = FilterForMoonAvoidance(projects);
-                    if (TSLogger.IsEnabled(LogEventLevel.Verbose)) {
-                        TSLogger.Trace($"GetPlan after FilterForMoonAvoidance:\n{PlanProject.ListToString(projects)}");
-                    }
 
                     DateTime? waitForVisibleNow = CheckForVisibleNow(projects);
                     if (waitForVisibleNow != null) {
@@ -93,7 +82,7 @@ namespace Assistant.NINAPlugin.Plan {
                             TSLogger.Trace($"highest scoring (or only) target:\n{planTarget}");
                         }
 
-                        TimeInterval targetWindow = GetTargetTimeWindow(atTime, planTarget);
+                        TimeInterval targetWindow = GetTargetTimeWindow(profilePreferences.EnableSmartPlanWindow, atTime, planTarget, projects);
                         List<IPlanInstruction> planInstructions = PlanInstructions(planTarget, previousPlanTarget, targetWindow);
 
                         return new SchedulerPlan(atTime, projects, planTarget, targetWindow, planInstructions, !checkCondition);
@@ -297,7 +286,8 @@ namespace Assistant.NINAPlugin.Plan {
                 if (planProject.Rejected) { continue; }
 
                 foreach (IPlanTarget planTarget in planProject.Targets) {
-                    if (planTarget.Rejected) { continue; }
+                    //if (planTarget.Rejected) { continue; }
+                    if (planTarget.Rejected && planTarget.RejectedReason != Reasons.TargetNotYetVisible) { continue; }
 
                     foreach (IPlanExposure planExposure in planTarget.ExposurePlans) {
                         if (planExposure.IsIncomplete() && planExposure.MoonAvoidanceEnabled) {
@@ -393,10 +383,10 @@ namespace Assistant.NINAPlugin.Plan {
             return highScoreTarget;
         }
 
-        public TimeInterval GetTargetTimeWindow(DateTime atTime, IPlanTarget planTarget) {
+        public TimeInterval GetTargetTimeWindow(bool useSmartPlanWindow, DateTime atTime, IPlanTarget planTarget, List<IPlanProject> projects) {
 
             DateTime planStartTime = planTarget.StartTime < atTime ? atTime : planTarget.StartTime;
-            DateTime planStopTime = new PlanStopTimeExpert().GetStopTime(planStartTime, planTarget, null);
+            DateTime planStopTime = new PlanStopTimeExpert().GetStopTime(useSmartPlanWindow, planStartTime, planTarget, projects);
 
             if (planStopTime > planTarget.EndTime) {
                 planStopTime = planTarget.EndTime;

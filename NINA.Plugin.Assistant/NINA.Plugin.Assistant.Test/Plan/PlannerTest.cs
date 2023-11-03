@@ -509,7 +509,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             DateTime atTime = new DateTime(2023, 1, 23, 18, 0, 0);
             pt.SetupProperty(t => t.StartTime, atTime.AddMinutes(10));
             pt.SetupProperty(t => t.EndTime, atTime.AddMinutes(50));
-            TimeInterval window = new Planner(atTime, profileMock.Object, GetPrefs(), false).GetTargetTimeWindow(atTime, pt.Object);
+            TimeInterval window = new Planner(atTime, profileMock.Object, GetPrefs(), false).GetTargetTimeWindow(false, atTime, pt.Object, null);
             window.StartTime.Should().BeSameDateAs(23.January(2023).At(18, 10, 0));
             window.EndTime.Should().BeSameDateAs(23.January(2023).At(18, 40, 0));
             window.Duration.Should().Be(minimumMinutes * 60);
@@ -518,7 +518,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pp.SetupProperty(p => p.MinimumTime, minimumMinutes);
             pt.SetupProperty(t => t.StartTime, atTime.AddMinutes(-10));
             pt.SetupProperty(t => t.EndTime, atTime.AddMinutes(120));
-            window = new Planner(atTime, profileMock.Object, GetPrefs(), false).GetTargetTimeWindow(atTime, pt.Object);
+            window = new Planner(atTime, profileMock.Object, GetPrefs(), false).GetTargetTimeWindow(false, atTime, pt.Object, null);
             window.StartTime.Should().BeSameDateAs(23.January(2023).At(18, 0, 0));
             window.EndTime.Should().BeSameDateAs(23.January(2023).At(19, 0, 0));
             window.Duration.Should().Be(minimumMinutes * 60);
@@ -529,7 +529,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pt.SetupProperty(t => t.MeridianWindow, meridianWindow);
             pt.SetupProperty(t => t.StartTime, atTime.AddMinutes(-20));
             pt.SetupProperty(t => t.EndTime, atTime.AddHours(4));
-            window = new Planner(atTime, profileMock.Object, GetPrefs(), false).GetTargetTimeWindow(atTime, pt.Object);
+            window = new Planner(atTime, profileMock.Object, GetPrefs(), false).GetTargetTimeWindow(false, atTime, pt.Object, null);
             TimeSpan precision = TimeSpan.FromSeconds(1);
             window.StartTime.Should().BeCloseTo(atTime, precision);
             window.EndTime.Should().BeCloseTo(atTime.AddHours(3), precision);
