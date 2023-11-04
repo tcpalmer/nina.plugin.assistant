@@ -306,6 +306,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                     sb.Append(plan.DetailsLog);
                 }
 
+                sb.AppendLine("\nRUN COMPLETE - NO MORE TARGETS AVAILABLE");
                 PlanPreviewResultsLog = sb.ToString();
                 ShowPlanPreview = false;
                 ShowPlanPreviewResults = true;

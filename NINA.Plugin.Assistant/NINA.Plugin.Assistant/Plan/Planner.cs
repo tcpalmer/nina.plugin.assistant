@@ -78,10 +78,6 @@ namespace Assistant.NINAPlugin.Plan {
 
                     if (planTarget != null) {
                         TSLogger.Debug($"highest scoring (or only) target: {planTarget.Name}");
-                        if (TSLogger.IsEnabled(LogEventLevel.Verbose)) {
-                            TSLogger.Trace($"highest scoring (or only) target:\n{planTarget}");
-                        }
-
                         TimeInterval targetWindow = GetTargetTimeWindow(profilePreferences.EnableSmartPlanWindow, atTime, planTarget, projects);
                         List<IPlanInstruction> planInstructions = PlanInstructions(planTarget, previousPlanTarget, targetWindow);
 
