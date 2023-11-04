@@ -7,6 +7,7 @@
 * Added smarter determination of plan stop times
 * The rule weight list is now sorted when displayed
 * Added target rotation and ROI to the set of data saved for acquired images.  A future release will use these values when selecting 'like' images for grading.
+* Fixed issue where target rotation wasn't being sent to Framing Wizard
 * Added experimental support for synchronization across multiple instances of NINA
 * All sequencer instructions moved to new category "Target Scheduler"
 

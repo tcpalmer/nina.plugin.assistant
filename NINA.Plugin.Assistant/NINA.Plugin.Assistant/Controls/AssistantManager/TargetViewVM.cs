@@ -117,6 +117,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 Target target = TargetProxy.Target;
                 DeepSkyObject dso = new DeepSkyObject(string.Empty, target.Coordinates, profileService.ActiveProfile.ApplicationSettings.SkyAtlasImageRepository, profileService.ActiveProfile.AstrometrySettings.Horizon);
                 dso.Name = target.Name;
+                dso.RotationPositionAngle = target.Rotation;
                 return dso;
             }
         }
