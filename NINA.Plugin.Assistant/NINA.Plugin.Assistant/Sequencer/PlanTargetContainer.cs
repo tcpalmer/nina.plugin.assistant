@@ -61,7 +61,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         private IImageSaveWatcher ImageSaveWatcher;
 
         private bool synchronizationEnabled;
-        private int syncExposureTimeout;
+        private int syncActionTimeout;
+        private int syncSolveRotateTimeout;
 
         public PlanTargetContainer(
                 TargetSchedulerContainer parentContainer,
@@ -114,7 +115,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             AttachNewParent(parentContainer);
 
             if (synchronizationEnabled) {
-                syncExposureTimeout = GetSyncExposureTimeout();
+                SetSyncTimeouts();
             }
 
             if (!plan.IsEmulator)
@@ -248,7 +249,13 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             if (isPlateSolve) {
                 if (rotatorMediator.GetInfo().Connected) {
-                    slewCenter = new CenterAndRotate(profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
+                    if (synchronizationEnabled) {
+                        slewCenter = new PlanCenterAndRotate(planTarget, Target, syncActionTimeout, syncSolveRotateTimeout, profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
+                    }
+                    else {
+                        slewCenter = new CenterAndRotate(profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
+                    }
+
                     slewCenter.Name = nameof(CenterAndRotate);
                     (slewCenter as Center).Coordinates = slewCoordinates;
                     (slewCenter as CenterAndRotate).PositionAngle = planTarget.Rotation;
@@ -307,7 +314,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             PlanTakeExposure takeExposure = new PlanTakeExposure(
                         parentContainer,
                         synchronizationEnabled,
-                        syncExposureTimeout,
+                        syncActionTimeout,
                         profileService,
                         cameraMediator,
                         imagingMediator,
@@ -351,10 +358,11 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        private int GetSyncExposureTimeout() {
+        private void SetSyncTimeouts() {
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 ProfilePreference profilePreference = context.GetProfilePreference(profileService.ActiveProfile.Id.ToString());
-                return profilePreference != null ? profilePreference.SyncExposureTimeout : SyncManager.DEFAULT_SYNC_EXPOSURE_TIMEOUT;
+                syncActionTimeout = profilePreference != null ? profilePreference.SyncActionTimeout : SyncManager.DEFAULT_SYNC_ACTION_TIMEOUT;
+                syncSolveRotateTimeout = profilePreference != null ? profilePreference.SyncSolveRotateTimeout : SyncManager.DEFAULT_SYNC_SOLVEROTATE_TIMEOUT;
             }
         }
 

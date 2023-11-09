@@ -11,9 +11,11 @@ service SchedulerSync {
 	rpc Register (RegistrationRequest) returns (StatusResponse);
 	rpc Unregister (ClientIdRequest) returns (StatusResponse);
 	rpc SyncWait (ClientIdRequest) returns (SyncWaitResponse);
-	rpc RequestExposure (ClientIdRequest) returns (ExposureResponse);
+	rpc RequestAction (ClientIdRequest) returns (ActionResponse);
 	rpc AcceptExposure (ExposureRequest) returns (StatusResponse);
+	rpc AcceptSolveRotate (SolveRotateRequest) returns (StatusResponse);
 	rpc CompleteExposure (ExposureRequest) returns (StatusResponse);
+	rpc CompleteSolveRotate (SolveRotateRequest) returns (StatusResponse);
 	rpc Keepalive (ClientIdRequest) returns (StatusResponse);
 }
 
@@ -21,9 +23,10 @@ enum ClientState {
 	STARTING = 0;
 	READY = 1;
 	WAITING = 2;
-	EXPOSUREREADY = 3;
+	ACTIONREADY = 3;
 	EXPOSING = 4;
-	ENDING = 5;
+	SOLVING = 5;
+	ENDING = 6;
 }
 
 message RegistrationRequest {
@@ -48,20 +51,28 @@ message SyncWaitResponse {
 	bool continue = 2;
 }
 
-message ExposureResponse {
+message ActionResponse {
 	bool success = 1;
 	bool exposureReady = 2;
-	bool terminate = 3;
-	string exposureId = 4;
-	string targetName = 5;
-	string targetRa = 6;
-	string targetDec = 7;
-	double targetPositionAngle = 8;
-	int32 targetDatabaseId = 9;
-	int32 exposurePlanDatabaseId = 10;
+	bool solveRotateReady = 3;
+	bool terminate = 4;
+	string exposureId = 5;
+	string solveRotateId = 6;
+	string targetName = 7;
+	string targetRa = 8;
+	string targetDec = 9;
+	double targetPositionAngle = 10;
+	int32 pierSide = 11;
+	int32 targetDatabaseId = 12;
+	int32 exposurePlanDatabaseId = 13;
 }
 
 message ExposureRequest {
 	string guid = 1;
 	string exposureId = 2;
+}
+
+message SolveRotateRequest {
+	string guid = 1;
+	string solveRotateId = 2;
 }

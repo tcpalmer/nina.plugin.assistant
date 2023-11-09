@@ -1,15 +1,17 @@
-﻿using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.Sync;
+﻿using Assistant.NINAPlugin.Sync;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
 using NINA.Core.Model;
 using NINA.Core.Utility.Notification;
+using NINA.Core.Utility.WindowService;
 using NINA.Equipment.Interfaces.Mediator;
+using NINA.PlateSolving.Interfaces;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.SyncService.Sync;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
+using NINA.Sequencer.SequenceItem.Platesolving;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using Scheduler.SyncService;
@@ -24,46 +26,61 @@ namespace Assistant.NINAPlugin.Sequencer {
     [ExportMetadata("Icon", "Scheduler.SchedulerSVG")]
     [ExportMetadata("Category", "Target Scheduler")]
     [Export(typeof(ISequenceItem))]
-    [Export(typeof(ISequenceContainer))]
     [JsonObject(MemberSerialization.OptIn)]
     public class TargetSchedulerSyncContainer : SequenceItem {
 
         private readonly IProfileService profileService;
+        private readonly ITelescopeMediator telescopeMediator;
         private readonly IRotatorMediator rotatorMediator;
         private readonly ICameraMediator cameraMediator;
         private readonly IImagingMediator imagingMediator;
         private readonly IImageSaveMediator imageSaveMediator;
         private readonly IImageHistoryVM imageHistoryVM;
         private readonly IFilterWheelMediator filterWheelMediator;
+        private readonly IGuiderMediator guiderMediator;
+        private readonly IPlateSolverFactory plateSolverFactory;
+        private readonly IWindowServiceFactory windowServiceFactory;
 
         private ISyncImageSaveWatcher syncImageSaveWatcher;
 
         [ImportingConstructor]
         public TargetSchedulerSyncContainer(
             IProfileService profileService,
+            ITelescopeMediator telescopeMediator,
             IRotatorMediator rotatorMediator,
             ICameraMediator cameraMediator,
             IImagingMediator imagingMediator,
             IImageSaveMediator imageSaveMediator,
             IImageHistoryVM imageHistoryVM,
-            IFilterWheelMediator filterWheelMediator) : base() {
+            IFilterWheelMediator filterWheelMediator,
+            IGuiderMediator guiderMediator,
+            IPlateSolverFactory plateSolverFactory,
+            IWindowServiceFactory windowServiceFactory) : base() {
             this.profileService = profileService;
+            this.telescopeMediator = telescopeMediator;
             this.rotatorMediator = rotatorMediator;
             this.cameraMediator = cameraMediator;
             this.imagingMediator = imagingMediator;
             this.imageSaveMediator = imageSaveMediator;
             this.imageHistoryVM = imageHistoryVM;
             this.filterWheelMediator = filterWheelMediator;
+            this.guiderMediator = guiderMediator;
+            this.plateSolverFactory = plateSolverFactory;
+            this.windowServiceFactory = windowServiceFactory;
         }
 
         public TargetSchedulerSyncContainer(TargetSchedulerSyncContainer cloneMe) : this(
             cloneMe.profileService,
+            cloneMe.telescopeMediator,
             cloneMe.rotatorMediator,
             cloneMe.cameraMediator,
             cloneMe.imagingMediator,
             cloneMe.imageSaveMediator,
             cloneMe.imageHistoryVM,
-            cloneMe.filterWheelMediator) {
+            cloneMe.filterWheelMediator,
+            cloneMe.guiderMediator,
+            cloneMe.plateSolverFactory,
+            cloneMe.windowServiceFactory) {
             CopyMetaData(cloneMe);
         }
 
@@ -90,6 +107,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             if (SyncManager.Instance.RunningClient) {
                 SyncClient.Instance.SetClientState(ClientState.Ready);
             }
+
             base.Teardown();
         }
 
@@ -105,26 +123,43 @@ namespace Assistant.NINAPlugin.Sequencer {
                 return;
             }
 
-            if (!Common.USE_EMULATOR) {
-                syncImageSaveWatcher = new SyncImageSaveWatcher(profileService.ActiveProfile, imageSaveMediator);
-                syncImageSaveWatcher.Start();
-            }
+            //if (!Common.USE_EMULATOR) {
+            syncImageSaveWatcher = new SyncImageSaveWatcher(profileService.ActiveProfile, imageSaveMediator);
+            syncImageSaveWatcher.Start();
+            //}
 
             while (true) {
-                progress?.Report(new ApplicationStatus() { Status = "Target Scheduler: requesting exposure from server" });
+                progress?.Report(new ApplicationStatus() { Status = "Target Scheduler: requesting action from sync server" });
                 try {
-                    SyncedExposure syncedExposure = await SyncClient.Instance.StartRequestExposure(token);
-                    if (syncedExposure == null) {
+                    SyncedAction syncedAction = await SyncClient.Instance.StartRequestAction(token);
+
+                    if (syncedAction == null) {
                         TSLogger.Info("TargetSchedulerSyncContainer complete, ending instruction");
                         progress?.Report(new ApplicationStatus() { Status = "" });
                         break;
                     }
 
-                    TSLogger.Info($"SYNC client received exposure: {syncedExposure.ExposureId}");
-                    await TakeSyncedExposure(syncedExposure, progress, token);
+                    if (syncedAction is SyncedExposure) {
+                        SyncedExposure syncedExposure = syncedAction as SyncedExposure;
+                        TSLogger.Info($"SYNC client received exposure: {syncedExposure.ExposureId} for {syncedExposure.TargetName}");
+                        await TakeSyncedExposure(syncedExposure, progress, token);
+                    }
+
+                    if (syncedAction is SyncedSolveRotate) {
+                        SyncedSolveRotate syncedSolveRotate = syncedAction as SyncedSolveRotate;
+                        TSLogger.Info($"SYNC client received solve/rotate: {syncedSolveRotate.SolveRotateId} for {syncedSolveRotate.TargetName}");
+                        await DoSyncedSolveRotate(syncedSolveRotate, progress, token);
+                    }
                 }
                 catch (Exception ex) {
-                    TSLogger.Error("TargetSchedulerSyncContainer exception", ex);
+                    if (Utils.IsCancelException(ex)) {
+                        TSLogger.Warning("TargetSchedulerSyncContainer instruction was canceled");
+                        syncImageSaveWatcher.Stop();
+                        return;
+                    }
+                    else {
+                        TSLogger.Error($"TargetSchedulerSyncContainer exception (will continue): {ex}");
+                    }
                 }
 
                 // Test something like an AF on the client
@@ -139,6 +174,22 @@ namespace Assistant.NINAPlugin.Sequencer {
         private async Task TakeSyncedExposure(SyncedExposure syncedExposure, IProgress<ApplicationStatus> progress, CancellationToken token) {
             SyncTakeExposure takeExposure = new SyncTakeExposure(profileService, rotatorMediator, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM, filterWheelMediator, syncImageSaveWatcher, syncedExposure);
             await takeExposure.Execute(progress, token);
+        }
+
+        private async Task DoSyncedSolveRotate(SyncedSolveRotate syncedSolveRotate, IProgress<ApplicationStatus> progress, CancellationToken token) {
+
+            if (!rotatorMediator.GetInfo().Connected) {
+                TSLogger.Warning($"SYNC client received solve/rotate but no rotator is connected: skipping and continuing, id={syncedSolveRotate.SolveRotateId}");
+                await Task.Delay(2500, token);
+            }
+            else {
+                TSLogger.Info($"SYNC client starting solve/rotate, id={syncedSolveRotate.SolveRotateId}");
+                SolveAndRotate solveAndRotate = new SolveAndRotate(profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, plateSolverFactory, windowServiceFactory);
+                await solveAndRotate.Execute(progress, token);
+                TSLogger.Info($"SYNC client completed solve/rotate, id={syncedSolveRotate.SolveRotateId}");
+            }
+
+            await SyncClient.Instance.CompleteSolveRotate(syncedSolveRotate.SolveRotateId);
         }
     }
 }

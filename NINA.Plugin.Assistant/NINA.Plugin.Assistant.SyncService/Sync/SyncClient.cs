@@ -1,12 +1,11 @@
 ﻿using Grpc.Core;
 using GrpcDotNetNamedPipes;
+using NINA.Core.Enum;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.SyncService.Sync;
 using Scheduler.SyncService;
 using System;
 using System.Diagnostics;
-using System.Threading;
-using static System.Windows.Forms.AxHost;
 
 namespace Assistant.NINAPlugin.Sync {
 
@@ -20,6 +19,7 @@ namespace Assistant.NINAPlugin.Sync {
         public readonly string Id = Guid.NewGuid().ToString();
         public string ProfileId { get; private set; }
         private ClientState ClientState = ClientState.Starting;
+        private SyncedSolveRotate? ClientRotationState = null;
         private bool keepaliveRunning = false;
         private CancellationTokenSource keepaliveCts;
 
@@ -115,18 +115,18 @@ namespace Assistant.NINAPlugin.Sync {
             finally { SetClientState(ClientState.Ready); }
         }
 
-        public async Task<SyncedExposure?> StartRequestExposure(CancellationToken token) {
-            SetClientState(ClientState.Exposureready);
+        public async Task<SyncedAction?> StartRequestAction(CancellationToken token) {
+            SetClientState(ClientState.Actionready);
             ClientIdRequest request = new ClientIdRequest {
                 Guid = Id,
                 ClientState = ClientState
             };
 
-            TSLogger.Info($"SYNC client starting polling for exposures");
+            TSLogger.Info($"SYNC client starting polling for actions");
 
             while (true) {
                 try {
-                    ExposureResponse response = await base.RequestExposureAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: token);
+                    ActionResponse response = await base.RequestActionAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: token);
 
                     if (response.Terminate) {
                         TSLogger.Info("SYNC client completed");
@@ -140,7 +140,13 @@ namespace Assistant.NINAPlugin.Sync {
                         return new SyncedExposure(response.ExposureId, response.TargetName, response.TargetRa, response.TargetDec, response.TargetPositionAngle, response.TargetDatabaseId, response.ExposurePlanDatabaseId);
                     }
 
-                    await Task.Delay(SyncManager.CLIENT_EXPOSURE_READY_POLL_PERIOD, token);
+                    if (response.SolveRotateReady) {
+                        await AcceptSolveRotate(response.SolveRotateId);
+                        SetClientState(ClientState.Solving);
+                        return new SyncedSolveRotate(response.SolveRotateId, response.TargetName, response.TargetRa, response.TargetDec, response.TargetPositionAngle, PierSide.pierUnknown);
+                    }
+
+                    await Task.Delay(SyncManager.CLIENT_ACTION_READY_POLL_PERIOD, token);
                 }
                 catch (Exception e) {
                     if (e is TaskCanceledException || (e is RpcException && e.Message.Contains("Cancelled"))) {
@@ -149,7 +155,7 @@ namespace Assistant.NINAPlugin.Sync {
                         return null;
                     }
 
-                    TSLogger.Error("SYNC client exception in request exposure", e);
+                    TSLogger.Error("SYNC client exception in request action", e);
                     await Task.Delay(2000, token); // at least slow down exceptions repeating
                 }
             }
@@ -173,6 +179,24 @@ namespace Assistant.NINAPlugin.Sync {
             }
         }
 
+        private async Task AcceptSolveRotate(string solveRotateId) {
+            SolveRotateRequest request = new SolveRotateRequest {
+                Guid = Id,
+                SolveRotateId = solveRotateId
+            };
+
+            try {
+                TSLogger.Info($"SYNC client accepting solve/rotate: {request.SolveRotateId}");
+                StatusResponse response = await base.AcceptSolveRotateAsync(request);
+                if (!response.Success) {
+                    TSLogger.Error($"SYNC client problem accepting solve/rotate: {response.Message}");
+                }
+            }
+            catch (Exception e) {
+                TSLogger.Error("SYNC client exception accepting solve/rotate", e);
+            }
+        }
+
         public async Task SubmitCompletedExposure(string exposureId) {
             ExposureRequest request = new ExposureRequest {
                 Guid = Id,
@@ -188,6 +212,24 @@ namespace Assistant.NINAPlugin.Sync {
             }
             catch (Exception e) {
                 TSLogger.Error("SYNC client exception submitting completed exposure", e);
+            }
+        }
+
+        public async Task CompleteSolveRotate(string solveRotateId) {
+            SolveRotateRequest request = new SolveRotateRequest {
+                Guid = Id,
+                SolveRotateId = solveRotateId
+            };
+
+            try {
+                TSLogger.Info($"SYNC client submitting completed solve/rotate to server ({request.SolveRotateId})");
+                StatusResponse response = await base.CompleteSolveRotateAsync(request);
+                if (!response.Success) {
+                    TSLogger.Error($"SYNC client problem submitting completed solve/rotate: {response.Message}");
+                }
+            }
+            catch (Exception e) {
+                TSLogger.Error("SYNC client exception submitting completed solve/rotate", e);
             }
         }
 
@@ -250,7 +292,9 @@ namespace Assistant.NINAPlugin.Sync {
         }
     }
 
-    public class SyncedExposure {
+    public class SyncedAction { }
+
+    public class SyncedExposure : SyncedAction {
 
         public string ExposureId { get; private set; }
         public string TargetName { get; private set; }
@@ -268,6 +312,24 @@ namespace Assistant.NINAPlugin.Sync {
             TargetPositionAngle = targetPositionAngle;
             TargetDatabaseId = targetDatabaseId;
             ExposurePlanDatabaseId = exposurePlanDatabaseId;
+        }
+    }
+
+    public class SyncedSolveRotate : SyncedAction {
+        public string SolveRotateId { get; private set; }
+        public string TargetName { get; private set; }
+        public string TargetRA { get; private set; }
+        public string TargetDec { get; private set; }
+        public double TargetPositionAngle { get; private set; }
+        public PierSide PierSide { get; private set; }
+
+        public SyncedSolveRotate(string solveRotateId, string targetName, string targetRA, string targetDec, double targetPositionAngle, PierSide pierSide) {
+            SolveRotateId = solveRotateId;
+            TargetName = targetName;
+            TargetRA = targetRA;
+            TargetDec = targetDec;
+            TargetPositionAngle = targetPositionAngle;
+            PierSide = pierSide;
         }
     }
 }

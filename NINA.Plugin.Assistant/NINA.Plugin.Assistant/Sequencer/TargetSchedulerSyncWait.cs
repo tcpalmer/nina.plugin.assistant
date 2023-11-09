@@ -18,18 +18,11 @@ using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
-    /* TODO FIX
-System.ComponentModel.Composition.CompositionContractMismatchException: Cannot cast the underlying exported value of type
-    'Assistant.NINAPlugin.Sequencer.TargetSchedulerSyncWait (ContractName="NINA.Sequencer.Container.ISequenceContainer")'
-    to type 'NINA.Sequencer.Container.ISequenceContainer'.
-    */
-
     [ExportMetadata("Name", "Target Scheduler Sync Wait")]
     [ExportMetadata("Description", "Target Scheduler synchronized waiting for multiple NINA instances")]
     [ExportMetadata("Icon", "Scheduler.SchedulerSVG")]
     [ExportMetadata("Category", "Target Scheduler")]
     [Export(typeof(ISequenceItem))]
-    [Export(typeof(ISequenceContainer))]
     [JsonObject(MemberSerialization.OptIn)]
     public class TargetSchedulerSyncWait : SequenceItem {
 

@@ -457,11 +457,11 @@
                             FontWeight="Bold" />
                         <UniformGrid
                             Width="320"
-                            Height="66"
+                            Height="88"
                             Margin="12,0,0,6"
                             HorizontalAlignment="Left"
                             Columns="2"
-                            Rows="3">
+                            Rows="4">
 
                             <TextBlock
                                 VerticalAlignment="Center"
@@ -506,11 +506,11 @@
                             <TextBlock
                                 VerticalAlignment="Center"
                                 FontWeight="Bold"
-                                Text="Exposure Timeout"
-                                ToolTip="Maximum number of seconds to wait on clients to accept exposures" />
+                                Text="Action Timeout"
+                                ToolTip="Maximum number of seconds to wait on clients to accept an action (exposure or solve/rotate)" />
                             <TextBox MaxHeight="20" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
                                 <TextBox.Text>
-                                    <Binding Path="ProfilePreferenceProxy.ProfilePreference.SyncExposureTimeout" UpdateSourceTrigger="LostFocus">
+                                    <Binding Path="ProfilePreferenceProxy.ProfilePreference.SyncActionTimeout" UpdateSourceTrigger="LostFocus">
                                         <Binding.ValidationRules>
                                             <rules:IntRangeRule>
                                                 <rules:IntRangeRule.ValidRange>
@@ -524,7 +524,31 @@
                             <TextBlock
                                 MaxHeight="20"
                                 Margin="3,3,0,0"
-                                Text="{Binding ProfilePreferenceProxy.ProfilePreference.SyncExposureTimeout}"
+                                Text="{Binding ProfilePreferenceProxy.ProfilePreference.SyncActionTimeout}"
+                                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontWeight="Bold"
+                                Text="Solve/Rotate Timeout"
+                                ToolTip="Maximum number of seconds to wait on clients to complete a solve/rotate" />
+                            <TextBox MaxHeight="20" Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                                <TextBox.Text>
+                                    <Binding Path="ProfilePreferenceProxy.ProfilePreference.SyncSolveRotateTimeout" UpdateSourceTrigger="LostFocus">
+                                        <Binding.ValidationRules>
+                                            <rules:IntRangeRule>
+                                                <rules:IntRangeRule.ValidRange>
+                                                    <rules:IntRangeChecker Maximum="10000000" Minimum="60" />
+                                                </rules:IntRangeRule.ValidRange>
+                                            </rules:IntRangeRule>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </TextBox.Text>
+                            </TextBox>
+                            <TextBlock
+                                MaxHeight="20"
+                                Margin="3,3,0,0"
+                                Text="{Binding ProfilePreferenceProxy.ProfilePreference.SyncSolveRotateTimeout}"
                                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
                         </UniformGrid>

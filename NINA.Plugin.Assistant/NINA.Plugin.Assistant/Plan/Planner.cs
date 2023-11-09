@@ -41,7 +41,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             if (AstrometryUtils.IsAbovePolarCircle(observerInfo)) {
                 TSLogger.Error("observer location is above a polar circle - not supported");
-                throw new Exception("Scheduler: observer location is above a polar circle - not supported");
+                throw new Exception("Target Scheduler: observer location is above a polar circle - not supported");
             }
         }
 

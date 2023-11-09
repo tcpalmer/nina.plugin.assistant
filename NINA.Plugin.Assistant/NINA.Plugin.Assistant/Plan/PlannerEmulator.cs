@@ -203,18 +203,20 @@ namespace Assistant.NINAPlugin.Plan {
             IPlanTarget planTarget = GetBasePlanTarget("M31", planProject, Cp5n5);
             planTarget.DatabaseId = 10;
             planTarget.EndTime = endTime;
+            planTarget.Rotation = 12.345;
             planTarget.ROI = 100;
 
-            IPlanExposure lum = GetExposurePlan("Lum", 20, null, null, 3, 50);
+            IPlanExposure lum = GetExposurePlan("Lum", 20, 139, 21, 3, 50);
             lum.ReadoutMode = 0;
             planTarget.ExposurePlans.Add(lum);
 
-            IPlanExposure red = GetExposurePlan("Red", 20, null, null, 3, 51);
+            IPlanExposure red = GetExposurePlan("Red", 20, 139, 21, 3, 51);
             red.ReadoutMode = 0;
             planTarget.ExposurePlans.Add(red);
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             instructions.Add(new PlanMessage("planner emulator: SyncPlan1"));
+            instructions.Add(new PlanSlew(true));
             instructions.Add(new PlanBeforeTargetContainer());
 
             instructions.Add(new PlanSetReadoutMode(lum));

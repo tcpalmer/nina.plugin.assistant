@@ -17,7 +17,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public int enableSynchronization { get; set; }
         public int syncWaitTimeout { get; set; }
-        public int syncExposureTimeout { get; set; }
+        public int syncActionTimeout { get; set; }
+        public int syncSolveRotateTimeout { get; set; }
 
         public int enableGradeRMS { get; set; }
         public int enableGradeStars { get; set; }
@@ -41,9 +42,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             ParkOnWait = false;
             ExposureThrottle = 125;
             EnableSmartPlanWindow = true;
-            EnableSynchronization = false;
-            SyncWaitTimeout = SyncManager.DEFAULT_SYNC_WAIT_TIMEOUT;
-            SyncExposureTimeout = SyncManager.DEFAULT_SYNC_EXPOSURE_TIMEOUT;
+
             EnableGradeRMS = true;
             EnableGradeStars = true;
             EnableGradeHFR = true;
@@ -57,6 +56,11 @@ namespace Assistant.NINAPlugin.Database.Schema {
             HFRSigmaFactor = 4;
             FWHMSigmaFactor = 4;
             EccentricitySigmaFactor = 4;
+
+            EnableSynchronization = false;
+            SyncWaitTimeout = SyncManager.DEFAULT_SYNC_WAIT_TIMEOUT;
+            SyncActionTimeout = SyncManager.DEFAULT_SYNC_ACTION_TIMEOUT;
+            SyncSolveRotateTimeout = SyncManager.DEFAULT_SYNC_SOLVEROTATE_TIMEOUT;
         }
 
         [NotMapped]
@@ -105,11 +109,20 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
-        public int SyncExposureTimeout {
-            get { return syncExposureTimeout; }
+        public int SyncActionTimeout {
+            get { return syncActionTimeout; }
             set {
-                syncExposureTimeout = value;
-                RaisePropertyChanged(nameof(SyncExposureTimeout));
+                syncActionTimeout = value;
+                RaisePropertyChanged(nameof(SyncActionTimeout));
+            }
+        }
+
+        [NotMapped]
+        public int SyncSolveRotateTimeout {
+            get { return syncSolveRotateTimeout; }
+            set {
+                syncSolveRotateTimeout = value;
+                RaisePropertyChanged(nameof(SyncSolveRotateTimeout));
             }
         }
 
