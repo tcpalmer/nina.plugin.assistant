@@ -95,7 +95,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         List<double> samples = GetSamples(images, i => { return i.Metadata.FWHM; });
                         if (SamplesHaveData(samples)) {
                             TSLogger.Info("image grading: FWHM ->");
-                            if (!WithinAcceptableVariance(samples, fwhm, Preferences.FWHMSigmaFactor, false)) {
+                            if (NearZero(fwhm) || !WithinAcceptableVariance(samples, fwhm, Preferences.FWHMSigmaFactor, false)) {
                                 TSLogger.Info("image grading: failed FWHM grading => NOT accepted");
                                 return (false, REJECT_FWHM);
                             }
@@ -115,7 +115,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         List<double> samples = GetSamples(images, i => { return i.Metadata.Eccentricity; });
                         if (SamplesHaveData(samples)) {
                             TSLogger.Info("image grading: eccentricity ->");
-                            if (!WithinAcceptableVariance(samples, eccentricity, Preferences.EccentricitySigmaFactor, false)) {
+                            if (NearZero(eccentricity) || !WithinAcceptableVariance(samples, eccentricity, Preferences.EccentricitySigmaFactor, false)) {
                                 TSLogger.Info("image grading: failed eccentricity grading => NOT accepted");
                                 return (false, REJECT_ECCENTRICITY);
                             }

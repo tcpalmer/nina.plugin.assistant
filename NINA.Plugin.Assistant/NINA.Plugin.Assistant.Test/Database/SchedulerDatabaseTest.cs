@@ -270,9 +270,11 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                 List<Project> projects = context.GetAllProjects(profileId);
                 Target p2t1 = projects[1].Targets[0];
+                p2t1.ExposurePlans.Count.Should().Be(3);
                 p2t1.ExposurePlans.Add(ep);
 
-                context.SaveTarget(p2t1);
+                Target t = context.SaveTarget(p2t1);
+                t.ExposurePlans.Count.Should().Be(4);
             }
         }
 
@@ -306,6 +308,25 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 pp2.RMSPixelThreshold.Should().BeApproximately(1, 0.001);
                 pp2.DetectedStarsSigmaFactor.Should().BeApproximately(2, 0.001);
                 pp2.HFRSigmaFactor.Should().BeApproximately(3, 0.001);
+            }
+        }
+
+        [Test, Order(8)]
+        [NonParallelizable]
+        public void TestDeleteExposurePlans() {
+            using (var context = db.GetContext()) {
+
+                ExposureTemplate et = context.GetExposureTemplate(1);
+                ExposurePlan ep = new ExposurePlan(et.profileId);
+                ep.ExposureTemplateId = et.Id;
+                ep.Exposure = 120;
+                ep.Desired = 10;
+
+                List<Project> projects = context.GetAllProjects(profileId);
+                Target p2t1 = projects[1].Targets[0];
+                p2t1.ExposurePlans.Count.Should().Be(4);
+                Target t = context.DeleteAllExposurePlans(p2t1);
+                t.ExposurePlans.Count.Should().Be(0);
             }
         }
 
