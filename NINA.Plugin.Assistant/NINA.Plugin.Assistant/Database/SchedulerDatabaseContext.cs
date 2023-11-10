@@ -416,6 +416,28 @@ namespace Assistant.NINAPlugin.Database {
             }
         }
 
+        public Target DeleteAllExposurePlans(Target target) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    TargetSet.AddOrUpdate(target);
+
+                    List<ExposurePlan> eps = ExposurePlanSet.Where(p => p.TargetId == target.Id).ToList();
+                    foreach (ExposurePlan ep in eps) {
+                        ExposurePlanSet.Remove(ep);
+                    }
+
+                    SaveChanges();
+                    transaction.Commit();
+                    return GetTargetByProject(target.ProjectId, target.Id);
+                }
+                catch (Exception e) {
+                    TSLogger.Error($"error deleting all exposure plans: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
+                }
+            }
+        }
+
         public ExposureTemplate SaveExposureTemplate(ExposureTemplate exposureTemplate) {
             TSLogger.Debug($"saving Exposure Template Id={exposureTemplate.Id} Name={exposureTemplate.Name}");
             using (var transaction = Database.BeginTransaction()) {

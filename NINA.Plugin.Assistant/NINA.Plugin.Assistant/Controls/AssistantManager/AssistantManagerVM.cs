@@ -715,6 +715,20 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        public Target DeleteAllExposurePlans(Target target) {
+            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+                Target updatedTarget = context.DeleteAllExposurePlans(target);
+                if (updatedTarget != null) {
+                    activeTreeDataItem.Data = updatedTarget;
+                }
+                else {
+                    Notification.ShowError("Failed to delete all Scheduler Exposure Plans (see log for details)");
+                }
+
+                return updatedTarget;
+            }
+        }
+
         public Target ReloadTarget(Target reference) {
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 Target reloadedTarget = context.GetTargetByProject(reference.ProjectId, reference.Id);
@@ -992,6 +1006,10 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         public static ExposurePlansSpec GetItem() {
             return Instance.item;
+        }
+
+        public static void Clear() {
+            Instance.item = null;
         }
 
         private ExposurePlansClipboard() { }

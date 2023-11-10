@@ -445,6 +445,26 @@
                         Stretch="Uniform" />
                 </Grid>
             </Button>
+            <Button
+                Width="25"
+                Height="25"
+                Margin="10,0,0,6"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Left"
+                Command="{Binding DeleteExposurePlansCommand}"
+                IsEnabled="{Binding ExposurePlansDeleteEnabled}"
+                Style="{StaticResource BackgroundButton}"
+                ToolTip="Delete all exposure plans"
+                ToolTipService.ShowOnDisabled="True">
+                <Grid>
+                    <Path
+                        Margin="5"
+                        Data="{StaticResource SS_DeleteSVG}"
+                        Fill="{StaticResource ButtonForegroundBrush}"
+                        Stretch="Uniform" />
+                </Grid>
+            </Button>
         </StackPanel>
 
         <DataGrid
