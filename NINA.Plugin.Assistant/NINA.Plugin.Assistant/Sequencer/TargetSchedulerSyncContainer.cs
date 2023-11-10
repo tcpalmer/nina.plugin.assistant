@@ -185,6 +185,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             else {
                 TSLogger.Info($"SYNC client starting solve/rotate, id={syncedSolveRotate.SolveRotateId}");
                 SolveAndRotate solveAndRotate = new SolveAndRotate(profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, plateSolverFactory, windowServiceFactory);
+                solveAndRotate.PositionAngle = syncedSolveRotate.TargetPositionAngle;
                 await solveAndRotate.Execute(progress, token);
                 TSLogger.Info($"SYNC client completed solve/rotate, id={syncedSolveRotate.SolveRotateId}");
             }
