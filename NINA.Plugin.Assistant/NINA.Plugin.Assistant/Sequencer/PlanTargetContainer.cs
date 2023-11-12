@@ -86,7 +86,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 SchedulerProgressVM schedulerProgress) : base(new PlanTargetContainerStrategy()) {
             Name = nameof(PlanTargetContainer);
             Description = "";
-            Category = "Assistant";
+            Category = INSTRUCTION_CATEGORY;
 
             this.parentContainer = parentContainer;
             this.profileService = profileService;

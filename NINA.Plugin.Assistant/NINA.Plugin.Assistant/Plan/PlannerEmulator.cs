@@ -216,7 +216,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             instructions.Add(new PlanMessage("planner emulator: SyncPlan1"));
-            instructions.Add(new PlanSlew(true));
+            //instructions.Add(new PlanSlew(true));
             instructions.Add(new PlanBeforeTargetContainer());
 
             instructions.Add(new PlanSetReadoutMode(lum));

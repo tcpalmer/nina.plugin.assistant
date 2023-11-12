@@ -10,6 +10,7 @@ using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.SyncService.Sync;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Container;
+using NINA.Sequencer.Container.ExecutionStrategy;
 using NINA.Sequencer.SequenceItem;
 using NINA.Sequencer.SequenceItem.Platesolving;
 using NINA.WPF.Base.Interfaces.Mediator;
@@ -19,6 +20,7 @@ using System;
 using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Assistant.NINAPlugin.Sequencer {
     [ExportMetadata("Name", "Target Scheduler Sync Container")]
@@ -26,8 +28,9 @@ namespace Assistant.NINAPlugin.Sequencer {
     [ExportMetadata("Icon", "Scheduler.SchedulerSVG")]
     [ExportMetadata("Category", "Target Scheduler")]
     [Export(typeof(ISequenceItem))]
+    [Export(typeof(ISequenceContainer))]
     [JsonObject(MemberSerialization.OptIn)]
-    public class TargetSchedulerSyncContainer : SequenceItem {
+    public class TargetSchedulerSyncContainer : SequentialContainer {
 
         private readonly IProfileService profileService;
         private readonly ITelescopeMediator telescopeMediator;
@@ -56,6 +59,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             IGuiderMediator guiderMediator,
             IPlateSolverFactory plateSolverFactory,
             IWindowServiceFactory windowServiceFactory) : base() {
+
             this.profileService = profileService;
             this.telescopeMediator = telescopeMediator;
             this.rotatorMediator = rotatorMediator;
@@ -131,10 +135,12 @@ namespace Assistant.NINAPlugin.Sequencer {
             while (true) {
                 progress?.Report(new ApplicationStatus() { Status = "Target Scheduler: requesting action from sync server" });
                 try {
+                    DisplayText = "Requesting action from sync server";
                     SyncedAction syncedAction = await SyncClient.Instance.StartRequestAction(token);
 
                     if (syncedAction == null) {
                         TSLogger.Info("TargetSchedulerSyncContainer complete, ending instruction");
+                        DisplayText = "Completed";
                         progress?.Report(new ApplicationStatus() { Status = "" });
                         break;
                     }
@@ -142,11 +148,12 @@ namespace Assistant.NINAPlugin.Sequencer {
                     if (syncedAction is SyncedExposure) {
                         SyncedExposure syncedExposure = syncedAction as SyncedExposure;
                         TSLogger.Info($"SYNC client received exposure: {syncedExposure.ExposureId} for {syncedExposure.TargetName}");
-                        await TakeSyncedExposure(syncedExposure, progress, token);
+                        TakeSyncedExposure(syncedExposure, progress, token).Wait();
                     }
 
                     if (syncedAction is SyncedSolveRotate) {
                         SyncedSolveRotate syncedSolveRotate = syncedAction as SyncedSolveRotate;
+                        DisplayText = $"Rotating to {syncedSolveRotate.TargetPositionAngle} and solving";
                         TSLogger.Info($"SYNC client received solve/rotate: {syncedSolveRotate.SolveRotateId} for {syncedSolveRotate.TargetName}");
                         await DoSyncedSolveRotate(syncedSolveRotate, progress, token);
                     }
@@ -161,19 +168,31 @@ namespace Assistant.NINAPlugin.Sequencer {
                         TSLogger.Error($"TargetSchedulerSyncContainer exception (will continue): {ex}");
                     }
                 }
-
-                // Test something like an AF on the client
-                //SyncClient.Instance.SetClientState(ClientState.Exposureready);
-                //Utils.TestWait(130);
-                ////
             }
 
+            DisplayText = "";
             syncImageSaveWatcher.Stop();
         }
 
+        private string displayText;
+        public string DisplayText {
+            get => displayText;
+            set {
+                displayText = value;
+                RaisePropertyChanged(nameof(DisplayText));
+            }
+        }
+
+        public void UpdateDisplayTextAction(string text) { DisplayText = text; }
+
         private async Task TakeSyncedExposure(SyncedExposure syncedExposure, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            SyncTakeExposure takeExposure = new SyncTakeExposure(profileService, rotatorMediator, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM, filterWheelMediator, syncImageSaveWatcher, syncedExposure);
-            await takeExposure.Execute(progress, token);
+            SyncTakeExposureContainer container = new SyncTakeExposureContainer(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM, filterWheelMediator, syncImageSaveWatcher, syncedExposure, UpdateDisplayTextAction);
+            Application.Current.Dispatcher.Invoke(delegate {
+                Items.Clear();
+                Add(container);
+            });
+
+            await base.Execute(progress, token);
         }
 
         private async Task DoSyncedSolveRotate(SyncedSolveRotate syncedSolveRotate, IProgress<ApplicationStatus> progress, CancellationToken token) {
