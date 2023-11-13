@@ -223,6 +223,10 @@ namespace Assistant.NINAPlugin.Plan {
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
             instructions.Add(new PlanTakeExposure(lum));
+            instructions.Add(new PlanTakeExposure(lum));
+            instructions.Add(new PlanTakeExposure(lum));
+            instructions.Add(new PlanTakeExposure(lum));
+            instructions.Add(new PlanTakeExposure(lum));
 
             instructions.Add(new PlanSetReadoutMode(red));
             instructions.Add(new PlanSwitchFilter(red));

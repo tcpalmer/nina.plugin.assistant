@@ -21,6 +21,7 @@ using NINA.Sequencer.Conditions;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
 using NINA.Sequencer.Trigger;
+using NINA.Sequencer.Trigger.Platesolving;
 using NINA.Sequencer.Utility.DateTimeProvider;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
@@ -245,6 +246,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         TSLogger.Info("--BEGIN PLAN EXECUTION--------------------------------------------------------");
                         TSLogger.Info($"plan target: {planTarget.Name}");
                         SetTarget(atTime, planTarget);
+                        ResetCenterAfterDrift();
                         SchedulerProgress.TargetStart(planTarget.Project.Name, planTarget.Name);
 
                         // Create a container for this target, add the instructions, and execute
@@ -437,6 +439,32 @@ namespace Assistant.NINAPlugin.Sequencer {
             inputTarget.InputCoordinates.Coordinates = new Coordinates(Angle.Zero, Angle.Zero, Epoch.J2000);
             inputTarget.PositionAngle = 0;
             return inputTarget;
+        }
+
+        private void ResetCenterAfterDrift() {
+            // If our parent container has a CenterAfterDrift trigger, reset it for latest plan target coordinates
+            CenterAfterDriftTrigger centerAfterDriftTrigger = GetCenterAfterDriftTrigger();
+            if (centerAfterDriftTrigger != null) {
+                TSLogger.Info("Resetting container CenterAfterDrift trigger for latest plan coordinates");
+                centerAfterDriftTrigger.Coordinates = Target.InputCoordinates;
+                centerAfterDriftTrigger.Inherited = true;
+                centerAfterDriftTrigger.SequenceBlockInitialize();
+            }
+        }
+
+        private CenterAfterDriftTrigger GetCenterAfterDriftTrigger() {
+            SequenceContainer container = (Parent as SequenceContainer);
+            if (container != null) {
+                var triggers = container.GetTriggersSnapshot();
+                foreach (ISequenceTrigger trigger in triggers) {
+                    CenterAfterDriftTrigger centerAfterDriftTrigger = trigger as CenterAfterDriftTrigger;
+                    if (centerAfterDriftTrigger != null) {
+                        return centerAfterDriftTrigger;
+                    }
+                }
+            }
+
+            return null;
         }
 
         private void SchedulerProgress_PropertyChanged(object sender, PropertyChangedEventArgs e) {

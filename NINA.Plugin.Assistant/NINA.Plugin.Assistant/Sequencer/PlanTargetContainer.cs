@@ -5,6 +5,7 @@ using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Enum;
 using NINA.Core.Model;
+using NINA.Core.Utility.Notification;
 using NINA.Core.Utility.WindowService;
 using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
@@ -21,6 +22,7 @@ using NINA.Sequencer.SequenceItem.Imaging;
 using NINA.Sequencer.SequenceItem.Platesolving;
 using NINA.Sequencer.SequenceItem.Telescope;
 using NINA.Sequencer.Trigger;
+using NINA.Sequencer.Trigger.Platesolving;
 using NINA.Sequencer.Utility;
 using NINA.Sequencer.Utility.DateTimeProvider;
 using NINA.WPF.Base.Interfaces.Mediator;
@@ -185,6 +187,13 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             foreach (var trigger in localTriggers) {
                 if (trigger.Status == SequenceEntityStatus.DISABLED) { continue; }
+
+                if (trigger is CenterAfterDriftTrigger) {
+                    TSLogger.Warning("Found CenterAfterDriftTrigger in Target Scheduler Container Triggers, will be ignored and should be removed");
+                    Notification.ShowWarning("Center After Drift trigger should be removed from Target Scheduler Container Triggers and added to surrounding container.");
+                    continue;
+                }
+
                 Add((ISequenceTrigger)trigger.Clone());
             }
         }
