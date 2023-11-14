@@ -144,25 +144,42 @@
                             SelectedValue="{Binding SelectedFilterId}"
                             SelectedValuePath="Key" />
 
-                        <Button
-                            Grid.Row="5"
-                            Grid.Column="0"
-                            Width="18"
-                            Height="18"
-                            Margin="10,5,0,0"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Center"
-                            Command="{Binding RefreshTableCommand}"
-                            Style="{StaticResource BackgroundButton}"
-                            ToolTip="Refresh the table to reflect external changes"
-                            ToolTipService.ShowOnDisabled="True">
-                            <Grid>
-                                <Path
-                                    Data="{StaticResource SS_RefreshSVG}"
-                                    Fill="{StaticResource ButtonForegroundBrush}"
-                                    Stretch="Uniform" />
-                            </Grid>
-                        </Button>
+                        <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.Column="0">
+                            <Button
+                                Width="18"
+                                Height="18"
+                                Margin="0,5,0,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Command="{Binding RefreshTableCommand}"
+                                Style="{StaticResource BackgroundButton}"
+                                ToolTip="Refresh the table to reflect external changes"
+                                ToolTipService.ShowOnDisabled="True">
+                                <Grid>
+                                    <Path
+                                        Data="{StaticResource SS_RefreshSVG}"
+                                        Fill="{StaticResource ButtonForegroundBrush}"
+                                        Stretch="Uniform" />
+                                </Grid>
+                            </Button>
+                            <Button
+                                Width="18"
+                                Height="18"
+                                Margin="10,5,0,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Command="{Binding CsvOutputCommand}"
+                                Style="{StaticResource BackgroundButton}"
+                                ToolTip="Write current query results to a CSV file"
+                                ToolTipService.ShowOnDisabled="True">
+                                <Grid>
+                                    <Path
+                                        Data="{StaticResource SS_CsvSVG}"
+                                        Fill="{StaticResource ButtonForegroundBrush}"
+                                        Stretch="Uniform" />
+                                </Grid>
+                            </Button>
+                        </StackPanel>
 
                     </Grid>
                 </Border>
@@ -207,8 +224,8 @@
                                     Grid.Row="0"
                                     Grid.Column="1"
                                     Width="200"
-                                    VerticalAlignment="Center"
                                     HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
                                     SelectedDate="{Binding PurgeOlderThanDate}" />
 
                                 <TextBlock

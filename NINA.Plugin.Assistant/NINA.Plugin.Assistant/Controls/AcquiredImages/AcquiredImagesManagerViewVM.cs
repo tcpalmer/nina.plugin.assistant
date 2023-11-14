@@ -1,6 +1,8 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
+using CsvHelper;
 using LinqKit;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using NINA.Core.Locale;
 using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
@@ -12,6 +14,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Text;
@@ -33,6 +36,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
             database = new SchedulerDatabaseInteraction();
 
             RefreshTableCommand = new AsyncCommand<bool>(() => RefreshTable());
+            CsvOutputCommand = new AsyncCommand<bool>(() => CsvOutput());
             PurgeCommand = new AsyncCommand<bool>(() => PurgeRecords());
             PurgeTargetChoices = GetPurgeTargetChoices();
 
@@ -321,6 +325,56 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
             return true;
         }
 
+        public ICommand CsvOutputCommand { get; private set; }
+
+        private async Task<bool> CsvOutput() {
+
+            if (AcquiredImageCollection.Count == 0) {
+                MyMessageBox.Show("No records selected for CSV output");
+                return true;
+            }
+
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.Title = "Select CSV Output File";
+
+            CommonFileDialogResult result = dialog.ShowDialog();
+            if (result == CommonFileDialogResult.Ok) {
+                string fileName = dialog.FileName;
+                string ext = Path.GetExtension(fileName);
+                if (ext != ".csv" && ext != ".CSV") {
+                    fileName = $"{fileName}.csv";
+                }
+
+                if (File.Exists(fileName)) {
+                    if (MyMessageBox.Show($"File {fileName} exists, overwrite?", "Overwrite?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
+                        try { File.Delete(fileName); }
+                        catch (Exception e) {
+                            TSLogger.Error($"failed to remove existing CSV file {fileName}: {e.Message}");
+                            return false;
+                        }
+                    }
+                }
+
+                try {
+                    using (var writer = File.AppendText(fileName))
+                    using (var csv = new CsvWriter(writer, System.Globalization.CultureInfo.InvariantCulture)) {
+                        csv.WriteHeader<CsvAcquiredImage>();
+                        csv.NextRecord();
+                        foreach (var record in AcquiredImageCollection) {
+                            csv.WriteRecord(new CsvAcquiredImage(record));
+                            csv.NextRecord();
+                        }
+                    }
+                }
+                catch (Exception e) {
+                    TSLogger.Error($"failed to write CSV file {fileName}: {e.Message}");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public ICommand PurgeCommand { get; private set; }
 
         private async Task<bool> PurgeRecords() {
@@ -576,6 +630,57 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         private string fmtHF(double d) {
             return Double.IsNaN(d) || d <= 0 ? "--" : String.Format("{0:0.####}", d);
         }
+    }
+
+    class CsvAcquiredImage {
+
+        private AcquiredImageVM record;
+
+        public CsvAcquiredImage(AcquiredImageVM record) {
+            this.record = record;
+        }
+
+        public DateTime AcquiredDate { get => record.AcquiredDate; }
+        public string FilePath { get => record.FileName; }
+
+        public string ProjectName { get => record.ProjectName; }
+        public string TargetName { get => record.TargetName; }
+        public string FilterName { get => record.FilterName; }
+        public bool Accepted { get => record.Accepted; }
+        public string RejectReason { get => record.RejectReason; }
+
+        public string Duration { get => record.ExposureDuration; }
+
+        public string Binning { get => record.Binning; }
+        public string CameraTemp { get => record.CameraTemp; }
+        public string CameraTargetTemp { get => record.CameraTargetTemp; }
+        public string Gain { get => record.Gain; }
+        public string Offset { get => record.Offset; }
+
+        public string ADUStDev { get => record.ADUStDev; }
+        public string ADUMean { get => record.ADUMean; }
+        public string ADUMedian { get => record.ADUMedian; }
+        public string ADUMin { get => record.ADUMin; }
+        public string ADUMax { get => record.ADUMax; }
+
+        public string DetectedStars { get => record.DetectedStars; }
+        public string HFR { get => record.HFR; }
+        public string HFRStDev { get => record.HFRStDev; }
+        public string FWHM { get => record.FWHM; }
+        public string Eccentricity { get => record.Eccentricity; }
+
+        public string GuidingRMS { get => record.GuidingRMS; }
+        public string GuidingRMSArcSec { get => record.GuidingRMSArcSec; }
+        public string GuidingRMSRA { get => record.GuidingRMSRA; }
+        public string GuidingRMSRAArcSec { get => record.GuidingRMSRAArcSec; }
+        public string GuidingRMSDEC { get => record.GuidingRMSDEC; }
+        public string GuidingRMSDECArcSec { get => record.GuidingRMSDECArcSec; }
+
+        public string FocuserPosition { get => record.FocuserPosition; }
+        public string FocuserTemp { get => record.FocuserTemp; }
+        public string RotatorPosition { get => record.RotatorPosition; }
+        public string PierSide { get => record.PierSide; }
+        public string Airmass { get => record.Airmass; }
     }
 
     class ProjectTargetNameCache {
