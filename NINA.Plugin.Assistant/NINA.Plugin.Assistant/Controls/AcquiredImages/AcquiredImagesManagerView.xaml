@@ -391,9 +391,13 @@
                                     VerticalAlignment="Center"
                                     Text="Exposure (secs)" />
                                 <TextBlock
-                                    Margin="0,3,0,0"
+                                    Margin="0,3,0,16"
                                     VerticalAlignment="Center"
                                     Text="Image File" />
+                                <TextBlock
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="Profile" />
                             </StackPanel>
                         </Border>
                         <Border
@@ -427,6 +431,12 @@
                                         Margin="0,3,0,0"
                                         VerticalAlignment="Center"
                                         Text="{Binding FileName}" />
+                                </ScrollViewer>
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden">
+                                    <TextBlock
+                                        Margin="0,3,0,0"
+                                        VerticalAlignment="Center"
+                                        Text="{Binding ProfileName}" />
                                 </ScrollViewer>
                             </StackPanel>
                         </Border>

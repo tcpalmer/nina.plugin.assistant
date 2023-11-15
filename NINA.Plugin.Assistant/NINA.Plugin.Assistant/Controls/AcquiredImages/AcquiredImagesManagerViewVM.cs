@@ -7,6 +7,7 @@ using NINA.Core.Locale;
 using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
 using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;
 using System;
@@ -29,10 +30,12 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
     public class AcquiredImagesManagerViewVM : BaseVM {
 
+        private IProfileService profileService;
         private SchedulerDatabaseInteraction database;
 
         public AcquiredImagesManagerViewVM(IProfileService profileService) : base(profileService) {
 
+            this.profileService = profileService;
             database = new SchedulerDatabaseInteraction();
 
             RefreshTableCommand = new AsyncCommand<bool>(() => RefreshTable());
@@ -353,6 +356,9 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
                             return false;
                         }
                     }
+                    else {
+                        return true;
+                    }
                 }
 
                 try {
@@ -370,6 +376,8 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
                     TSLogger.Error($"failed to write CSV file {fileName}: {e.Message}");
                     return false;
                 }
+
+                TSLogger.Info($"wrote CSV file: {fileName}");
             }
 
             return true;
@@ -456,7 +464,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
                     // Create an intermediate list so we can add it to the display collection via AddRange while suppressing notifications
                     List<AcquiredImageVM> acquiredImageVMs = new List<AcquiredImageVM>(acquiredImages.Count);
-                    acquiredImages.ForEach(a => { acquiredImageVMs.Add(new AcquiredImageVM(a)); });
+                    acquiredImages.ForEach(a => { acquiredImageVMs.Add(new AcquiredImageVM(a, profileService)); });
 
                     _dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => {
                         AcquiredImageCollection.Clear();
@@ -545,10 +553,11 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
         public AcquiredImageVM() { }
 
-        public AcquiredImageVM(AcquiredImage acquiredImage) {
+        public AcquiredImageVM(AcquiredImage acquiredImage, IProfileService profileService) {
             this.acquiredImage = acquiredImage;
             string projectName;
             string targetName;
+            string? profileName;
 
             NamesItem names = ProjectTargetNameCache.GetNames(acquiredImage.ProjectId, acquiredImage.TargetId);
 
@@ -571,12 +580,22 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
             ProjectName = projectName;
             TargetName = targetName;
+
+            profileName = acquiredImage.profileId != null ? ProfileNameCache.Get(acquiredImage.profileId) : "";
+            if (profileName == null) {
+                ProfileMeta profileMeta = profileService.Profiles.Where(p => p.Id.ToString() == acquiredImage.profileId).FirstOrDefault();
+                profileName = profileMeta != null ? profileMeta.Name : "";
+                ProfileNameCache.Put(acquiredImage.profileId, profileName);
+            }
+
+            ProfileName = profileName;
         }
 
         public DateTime AcquiredDate { get { return acquiredImage.AcquiredDate; } }
         public string FilterName { get { return acquiredImage.FilterName; } }
         public string ProjectName { get; private set; }
         public string TargetName { get; private set; }
+        public string ProfileName { get; private set; }
         public bool Accepted { get { return acquiredImage.Accepted; } }
         public string RejectReason { get { return acquiredImage.RejectReason; } }
 
@@ -645,6 +664,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
         public string ProjectName { get => record.ProjectName; }
         public string TargetName { get => record.TargetName; }
+        public string ProfileName { get => record.ProfileName; }
         public string FilterName { get => record.FilterName; }
         public bool Accepted { get => record.Accepted; }
         public string RejectReason { get => record.RejectReason; }
@@ -710,6 +730,20 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         public NamesItem(string projectName, string targetName) {
             ProjectName = projectName;
             TargetName = targetName;
+        }
+    }
+
+    internal class ProfileNameCache {
+
+        private static readonly TimeSpan ITEM_TIMEOUT = TimeSpan.FromHours(12);
+        private static readonly MemoryCache _cache = new MemoryCache("Scheduler AcquiredImages Profile Names");
+
+        internal static string Get(string profileId) {
+            return (string)_cache.Get(profileId);
+        }
+
+        internal static void Put(string profileId, string profileName) {
+            _cache.Add(profileId, profileName, DateTime.Now.Add(ITEM_TIMEOUT));
         }
     }
 }
