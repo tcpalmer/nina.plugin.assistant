@@ -292,7 +292,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 }
                 catch (Exception e) {
                     CollapseAllViews();
-                    TSLogger.Error("Error while changing selected item in nav tree", e);
+                    TSLogger.Error($"Error while changing selected item in nav tree: {e.Message}");
                     MyMessageBox.Show("An error occured trying to select an item.  Is it possible you have another instance of NINA running that was locked the associated profile?", "Oops");
                 }
             }
