@@ -1,6 +1,6 @@
 # Release Notes
 
-## 4.0.5.0 - 2023-11-XX
+## 4.0.5.0 - 2023-11-17
 * Added image grading on FWHM and Eccentricity (requires Hocus Focus plugin)
 * Added option to move rejected images to a 'rejected' directory
 * Added ability to purge acquired image records by date or date/target
