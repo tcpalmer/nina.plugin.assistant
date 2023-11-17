@@ -1,12 +1,29 @@
 ﻿using NINA.Astrometry;
+using NINA.Core.Model;
+using NINA.Core.Model.Equipment;
+using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Profile.Interfaces;
 using System;
+using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Util {
 
     public class Utils {
 
         public static readonly string DateFMT = "yyyy-MM-dd HH:mm:ss";
+
+        public static FilterInfo LookupFilter(IProfileService profileService, string filterName) {
+            foreach (FilterInfo filterInfo in profileService?.ActiveProfile?.FilterWheelSettings?.FilterWheelFilters) {
+                if (filterInfo.Name == filterName) {
+                    return filterInfo;
+                }
+            }
+
+            throw new SequenceEntityFailedException($"failed to find FilterInfo for filter: {filterName}");
+        }
 
         public static string MtoHM(int minutes) {
             decimal hours = Math.Floor((decimal)minutes / 60);
@@ -55,6 +72,12 @@ namespace Assistant.NINAPlugin.Util {
             return coordinates == null ? "n/a" : $"{coordinates.RAString} {coordinates.DecString}";
         }
 
+        public static async void TestWait(int seconds) {
+            TSLogger.Debug($"********** TESTING: waiting for {seconds}s ...");
+            Thread.Sleep(seconds * 1000);
+            TSLogger.Debug("********** TESTING: wait complete");
+        }
+
         public static DateTime GetMidpointTime(DateTime startTime, DateTime endTime) {
             long span = (long)endTime.Subtract(startTime).TotalSeconds;
             return startTime.AddSeconds(span / 2);
@@ -94,6 +117,38 @@ namespace Assistant.NINAPlugin.Util {
             return string.Format(pattern, degree, arcmin, arcsec);
         }
 
+        public static bool IsCancelException(Exception ex) {
+            if (ex == null) { return false; }
+
+            if (ex is TaskCanceledException) { return true; }
+            if (ex is OperationCanceledException) { return true; }
+            if (ex.Message.Contains("canceled")) { return true; }
+            if (ex.Message.Contains("cancelled")) { return true; }
+
+            if (ex.InnerException != null) {
+                return IsCancelException(ex.InnerException);
+            }
+
+            return false;
+        }
+
+        public static bool MoveFile(string srcFile, string dstDir) {
+            try {
+                if (!Directory.Exists(dstDir)) {
+                    Directory.CreateDirectory(dstDir);
+                }
+
+                File.Move(srcFile, Path.Combine(dstDir, Path.GetFileName(srcFile)));
+                return true;
+
+            }
+            catch (Exception ex) {
+                TSLogger.Error($"failed to move file {srcFile} to {dstDir}: {ex.Message}");
+                return false;
+            }
+        }
+
+        private Utils() { }
     }
 
 }

@@ -2,12 +2,14 @@
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
-using NINA.Core.Utility;
+using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;
 using System;
 using System.Collections.Concurrent;
 using System.Data.Entity.Migrations;
+using System.IO;
 using System.Text;
 using System.Threading;
 
@@ -29,19 +31,26 @@ namespace Assistant.NINAPlugin.Sequencer {
     /// </summary>
     public class ImageSaveWatcher : IImageSaveWatcher {
 
+        public static readonly string REJECTED_SUBDIR = "rejected";
+
         private IProfile profile;
+        private ProfilePreference profilePreference;
         private IImageSaveMediator imageSaveMediator;
         private ConcurrentDictionary<int, int> exposureDictionary;
 
         private IPlanTarget planTarget;
         private bool enableGrader;
+        private bool synchronizationEnabled;
+        private CancellationTokenSource syncClientExposureWatcherCts;
 
-        public ImageSaveWatcher(IProfile profile, IImageSaveMediator imageSaveMediator, IPlanTarget planTarget) {
+        public ImageSaveWatcher(IProfile profile, IImageSaveMediator imageSaveMediator, IPlanTarget planTarget, bool synchronizationEnabled) {
             this.profile = profile;
+            this.profilePreference = new SchedulerPlanLoader(profile).GetProfilePreferences();
             this.imageSaveMediator = imageSaveMediator;
             exposureDictionary = new ConcurrentDictionary<int, int>(Environment.ProcessorCount * 2, 31);
             this.planTarget = planTarget;
             this.enableGrader = planTarget.Project.EnableGrader;
+            this.synchronizationEnabled = synchronizationEnabled;
         }
 
         public void Start() {
@@ -74,6 +83,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             imageSaveMediator.ImageSaved -= ImageSaved;
+
             TSLogger.Debug($"stopped watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
         }
 
@@ -84,8 +94,14 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             bool accepted = false;
             string rejectReason = "not graded";
+
             if (enableGrader) {
                 (accepted, rejectReason) = new ImageGrader(profile).GradeImage(planTarget, msg);
+                if (!accepted && profilePreference.EnableMoveRejected) {
+                    string dstDir = Path.Combine(Path.GetDirectoryName(msg.PathToImage.LocalPath), REJECTED_SUBDIR);
+                    TSLogger.Debug($"moving rejected image to {dstDir}");
+                    Utils.MoveFile(msg.PathToImage.LocalPath, dstDir);
+                }
             }
 
             int? imageId = msg.MetaData?.Image?.Id;
@@ -136,13 +152,14 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                         // Save the acquired image record
                         AcquiredImage acquiredImage = new AcquiredImage(
+                            profile.Id.ToString(),
                             planTarget.Project.DatabaseId,
                             planTarget.DatabaseId,
                             msg.MetaData.Image.ExposureStart,
                             filterName,
                             accepted,
                             rejectReason,
-                            new ImageMetadata(msg));
+                            new ImageMetadata(msg, planTarget.ROI));
                         context.AcquiredImageSet.Add(acquiredImage);
 
                         context.SaveChanges();

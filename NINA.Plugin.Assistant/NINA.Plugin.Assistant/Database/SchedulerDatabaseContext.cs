@@ -1,8 +1,10 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
+using Assistant.NINAPlugin.Controls.AcquiredImages;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan.Scoring.Rules;
-using Assistant.NINAPlugin.Util;
+using LinqKit;
 using NINA.Core.Utility;
+using NINA.Plugin.Assistant.Shared.Utility;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -111,6 +113,12 @@ namespace Assistant.NINAPlugin.Database {
                 .FirstOrDefault();
         }
 
+        public Target GetTargetOnly(int targetId) {
+            return TargetSet
+                .Where(t => t.Id == targetId)
+                .FirstOrDefault();
+        }
+
         public Target GetTarget(int projectId, int targetId) {
             return TargetSet
                 .Include("exposureplans.exposuretemplate")
@@ -149,6 +157,38 @@ namespace Assistant.NINAPlugin.Database {
                 p.accepted == 1)
               .OrderByDescending(p => p.acquiredDate);
             return images.ToList();
+        }
+
+        public int GetAcquiredImagesCount(DateTime olderThan, int targetId) {
+            var predicate = PredicateBuilder.New<AcquiredImage>();
+            long olderThanSecs = DateTimeToUnixSeconds(olderThan);
+            predicate = predicate.And(a => a.acquiredDate < olderThanSecs);
+            if (targetId != 0) {
+                predicate = predicate.And(a => a.TargetId == targetId);
+            }
+
+            return AcquiredImageSet.AsNoTracking().AsExpandable().Where(predicate).Count();
+        }
+
+        public void DeleteAcquiredImages(DateTime olderThan, int targetId) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    var predicate = PredicateBuilder.New<AcquiredImage>();
+                    long olderThanSecs = DateTimeToUnixSeconds(olderThan);
+                    predicate = predicate.And(a => a.acquiredDate < olderThanSecs);
+                    if (targetId != 0) {
+                        predicate = predicate.And(a => a.TargetId == targetId);
+                    }
+
+                    AcquiredImageSet.RemoveRange(AcquiredImageSet.Where(predicate));
+                    SaveChanges();
+                    transaction.Commit();
+                }
+                catch (Exception e) {
+                    TSLogger.Error($"error deleting acquired images: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                }
+            }
         }
 
         public ImageData GetImageData(int acquiredImageId) {
@@ -370,6 +410,28 @@ namespace Assistant.NINAPlugin.Database {
                 }
                 catch (Exception e) {
                     TSLogger.Error($"error deleting exposure plan: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
+                }
+            }
+        }
+
+        public Target DeleteAllExposurePlans(Target target) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    TargetSet.AddOrUpdate(target);
+
+                    List<ExposurePlan> eps = ExposurePlanSet.Where(p => p.TargetId == target.Id).ToList();
+                    foreach (ExposurePlan ep in eps) {
+                        ExposurePlanSet.Remove(ep);
+                    }
+
+                    SaveChanges();
+                    transaction.Commit();
+                    return GetTargetByProject(target.ProjectId, target.Id);
+                }
+                catch (Exception e) {
+                    TSLogger.Error($"error deleting all exposure plans: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
                 }

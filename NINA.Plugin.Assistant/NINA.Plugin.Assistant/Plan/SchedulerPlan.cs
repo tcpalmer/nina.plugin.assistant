@@ -4,6 +4,7 @@ using Assistant.NINAPlugin.Plan.Scoring.Rules;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Model.Equipment;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -70,6 +71,7 @@ namespace Assistant.NINAPlugin.Plan {
             }
 
             bool haveScoringRuns = false;
+            bool hasAllEPsRejected = false;
 
             if (Projects != null) {
                 sb.AppendLine(String.Format("\n{0,-40} {1,-27} {2,6}   {3,19}", "TARGETS CONSIDERED", "REJECTED FOR", "SCORE", "POTENTIAL START"));
@@ -84,7 +86,14 @@ namespace Assistant.NINAPlugin.Plan {
                         }
 
                         sb.AppendLine(String.Format("{0,-40} {1,-27} {2,6}   {3}", $"{project.Name}/{target.Name}", target.RejectedReason, score, startTime));
+                        if (target.RejectedReason == Reasons.TargetAllExposurePlans) {
+                            hasAllEPsRejected = true;
+                        }
                     }
+                }
+
+                if (hasAllEPsRejected) {
+                    sb.AppendLine("\n(Rejection for 'all exposure plans' is due to moon avoidance or all exposure plans complete.)");
                 }
 
                 if (haveScoringRuns) {

@@ -1,12 +1,12 @@
-﻿using Assistant.NINAPlugin.Util;
+﻿using Namotion.Reflection;
 using NINA.Core.Enum;
 using NINA.Image.ImageData;
+using NINA.Image.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;
-using System;
 using System.Text;
 using System.Web;
 
-namespace Assistant.NINAPlugin.Database.Schema {
+namespace NINA.Plugin.Assistant.Shared.Utility {
 
     public class ImageMetadata {
 
@@ -18,10 +18,14 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public int Gain { get; set; }
         public int Offset { get; set; }
         public string Binning { get; set; }
+        public double ROI { get; set; }
 
         public int DetectedStars { get; set; }
         public double HFR { get; set; }
         public double HFRStDev { get; set; }
+
+        public double FWHM { get; set; }
+        public double Eccentricity { get; set; }
 
         public double ADUStDev { get; set; }
         public double ADUMean { get; set; }
@@ -47,14 +51,17 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public ImageMetadata() { }
 
-        public ImageMetadata(ImageSavedEventArgs msg) {
-            Assert.notNull(msg, "msg cannot be null");
+        public ImageMetadata(ImageSavedEventArgs msg, double roi) {
+            if (msg == null) {
+                throw new Exception("msg cannot be null");
+            }
 
             FileName = msg.PathToImage.LocalPath;
             FilterName = msg.Filter;
             ExposureStartTime = msg.MetaData.Image.ExposureStart;
             ExposureDuration = msg.Duration;
             Binning = msg.MetaData.Image.Binning?.ToString();
+            ROI = roi;
 
             Gain = msg.MetaData.Camera.Gain;
             Offset = msg.MetaData.Camera.Offset;
@@ -69,6 +76,9 @@ namespace Assistant.NINAPlugin.Database.Schema {
             HFR = msg.StarDetectionAnalysis.HFR;
             HFRStDev = msg.StarDetectionAnalysis.HFRStDev;
 
+            FWHM = GetHocusFocusMetric(msg.StarDetectionAnalysis, "FWHM");
+            Eccentricity = GetHocusFocusMetric(msg.StarDetectionAnalysis, "Eccentricity");
+
             GuidingRMS = GetGuidingMetric(msg.MetaData.Image, msg.MetaData.Image?.RecordedRMS?.Total);
             GuidingRMSArcSec = GetGuidingMetricArcSec(msg.MetaData.Image, msg.MetaData.Image?.RecordedRMS?.Total);
             GuidingRMSRA = GetGuidingMetric(msg.MetaData.Image, msg.MetaData.Image?.RecordedRMS?.RA);
@@ -78,7 +88,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
             FocuserPosition = msg.MetaData.Focuser.Position;
             FocuserTemp = msg.MetaData.Focuser.Temperature;
-            RotatorPosition = msg.MetaData.Rotator.Position;
+            RotatorPosition = Double.IsNaN(msg.MetaData.Rotator.Position) ? 0 : msg.MetaData.Rotator.Position;
             PierSide = GetPierSide(msg.MetaData.Telescope.SideOfPier);
 
             CameraTemp = msg.MetaData.Camera.Temperature;
@@ -88,6 +98,12 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         private string GetImageFilePath(Uri imageUri) {
             return HttpUtility.UrlDecode(imageUri.AbsolutePath);
+        }
+
+        private double GetHocusFocusMetric(IStarDetectionAnalysis starDetectionAnalysis, string propertyName) {
+            return starDetectionAnalysis.HasProperty(propertyName) ?
+                (Double)starDetectionAnalysis.GetType().GetProperty(propertyName).GetValue(starDetectionAnalysis) :
+                Double.NaN;
         }
 
         private double GetGuidingMetric(ImageParameter image, double? metric) {
@@ -115,6 +131,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"Gain: {Gain}");
             sb.AppendLine($"Offset: {Offset}");
             sb.AppendLine($"Binning: {Binning}");
+            sb.AppendLine($"ROI: {ROI}");
             sb.AppendLine($"DetectedStars: {DetectedStars}");
             sb.AppendLine($"HFR: {HFR}");
             sb.AppendLine($"HFRStDev: {HFRStDev}");

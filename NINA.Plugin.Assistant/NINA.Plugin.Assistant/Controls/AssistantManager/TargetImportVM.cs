@@ -6,6 +6,7 @@ using NINA.Astrometry;
 using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
 using NINA.Equipment.Interfaces;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using System;
 using System.ComponentModel;

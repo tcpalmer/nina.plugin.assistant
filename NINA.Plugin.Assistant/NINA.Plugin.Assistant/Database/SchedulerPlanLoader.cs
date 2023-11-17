@@ -1,6 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
-using Assistant.NINAPlugin.Util;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -15,6 +15,10 @@ namespace Assistant.NINAPlugin.Database {
         public SchedulerPlanLoader(IProfile activeProfile) {
             this.activeProfile = activeProfile;
             profileId = activeProfile.Id.ToString();
+        }
+
+        public ProfilePreference GetProfilePreferences() {
+            return GetProfilePreferences(new SchedulerDatabaseInteraction().GetContext());
         }
 
         public ProfilePreference GetProfilePreferences(SchedulerDatabaseContext context) {

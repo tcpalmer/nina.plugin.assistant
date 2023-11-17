@@ -1,4 +1,4 @@
-﻿using System;
+﻿using NINA.Plugin.Assistant.SyncService.Sync;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -13,16 +13,27 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public int parkOnWait { get; set; }
         public double exposureThrottle { get; set; }
+        public int enableSmartPlanWindow { get; set; }
+
+        public int enableSynchronization { get; set; }
+        public int syncWaitTimeout { get; set; }
+        public int syncActionTimeout { get; set; }
+        public int syncSolveRotateTimeout { get; set; }
 
         public int enableGradeRMS { get; set; }
         public int enableGradeStars { get; set; }
         public int enableGradeHFR { get; set; }
+        public int enableGradeFWHM { get; set; }
+        public int enableGradeEccentricity { get; set; }
+        public int enableMoveRejected { get; set; }
         public int acceptimprovement { get; set; }
 
         public int maxGradingSampleSize { get; set; }
         public double rmsPixelThreshold { get; set; }
         public double detectedStarsSigmaFactor { get; set; }
         public double hfrSigmaFactor { get; set; }
+        public double fwhmSigmaFactor { get; set; }
+        public double eccentricitySigmaFactor { get; set; }
 
         public ProfilePreference() { }
 
@@ -30,14 +41,26 @@ namespace Assistant.NINAPlugin.Database.Schema {
             ProfileId = profileId;
             ParkOnWait = false;
             ExposureThrottle = 125;
+            EnableSmartPlanWindow = true;
+
             EnableGradeRMS = true;
             EnableGradeStars = true;
             EnableGradeHFR = true;
+            EnableGradeFWHM = false;
+            EnableGradeEccentricity = false;
+            EnableMoveRejected = false;
             AcceptImprovement = true;
             MaxGradingSampleSize = 10;
             RMSPixelThreshold = 8;
             DetectedStarsSigmaFactor = 4;
             HFRSigmaFactor = 4;
+            FWHMSigmaFactor = 4;
+            EccentricitySigmaFactor = 4;
+
+            EnableSynchronization = false;
+            SyncWaitTimeout = SyncManager.DEFAULT_SYNC_WAIT_TIMEOUT;
+            SyncActionTimeout = SyncManager.DEFAULT_SYNC_ACTION_TIMEOUT;
+            SyncSolveRotateTimeout = SyncManager.DEFAULT_SYNC_SOLVEROTATE_TIMEOUT;
         }
 
         [NotMapped]
@@ -49,13 +72,57 @@ namespace Assistant.NINAPlugin.Database.Schema {
             }
         }
 
-        // exposurethrottle
         [NotMapped]
         public double ExposureThrottle {
             get { return exposureThrottle; }
             set {
                 exposureThrottle = value;
                 RaisePropertyChanged(nameof(ExposureThrottle));
+            }
+        }
+
+        [NotMapped]
+        public bool EnableSmartPlanWindow {
+            get { return enableSmartPlanWindow == 1; }
+            set {
+                enableSmartPlanWindow = value ? 1 : 0;
+                RaisePropertyChanged(nameof(EnableSmartPlanWindow));
+            }
+        }
+
+        [NotMapped]
+        public bool EnableSynchronization {
+            get { return enableSynchronization == 1; }
+            set {
+                enableSynchronization = value ? 1 : 0;
+                RaisePropertyChanged(nameof(EnableSynchronization));
+            }
+        }
+
+        [NotMapped]
+        public int SyncWaitTimeout {
+            get { return syncWaitTimeout; }
+            set {
+                syncWaitTimeout = value;
+                RaisePropertyChanged(nameof(SyncWaitTimeout));
+            }
+        }
+
+        [NotMapped]
+        public int SyncActionTimeout {
+            get { return syncActionTimeout; }
+            set {
+                syncActionTimeout = value;
+                RaisePropertyChanged(nameof(SyncActionTimeout));
+            }
+        }
+
+        [NotMapped]
+        public int SyncSolveRotateTimeout {
+            get { return syncSolveRotateTimeout; }
+            set {
+                syncSolveRotateTimeout = value;
+                RaisePropertyChanged(nameof(SyncSolveRotateTimeout));
             }
         }
 
@@ -83,6 +150,33 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 enableGradeHFR = value ? 1 : 0;
                 RaisePropertyChanged(nameof(EnableGradeHFR));
+            }
+        }
+
+        [NotMapped]
+        public bool EnableGradeFWHM {
+            get { return enableGradeFWHM == 1; }
+            set {
+                enableGradeFWHM = value ? 1 : 0;
+                RaisePropertyChanged(nameof(EnableGradeFWHM));
+            }
+        }
+
+        [NotMapped]
+        public bool EnableGradeEccentricity {
+            get { return enableGradeEccentricity == 1; }
+            set {
+                enableGradeEccentricity = value ? 1 : 0;
+                RaisePropertyChanged(nameof(EnableGradeEccentricity));
+            }
+        }
+
+        [NotMapped]
+        public bool EnableMoveRejected {
+            get { return enableMoveRejected == 1; }
+            set {
+                enableMoveRejected = value ? 1 : 0;
+                RaisePropertyChanged(nameof(EnableMoveRejected));
             }
         }
 
@@ -128,6 +222,24 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 hfrSigmaFactor = value;
                 RaisePropertyChanged(nameof(HFRSigmaFactor));
+            }
+        }
+
+        [NotMapped]
+        public double FWHMSigmaFactor {
+            get { return fwhmSigmaFactor; }
+            set {
+                fwhmSigmaFactor = value;
+                RaisePropertyChanged(nameof(FWHMSigmaFactor));
+            }
+        }
+
+        [NotMapped]
+        public double EccentricitySigmaFactor {
+            get { return eccentricitySigmaFactor; }
+            set {
+                eccentricitySigmaFactor = value;
+                RaisePropertyChanged(nameof(EccentricitySigmaFactor));
             }
         }
 

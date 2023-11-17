@@ -1,0 +1,23 @@
+﻿<ResourceDictionary
+    x:Class="Assistant.NINAPlugin.Sequencer.TargetSchedulerSyncContainerTemplate"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Assistant.NINAPlugin.Sequencer"
+    xmlns:mini="clr-namespace:NINA.View.Sequencer.MiniSequencer;assembly=NINA.Sequencer"
+    xmlns:nina="clr-namespace:NINA.View.Sequencer;assembly=NINA.Sequencer">
+
+    <DataTemplate DataType="{x:Type local:TargetSchedulerSyncContainer}">
+        <nina:SequenceBlockView DataContext="{Binding}">
+            <nina:SequenceBlockView.SequenceItemContent>
+                <WrapPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding DisplayText}"/>
+                </WrapPanel>
+            </nina:SequenceBlockView.SequenceItemContent>
+        </nina:SequenceBlockView>
+    </DataTemplate>
+
+    <DataTemplate x:Key="Assistant.NINAPlugin.Sequencer.TargetSchedulerSyncContainer_Mini">
+        <mini:MiniSequenceItem/>
+    </DataTemplate>
+
+</ResourceDictionary>

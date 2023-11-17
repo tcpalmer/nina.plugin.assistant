@@ -1,0 +1,78 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Scheduler.SyncService";
+
+package schedulersync;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service SchedulerSync {
+	rpc Register (RegistrationRequest) returns (StatusResponse);
+	rpc Unregister (ClientIdRequest) returns (StatusResponse);
+	rpc SyncWait (ClientIdRequest) returns (SyncWaitResponse);
+	rpc RequestAction (ClientIdRequest) returns (ActionResponse);
+	rpc AcceptExposure (ExposureRequest) returns (StatusResponse);
+	rpc AcceptSolveRotate (SolveRotateRequest) returns (StatusResponse);
+	rpc CompleteExposure (ExposureRequest) returns (StatusResponse);
+	rpc CompleteSolveRotate (SolveRotateRequest) returns (StatusResponse);
+	rpc Keepalive (ClientIdRequest) returns (StatusResponse);
+}
+
+enum ClientState {
+	STARTING = 0;
+	READY = 1;
+	WAITING = 2;
+	ACTIONREADY = 3;
+	EXPOSING = 4;
+	SOLVING = 5;
+	ENDING = 6;
+}
+
+message RegistrationRequest {
+  string guid = 1;
+  string profileId = 2;
+  int32 pid = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+message ClientIdRequest {
+  string guid = 1;
+  ClientState clientState = 2;
+}
+
+message StatusResponse {
+	bool success = 1;
+	string message = 2;
+}
+
+message SyncWaitResponse {
+	bool success = 1;
+	bool continue = 2;
+}
+
+message ActionResponse {
+	bool success = 1;
+	bool exposureReady = 2;
+	bool solveRotateReady = 3;
+	bool terminate = 4;
+	string exposureId = 5;
+	string solveRotateId = 6;
+	string targetName = 7;
+	string targetRa = 8;
+	string targetDec = 9;
+	double targetPositionAngle = 10;
+	int32 pierSide = 11;
+	int32 targetDatabaseId = 12;
+	int32 exposurePlanDatabaseId = 13;
+}
+
+message ExposureRequest {
+	string guid = 1;
+	string exposureId = 2;
+}
+
+message SolveRotateRequest {
+	string guid = 1;
+	string solveRotateId = 2;
+}

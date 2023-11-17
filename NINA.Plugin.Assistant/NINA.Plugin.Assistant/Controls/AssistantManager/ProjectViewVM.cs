@@ -3,6 +3,7 @@ using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using NINA.WPF.Base.ViewModel;
@@ -30,6 +31,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ProjectViewVM(AssistantManagerVM managerVM, IFramingAssistantVM framingAssistantVM, IProfileService profileService, Project project) : base(profileService) {
             this.managerVM = managerVM;
             this.framingAssistantVM = framingAssistantVM;
+
+            project.RuleWeights.Sort();
             ProjectProxy = new ProjectProxy(project);
             ProjectActive = ProjectProxy.Project.ActiveNowWithActiveTargets;
 

@@ -1,11 +1,11 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan.Scoring;
-using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Enum;
 using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
@@ -61,6 +61,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             AddExposurePlanCommand = new RelayCommand(AddExposurePlan);
             CopyExposurePlansCommand = new RelayCommand(CopyExposurePlans);
             PasteExposurePlansCommand = new RelayCommand(PasteExposurePlans);
+            DeleteExposurePlansCommand = new RelayCommand(DeleteAllExposurePlans);
             DeleteExposurePlanCommand = new RelayCommand(DeleteExposurePlan);
 
             OverrideExposureOrderCommand = new RelayCommand(DisplayOverrideExposureOrder);
@@ -117,6 +118,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 Target target = TargetProxy.Target;
                 DeepSkyObject dso = new DeepSkyObject(string.Empty, target.Coordinates, profileService.ActiveProfile.ApplicationSettings.SkyAtlasImageRepository, profileService.ActiveProfile.AstrometrySettings.Horizon);
                 dso.Name = target.Name;
+                dso.RotationPositionAngle = target.Rotation;
                 return dso;
             }
         }
@@ -175,6 +177,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 RaisePropertyChanged(nameof(ShowEditView));
                 RaisePropertyChanged(nameof(ExposurePlansCopyEnabled));
                 RaisePropertyChanged(nameof(ExposurePlansPasteEnabled));
+                RaisePropertyChanged(nameof(ExposurePlansDeleteEnabled));
             }
         }
 
@@ -204,6 +207,10 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             get => !ShowEditView && ExposurePlansClipboard.HasCopyItem();
         }
 
+        public bool ExposurePlansDeleteEnabled {
+            get => !ShowEditView && TargetProxy.Original.ExposurePlans?.Count > 0;
+        }
+
         private TargetImportVM targetImportVM;
         public TargetImportVM TargetImportVM { get => targetImportVM; set => targetImportVM = value; }
 
@@ -230,6 +237,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand AddExposurePlanCommand { get; private set; }
         public ICommand CopyExposurePlansCommand { get; private set; }
         public ICommand PasteExposurePlansCommand { get; private set; }
+        public ICommand DeleteExposurePlansCommand { get; private set; }
         public ICommand DeleteExposurePlanCommand { get; private set; }
 
         public ICommand OverrideExposureOrderCommand { get; private set; }
@@ -342,6 +350,10 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 ExposurePlansClipboard.SetItem(exposurePlans, overrideExposureOrder);
                 RaisePropertyChanged(nameof(ExposurePlansPasteEnabled));
             }
+            else {
+                ExposurePlansClipboard.Clear();
+                RaisePropertyChanged(nameof(ExposurePlansPasteEnabled));
+            }
         }
 
         private void PasteExposurePlans(object obj) {
@@ -389,8 +401,33 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             OverrideExposureOrder = overrideExposureOrder == null ? null : new OverrideExposureOrder(overrideExposureOrder, ExposurePlans);
 
             RaisePropertyChanged(nameof(ExposurePlans));
+            RaisePropertyChanged(nameof(ExposurePlansCopyEnabled));
+            RaisePropertyChanged(nameof(ExposurePlansDeleteEnabled));
 
             TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
+        }
+
+        private void DeleteAllExposurePlans(object obj) {
+            if (TargetProxy.Original.ExposurePlans?.Count > 0) {
+                string message = "Delete all exposure plans for this target?  This cannot be undone.";
+                if (MyMessageBox.Show(message, "Delete all Exposure Plans?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
+
+                    // Have to clear any override exposure order on deleted exposure plans
+                    TargetProxy.Original.OverrideExposureOrder = null;
+
+                    Target updatedTarget = managerVM.DeleteAllExposurePlans(TargetProxy.Original);
+                    if (updatedTarget != null) {
+                        TargetProxy = new TargetProxy(updatedTarget);
+                        InitializeExposurePlans(TargetProxy.Proxy);
+                        RaisePropertyChanged(nameof(ExposurePlansCopyEnabled));
+                        RaisePropertyChanged(nameof(ExposurePlansDeleteEnabled));
+                        TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
+
+                        OverrideExposureOrder = null;
+                        DefaultExposureOrder = GetDefaultExposureOrder();
+                    }
+                }
+            }
         }
 
         private void DeleteExposurePlan(object obj) {
@@ -400,13 +437,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 string message = $"Delete exposure plan using template '{exposurePlan.ExposureTemplate?.Name}'?  This cannot be undone.";
                 if (MyMessageBox.Show(message, "Delete Exposure Plan?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
 
-                    // Have to clear any over exposure order on deleted exposure plan
+                    // Have to clear any override exposure order on deleted exposure plan
                     TargetProxy.Original.OverrideExposureOrder = null;
 
                     Target updatedTarget = managerVM.DeleteExposurePlan(TargetProxy.Original, exposurePlan);
                     if (updatedTarget != null) {
                         TargetProxy = new TargetProxy(updatedTarget);
                         InitializeExposurePlans(TargetProxy.Proxy);
+                        RaisePropertyChanged(nameof(ExposurePlansDeleteEnabled));
+                        TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
 
                         OverrideExposureOrder = null;
                         DefaultExposureOrder = GetDefaultExposureOrder();

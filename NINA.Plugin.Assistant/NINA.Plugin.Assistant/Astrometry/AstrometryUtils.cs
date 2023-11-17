@@ -1,6 +1,6 @@
 ﻿using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
-using NINA.Core.Utility;
+using NINA.Plugin.Assistant.Shared.Utility;
 using System;
 
 namespace Assistant.NINAPlugin.Astrometry {

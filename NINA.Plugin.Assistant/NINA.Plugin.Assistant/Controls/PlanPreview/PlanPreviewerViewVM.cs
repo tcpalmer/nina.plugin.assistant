@@ -6,6 +6,7 @@ using Assistant.NINAPlugin.Util;
 using LinqKit;
 using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;
@@ -305,6 +306,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                     sb.Append(plan.DetailsLog);
                 }
 
+                sb.AppendLine("\nRUN COMPLETE - NO MORE TARGETS AVAILABLE");
                 PlanPreviewResultsLog = sb.ToString();
                 ShowPlanPreview = false;
                 ShowPlanPreviewResults = true;

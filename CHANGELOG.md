@@ -1,5 +1,19 @@
 # Target Scheduler
 
+## 4.0.5.0 - 2023-11-17
+* Added image grading on FWHM and Eccentricity (requires Hocus Focus plugin)
+* Added option to move rejected images to a 'rejected' directory
+* Added ability to purge acquired image records by date or date/target
+* Added CSV output for acquired image records
+* Added better support for the Center After Drift trigger (see release notes)
+* Added smarter determination of plan stop times
+* Added ability to delete all target exposure plans
+* The rule weight list is now sorted when displayed
+* Added target rotation and ROI to the set of data saved for acquired images.  A future release will use these values when selecting 'like' images for grading.
+* Fixed issue where target rotation wasn't being sent to Framing Wizard
+* Added experimental support for synchronization across multiple instances of NINA
+* All sequencer instructions moved to new category "Target Scheduler"
+
 ## 3.3.3.1 - 2023-10-11
 * Fixed bug with exposure planner.
 

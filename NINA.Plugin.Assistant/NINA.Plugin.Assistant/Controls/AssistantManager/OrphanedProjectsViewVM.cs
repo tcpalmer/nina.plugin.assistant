@@ -1,8 +1,8 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.Util;
 using LinqKit;
 using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;

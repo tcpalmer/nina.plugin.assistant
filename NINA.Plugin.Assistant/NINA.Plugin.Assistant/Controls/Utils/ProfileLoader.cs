@@ -1,5 +1,4 @@
-﻿using Assistant.NINAPlugin.Util;
-using NINA.Core.Utility;
+﻿using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
 using System;
@@ -35,16 +34,15 @@ namespace Assistant.NINAPlugin.Controls.Util {
             }
 
             try {
-                using (FileStream fs = new FileStream(profileMeta.Location, FileMode.Open, FileAccess.ReadWrite, FileShare.Read)) {
-                    var serializer = new DataContractSerializer(typeof(Profile));
-                    profile = (Profile)serializer.ReadObject(fs);
-                    Instance.cache.Put(profile, cacheKey);
-                    return profile;
-                }
+                using FileStream fs = new FileStream(profileMeta.Location, FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
+                var serializer = new DataContractSerializer(typeof(Profile));
+                profile = (Profile)serializer.ReadObject(fs);
+                Instance.cache.Put(profile, cacheKey);
+                return profile;
             }
             catch (Exception e) {
                 TSLogger.Error($"failed to read profile at {profileMeta.Location}: {e.Message} {e.StackTrace}");
-                return null;
+                throw;
             }
         }
 

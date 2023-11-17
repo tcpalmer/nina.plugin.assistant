@@ -11,12 +11,13 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
+[assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("windows")]
 
-[assembly: AssemblyVersion("3.3.3.1")]
-[assembly: AssemblyFileVersion("3.3.3.1")]
+[assembly: AssemblyVersion("4.0.5.0")]
+[assembly: AssemblyFileVersion("4.0.5.0")]
 
 // The minimum Version of N.I.N.A. that this plugin is compatible with
-[assembly: AssemblyMetadata("MinimumApplicationVersion", "3.0.0.1032")]
+[assembly: AssemblyMetadata("MinimumApplicationVersion", "3.0.0.1056")]
 
 [assembly: AssemblyMetadata("License", "MPL-2.0")]
 [assembly: AssemblyMetadata("LicenseURL", "https://www.mozilla.org/en-US/MPL/2.0/")]
@@ -44,7 +45,7 @@ The [plugin documentation](https://tcpalmer.github.io/nina-scheduler/) provides 
 
 # Getting Help #
 * Review the [plugin documentation](https://tcpalmer.github.io/nina-scheduler/)
-* Ask for help (tag @tcpalmer) in the #plugin-discussions channel on the NINA project [Discord server](https://discord.com/invite/rWRbVbw).
+* Ask for help (tag @tcpalmer) in the #target-scheduler channel on the NINA project [Discord server](https://discord.com/invite/rWRbVbw).
 * [Plugin source code](https://github.com/tcpalmer/nina.plugin.assistant)
 * [Change log](https://github.com/tcpalmer/nina.plugin.assistant/blob/main/CHANGELOG.md)
 

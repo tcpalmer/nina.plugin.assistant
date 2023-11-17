@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using NINA.Astrometry;
+using NINA.Plugin.Assistant.Shared.Utility;
 using System;
 using System.IO;
 using System.Text;

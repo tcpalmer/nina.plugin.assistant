@@ -1,13 +1,17 @@
-﻿using Assistant.NINAPlugin.Plan;
+﻿using Assistant.NINAPlugin.Database;
+using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Enum;
 using NINA.Core.Model;
-using NINA.Core.Model.Equipment;
+using NINA.Core.Utility.Notification;
 using NINA.Core.Utility.WindowService;
 using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.PlateSolving.Interfaces;
+using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Plugin.Assistant.SyncService.Sync;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
@@ -18,6 +22,7 @@ using NINA.Sequencer.SequenceItem.Imaging;
 using NINA.Sequencer.SequenceItem.Platesolving;
 using NINA.Sequencer.SequenceItem.Telescope;
 using NINA.Sequencer.Trigger;
+using NINA.Sequencer.Trigger.Platesolving;
 using NINA.Sequencer.Utility;
 using NINA.Sequencer.Utility.DateTimeProvider;
 using NINA.WPF.Base.Interfaces.Mediator;
@@ -57,6 +62,10 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private IImageSaveWatcher ImageSaveWatcher;
 
+        private bool synchronizationEnabled;
+        private int syncActionTimeout;
+        private int syncSolveRotateTimeout;
+
         public PlanTargetContainer(
                 TargetSchedulerContainer parentContainer,
                 IProfileService profileService,
@@ -73,12 +82,13 @@ namespace Assistant.NINAPlugin.Sequencer {
                 IDomeFollower domeFollower,
                 IPlateSolverFactory plateSolverFactory,
                 IWindowServiceFactory windowServiceFactory,
+                bool synchronizationEnabled,
                 IPlanTarget previousPlanTarget,
                 SchedulerPlan plan,
                 SchedulerProgressVM schedulerProgress) : base(new PlanTargetContainerStrategy()) {
             Name = nameof(PlanTargetContainer);
             Description = "";
-            Category = "Assistant";
+            Category = INSTRUCTION_CATEGORY;
 
             this.parentContainer = parentContainer;
             this.profileService = profileService;
@@ -96,6 +106,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.plateSolverFactory = plateSolverFactory;
             this.windowServiceFactory = windowServiceFactory;
 
+            this.synchronizationEnabled = synchronizationEnabled;
             this.schedulerProgress = schedulerProgress;
             this.previousPlanTarget = previousPlanTarget;
             this.plan = plan;
@@ -105,8 +116,12 @@ namespace Assistant.NINAPlugin.Sequencer {
             containerStrategy.SetContext(parentContainer, plan, schedulerProgress);
             AttachNewParent(parentContainer);
 
+            if (synchronizationEnabled) {
+                SetSyncTimeouts();
+            }
+
             if (!plan.IsEmulator)
-                ImageSaveWatcher = new ImageSaveWatcher(activeProfile, imageSaveMediator, plan.PlanTarget);
+                ImageSaveWatcher = new ImageSaveWatcher(activeProfile, imageSaveMediator, plan.PlanTarget, synchronizationEnabled);
             else
                 ImageSaveWatcher = new ImageSaveWatcherEmulator();
 
@@ -172,6 +187,13 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             foreach (var trigger in localTriggers) {
                 if (trigger.Status == SequenceEntityStatus.DISABLED) { continue; }
+
+                if (trigger is CenterAfterDriftTrigger) {
+                    TSLogger.Warning("Found CenterAfterDriftTrigger in Target Scheduler Container Triggers, will be ignored and should be removed");
+                    Notification.ShowWarning("Center After Drift trigger should be removed from Target Scheduler Container Triggers and added to surrounding container.");
+                    continue;
+                }
+
                 Add((ISequenceTrigger)trigger.Clone());
             }
         }
@@ -236,7 +258,13 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             if (isPlateSolve) {
                 if (rotatorMediator.GetInfo().Connected) {
-                    slewCenter = new CenterAndRotate(profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
+                    if (synchronizationEnabled) {
+                        slewCenter = new PlanCenterAndRotate(planTarget, Target, syncActionTimeout, syncSolveRotateTimeout, profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
+                    }
+                    else {
+                        slewCenter = new CenterAndRotate(profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
+                    }
+
                     slewCenter.Name = nameof(CenterAndRotate);
                     (slewCenter as Center).Coordinates = slewCoordinates;
                     (slewCenter as CenterAndRotate).PositionAngle = planTarget.Rotation;
@@ -272,7 +300,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator);
             SetItemDefaults(switchFilter, nameof(SwitchFilter));
 
-            switchFilter.Filter = LookupFilter(planExposure.FilterName);
+            switchFilter.Filter = Utils.LookupFilter(profileService, planExposure.FilterName);
             Add(switchFilter);
         }
 
@@ -292,13 +320,17 @@ namespace Assistant.NINAPlugin.Sequencer {
         private void AddTakeExposure(IPlanTarget planTarget, IPlanExposure planExposure) {
             TSLogger.Info($"adding take exposure: {planExposure.FilterName} {planExposure.ExposureLength}s");
 
-            PlanTakeExposure takeExposure = new PlanTakeExposure(parentContainer,
+            PlanTakeExposure takeExposure = new PlanTakeExposure(
+                        parentContainer,
+                        synchronizationEnabled,
+                        syncActionTimeout,
                         profileService,
                         cameraMediator,
                         imagingMediator,
                         imageSaveMediator,
                         imageHistoryVM,
                         ImageSaveWatcher,
+                        planTarget.DatabaseId,
                         planExposure.DatabaseId);
             SetItemDefaults(takeExposure, nameof(TakeExposure));
 
@@ -335,6 +367,14 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
+        private void SetSyncTimeouts() {
+            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+                ProfilePreference profilePreference = context.GetProfilePreference(profileService.ActiveProfile.Id.ToString());
+                syncActionTimeout = profilePreference != null ? profilePreference.SyncActionTimeout : SyncManager.DEFAULT_SYNC_ACTION_TIMEOUT;
+                syncSolveRotateTimeout = profilePreference != null ? profilePreference.SyncSolveRotateTimeout : SyncManager.DEFAULT_SYNC_SOLVEROTATE_TIMEOUT;
+            }
+        }
+
         private void SetItemDefaults(ISequenceItem item, string name) {
             if (name != null) {
                 item.Name = name;
@@ -349,16 +389,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         private int GetExposureCount() {
             parentContainer.TotalExposureCount++;
             return parentContainer.TotalExposureCount;
-        }
-
-        private FilterInfo LookupFilter(string filterName) {
-            foreach (FilterInfo filterInfo in activeProfile.FilterWheelSettings.FilterWheelFilters) {
-                if (filterInfo.Name == filterName) {
-                    return filterInfo;
-                }
-            }
-
-            throw new SequenceEntityFailedException($"failed to find FilterInfo for filter: {filterName}");
         }
 
         private int GetGain(int? gain) {

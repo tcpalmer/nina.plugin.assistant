@@ -2,10 +2,12 @@
 using Assistant.NINAPlugin.Controls.AssistantManager;
 using Assistant.NINAPlugin.Controls.PlanPreview;
 using Assistant.NINAPlugin.Database;
-using Assistant.NINAPlugin.Util;
+using Assistant.NINAPlugin.Database.Schema;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
 using NINA.Plugin;
+using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Plugin.Assistant.SyncService.Sync;
 using NINA.Plugin.Interfaces;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
@@ -22,8 +24,6 @@ namespace Assistant.NINAPlugin {
 
     [Export(typeof(IPluginManifest))]
     public class AssistantPlugin : PluginBase, INotifyPropertyChanged {
-
-        public static string PLUGIN_HOME = Path.Combine(CoreUtil.APPLICATIONTEMPPATH, "SchedulerPlugin");
 
         private IPluginOptionsAccessor pluginSettings;
         private IProfileService profileService;
@@ -53,17 +53,29 @@ namespace Assistant.NINAPlugin {
             this.planetariumFactory = planetariumFactory;
 
             profileService.ProfileChanged += ProfileService_ProfileChanged;
+        }
 
+        public override async Task Initialize() {
             InitPluginHome();
+
+            if (SyncEnabled(profileService)) {
+                SyncManager.Instance.Start(profileService.ActiveProfile.Id.ToString());
+            }
+
             TSLogger.Info("plugin initialized");
         }
 
         private void InitPluginHome() {
-            if (!Directory.Exists(PLUGIN_HOME)) {
-                Directory.CreateDirectory(PLUGIN_HOME);
+            if (!Directory.Exists(Common.PLUGIN_HOME)) {
+                Directory.CreateDirectory(Common.PLUGIN_HOME);
             }
 
             SchedulerDatabaseInteraction.BackupDatabase();
+        }
+
+        public static bool SyncEnabled(IProfileService profileService) {
+            ProfilePreference profilePreference = new SchedulerPlanLoader(profileService.ActiveProfile).GetProfilePreferences();
+            return profilePreference.EnableSynchronization;
         }
 
         private AssistantManagerVM assistantManagerVM;
@@ -131,6 +143,11 @@ namespace Assistant.NINAPlugin {
         }
 
         public override Task Teardown() {
+
+            if (SyncManager.Instance.IsRunning) {
+                SyncManager.Instance.Shutdown();
+            }
+
             profileService.ProfileChanged -= ProfileService_ProfileChanged;
             TSLogger.Info("closing log");
             TSLogger.CloseAndFlush();
@@ -155,6 +172,13 @@ namespace Assistant.NINAPlugin {
             if (profileService.ActiveProfile != null) {
                 profileService.ActiveProfile.AstrometrySettings.PropertyChanged -= ProfileService_ProfileChanged;
                 profileService.ActiveProfile.AstrometrySettings.PropertyChanged += ProfileService_ProfileChanged;
+
+                if (SyncManager.Instance.IsRunning) {
+                    SyncManager.Instance.Shutdown();
+                    if (SyncEnabled(profileService)) {
+                        SyncManager.Instance.Start(profileService.ActiveProfile.Id.ToString());
+                    }
+                }
             }
         }
     }

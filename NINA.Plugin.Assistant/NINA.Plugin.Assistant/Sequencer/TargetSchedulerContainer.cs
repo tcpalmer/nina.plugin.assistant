@@ -2,6 +2,7 @@
 using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.Sync;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
 using NINA.Astrometry;
@@ -13,11 +14,14 @@ using NINA.Core.Utility.WindowService;
 using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.PlateSolving.Interfaces;
+using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Plugin.Assistant.SyncService.Sync;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Conditions;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
 using NINA.Sequencer.Trigger;
+using NINA.Sequencer.Trigger.Platesolving;
 using NINA.Sequencer.Utility.DateTimeProvider;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
@@ -39,7 +43,7 @@ namespace Assistant.NINAPlugin.Sequencer {
     [ExportMetadata("Name", "Target Scheduler Container")]
     [ExportMetadata("Description", "Container for Target Scheduler")]
     [ExportMetadata("Icon", "Scheduler.SchedulerSVG")]
-    [ExportMetadata("Category", "Lbl_SequenceCategory_Container")]
+    [ExportMetadata("Category", "Target Scheduler")]
     [Export(typeof(ISequenceItem))]
     [Export(typeof(ISequenceContainer))]
     [JsonObject(MemberSerialization.OptIn)]
@@ -62,6 +66,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IWindowServiceFactory windowServiceFactory;
         private readonly IFramingAssistantVM framingAssistantVM;
         private readonly IApplicationMediator applicationMediator;
+        private bool synchronizationEnabled;
 
         [JsonProperty]
         public InstructionContainer BeforeWaitContainer { get; set; }
@@ -190,11 +195,13 @@ namespace Assistant.NINAPlugin.Sequencer {
             TSLogger.Debug("Scheduler instruction: Execute");
 
             IPlanTarget previousPlanTarget = null;
+            synchronizationEnabled = IsSynchronizationEnabled();
 
             while (true) {
                 DateTime atTime = DateTime.Now;
                 profilePreferences = GetProfilePreferences();
                 SchedulerPlan plan = new Planner(atTime, profileService, profilePreferences, false).GetPlan(previousPlanTarget);
+                SetSyncServerState(ServerState.Ready);
 
                 if (plan == null) {
                     if (previousPlanTarget != null) {
@@ -202,6 +209,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
 
                     SchedulerProgress.End();
+                    SetSyncServerState(ServerState.EndSyncContainers);
 
                     TSLogger.Info("planner returned empty plan, done");
                     return;
@@ -215,6 +223,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                     TSLogger.Info($"planner waiting for next target to become available: {Utils.FormatDateTimeFull(plan.WaitForNextTargetTime)}");
 
+                    SetSyncServerState(ServerState.PlanWait);
                     SchedulerProgress.WaitStart(plan.WaitForNextTargetTime);
                     await ExecuteEventContainer(BeforeWaitContainer, progress, token);
                     SchedulerProgress.Add("Wait");
@@ -237,6 +246,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         TSLogger.Info("--BEGIN PLAN EXECUTION--------------------------------------------------------");
                         TSLogger.Info($"plan target: {planTarget.Name}");
                         SetTarget(atTime, planTarget);
+                        ResetCenterAfterDrift();
                         SchedulerProgress.TargetStart(planTarget.Project.Name, planTarget.Name);
 
                         // Create a container for this target, add the instructions, and execute
@@ -245,7 +255,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         previousPlanTarget = planTarget;
                     }
                     catch (Exception ex) {
-                        if (ex.InnerException?.Message == "A task was canceled.") {
+                        if (Utils.IsCancelException(ex)) {
                             TSLogger.Warning("sequence was canceled");
                         }
                         else {
@@ -263,6 +273,12 @@ namespace Assistant.NINAPlugin.Sequencer {
                         TSLogger.Info("-- END PLAN EXECUTION ----------------------------------------------------------");
                     }
                 }
+            }
+        }
+
+        private void SetSyncServerState(ServerState state) {
+            if (synchronizationEnabled) {
+                SyncServer.Instance.State = state;
             }
         }
 
@@ -289,6 +305,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                     container.ResetAll();
                 }
             }
+        }
+
+        private bool IsSynchronizationEnabled() {
+            return AssistantPlugin.SyncEnabled(profileService) && SyncManager.Instance.IsServer && SyncManager.Instance.IsRunning;
         }
 
         private ProfilePreference GetProfilePreferences() {
@@ -325,7 +345,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             PlanTargetContainer targetContainer = new PlanTargetContainer(this, profileService, dateTimeProviders, telescopeMediator,
             rotatorMediator, guiderMediator, cameraMediator, imagingMediator, imageSaveMediator,
             imageHistoryVM, filterWheelMediator, domeMediator, domeFollower,
-                plateSolverFactory, windowServiceFactory, previousPlanTarget, plan, schedulerProgress);
+                plateSolverFactory, windowServiceFactory, synchronizationEnabled, previousPlanTarget, plan, schedulerProgress);
             return targetContainer;
         }
 
@@ -419,6 +439,32 @@ namespace Assistant.NINAPlugin.Sequencer {
             inputTarget.InputCoordinates.Coordinates = new Coordinates(Angle.Zero, Angle.Zero, Epoch.J2000);
             inputTarget.PositionAngle = 0;
             return inputTarget;
+        }
+
+        private void ResetCenterAfterDrift() {
+            // If our parent container has a CenterAfterDrift trigger, reset it for latest plan target coordinates
+            CenterAfterDriftTrigger centerAfterDriftTrigger = GetCenterAfterDriftTrigger();
+            if (centerAfterDriftTrigger != null) {
+                TSLogger.Info("Resetting container CenterAfterDrift trigger for latest plan coordinates");
+                centerAfterDriftTrigger.Coordinates = Target.InputCoordinates;
+                centerAfterDriftTrigger.Inherited = true;
+                centerAfterDriftTrigger.SequenceBlockInitialize();
+            }
+        }
+
+        private CenterAfterDriftTrigger GetCenterAfterDriftTrigger() {
+            SequenceContainer container = (Parent as SequenceContainer);
+            if (container != null) {
+                var triggers = container.GetTriggersSnapshot();
+                foreach (ISequenceTrigger trigger in triggers) {
+                    CenterAfterDriftTrigger centerAfterDriftTrigger = trigger as CenterAfterDriftTrigger;
+                    if (centerAfterDriftTrigger != null) {
+                        return centerAfterDriftTrigger;
+                    }
+                }
+            }
+
+            return null;
         }
 
         private void SchedulerProgress_PropertyChanged(object sender, PropertyChangedEventArgs e) {

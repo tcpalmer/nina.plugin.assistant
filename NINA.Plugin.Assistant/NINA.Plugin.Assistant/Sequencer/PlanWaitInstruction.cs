@@ -3,6 +3,7 @@ using NINA.Core.Model;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Sequencer.SequenceItem;
 using System;
 using System.Threading;

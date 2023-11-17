@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using NINA.Plugin.Assistant.Shared.Utility;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,6 +12,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
     public class AcquiredImage {
 
         [Key] public int Id { get; set; }
+        public string profileId { get; set; }
         [Required] public int ProjectId { get; set; }
         [Required] public int TargetId { get; set; }
         public long acquiredDate { get; set; }
@@ -18,6 +20,14 @@ namespace Assistant.NINAPlugin.Database.Schema {
         [Required] public int accepted { get; set; }
         public string rejectreason { get; set; }
         internal string _metadata { get; set; }
+
+        [NotMapped]
+        public string ProfileId {
+            get { return profileId == null ? "" : profileId; }
+            set {
+                profileId = value;
+            }
+        }
 
         [NotMapped]
         public DateTime AcquiredDate {
@@ -59,7 +69,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
             this.Metadata = imageMetadata;
         }
 
-        public AcquiredImage(int projectId, int targetId, DateTime acquiredDate, string filterName, bool accepted, string rejectReason, ImageMetadata imageMetadata) {
+        public AcquiredImage(string profileId, int projectId, int targetId, DateTime acquiredDate, string filterName, bool accepted, string rejectReason, ImageMetadata imageMetadata) {
+            this.ProfileId = profileId;
             this.ProjectId = projectId;
             this.TargetId = targetId;
             this.AcquiredDate = acquiredDate;
@@ -71,6 +82,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"ProfileId: {ProfileId}");
             sb.AppendLine($"AcquiredDate: {AcquiredDate}");
             sb.AppendLine($"FilterName: {FilterName}");
             sb.AppendLine($"Accepted: {Accepted}");

@@ -1,10 +1,10 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
-using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
 using NINA.Core.Model;
 using NINA.Core.Utility.Notification;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Conditions;
 using NINA.Sequencer.SequenceItem;
@@ -18,7 +18,7 @@ namespace Assistant.NINAPlugin.Sequencer {
     [ExportMetadata("Name", "Target Scheduler Condition")]
     [ExportMetadata("Description", "Loop condition for Target Scheduler")]
     [ExportMetadata("Icon", "Scheduler.SchedulerSVG")]
-    [ExportMetadata("Category", "Lbl_SequenceCategory_Condition")]
+    [ExportMetadata("Category", "Target Scheduler")]
     [Export(typeof(ISequenceCondition))]
     [JsonObject(MemberSerialization.OptIn)]
     public class TargetSchedulerCondition : SequenceCondition {

@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using NINA.Astrometry;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NUnit.Framework;
 using System;
 using System.Data.Entity.Validation;
@@ -33,29 +34,29 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                 DateTime expTime = DateTime.Now.Date.AddDays(-10);
                 for (int i = 0; i < 30; i++) {
-                    context.AcquiredImageSet.Add(new AcquiredImage(1, 1, expTime, "L", IsAccepted(), "", GetIMD("L", expTime, 120)));
+                    context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, expTime, "L", IsAccepted(), "", GetIMD("L", expTime, 120)));
                     expTime = expTime.AddMinutes(2);
-                    context.AcquiredImageSet.Add(new AcquiredImage(1, 1, expTime, "R", IsAccepted(), "", GetIMD("R", expTime, 120)));
+                    context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, expTime, "R", IsAccepted(), "", GetIMD("R", expTime, 120)));
                     expTime = expTime.AddMinutes(2);
-                    context.AcquiredImageSet.Add(new AcquiredImage(1, 1, expTime, "G", IsAccepted(), "", GetIMD("G", expTime, 120)));
+                    context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, expTime, "G", IsAccepted(), "", GetIMD("G", expTime, 120)));
                     expTime = expTime.AddMinutes(2);
-                    context.AcquiredImageSet.Add(new AcquiredImage(1, 1, expTime, "B", IsAccepted(), "", GetIMD("B", expTime, 120)));
+                    context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, expTime, "B", IsAccepted(), "", GetIMD("B", expTime, 120)));
                     expTime = expTime.AddMinutes(2);
                 }
 
                 expTime = DateTime.Now.Date.AddDays(-5);
                 for (int i = 0; i < 20; i++) {
-                    context.AcquiredImageSet.Add(new AcquiredImage(2, 2, expTime, "Ha", IsAccepted(), "", GetIMD("Ha", expTime, 180)));
+                    context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 2, 2, expTime, "Ha", IsAccepted(), "", GetIMD("Ha", expTime, 180)));
                     expTime = expTime.AddMinutes(3);
                 }
 
                 for (int i = 0; i < 20; i++) {
-                    context.AcquiredImageSet.Add(new AcquiredImage(2, 2, expTime, "OIII", IsAccepted(), "", GetIMD("OIII", expTime, 180)));
+                    context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 2, 2, expTime, "OIII", IsAccepted(), "", GetIMD("OIII", expTime, 180)));
                     expTime = expTime.AddMinutes(3);
                 }
 
                 for (int i = 0; i < 20; i++) {
-                    context.AcquiredImageSet.Add(new AcquiredImage(2, 2, expTime, "SII", IsAccepted(), "", GetIMD("SII", expTime, 180)));
+                    context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 2, 2, expTime, "SII", IsAccepted(), "", GetIMD("SII", expTime, 180)));
                     expTime = expTime.AddMinutes(3);
                 }
 

@@ -1,9 +1,13 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.Util;
+using CsvHelper;
 using LinqKit;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using NINA.Core.Locale;
+using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
+using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;
 using System;
@@ -11,6 +15,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Text;
@@ -25,13 +30,19 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
     public class AcquiredImagesManagerViewVM : BaseVM {
 
+        private IProfileService profileService;
         private SchedulerDatabaseInteraction database;
 
         public AcquiredImagesManagerViewVM(IProfileService profileService) : base(profileService) {
 
+            this.profileService = profileService;
             database = new SchedulerDatabaseInteraction();
 
             RefreshTableCommand = new AsyncCommand<bool>(() => RefreshTable());
+            CsvOutputCommand = new AsyncCommand<bool>(() => CsvOutput());
+            PurgeCommand = new AsyncCommand<bool>(() => PurgeRecords());
+            PurgeTargetChoices = GetPurgeTargetChoices();
+
             InitializeCriteria();
 
             AcquiredImageCollection = new AcquiredImageCollection();
@@ -261,6 +272,53 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
             }
         }
 
+        private DateTime purgeOlderThanDate = DateTime.Now.AddMonths(-9);
+        public DateTime PurgeOlderThanDate {
+            get => purgeOlderThanDate;
+            set {
+                purgeOlderThanDate = value.Date;
+                RaisePropertyChanged(nameof(PurgeOlderThanDate));
+            }
+        }
+
+        private AsyncObservableCollection<KeyValuePair<int, string>> GetPurgeTargetChoices() {
+            List<Target> targets;
+            AsyncObservableCollection<KeyValuePair<int, string>> choices = new AsyncObservableCollection<KeyValuePair<int, string>> {
+                new KeyValuePair<int, string>(0, "All")
+            };
+
+            using (var context = database.GetContext()) {
+                targets = context.TargetSet.AsNoTracking().ToList();
+            }
+
+            targets.Sort((t1, t2) => t1.Name.CompareTo(t2.Name));
+            targets.ForEach(t => {
+                choices.Add(new KeyValuePair<int, string>(t.Id, t.Name));
+            });
+
+            return choices;
+        }
+
+        private AsyncObservableCollection<KeyValuePair<int, string>> purgeTargetChoices;
+        public AsyncObservableCollection<KeyValuePair<int, string>> PurgeTargetChoices {
+            get {
+                return purgeTargetChoices;
+            }
+            set {
+                purgeTargetChoices = value;
+                RaisePropertyChanged(nameof(PurgeTargetChoices));
+            }
+        }
+
+        private int purgeSelectedTargetId = 0;
+        public int PurgeSelectedTargetId {
+            get => purgeSelectedTargetId;
+            set {
+                purgeSelectedTargetId = value;
+                RaisePropertyChanged(nameof(PurgeSelectedTargetId));
+            }
+        }
+
         public ICommand RefreshTableCommand { get; private set; }
 
         private async Task<bool> RefreshTable() {
@@ -268,6 +326,82 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
             InitializeCriteria();
             await LoadRecords();
             return true;
+        }
+
+        public ICommand CsvOutputCommand { get; private set; }
+
+        private async Task<bool> CsvOutput() {
+
+            if (AcquiredImageCollection.Count == 0) {
+                MyMessageBox.Show("No records selected for CSV output");
+                return true;
+            }
+
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.Title = "Select CSV Output File";
+
+            CommonFileDialogResult result = dialog.ShowDialog();
+            if (result == CommonFileDialogResult.Ok) {
+                string fileName = dialog.FileName;
+                string ext = Path.GetExtension(fileName);
+                if (ext != ".csv" && ext != ".CSV") {
+                    fileName = $"{fileName}.csv";
+                }
+
+                if (File.Exists(fileName)) {
+                    if (MyMessageBox.Show($"File {fileName} exists, overwrite?", "Overwrite?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
+                        try { File.Delete(fileName); }
+                        catch (Exception e) {
+                            TSLogger.Error($"failed to remove existing CSV file {fileName}: {e.Message}");
+                            return false;
+                        }
+                    }
+                    else {
+                        return true;
+                    }
+                }
+
+                try {
+                    using (var writer = File.AppendText(fileName))
+                    using (var csv = new CsvWriter(writer, System.Globalization.CultureInfo.InvariantCulture)) {
+                        csv.WriteHeader<CsvAcquiredImage>();
+                        csv.NextRecord();
+                        foreach (var record in AcquiredImageCollection) {
+                            csv.WriteRecord(new CsvAcquiredImage(record));
+                            csv.NextRecord();
+                        }
+                    }
+                }
+                catch (Exception e) {
+                    TSLogger.Error($"failed to write CSV file {fileName}: {e.Message}");
+                    return false;
+                }
+
+                TSLogger.Info($"wrote CSV file: {fileName}");
+            }
+
+            return true;
+        }
+
+        public ICommand PurgeCommand { get; private set; }
+
+        private async Task<bool> PurgeRecords() {
+            using (var context = database.GetContext()) {
+                int count = context.GetAcquiredImagesCount(PurgeOlderThanDate, PurgeSelectedTargetId);
+                if (count == 0) {
+                    MyMessageBox.Show("No records selected for deletion");
+                    return true;
+                }
+
+                if (MyMessageBox.Show($"Delete {count} acquired image records?", "Delete records?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
+                    TSLogger.Info($"deleting {count} acquired images records");
+                    context.DeleteAcquiredImages(PurgeOlderThanDate, PurgeSelectedTargetId);
+                    SearchCriteraKey = null;
+                    _ = LoadRecords();
+                }
+
+                return true;
+            }
         }
 
         private AcquiredImageCollection acquiredImageCollection;
@@ -330,7 +464,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
                     // Create an intermediate list so we can add it to the display collection via AddRange while suppressing notifications
                     List<AcquiredImageVM> acquiredImageVMs = new List<AcquiredImageVM>(acquiredImages.Count);
-                    acquiredImages.ForEach(a => { acquiredImageVMs.Add(new AcquiredImageVM(a)); });
+                    acquiredImages.ForEach(a => { acquiredImageVMs.Add(new AcquiredImageVM(a, profileService)); });
 
                     _dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => {
                         AcquiredImageCollection.Clear();
@@ -419,10 +553,11 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
         public AcquiredImageVM() { }
 
-        public AcquiredImageVM(AcquiredImage acquiredImage) {
+        public AcquiredImageVM(AcquiredImage acquiredImage, IProfileService profileService) {
             this.acquiredImage = acquiredImage;
             string projectName;
             string targetName;
+            string? profileName;
 
             NamesItem names = ProjectTargetNameCache.GetNames(acquiredImage.ProjectId, acquiredImage.TargetId);
 
@@ -445,12 +580,22 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
             ProjectName = projectName;
             TargetName = targetName;
+
+            profileName = acquiredImage.profileId != null ? ProfileNameCache.Get(acquiredImage.profileId) : "";
+            if (profileName == null) {
+                ProfileMeta profileMeta = profileService.Profiles.Where(p => p.Id.ToString() == acquiredImage.profileId).FirstOrDefault();
+                profileName = profileMeta != null ? profileMeta.Name : "";
+                ProfileNameCache.Put(acquiredImage.profileId, profileName);
+            }
+
+            ProfileName = profileName;
         }
 
         public DateTime AcquiredDate { get { return acquiredImage.AcquiredDate; } }
         public string FilterName { get { return acquiredImage.FilterName; } }
         public string ProjectName { get; private set; }
         public string TargetName { get; private set; }
+        public string ProfileName { get; private set; }
         public bool Accepted { get { return acquiredImage.Accepted; } }
         public string RejectReason { get { return acquiredImage.RejectReason; } }
 
@@ -464,6 +609,9 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         public string DetectedStars { get { return fmtInt(acquiredImage.Metadata.DetectedStars); } }
         public string HFR { get { return fmt(acquiredImage.Metadata.HFR); } }
         public string HFRStDev { get { return fmt(acquiredImage.Metadata.HFRStDev); } }
+
+        public string FWHM { get { return fmtHF(acquiredImage.Metadata.FWHM); } }
+        public string Eccentricity { get { return fmtHF(acquiredImage.Metadata.Eccentricity); } }
 
         public string ADUStDev { get { return fmt(acquiredImage.Metadata.ADUStDev); } }
         public string ADUMean { get { return fmt(acquiredImage.Metadata.ADUMean); } }
@@ -497,6 +645,62 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         private string fmt(double d, string format) {
             return Double.IsNaN(d) ? "" : String.Format(format, d);
         }
+
+        private string fmtHF(double d) {
+            return Double.IsNaN(d) || d <= 0 ? "--" : String.Format("{0:0.####}", d);
+        }
+    }
+
+    class CsvAcquiredImage {
+
+        private AcquiredImageVM record;
+
+        public CsvAcquiredImage(AcquiredImageVM record) {
+            this.record = record;
+        }
+
+        public DateTime AcquiredDate { get => record.AcquiredDate; }
+        public string FilePath { get => record.FileName; }
+
+        public string ProjectName { get => record.ProjectName; }
+        public string TargetName { get => record.TargetName; }
+        public string ProfileName { get => record.ProfileName; }
+        public string FilterName { get => record.FilterName; }
+        public bool Accepted { get => record.Accepted; }
+        public string RejectReason { get => record.RejectReason; }
+
+        public string Duration { get => record.ExposureDuration; }
+
+        public string Binning { get => record.Binning; }
+        public string CameraTemp { get => record.CameraTemp; }
+        public string CameraTargetTemp { get => record.CameraTargetTemp; }
+        public string Gain { get => record.Gain; }
+        public string Offset { get => record.Offset; }
+
+        public string ADUStDev { get => record.ADUStDev; }
+        public string ADUMean { get => record.ADUMean; }
+        public string ADUMedian { get => record.ADUMedian; }
+        public string ADUMin { get => record.ADUMin; }
+        public string ADUMax { get => record.ADUMax; }
+
+        public string DetectedStars { get => record.DetectedStars; }
+        public string HFR { get => record.HFR; }
+        public string HFRStDev { get => record.HFRStDev; }
+        public string FWHM { get => record.FWHM; }
+        public string Eccentricity { get => record.Eccentricity; }
+
+        public string GuidingRMS { get => record.GuidingRMS; }
+        public string GuidingRMSArcSec { get => record.GuidingRMSArcSec; }
+        public string GuidingRMSRA { get => record.GuidingRMSRA; }
+        public string GuidingRMSRAArcSec { get => record.GuidingRMSRAArcSec; }
+        public string GuidingRMSDEC { get => record.GuidingRMSDEC; }
+        public string GuidingRMSDECArcSec { get => record.GuidingRMSDECArcSec; }
+
+        public string FocuserPosition { get => record.FocuserPosition; }
+        public string FocuserTemp { get => record.FocuserTemp; }
+        public string RotatorPosition { get => record.RotatorPosition; }
+        public string PierSide { get => record.PierSide; }
+        public string Airmass { get => record.Airmass; }
     }
 
     class ProjectTargetNameCache {
@@ -526,6 +730,20 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         public NamesItem(string projectName, string targetName) {
             ProjectName = projectName;
             TargetName = targetName;
+        }
+    }
+
+    internal class ProfileNameCache {
+
+        private static readonly TimeSpan ITEM_TIMEOUT = TimeSpan.FromHours(12);
+        private static readonly MemoryCache _cache = new MemoryCache("Scheduler AcquiredImages Profile Names");
+
+        internal static string Get(string profileId) {
+            return (string)_cache.Get(profileId);
+        }
+
+        internal static void Put(string profileId, string profileName) {
+            _cache.Add(profileId, profileName, DateTime.Now.Add(ITEM_TIMEOUT));
         }
     }
 }
