@@ -18,6 +18,7 @@ using NINA.WPF.Base.Interfaces.ViewModel;
 using Scheduler.SyncService;
 using System;
 using System.ComponentModel.Composition;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -172,6 +173,13 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             DisplayText = "";
             syncImageSaveWatcher.Stop();
+        }
+
+        [OnDeserializing]
+        public void OnDeserializing(StreamingContext context) {
+            this.Items.Clear();
+            this.Conditions.Clear();
+            this.Triggers.Clear();
         }
 
         private string displayText;

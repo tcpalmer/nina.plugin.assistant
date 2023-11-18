@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 4.1.0.0 - 2023-11-XX
+* Added support for taking automated flats based on recent targets
+
 ## 4.0.5.0 - 2023-11-17
 * Added image grading on FWHM and Eccentricity (requires Hocus Focus plugin)
 * Added option to move rejected images to a 'rejected' directory
