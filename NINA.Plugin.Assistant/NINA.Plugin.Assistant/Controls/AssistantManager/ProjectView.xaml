@@ -188,11 +188,11 @@
 
         <UniformGrid
             Width="280"
-            Height="200"
+            Height="222"
             Margin="12,12,0,6"
             HorizontalAlignment="Left"
             Columns="2"
-            Rows="9">
+            Rows="10">
             <TextBlock
                 VerticalAlignment="Center"
                 FontWeight="Bold"
@@ -374,6 +374,22 @@
                 MaxHeight="20"
                 Margin="3,3,0,0"
                 Text="{Binding ProjectProxy.Project.IsMosaic}"
+                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                Text="Flats Handling"
+                ToolTip="Flat frames cadence for project targets" />
+            <ComboBox
+                MaxHeight="20"
+                ItemsSource="{Binding FlatsHandlingChoices}"
+                SelectedValue="{Binding ProjectProxy.Project.FlatsHandling, Mode=TwoWay, Converter={StaticResource FlatsHandlingChoicesConverter}}"
+                Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                Text="{Binding ProjectProxy.Project.FlatsHandling, Converter={StaticResource FlatsHandlingChoicesConverter}}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
         </UniformGrid>

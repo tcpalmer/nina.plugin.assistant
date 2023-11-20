@@ -27,6 +27,7 @@ namespace Assistant.NINAPlugin.Database {
         public DbSet<ExposurePlan> ExposurePlanSet { get; set; }
         public DbSet<ExposureTemplate> ExposureTemplateSet { get; set; }
         public DbSet<AcquiredImage> AcquiredImageSet { get; set; }
+        public DbSet<FlatHistory> FlatHistorySet { get; set; }
         public DbSet<ImageData> ImageDataSet { get; set; }
 
         public SchedulerDatabaseContext(string connectionString) : base(new SQLiteConnection() { ConnectionString = connectionString }, true) {
@@ -189,6 +190,13 @@ namespace Assistant.NINAPlugin.Database {
                     RollbackTransaction(transaction);
                 }
             }
+        }
+
+        public List<FlatHistory> GetFlatsHistory(DateTime lightSessionDate) {
+            var predicate = PredicateBuilder.New<FlatHistory>();
+            long lightSessionDateSecs = DateTimeToUnixSeconds(lightSessionDate);
+            predicate = predicate.And(f => f.lightSessionDate == lightSessionDateSecs);
+            return FlatHistorySet.AsNoTracking().Where(predicate).ToList();
         }
 
         public ImageData GetImageData(int acquiredImageId) {

@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using FluentAssertions;
+using NINA.Core.Model.Equipment;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.Test.Astrometry;
 using NINA.Plugin.Assistant.Test.Plan;
@@ -62,6 +63,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 p1.DitherEvery.Should().Be(14);
                 p1.EnableGrader.Should().BeFalse();
                 p1.IsMosaic.Should().BeTrue();
+                p1.FlatsHandling.Should().Be(Project.FLATS_HANDLING_OFF);
 
                 p1.RuleWeights[0].Name.Should().Be("a");
                 p1.RuleWeights[1].Name.Should().Be("b");
@@ -95,6 +97,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 p2.DitherEvery.Should().Be(16);
                 p2.EnableGrader.Should().BeFalse();
                 p2.IsMosaic.Should().BeFalse();
+                p2.FlatsHandling.Should().Be(3);
 
                 p2.RuleWeights[0].Name.Should().Be("d");
                 p2.RuleWeights[1].Name.Should().Be("e");
@@ -330,6 +333,40 @@ namespace NINA.Plugin.Assistant.Test.Database {
             }
         }
 
+        [Test, Order(9)]
+        [NonParallelizable]
+        public void TestFlatHistory() {
+
+            DateTime dt = DateTime.Now;
+            FlatHistory record = new FlatHistory(dt, dt.AddDays(2), "abcd-1234", 12, "panel", "Ha", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
+
+            using (var context = db.GetContext()) {
+                context.FlatHistorySet.Add(record);
+                context.SaveChanges();
+            }
+
+            using (var context = db.GetContext()) {
+                List<FlatHistory> records = context.GetFlatsHistory(dt.AddDays(-1));
+                records.Count.Should().Be(0);
+                records = context.GetFlatsHistory(dt);
+                records.Count.Should().Be(1);
+
+                FlatHistory sut = records[0];
+                sut.LightSessionDate = dt;
+                sut.FlatsTakenDate = dt.AddDays(2);
+                sut.ProfileId = "abcd-1234";
+                sut.NumberFlatsTaken = 12;
+                sut.FlatsType = "panel";
+                sut.FilterName = "Ha";
+                sut.Gain = 10;
+                sut.Offset = 20;
+                sut.BinningMode.X.Should().Be(2);
+                sut.ReadoutMode = 0;
+                sut.Rotation = 123.4;
+                sut.ROI = 89;
+            }
+        }
+
         private void LoadTestDatabase() {
             using (var context = db.GetContext()) {
                 try {
@@ -346,6 +383,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p1.DitherEvery = 14;
                     p1.EnableGrader = false;
                     p1.IsMosaic = true;
+                    p1.FlatsHandling = Project.FLATS_HANDLING_OFF;
 
                     p1.RuleWeights = new List<RuleWeight> {
                         {new RuleWeight("a", .1) },
@@ -399,6 +437,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p2.DitherEvery = 16;
                     p2.EnableGrader = false;
                     p2.IsMosaic = false;
+                    p2.FlatsHandling = 3;
 
                     p2.RuleWeights = new List<RuleWeight> {
                         {new RuleWeight("d", .4) },

@@ -7,6 +7,7 @@
     <ac:AllowEmptyConverter x:Key="AllowEmptyConverter" />
     <ac:ImagingMinutesConverter x:Key="ImagingMinutesConverter" />
     <ac:AltitudeChoicesConverter x:Key="AltitudeChoicesConverter" />
+    <ac:FlatsHandlingChoicesConverter x:Key="FlatsHandlingChoicesConverter" />
     <nc:BooleanToVisibilityCollapsedConverter x:Key="BooleanToVisibilityCollapsedConverter" />
     <nc:InverseBooleanToVisibilityCollapsedConverter x:Key="InverseBooleanToVisibilityCollapsedConverter" />
     <nc:MinusOneToEmptyStringConverter x:Key="MinusOneToEmptyStringConverter" />
