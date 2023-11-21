@@ -3,6 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS `flathistory` (
    `Id`        INTEGER NOT NULL,
+   `targetId`         INTEGER,
    `lightSessionDate`   INTEGER,
    `flatsTakenDate`   INTEGER,
    `profileId`    TEXT NOT NULL,

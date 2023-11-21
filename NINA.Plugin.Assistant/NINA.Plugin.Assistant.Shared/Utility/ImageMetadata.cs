@@ -18,6 +18,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
         public int Gain { get; set; }
         public int Offset { get; set; }
         public string Binning { get; set; }
+        public int ReadoutMode { get; set; }
         public double ROI { get; set; }
 
         public int DetectedStars { get; set; }
@@ -61,6 +62,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
             ExposureStartTime = msg.MetaData.Image.ExposureStart;
             ExposureDuration = msg.Duration;
             Binning = msg.MetaData.Image.Binning?.ToString();
+            ReadoutMode = 0; // TODO: FIX
             ROI = roi;
 
             Gain = msg.MetaData.Camera.Gain;
@@ -131,6 +133,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
             sb.AppendLine($"Gain: {Gain}");
             sb.AppendLine($"Offset: {Offset}");
             sb.AppendLine($"Binning: {Binning}");
+            sb.AppendLine($"ReadoutMode: {ReadoutMode}");
             sb.AppendLine($"ROI: {ROI}");
             sb.AppendLine($"DetectedStars: {DetectedStars}");
             sb.AppendLine($"HFR: {HFR}");

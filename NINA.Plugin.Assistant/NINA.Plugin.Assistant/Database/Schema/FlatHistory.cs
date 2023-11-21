@@ -2,21 +2,14 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Xml.Linq;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public class FlatHistory {
-
-        /*
-** Profile ID (needed for sync support)
-** Filter/gain/offset/binning/rotation/roi
-** Number of flats taken
-** Type of flat: panel or sky (maybe future use)
-         */
+    public class FlatHistory : IComparable {
 
         [Key] public int Id { get; set; }
 
+        public int targetId { get; set; }
         public long lightSessionDate { get; set; }
         public long flatsTakenDate { get; set; }
         public string profileId { get; set; }
@@ -33,7 +26,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public FlatHistory() { }
 
-        public FlatHistory(DateTime lightSessionDate,
+        public FlatHistory(int targetId,
+                           DateTime lightSessionDate,
                            DateTime flatsTakenDate,
                            string profileId,
                            int numberFlatsTaken,
@@ -46,6 +40,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
                            double rotation,
                            double roi) {
 
+            TargetId = targetId;
             LightSessionDate = lightSessionDate;
             FlatsTakenDate = flatsTakenDate;
             ProfileId = profileId;
@@ -58,6 +53,12 @@ namespace Assistant.NINAPlugin.Database.Schema {
             ReadoutMode = readoutMode;
             Rotation = rotation;
             ROI = roi;
+        }
+
+        [NotMapped]
+        public int TargetId {
+            get => targetId;
+            set { targetId = value; }
         }
 
         [NotMapped]
@@ -134,5 +135,9 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set { roi = value; }
         }
 
+        public int CompareTo(object obj) {
+            FlatHistory flatHistory = obj as FlatHistory;
+            return (flatHistory != null) ? FlatsTakenDate.CompareTo(flatHistory.FlatsTakenDate) : 0;
+        }
     }
 }

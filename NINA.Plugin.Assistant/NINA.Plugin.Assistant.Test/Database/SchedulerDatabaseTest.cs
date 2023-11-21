@@ -338,10 +338,12 @@ namespace NINA.Plugin.Assistant.Test.Database {
         public void TestFlatHistory() {
 
             DateTime dt = DateTime.Now;
-            FlatHistory record = new FlatHistory(dt, dt.AddDays(2), "abcd-1234", 12, "panel", "Ha", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
+            FlatHistory record1 = new FlatHistory(1, dt, dt.AddDays(2), "abcd-1234", 12, "panel", "Ha", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
+            FlatHistory record2 = new FlatHistory(1, dt.AddDays(1), dt.AddDays(3), "abcd-1234", 12, "panel", "O3", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
 
             using (var context = db.GetContext()) {
-                context.FlatHistorySet.Add(record);
+                context.FlatHistorySet.Add(record1);
+                context.FlatHistorySet.Add(record2);
                 context.SaveChanges();
             }
 
@@ -352,6 +354,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 records.Count.Should().Be(1);
 
                 FlatHistory sut = records[0];
+                sut.TargetId = 1;
                 sut.LightSessionDate = dt;
                 sut.FlatsTakenDate = dt.AddDays(2);
                 sut.ProfileId = "abcd-1234";
@@ -364,6 +367,12 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 sut.ReadoutMode = 0;
                 sut.Rotation = 123.4;
                 sut.ROI = 89;
+
+                records = context.GetFlatsHistory(1);
+                records.Sort();
+                records.Count.Should().Be(2);
+                records[0].FilterName = "O3";
+                records[1].FilterName = "Ha";
             }
         }
 
