@@ -158,6 +158,13 @@ namespace Assistant.NINAPlugin.Database {
             return images.ToList();
         }
 
+        public List<AcquiredImage> GetAcquiredImages(DateTime newerThan) {
+            var predicate = PredicateBuilder.New<AcquiredImage>();
+            long newerThanSecs = DateTimeToUnixSeconds(newerThan);
+            predicate = predicate.And(a => a.acquiredDate > newerThanSecs);
+            return AcquiredImageSet.AsNoTracking().Where(predicate).ToList();
+        }
+
         public List<AcquiredImage> GetAcquiredImagesForGrading(int targetId, string filterName) {
             var images = AcquiredImageSet.AsNoTracking().Where(p =>
                 p.TargetId == targetId &&
@@ -208,6 +215,15 @@ namespace Assistant.NINAPlugin.Database {
 
         public List<FlatHistory> GetFlatsHistory(int targetId) {
             return FlatHistorySet.AsNoTracking().Where(fh => fh.targetId == targetId).ToList();
+        }
+
+        public List<FlatHistory> GetFlatsHistory(List<Target> targets) {
+            List<FlatHistory> records = new List<FlatHistory>();
+            foreach (Target target in targets) {
+                records.AddRange(FlatHistorySet.AsNoTracking().Where(fh => fh.targetId == target.Id).ToList());
+            }
+
+            return records;
         }
 
         public ImageData GetImageData(int acquiredImageId) {

@@ -23,6 +23,55 @@ namespace NINA.Plugin.Assistant.Test.Database {
         }*/
 
         //[Test]
+        public void AddAcquiredImagesForTSFlats() {
+
+            // BEWARE! THIS WILL UPDATE ACTUAL DATABASE USED BY THE PLUGIN
+            var testDbPath = @"C:\Users\Tom\AppData\Local\NINA\SchedulerPlugin\schedulerdb.sqlite";
+            db = new SchedulerDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
+
+            DateTime dt = DateTime.Now.Date.AddDays(-5).AddHours(18);
+            string binning = "1x1";
+            string profileId = "c0e1645f-4d4c-4cff-b6f8-c66a58be9cd4";
+
+            using (SchedulerDatabaseContext context = db.GetContext()) {
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, profileId, GetImageMetadata("Lum", 10, 20, binning, 0, 0, 1));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, profileId, GetImageMetadata("Ha", 10, 20, binning, 0, 0, 1));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                context.SaveChanges();
+            }
+        }
+
+        private ImageMetadata GetImageMetadata(string filterName, int gain, int offset, string binning, int readoutMode, double rotation, double roi) {
+            return new ImageMetadata() {
+                FilterName = filterName,
+                Gain = gain,
+                Offset = offset,
+                Binning = binning,
+                ReadoutMode = readoutMode,
+                RotatorPosition = rotation,
+                ROI = roi
+            };
+        }
+
+        private AcquiredImage GetAcquiredImage(DateTime dt, int targetId, string profileId, ImageMetadata metadata) {
+            return new AcquiredImage(metadata) {
+                AcquiredDate = dt,
+                FilterName = metadata.FilterName,
+                TargetId = targetId,
+                ProfileId = profileId
+            };
+        }
+
+        //[Test]
         public void AddAcquiredImages() {
 
             // BEWARE! THIS WILL UPDATE ACTUAL DATABASE USED BY THE PLUGIN

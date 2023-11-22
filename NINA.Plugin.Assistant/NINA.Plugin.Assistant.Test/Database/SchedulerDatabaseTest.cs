@@ -338,8 +338,8 @@ namespace NINA.Plugin.Assistant.Test.Database {
         public void TestFlatHistory() {
 
             DateTime dt = DateTime.Now;
-            FlatHistory record1 = new FlatHistory(1, dt, dt.AddDays(2), "abcd-1234", 12, "panel", "Ha", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
-            FlatHistory record2 = new FlatHistory(1, dt.AddDays(1), dt.AddDays(3), "abcd-1234", 12, "panel", "O3", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
+            FlatHistory record1 = new FlatHistory(1, dt, dt.AddDays(2), "abcd-1234", FlatHistory.FLAT_TYPE_PANEL, "Ha", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
+            FlatHistory record2 = new FlatHistory(1, dt.AddDays(1), dt.AddDays(3), "abcd-1234", FlatHistory.FLAT_TYPE_SKY, "O3", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
 
             using (var context = db.GetContext()) {
                 context.FlatHistorySet.Add(record1);
@@ -358,8 +358,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 sut.LightSessionDate = dt;
                 sut.FlatsTakenDate = dt.AddDays(2);
                 sut.ProfileId = "abcd-1234";
-                sut.NumberFlatsTaken = 12;
-                sut.FlatsType = "panel";
+                sut.FlatsType = FlatHistory.FLAT_TYPE_PANEL;
                 sut.FilterName = "Ha";
                 sut.Gain = 10;
                 sut.Offset = 20;
@@ -372,7 +371,9 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 records.Sort();
                 records.Count.Should().Be(2);
                 records[0].FilterName = "O3";
+                records[0].FlatsType = FlatHistory.FLAT_TYPE_SKY;
                 records[1].FilterName = "Ha";
+                records[1].FlatsType = FlatHistory.FLAT_TYPE_PANEL;
             }
         }
 

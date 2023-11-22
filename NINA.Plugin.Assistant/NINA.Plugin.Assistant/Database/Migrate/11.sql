@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS `flathistory` (
    `lightSessionDate`   INTEGER,
    `flatsTakenDate`   INTEGER,
    `profileId`    TEXT NOT NULL,
-   `numberFlatsTaken`        INTEGER,
    `flatsType`    TEXT,
    `filterName`    TEXT,
    `gain`         INTEGER,

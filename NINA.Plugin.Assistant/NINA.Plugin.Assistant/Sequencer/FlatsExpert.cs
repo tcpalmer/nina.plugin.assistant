@@ -9,6 +9,8 @@ namespace Assistant.NINAPlugin.Sequencer {
 
     public class FlatsExpert {
 
+        public static readonly double ACQUIRED_IMAGES_CUTOFF_DAYS = -45;
+
         public FlatsExpert() { }
 
         /// <summary>
@@ -103,6 +105,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         // Remove if there is a flat set for the light session
                         if (lightSession.SessionDate == flatHistory.LightSessionDate && lightSession.FlatSpec.Equals(FlatSpecFromFlatHistory(flatHistory))) {
                             potentialLightSessions.Remove(lightSession);
+                            continue;
                         }
                     }
                 }

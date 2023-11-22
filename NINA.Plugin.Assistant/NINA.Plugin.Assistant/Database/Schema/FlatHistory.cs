@@ -7,13 +7,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
     public class FlatHistory : IComparable {
 
+        public const string FLAT_TYPE_PANEL = "panel";
+        public const string FLAT_TYPE_SKY = "sky";
+
         [Key] public int Id { get; set; }
 
         public int targetId { get; set; }
         public long lightSessionDate { get; set; }
         public long flatsTakenDate { get; set; }
         public string profileId { get; set; }
-        public int numberFlatsTaken { get; set; }
         public string flatsType { get; set; }
 
         public string filterName { get; set; }
@@ -30,7 +32,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
                            DateTime lightSessionDate,
                            DateTime flatsTakenDate,
                            string profileId,
-                           int numberFlatsTaken,
                            string flatsType,
                            string filterName,
                            int gain,
@@ -44,7 +45,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
             LightSessionDate = lightSessionDate;
             FlatsTakenDate = flatsTakenDate;
             ProfileId = profileId;
-            NumberFlatsTaken = numberFlatsTaken;
             FlatsType = flatsType;
             FilterName = filterName;
             Gain = gain;
@@ -79,12 +79,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 profileId = value;
             }
-        }
-
-        [NotMapped]
-        public int NumberFlatsTaken {
-            get => numberFlatsTaken;
-            set { numberFlatsTaken = value; }
         }
 
         [NotMapped]
