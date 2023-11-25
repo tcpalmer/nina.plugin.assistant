@@ -18,6 +18,7 @@ using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
 using NINA.Sequencer.SequenceItem.Camera;
 using NINA.Sequencer.SequenceItem.FilterWheel;
+using NINA.Sequencer.SequenceItem.FlatDevice;
 using NINA.Sequencer.SequenceItem.Imaging;
 using NINA.Sequencer.SequenceItem.Rotator;
 using NINA.Sequencer.Validations;
@@ -119,6 +120,9 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 DisplayText = "";
+                Iterations = 0;
+                CompletedIterations = 0;
+
                 await ToggleLight(false, progress, token);
             }
             catch (Exception ex) {
@@ -147,6 +151,24 @@ namespace Assistant.NINAPlugin.Sequencer {
             set {
                 displayText = value;
                 RaisePropertyChanged(nameof(DisplayText));
+            }
+        }
+
+        private int iterations = 0;
+        public int Iterations {
+            get => iterations;
+            set {
+                iterations = value;
+                RaisePropertyChanged(nameof(Iterations));
+            }
+        }
+
+        private int completedIterations = 0;
+        public int CompletedIterations {
+            get => completedIterations;
+            set {
+                completedIterations = value;
+                RaisePropertyChanged(nameof(CompletedIterations));
             }
         }
 
@@ -198,7 +220,9 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             int count = profileService.ActiveProfile.FlatWizardSettings.FlatCount;
-            DisplayText = $"Taking flat set: {count}x @ {setting.Time}s , panel brightness: {setting.Brightness} for {GetFlatSpecDisplay(flatSpec)}";
+            DisplayText = $"Flat set: {flatSpec.FilterName} {setting.Time}s ({GetFlatSpecDisplay(flatSpec)})";
+            Iterations = count;
+            CompletedIterations = 0;
 
             // Set rotation angle, if applicable
             if (rotatorMediator.GetInfo().Connected) {
@@ -217,9 +241,10 @@ namespace Assistant.NINAPlugin.Sequencer {
             SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator) { Filter = Utils.LookupFilter(profileService, flatSpec.FilterName) };
             await switchFilter.Execute(progress, token);
 
-            // TODO: not sure we're handling ExposureCount correctly by repeatedly running TakeExposure.Execute() ...
-            //   The file increment is good
-            //   Are we getting progress display?
+            // Set the panel brightness
+            TSLogger.Info($"TS Flats: setting panel brightness: {setting.Brightness}");
+            SetBrightness setBrightness = new SetBrightness(flatDeviceMediator) { Brightness = setting.Brightness };
+            await setBrightness.Execute(progress, token);
 
             // Take the exposures
             TakeSubframeExposure takeExposure = new TakeSubframeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM) {
@@ -236,6 +261,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             for (int i = 0; i < count; i++) {
                 await takeExposure.Execute(progress, token);
+                CompletedIterations++;
             }
         }
 
@@ -309,13 +335,18 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 // Handle flats taken on target completion
                 targets = flatsExpert.GetCompletedTargetsForFlats(activeProjects);
-                // TODO HERE
+                // TODO HERE, note that we need to pass in neededFlats from above so ensure no dups
                 //neededFlats.AddRange(...);
 
                 if (neededFlats.Count == 0) {
                     TSLogger.Info("TS Flats: all light sessions covered by taken flats history");
                     return null;
                 }
+
+                // Sort in increasing rotation angle order to minimize rotator movements
+                neededFlats.Sort(delegate (LightSession x, LightSession y) {
+                    return x.FlatSpec.Rotation.CompareTo(y.FlatSpec.Rotation);
+                });
 
                 return neededFlats;
             }

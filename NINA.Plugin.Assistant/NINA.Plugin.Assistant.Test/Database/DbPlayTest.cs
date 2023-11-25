@@ -36,13 +36,19 @@ namespace NINA.Plugin.Assistant.Test.Database {
             using (SchedulerDatabaseContext context = db.GetContext()) {
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 1, profileId, GetImageMetadata("Lum", 10, 20, binning, 0, 0, 1));
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, profileId, GetImageMetadata("Lum", 10, 20, binning, 0, 15, 1));
                     context.AcquiredImageSet.Add(ai);
                 }
 
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 1, profileId, GetImageMetadata("Ha", 10, 20, binning, 0, 0, 1));
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, profileId, GetImageMetadata("Red", 10, 20, binning, 0, 8, 1));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, profileId, GetImageMetadata("Green", 10, 20, binning, 0, 22, 1));
                     context.AcquiredImageSet.Add(ai);
                 }
 

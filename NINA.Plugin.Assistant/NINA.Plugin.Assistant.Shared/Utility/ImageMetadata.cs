@@ -44,6 +44,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
         public int? FocuserPosition { get; set; }
         public double FocuserTemp { get; set; }
         public double RotatorPosition { get; set; }
+        public double RotatorMechanicalPosition { get; set; }
         public string PierSide { get; set; }
 
         public double CameraTemp { get; set; }
@@ -91,6 +92,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
             FocuserPosition = msg.MetaData.Focuser.Position;
             FocuserTemp = msg.MetaData.Focuser.Temperature;
             RotatorPosition = Double.IsNaN(msg.MetaData.Rotator.Position) ? 0 : msg.MetaData.Rotator.Position;
+            RotatorMechanicalPosition = Double.IsNaN(msg.MetaData.Rotator.MechanicalPosition) ? 0 : msg.MetaData.Rotator.MechanicalPosition;
             PierSide = GetPierSide(msg.MetaData.Telescope.SideOfPier);
 
             CameraTemp = msg.MetaData.Camera.Temperature;
@@ -152,6 +154,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
             sb.AppendLine($"FocuserPosition: {FocuserPosition}");
             sb.AppendLine($"FocuserTemp: {FocuserTemp}");
             sb.AppendLine($"RotatorPosition: {RotatorPosition}");
+            sb.AppendLine($"RotatorMechanicalPosition: {RotatorMechanicalPosition}");
             sb.AppendLine($"PierSide: {PierSide}");
             sb.AppendLine($"CameraTemp: {CameraTemp}");
             sb.AppendLine($"CameraTargetTemp: {CameraTargetTemp}");

@@ -57,19 +57,30 @@ namespace Assistant.NINAPlugin.Sequencer {
         /// <param name="acquiredImages"></param>
         /// <returns></returns>
         public List<LightSession> GetLightSessions(List<Target> targets, List<AcquiredImage> acquiredImages) {
-            List<LightSession> list = new List<LightSession>();
+            List<LightSession> lightSessions = new List<LightSession>();
+
             foreach (Target target in targets) {
+                List<LightSession> sessionsWithRotation = new List<LightSession>();
+
                 foreach (AcquiredImage exposure in acquiredImages) {
                     if (target.Id != exposure.TargetId) { continue; }
                     LightSession lightSession = new LightSession(exposure.TargetId, GetLightSessionDate(exposure.AcquiredDate), new FlatSpec(exposure));
-                    if (!list.Contains(lightSession)) {
-                        list.Add(lightSession);
+
+                    if (target.Rotation != 0) {
+                        sessionsWithRotation.Add(lightSession);
                     }
+                    else if (!lightSessions.Contains(lightSession)) {
+                        lightSessions.Add(lightSession);
+                    }
+                }
+
+                if (sessionsWithRotation.Count > 0) {
+                    lightSessions.AddRange(AggregateForRotation(target, sessionsWithRotation));
                 }
             }
 
-            list.Sort();
-            return list;
+            lightSessions.Sort();
+            return lightSessions;
         }
 
         /// <summary>
@@ -133,6 +144,32 @@ namespace Assistant.NINAPlugin.Sequencer {
                 : exposureDate.Date.AddDays(-1).AddHours(12);
         }
 
+        /// <summary>
+        /// If a rotator is being used, you could have many items in the list that have
+        /// slightly different rotations but are otherwise the same.  We need to scan and find those
+        /// that can be grouped into a single light session - basically those for the same target where
+        /// the rotation angles are all 'close' to some value.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="lightSessions"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public List<LightSession> AggregateForRotation(Target target, List<LightSession> lightSessions) {
+            List<LightSession> aggregatedList = new List<LightSession>();
+
+            // Keep a set of rotation 'bins' with associated flat spec (so can compare minus rotation value)
+            // Compare each to existing bins:
+            //  - if w/in some variance, add to bin
+            //  - otherwise start new bin
+            // Average the values in each bin list when done
+
+            foreach (LightSession lightSession in lightSessions) {
+
+            }
+
+            return aggregatedList;
+        }
+
         private FlatSpec FlatSpecFromFlatHistory(FlatHistory flatHistory) {
             return new FlatSpec(flatHistory.FilterName, flatHistory.Gain, flatHistory.Offset, flatHistory.BinningMode, flatHistory.ReadoutMode, flatHistory.Rotation, flatHistory.ROI);
         }
@@ -168,7 +205,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             BinningMode.TryParse(exposure.Metadata.Binning, out bin);
             BinningMode = bin;
             ReadoutMode = exposure.Metadata.ReadoutMode;
-            Rotation = exposure.Metadata.RotatorPosition;
+            Rotation = exposure.Metadata.RotatorMechanicalPosition;
             ROI = exposure.Metadata.ROI;
             Key = GetKey();
         }
