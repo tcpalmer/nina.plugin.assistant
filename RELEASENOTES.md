@@ -3,6 +3,9 @@
 ## 4.1.0.0 - 2023-11-XX
 * Added support for taking automated flats
 
+## 4.0.5.1 - 2023-11-26
+* Improved handling when TS is canceled/interrupted which means it behaves better in safety scenarios and with Powerups safety controls.
+
 ## 4.0.5.0 - 2023-11-17
 * Added image grading on FWHM and Eccentricity (requires Hocus Focus plugin)
 * Added option to move rejected images to a 'rejected' directory

@@ -257,17 +257,17 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
                     catch (Exception ex) {
                         if (Utils.IsCancelException(ex)) {
-                            TSLogger.Warning("sequence was canceled");
+                            TSLogger.Warning("sequence was canceled or interrupted, target scheduler execution is incomplete");
+                            SchedulerProgress.Reset();
+                            Status = SequenceEntityStatus.CREATED;
+                            token.ThrowIfCancellationRequested();
                         }
                         else {
-                            TSLogger.Error($"exception executing plan: {ex}");
+                            TSLogger.Error($"exception executing plan: {ex.Message}\n{ex}");
+                            throw ex is SequenceEntityFailedException
+                                ? ex
+                                : new SequenceEntityFailedException($"exception executing plan: {ex.Message}", ex);
                         }
-
-                        if (ex is SequenceEntityFailedException) {
-                            throw;
-                        }
-
-                        throw new SequenceEntityFailedException($"exception executing plan: {ex.Message}", ex);
                     }
                     finally {
                         ClearTarget();
