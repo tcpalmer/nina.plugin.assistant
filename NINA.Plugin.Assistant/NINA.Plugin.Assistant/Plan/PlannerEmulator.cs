@@ -2,6 +2,7 @@
 using Assistant.NINAPlugin.Database.Schema;
 using NINA.Astrometry;
 using NINA.Core.Model.Equipment;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -27,13 +28,17 @@ namespace Assistant.NINAPlugin.Plan {
 
         public SchedulerPlan GetPlan(IPlanTarget previousPlanTarget) {
             CallNumber++;
+            TSLogger.Info($"PlannerEmulator.GetPlan: {CallNumber}");
             SchedulerPlan plan;
 
             switch (CallNumber) {
                 case 1: plan = WaitForTime(DateTime.Now.AddSeconds(10)); break;
                 case 2: plan = SyncPlan1(); break;
-                //case 3: plan = Plan2(); break;
-                // case 4: plan = Plan3(); break;
+                case 3: plan = Plan2(); break;
+                case 4: plan = Plan3(); break;
+                case 5: plan = Plan3(); break;
+                case 6: plan = Plan3(); break;
+                case 7: plan = Plan3(); break;
                 default:
                     CallNumber = 0;
                     return null;
@@ -115,11 +120,11 @@ namespace Assistant.NINAPlugin.Plan {
             IPlanTarget planTarget = GetBasePlanTarget("M31 Andromeda Panel 1", planProject, Cp1525);
             planTarget.EndTime = endTime;
 
-            IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3, 101);
+            IPlanExposure lum = GetExposurePlan("Lum", 14, null, null, 3, 101);
             lum.ReadoutMode = 0;
-            IPlanExposure red = GetExposurePlan("R", 4, null, null, 3, 102);
-            IPlanExposure grn = GetExposurePlan("G", 4, null, null, 3, 103);
-            IPlanExposure blu = GetExposurePlan("B", 4, null, null, 3, 104);
+            IPlanExposure red = GetExposurePlan("Red", 14, null, null, 3, 102);
+            IPlanExposure grn = GetExposurePlan("Green", 14, null, null, 3, 103);
+            IPlanExposure blu = GetExposurePlan("Blue", 14, null, null, 3, 104);
             planTarget.ExposurePlans.Add(lum);
             planTarget.ExposurePlans.Add(red);
             planTarget.ExposurePlans.Add(grn);
@@ -161,9 +166,9 @@ namespace Assistant.NINAPlugin.Plan {
 
             IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3, 101);
             lum.ReadoutMode = 0;
-            IPlanExposure red = GetExposurePlan("R", 4, null, null, 3, 102);
-            IPlanExposure grn = GetExposurePlan("G", 4, null, null, 3, 103);
-            IPlanExposure blu = GetExposurePlan("B", 4, null, null, 3, 104);
+            IPlanExposure red = GetExposurePlan("Red", 4, null, null, 3, 102);
+            IPlanExposure grn = GetExposurePlan("Green", 4, null, null, 3, 103);
+            IPlanExposure blu = GetExposurePlan("Blue", 4, null, null, 3, 104);
             planTarget.ExposurePlans.Add(lum);
             planTarget.ExposurePlans.Add(red);
             planTarget.ExposurePlans.Add(grn);

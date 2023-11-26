@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Sync;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
+using NINA.Core.Enum;
 using NINA.Core.Model;
 using NINA.Core.Utility.Notification;
 using NINA.Core.Utility.WindowService;
@@ -160,8 +161,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
                 catch (Exception ex) {
                     if (Utils.IsCancelException(ex)) {
-                        TSLogger.Warning("TargetSchedulerSyncContainer instruction was canceled");
+                        TSLogger.Warning("TargetSchedulerSyncContainer was canceled or interrupted, execution is incomplete");
                         syncImageSaveWatcher.Stop();
+                        Status = SequenceEntityStatus.CREATED;
+                        token.ThrowIfCancellationRequested();
                         return;
                     }
                     else {
