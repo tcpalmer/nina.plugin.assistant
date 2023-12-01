@@ -119,6 +119,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             metadata.Focuser.Position = 300;
             metadata.Focuser.Temperature = 301;
             metadata.Rotator.Position = 302;
+            metadata.Rotator.MechanicalPosition = 308;
             metadata.Telescope.SideOfPier = NINA.Core.Enum.PierSide.pierWest;
             metadata.Telescope.Airmass = 303;
             metadata.Camera.Temperature = 304;

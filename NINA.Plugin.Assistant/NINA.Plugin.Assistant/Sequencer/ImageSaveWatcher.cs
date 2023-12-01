@@ -122,6 +122,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 using (var transaction = context.Database.BeginTransaction()) {
 
                     try {
+                        ExposurePlan exposurePlan = null;
+
                         if (imageId != null) {
 
                             int exposureDatabaseId;
@@ -130,7 +132,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                             if (found) {
 
                                 // Update the exposure plan record
-                                ExposurePlan exposurePlan = context.GetExposurePlan(exposureDatabaseId);
+                                exposurePlan = context.GetExposurePlan(exposureDatabaseId);
                                 if (exposurePlan != null) {
                                     exposurePlan.Acquired++;
 
@@ -158,7 +160,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                             filterName,
                             accepted,
                             rejectReason,
-                            new ImageMetadata(msg, planTarget.ROI));
+                            new ImageMetadata(msg, planTarget.ROI, exposurePlan?.ExposureTemplate.ReadoutMode));
                         context.AcquiredImageSet.Add(acquiredImage);
 
                         context.SaveChanges();

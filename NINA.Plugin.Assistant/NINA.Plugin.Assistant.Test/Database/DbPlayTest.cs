@@ -30,25 +30,54 @@ namespace NINA.Plugin.Assistant.Test.Database {
             db = new SchedulerDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
 
             DateTime dt = DateTime.Now.Date.AddDays(-5).AddHours(18);
+            int gain = 139;
+            int offset = 21;
+            double rotation = ImageMetadata.NO_ROTATOR_ANGLE;
             string binning = "1x1";
+
             string profileId = "c0e1645f-4d4c-4cff-b6f8-c66a58be9cd4";
+            //string profileId = "4033c406-2709-488c-bf12-5c9387302c05"; // TS Flats Test on astropc
 
             using (SchedulerDatabaseContext context = db.GetContext()) {
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 1, profileId, GetImageMetadata("Lum", 10, 20, binning, 0, 15, 1));
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Lum", gain, offset, binning, 0, rotation, 100));
                     context.AcquiredImageSet.Add(ai);
                 }
 
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 1, profileId, GetImageMetadata("Red", 10, 20, binning, 0, 8, 1));
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Red", gain, offset, binning, 0, rotation, 100));
                     context.AcquiredImageSet.Add(ai);
                 }
 
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 1, profileId, GetImageMetadata("Green", 10, 20, binning, 0, 22, 1));
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Green", gain, offset, binning, 0, rotation, 100));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 2, 2, profileId, GetImageMetadata("Lum", gain, offset, binning, 0, rotation, 100));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 2, 2, profileId, GetImageMetadata("Red", gain, offset, binning, 0, rotation, 100));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 2, 2, profileId, GetImageMetadata("Green", gain, offset, binning, 0, rotation, 100));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 2, 2, profileId, GetImageMetadata("Blue", gain, offset, binning, 0, rotation, 100));
                     context.AcquiredImageSet.Add(ai);
                 }
 
@@ -64,14 +93,16 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 Binning = binning,
                 ReadoutMode = readoutMode,
                 RotatorPosition = rotation,
+                RotatorMechanicalPosition = rotation,
                 ROI = roi
             };
         }
 
-        private AcquiredImage GetAcquiredImage(DateTime dt, int targetId, string profileId, ImageMetadata metadata) {
+        private AcquiredImage GetAcquiredImage(DateTime dt, int projectId, int targetId, string profileId, ImageMetadata metadata) {
             return new AcquiredImage(metadata) {
                 AcquiredDate = dt,
                 FilterName = metadata.FilterName,
+                ProjectId = projectId,
                 TargetId = targetId,
                 ProfileId = profileId
             };

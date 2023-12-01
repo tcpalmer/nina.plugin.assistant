@@ -78,7 +78,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             instructions.Add(new PlanMessage("planner emulator: Plan1"));
-            instructions.Add(new PlanBeforeTargetContainer());
+            instructions.Add(new PlanBeforeNewTargetContainer());
             instructions.Add(new PlanSetReadoutMode(lum));
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
@@ -132,7 +132,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             instructions.Add(new PlanMessage("planner emulator: Plan2"));
-            instructions.Add(new PlanBeforeTargetContainer());
+            instructions.Add(new PlanBeforeNewTargetContainer());
             instructions.Add(new PlanSetReadoutMode(lum));
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
@@ -176,7 +176,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             instructions.Add(new PlanMessage("planner emulator: Plan3"));
-            instructions.Add(new PlanBeforeTargetContainer());
+            instructions.Add(new PlanBeforeNewTargetContainer());
             instructions.Add(new PlanSetReadoutMode(lum));
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
@@ -222,7 +222,7 @@ namespace Assistant.NINAPlugin.Plan {
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
             instructions.Add(new PlanMessage("planner emulator: SyncPlan1"));
             //instructions.Add(new PlanSlew(true));
-            instructions.Add(new PlanBeforeTargetContainer());
+            instructions.Add(new PlanBeforeNewTargetContainer());
 
             instructions.Add(new PlanSetReadoutMode(lum));
             instructions.Add(new PlanSwitchFilter(lum));

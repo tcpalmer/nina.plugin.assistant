@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Util;
 using NINA.Core.Model.Equipment;
+using NINA.Plugin.Assistant.Shared.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,11 +22,11 @@ namespace Assistant.NINAPlugin.Sequencer {
         public List<Target> GetTargetsForPeriodicFlats(List<Project> allProjects) {
             List<Target> targets = new List<Target>();
             foreach (Project project in allProjects) {
-                if (project.State != ProjectState.Active || project.FlatsHandling == Project.FLATS_HANDLING_OFF) { continue; }
-                foreach (Target target in project.Targets) {
-                    if (!target.Enabled) { continue; }
-                    targets.Add(target);
-                }
+                if (project.State != ProjectState.Active ||
+                    project.FlatsHandling == Project.FLATS_HANDLING_OFF ||
+                    project.FlatsHandling == Project.FLATS_HANDLING_TARGET_COMPLETION) { continue; }
+
+                targets.AddRange(project.Targets.Where(t => t.Enabled == true));
             }
 
             return targets;
@@ -40,11 +41,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             List<Target> targets = new List<Target>();
             foreach (Project project in allProjects) {
                 if (project.State != ProjectState.Active || project.FlatsHandling != Project.FLATS_HANDLING_TARGET_COMPLETION) { continue; }
-                foreach (Target target in project.Targets) {
-                    if (!target.Enabled) { continue; }
-                    if (target.PercentComplete < 100) { continue; }
-                    targets.Add(target);
-                }
+
+                targets.AddRange(project.Targets.Where(t => t.Enabled == true && t.PercentComplete >= 100));
             }
 
             return targets;
@@ -60,22 +58,14 @@ namespace Assistant.NINAPlugin.Sequencer {
             List<LightSession> lightSessions = new List<LightSession>();
 
             foreach (Target target in targets) {
-                List<LightSession> sessionsWithRotation = new List<LightSession>();
 
                 foreach (AcquiredImage exposure in acquiredImages) {
                     if (target.Id != exposure.TargetId) { continue; }
                     LightSession lightSession = new LightSession(exposure.TargetId, GetLightSessionDate(exposure.AcquiredDate), new FlatSpec(exposure));
 
-                    if (target.Rotation != 0) {
-                        sessionsWithRotation.Add(lightSession);
-                    }
-                    else if (!lightSessions.Contains(lightSession)) {
+                    if (!lightSessions.Contains(lightSession)) {
                         lightSessions.Add(lightSession);
                     }
-                }
-
-                if (sessionsWithRotation.Count > 0) {
-                    lightSessions.AddRange(AggregateForRotation(target, sessionsWithRotation));
                 }
             }
 
@@ -84,7 +74,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         /// <summary>
-        /// Find light sessions without corresponding flat sets that are older than the flats cadence for the targets
+        /// Find light sessions without corresponding flats history that are older than the flats cadence for the targets
         /// that employ periodic flats.
         /// 
         /// Note that the list returned may well contain what would amount to duplicate flat sets if the same set is
@@ -92,15 +82,15 @@ namespace Assistant.NINAPlugin.Sequencer {
         /// we need the whole list to ultimately write flat history records when done.
         /// </summary>
         /// <param name="checkDate"></param>
-        /// <param name="periodicFlatTargets"></param>
+        /// <param name="targets"></param>
         /// <param name="allLightSessions"></param>
         /// <param name="takenFlats"></param>
         /// <returns></returns>
-        public List<LightSession> GetNeededPeriodicFlats(DateTime runDate, List<Target> periodicFlatTargets, List<LightSession> allLightSessions, List<FlatHistory> takenFlats) {
+        public List<LightSession> GetNeededPeriodicFlats(DateTime runDate, List<Target> targets, List<LightSession> allLightSessions, List<FlatHistory> takenFlats) {
             List<LightSession> missingLightSessions = new List<LightSession>();
             DateTime checkDate = GetLightSessionDate(runDate);
 
-            foreach (Target target in periodicFlatTargets) {
+            foreach (Target target in targets) {
                 int flatsPeriod = target.Project.FlatsHandling;
 
                 // Get the light sessions and flat history for this target
@@ -132,6 +122,42 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         /// <summary>
+        /// Find light sessions without corresponding flats history for targets that employ target completion flats.
+        /// 
+        /// Note that the list returned may well contain what would amount to duplicate flat sets if the same set is
+        /// needed by more than one target.  The list will be culled for dups before actually generating the flats but
+        /// we need the whole list to ultimately write flat history records when done.
+        /// </summary>
+        /// <param name="targets"></param>
+        /// <param name="allLightSessions"></param>
+        /// <param name="takenFlats"></param>
+        /// <returns></returns>
+        public List<LightSession> GetNeededTargetCompletionFlats(List<Target> targets, List<LightSession> allLightSessions, List<FlatHistory> takenFlats) {
+            List<LightSession> missingLightSessions = new List<LightSession>();
+
+            foreach (Target target in targets) {
+
+                // Get the light sessions and flat history for this target
+                List<LightSession> targetLightSessions = allLightSessions.Where(ls => ls.TargetId == target.Id).ToList();
+                List<FlatHistory> targetFlatHistory = takenFlats.Where(tf => tf.TargetId == target.Id).ToList();
+
+                foreach (LightSession lightSession in targetLightSessions) {
+                    missingLightSessions.Add(lightSession);
+                    foreach (FlatHistory flatHistory in targetFlatHistory) {
+
+                        // Remove if there is a flat set for the light session
+                        if (lightSession.SessionDate == flatHistory.LightSessionDate && lightSession.FlatSpec.Equals(FlatSpecFromFlatHistory(flatHistory))) {
+                            missingLightSessions.Remove(lightSession);
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            return missingLightSessions;
+        }
+
+        /// <summary>
         /// A light session date is just a date/time marker that groups exposures into a single 'session'.
         /// All instances are set to noon indicating that the associated session is the upcoming period of
         /// darkness (immediate dusk to following dawn).
@@ -142,32 +168,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             return (exposureDate.Hour >= 12 && exposureDate.Hour <= 23)
                 ? exposureDate.Date.AddHours(12)
                 : exposureDate.Date.AddDays(-1).AddHours(12);
-        }
-
-        /// <summary>
-        /// If a rotator is being used, you could have many items in the list that have
-        /// slightly different rotations but are otherwise the same.  We need to scan and find those
-        /// that can be grouped into a single light session - basically those for the same target where
-        /// the rotation angles are all 'close' to some value.
-        /// </summary>
-        /// <param name="target"></param>
-        /// <param name="lightSessions"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public List<LightSession> AggregateForRotation(Target target, List<LightSession> lightSessions) {
-            List<LightSession> aggregatedList = new List<LightSession>();
-
-            // Keep a set of rotation 'bins' with associated flat spec (so can compare minus rotation value)
-            // Compare each to existing bins:
-            //  - if w/in some variance, add to bin
-            //  - otherwise start new bin
-            // Average the values in each bin list when done
-
-            foreach (LightSession lightSession in lightSessions) {
-
-            }
-
-            return aggregatedList;
         }
 
         private FlatSpec FlatSpecFromFlatHistory(FlatHistory flatHistory) {
@@ -211,7 +211,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private string GetKey() {
-            return $"{FilterName}_{Gain}_{Offset}_{BinningMode}_{ReadoutMode}_{Rotation}_{ROI}";
+            string rotationKey = Rotation != ImageMetadata.NO_ROTATOR_ANGLE ? $"{Rotation}" : "na";
+            return $"{FilterName}_{Gain}_{Offset}_{BinningMode}_{ReadoutMode}_{rotationKey}_{ROI}";
         }
 
         public bool Equals(FlatSpec other) {
@@ -223,7 +224,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override string ToString() {
-            return $"filter:{FilterName} gain:{Gain} offset:{Offset} bin:{BinningMode} readout:{ReadoutMode} rot:{Rotation} roi: {ROI}";
+            string rot = Rotation != ImageMetadata.NO_ROTATOR_ANGLE ? Rotation.ToString() : "n/a";
+            return $"filter:{FilterName} gain:{Gain} offset:{Offset} bin:{BinningMode} readout:{ReadoutMode} rot:{rot} roi: {ROI}";
         }
     }
 

@@ -1,12 +1,12 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
 using NINA.Core.Enum;
 using NINA.Core.Locale;
 using NINA.Core.Model;
 using NINA.Core.Model.Equipment;
-using NINA.Core.Utility.Notification;
 using NINA.Equipment.Equipment.MyCamera;
 using NINA.Equipment.Equipment.MyFlatDevice;
 using NINA.Equipment.Interfaces;
@@ -26,22 +26,24 @@ using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
-    [ExportMetadata("Name", "Target Scheduler Flats")]
-    [ExportMetadata("Description", "Flats automation for Target Scheduler")]
+    // This is currently moth-balled ... may become TS Immediate Flats
+    // At that point, some of the logic currently in TS Flats could be refactored out to a base class.
+
+    /*
+    [ExportMetadata("Name", "Target Scheduler Rotated Flats")]
+    [ExportMetadata("Description", "Rotated flats automation for Target Scheduler")]
     [ExportMetadata("Icon", "Scheduler.SchedulerSVG")]
     [ExportMetadata("Category", "Target Scheduler")]
     [Export(typeof(ISequenceItem))]
     [JsonObject(MemberSerialization.OptIn)]
-    public class TargetSchedulerFlats : SequenceItem, IValidatable {
+    */
+    public class TargetSchedulerRotatedFlats : SequenceItem, IValidatable {
 
         private IProfileService profileService;
         private ICameraMediator cameraMediator;
@@ -55,7 +57,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         SchedulerDatabaseInteraction database;
 
         [ImportingConstructor]
-        public TargetSchedulerFlats(IProfileService profileService, ICameraMediator cameraMediator, IImagingMediator imagingMediator, IImageSaveMediator imageSaveMediator, IImageHistoryVM imageHistoryVM, IFilterWheelMediator filterWheelMediator, IRotatorMediator rotatorMediator, IFlatDeviceMediator flatDeviceMediator) {
+        public TargetSchedulerRotatedFlats(IProfileService profileService, ICameraMediator cameraMediator, IImagingMediator imagingMediator, IImageSaveMediator imageSaveMediator, IImageHistoryVM imageHistoryVM, IFilterWheelMediator filterWheelMediator, IRotatorMediator rotatorMediator, IFlatDeviceMediator flatDeviceMediator) {
             this.profileService = profileService;
             this.cameraMediator = cameraMediator;
             this.imagingMediator = imagingMediator;
@@ -66,7 +68,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.flatDeviceMediator = flatDeviceMediator;
         }
 
-        public TargetSchedulerFlats(TargetSchedulerFlats cloneMe) : this(
+        public TargetSchedulerRotatedFlats(TargetSchedulerRotatedFlats cloneMe) : this(
             cloneMe.profileService,
             cloneMe.cameraMediator,
             cloneMe.imagingMediator,
@@ -83,7 +85,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override object Clone() {
-            return new TargetSchedulerFlats(this);
+            return new TargetSchedulerRotatedFlats(this);
         }
 
         public override void AfterParentChanged() {
@@ -100,33 +102,22 @@ namespace Assistant.NINAPlugin.Sequencer {
                     return;
                 }
 
-                LogTrainedFlatDetails();
-
                 // Prep the flat device
-                DisplayText = "Preparing flat device";
+                DisplayText = "Preparing flat panel";
                 await CloseCover(progress, token);
                 await ToggleLight(true, progress, token);
 
                 List<FlatSpec> takenFlats = new List<FlatSpec>();
                 foreach (LightSession neededFlat in neededFlats) {
-                    bool success = true;
                     if (!takenFlats.Contains(neededFlat.FlatSpec)) {
-                        success = await TakeFlatSet(neededFlat.FlatSpec, progress, token);
-                        if (success) {
-                            takenFlats.Add(neededFlat.FlatSpec);
-                        }
-                    }
-                    else {
-                        TSLogger.Info($"TS Flats: flat already taken, skipping: {neededFlat}");
+                        await TakeFlatSet(neededFlat.FlatSpec, progress, token);
+                        takenFlats.Add(neededFlat.FlatSpec);
                     }
 
                     // Write the flat history record
-                    if (success) {
-                        TSLogger.Info($"TS Flats: writing flat history: {neededFlat}");
-                        using (var context = database.GetContext()) {
-                            context.FlatHistorySet.Add(GetFlatHistoryRecord(neededFlat));
-                            context.SaveChanges();
-                        }
+                    using (var context = database.GetContext()) {
+                        context.FlatHistorySet.Add(GetFlatHistoryRecord(neededFlat));
+                        context.SaveChanges();
                     }
                 }
 
@@ -140,19 +131,19 @@ namespace Assistant.NINAPlugin.Sequencer {
                 DisplayText = "";
 
                 if (Utils.IsCancelException(ex)) {
-                    TSLogger.Warning("TS Flats: sequence was canceled/interrupted");
+                    TSLogger.Warning("TS Rotated Flats: sequence was canceled/interrupted");
                     Status = SequenceEntityStatus.CREATED;
                     token.ThrowIfCancellationRequested();
                 }
                 else {
-                    TSLogger.Error($"Exception taking flats: {ex.Message}:\n{ex.StackTrace}");
+                    TSLogger.Error($"Exception taking rotated flats: {ex.Message}:\n{ex.StackTrace}");
                 }
 
                 if (ex is SequenceEntityFailedException) {
                     throw;
                 }
 
-                throw new SequenceEntityFailedException($"exception taking flats: {ex.Message}", ex);
+                throw new SequenceEntityFailedException($"exception taking rotated flats: {ex.Message}", ex);
             }
 
             return;
@@ -224,71 +215,62 @@ namespace Assistant.NINAPlugin.Sequencer {
             return i.Count == 0;
         }
 
-        private async Task<bool> TakeFlatSet(FlatSpec flatSpec, IProgress<ApplicationStatus> progress, CancellationToken token) {
+        private async Task TakeFlatSet(FlatSpec flatSpec, IProgress<ApplicationStatus> progress, CancellationToken token) {
 
-            try {
-                TrainedFlatExposureSetting setting = GetTrainedFlatExposureSetting(flatSpec);
-                if (setting == null) {
-                    TSLogger.Warning($"TS Flats: failed to find trained settings for {flatSpec}");
-                    return false;
-                }
-
-                int count = profileService.ActiveProfile.FlatWizardSettings.FlatCount;
-                DisplayText = $"Flat set: {flatSpec.FilterName} {setting.Time}s ({GetFlatSpecDisplay(flatSpec)})";
-                Iterations = count;
-                CompletedIterations = 0;
-
-                // Set rotation angle, if applicable
-                if (flatSpec.Rotation != ImageMetadata.NO_ROTATOR_ANGLE && rotatorMediator.GetInfo().Connected) {
-                    TSLogger.Info($"TS Flats: setting rotation angle: {flatSpec.Rotation}");
-                    MoveRotatorMechanical rotate = new MoveRotatorMechanical(rotatorMediator) { MechanicalPosition = (float)flatSpec.Rotation };
-                    await rotate.Execute(progress, token);
-                }
-
-                // Set the camera readout mode
-                TSLogger.Info($"TS Flats: setting readout mode: {flatSpec.ReadoutMode}");
-                SetReadoutMode setReadoutMode = new SetReadoutMode(cameraMediator) { Mode = (short)flatSpec.ReadoutMode };
-                await setReadoutMode.Execute(progress, token);
-
-                // Switch filters
-                TSLogger.Info($"TS Flats: switching filter: {flatSpec.FilterName}");
-                SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator) { Filter = Utils.LookupFilter(profileService, flatSpec.FilterName) };
-                await switchFilter.Execute(progress, token);
-
-                // Set the panel brightness
-                TSLogger.Info($"TS Flats: setting panel brightness: {setting.Brightness}");
-                SetBrightness setBrightness = new SetBrightness(flatDeviceMediator) { Brightness = setting.Brightness };
-                await setBrightness.Execute(progress, token);
-
-                // Take the exposures
-                TakeSubframeExposure takeExposure = new TakeSubframeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM) {
-                    ImageType = CaptureSequence.ImageTypes.FLAT,
-                    ExposureCount = 0,
-                    Gain = flatSpec.Gain,
-                    Offset = flatSpec.Offset,
-                    Binning = flatSpec.BinningMode,
-                    ExposureTime = setting.Time,
-                    ROI = flatSpec.ROI
-                };
-
-                TSLogger.Info($"TS Flats: taking {count} flats: exp:{setting.Time}, brightness: {setting.Brightness}, for {flatSpec}");
-
-                for (int i = 0; i < count; i++) {
-                    await takeExposure.Execute(progress, token);
-                    CompletedIterations++;
-                }
-
-                return true;
+            TrainedFlatExposureSetting setting = GetTrainedFlatExposureSetting(flatSpec);
+            if (setting == null) {
+                TSLogger.Warning($"TS Flats: failed to find trained settings for {flatSpec}");
+                return;
             }
-            catch (Exception ex) {
-                TSLogger.Error($"Exception taking automated flat: {ex.Message}\n{ex}");
-                return false;
+
+            int count = profileService.ActiveProfile.FlatWizardSettings.FlatCount;
+            DisplayText = $"Flat set: {flatSpec.FilterName} {setting.Time}s ({GetFlatSpecDisplay(flatSpec)})";
+            Iterations = count;
+            CompletedIterations = 0;
+
+            // Set rotation angle, if applicable
+            if (rotatorMediator.GetInfo().Connected) {
+                TSLogger.Info($"TS Flats: setting rotation angle: {flatSpec.Rotation}");
+                MoveRotatorMechanical rotate = new MoveRotatorMechanical(rotatorMediator) { MechanicalPosition = (float)flatSpec.Rotation };
+                await rotate.Execute(progress, token);
+            }
+
+            // Set the camera readout mode
+            TSLogger.Info($"TS Flats: setting readout mode: {flatSpec.ReadoutMode}");
+            SetReadoutMode setReadoutMode = new SetReadoutMode(cameraMediator) { Mode = (short)flatSpec.ReadoutMode };
+            await setReadoutMode.Execute(progress, token);
+
+            // Switch filters
+            TSLogger.Info($"TS Flats: switching filter: {flatSpec.FilterName}");
+            SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator) { Filter = Utils.LookupFilter(profileService, flatSpec.FilterName) };
+            await switchFilter.Execute(progress, token);
+
+            // Set the panel brightness
+            TSLogger.Info($"TS Flats: setting panel brightness: {setting.Brightness}");
+            SetBrightness setBrightness = new SetBrightness(flatDeviceMediator) { Brightness = setting.Brightness };
+            await setBrightness.Execute(progress, token);
+
+            // Take the exposures
+            TakeSubframeExposure takeExposure = new TakeSubframeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM) {
+                ImageType = CaptureSequence.ImageTypes.FLAT,
+                ExposureCount = 0,
+                Gain = flatSpec.Gain,
+                Offset = flatSpec.Offset,
+                Binning = flatSpec.BinningMode,
+                ExposureTime = setting.Time,
+                ROI = flatSpec.ROI
+            };
+
+            TSLogger.Info($"TS Flats: taking {count} flats: exp:{setting.Time}, brightness: {setting.Brightness}, for {flatSpec}");
+
+            for (int i = 0; i < count; i++) {
+                await takeExposure.Execute(progress, token);
+                CompletedIterations++;
             }
         }
 
         private string GetFlatSpecDisplay(FlatSpec flatSpec) {
-            string rot = flatSpec.Rotation != ImageMetadata.NO_ROTATOR_ANGLE ? flatSpec.Rotation.ToString() : "n/a";
-            return $"Filter: {flatSpec.FilterName} Gain: {flatSpec.Gain} Offset: {flatSpec.Offset} Binning: {flatSpec.BinningMode} Rotation: {rot} ROI: {flatSpec.ROI}";
+            return $"Filter: {flatSpec.FilterName} Gain: {flatSpec.Gain} Offset: {flatSpec.Offset} Binning: {flatSpec.BinningMode} Rotation: {flatSpec.Rotation} ROI: {flatSpec.ROI}";
         }
 
         private async Task CloseCover(IProgress<ApplicationStatus> progress, CancellationToken token) {
@@ -331,49 +313,53 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private List<LightSession> GetNeededFlats() {
-            List<LightSession> neededFlats = new List<LightSession>();
             FlatsExpert flatsExpert = new FlatsExpert();
             DateTime cutoff = DateTime.Now.Date.AddDays(FlatsExpert.ACQUIRED_IMAGES_CUTOFF_DAYS);
-            string profileId = profileService.ActiveProfile.Id.ToString();
 
             using (var context = database.GetContext()) {
-                List<Project> activeProjects = context.GetActiveProjects(profileId);
-                List<AcquiredImage> acquiredImages = context.GetAcquiredImages(profileId, cutoff);
 
-                // Handle flats taken periodically
-                List<Target> targets = flatsExpert.GetTargetsForPeriodicFlats(activeProjects);
-                if (targets.Count > 0) {
-                    List<LightSession> lightSessions = flatsExpert.GetLightSessions(targets, acquiredImages);
-                    if (lightSessions.Count > 0) {
-                        List<FlatHistory> takenFlats = context.GetFlatsHistory(targets);
-                        neededFlats.AddRange(flatsExpert.GetNeededPeriodicFlats(DateTime.Now, targets, lightSessions, takenFlats));
-                    }
-                    else {
-                        TSLogger.Info("TS Flats: no light sessions for targets active for periodic flats");
-                    }
-                }
-                else {
-                    TSLogger.Info("TS Flats: no targets active for periodic flats");
+                // Handle flats with rotation if applicable to the current target
+
+                Target target = GetCurrentTarget();
+                if (target == null) {
+                    TSLogger.Warning("no current target found for rotated flats");
+                    return null;
                 }
 
-                // Add any flats needed for target completion targets
-                targets = flatsExpert.GetCompletedTargetsForFlats(activeProjects);
-                if (targets.Count > 0) {
-                    List<LightSession> lightSessions = flatsExpert.GetLightSessions(targets, acquiredImages);
-                    if (lightSessions.Count > 0) {
-                        List<FlatHistory> takenFlats = context.GetFlatsHistory(targets);
-                        neededFlats.AddRange(flatsExpert.GetNeededTargetCompletionFlats(targets, lightSessions, takenFlats));
-                    }
-                    else {
-                        TSLogger.Info("TS Flats: no light sessions for targets active for target completed flats");
+                if (target.Project.FlatsHandling != Project.FLATS_HANDLING_ROTATED) {
+                    TSLogger.Warning($"current target does not specify rotated flats: {target.Project.Name}/{target.Name}");
+                    return null;
+                }
+
+                // Examine the exposure plans for current target and run flats for each unless matching flats history is found
+                List<LightSession> neededFlats = new List<LightSession>();
+                List<FlatHistory> takenFlats = context.GetFlatsHistory(new List<Target> { target });
+                double mechanicalAngle = rotatorMediator.GetInfo().MechanicalPosition;
+
+                foreach (ExposurePlan exposurePlan in target.ExposurePlans) {
+                    ExposureTemplate et = exposurePlan.ExposureTemplate;
+                    FlatSpec flatSpec = new FlatSpec(et.FilterName, GetGain(et.Gain), GetOffset(et.Offset), et.BinningMode, et.ReadoutMode, mechanicalAngle, target.ROI);
+
+                    foreach (FlatHistory flatHistory in takenFlats) {
+                        // Compare flatSpec to flatHistory, if match, skip.  Otherwise create a light session to take the flat set
                     }
                 }
-                else {
-                    TSLogger.Info("TS Flats: no targets active for target completed flats");
+
+                return null;
+
+                /*
+                List<AcquiredImage> acquiredImages = context.GetAcquiredImages(cutoff);
+                List<LightSession> lightSessions = flatsExpert.GetLightSessions(targets, acquiredImages);
+                if (lightSessions.Count == 0) {
+                    TSLogger.Info("TS Flats: no light sessions for targets active for rotated flats");
+                    return null;
                 }
+
+                List<FlatHistory> takenFlats = context.GetFlatsHistory(targets);
+                neededFlats = flatsExpert.GetNeededPeriodicFlats(DateTime.Now, targets, lightSessions, takenFlats);
 
                 if (neededFlats.Count == 0) {
-                    TSLogger.Info("TS Flats: no flats needed");
+                    TSLogger.Info("TS Flats: all light sessions covered by taken flats history");
                     return null;
                 }
 
@@ -382,12 +368,53 @@ namespace Assistant.NINAPlugin.Sequencer {
                     return x.FlatSpec.Rotation.CompareTo(y.FlatSpec.Rotation);
                 });
 
-                return neededFlats;
+                return neededFlats;*/
             }
+        }
+
+        private Target GetCurrentTarget() {
+
+            /*
+            ISequenceContainer container = Parent;
+            while (container != null) {
+                if (container is PlanTargetContainer) {
+                    break;
+                }
+
+                container = container.Parent;
+            }
+
+            PlanTargetContainer planTargetContainer = container as PlanTargetContainer;
+            if (planTargetContainer != null) {
+                int? targetId = planTargetContainer.plan?.PlanTarget?.DatabaseId;
+                int? projectId = planTargetContainer.plan?.PlanTarget?.Project?.DatabaseId;
+                if (targetId != null && projectId != null) {
+                    using (var context = database.GetContext()) {
+                        return context.GetTarget((int)projectId, (int)targetId);
+                    }
+                }
+            }*/
+
+            return null;
+        }
+
+        private int GetGain(int? gain) {
+            return (int)(gain == null ? cameraMediator.GetInfo().DefaultGain : gain);
+        }
+
+        private int GetOffset(int? offset) {
+            return (int)((int)(offset == null ? cameraMediator.GetInfo().DefaultOffset : offset));
         }
 
         private TrainedFlatExposureSetting GetTrainedFlatExposureSetting(FlatSpec flatSpec) {
 
+            TSLogger.Warning("SPOOFING trained flat settings!");
+            return new TrainedFlatExposureSetting() {
+                Brightness = 10,
+                Time = 2
+            };
+
+            /*
             int filterPosition = GetFilterPosition(flatSpec.FilterName);
             if (filterPosition == -1) { return null; }
 
@@ -398,6 +425,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 && setting.Binning.Y == flatSpec.BinningMode.Y
                 && setting.Gain == flatSpec.Gain
                 && setting.Offset == flatSpec.Offset);
+            */
         }
 
         private short GetFilterPosition(string filterName) {
@@ -408,33 +436,6 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             TSLogger.Error($"No configured filter in filter wheel for filter '{filterName}'");
             return -1;
-        }
-
-        private void LogTrainedFlatDetails() {
-            Collection<TrainedFlatExposureSetting> settings = profileService.ActiveProfile.FlatDeviceSettings?.TrainedFlatExposureSettings;
-
-            /* Write training flats for testing.
-            BinningMode binning = new BinningMode(1, 1);
-            settings.Add(new TrainedFlatExposureSetting() { Filter = 0, Gain = 139, Offset = 21, Binning = binning, Time = 0.78125, Brightness = 21 });
-            settings.Add(new TrainedFlatExposureSetting() { Filter = 1, Gain = 139, Offset = 21, Binning = binning, Time = 4.0625, Brightness = 21 });
-            settings.Add(new TrainedFlatExposureSetting() { Filter = 2, Gain = 139, Offset = 21, Binning = binning, Time = 2.875, Brightness = 21 });
-            settings.Add(new TrainedFlatExposureSetting() { Filter = 3, Gain = 139, Offset = 21, Binning = binning, Time = 2.28125, Brightness = 21 });
-            settings.Add(new TrainedFlatExposureSetting() { Filter = 4, Gain = 139, Offset = 21, Binning = binning, Time = 8.8125, Brightness = 30 });
-            settings.Add(new TrainedFlatExposureSetting() { Filter = 5, Gain = 139, Offset = 21, Binning = binning, Time = 9.125, Brightness = 40 });
-            settings.Add(new TrainedFlatExposureSetting() { Filter = 6, Gain = 139, Offset = 21, Binning = binning, Time = 6.25, Brightness = 30 });
-            */
-
-            if (settings == null || settings.Count == 0) {
-                TSLogger.Debug("TS Flats: no trained flat exposure details found");
-                return;
-            }
-
-            StringBuilder sb = new StringBuilder();
-            foreach (TrainedFlatExposureSetting trainedFlat in settings) {
-                sb.AppendLine($"    filter pos: {trainedFlat.Filter} gain: {trainedFlat.Gain} offset: {trainedFlat.Offset} binning: {trainedFlat.Binning} exposure: {trainedFlat.Time} brightness: {trainedFlat.Brightness}");
-            }
-
-            TSLogger.Debug($"TS Flats: trained flat exposure details:\n{sb}");
         }
 
         private FlatHistory GetFlatHistoryRecord(LightSession neededFlat) {

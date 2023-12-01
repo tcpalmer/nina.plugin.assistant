@@ -158,10 +158,11 @@ namespace Assistant.NINAPlugin.Database {
             return images.ToList();
         }
 
-        public List<AcquiredImage> GetAcquiredImages(DateTime newerThan) {
+        public List<AcquiredImage> GetAcquiredImages(string profileId, DateTime newerThan) {
             var predicate = PredicateBuilder.New<AcquiredImage>();
             long newerThanSecs = DateTimeToUnixSeconds(newerThan);
             predicate = predicate.And(a => a.acquiredDate > newerThanSecs);
+            predicate = predicate.And(a => a.profileId == profileId);
             return AcquiredImageSet.AsNoTracking().Where(predicate).ToList();
         }
 
@@ -220,7 +221,7 @@ namespace Assistant.NINAPlugin.Database {
         public List<FlatHistory> GetFlatsHistory(List<Target> targets) {
             List<FlatHistory> records = new List<FlatHistory>();
             foreach (Target target in targets) {
-                records.AddRange(FlatHistorySet.AsNoTracking().Where(fh => fh.targetId == target.Id).ToList());
+                records.AddRange(FlatHistorySet.AsNoTracking().Where(fh => fh.targetId == target.Id));
             }
 
             return records;
@@ -404,6 +405,11 @@ namespace Assistant.NINAPlugin.Database {
                 try {
                     target = GetTarget(target.ProjectId, target.Id);
                     TargetSet.Remove(target);
+
+                    FlatHistorySet.Where(fh => fh.targetId == target.Id).ForEach(fh => {
+                        FlatHistorySet.Remove(fh);
+                    });
+
                     SaveChanges();
                     transaction.Commit();
                     return true;

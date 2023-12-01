@@ -74,7 +74,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     continue;
                 }
 
-                if (instruction is PlanBeforeTargetContainer) {
+                if (instruction is PlanBeforeNewTargetContainer) {
                     instructionProgressQueue.Enqueue(new InstructionMonitor("BeforeTarget"));
                     continue;
                 }

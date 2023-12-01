@@ -226,7 +226,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                     foreach (IPlanInstruction instruction in plan.PlanInstructions) {
                         TreeViewItem instructionItem = new TreeViewItem();
 
-                        if (instruction is PlanMessage || instruction is PlanBeforeTargetContainer) {
+                        if (instruction is PlanMessage || instruction is PlanBeforeNewTargetContainer) {
                             continue;
                         }
 

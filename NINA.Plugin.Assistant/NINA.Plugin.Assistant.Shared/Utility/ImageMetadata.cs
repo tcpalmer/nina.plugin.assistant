@@ -10,6 +10,8 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
 
     public class ImageMetadata {
 
+        public static readonly double NO_ROTATOR_ANGLE = double.MinValue;
+
         public string FileName { get; set; }
         public string FilterName { get; set; }
         public DateTime ExposureStartTime { get; set; }
@@ -53,7 +55,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
 
         public ImageMetadata() { }
 
-        public ImageMetadata(ImageSavedEventArgs msg, double roi) {
+        public ImageMetadata(ImageSavedEventArgs msg, double roi, int? readoutMode) {
             if (msg == null) {
                 throw new Exception("msg cannot be null");
             }
@@ -63,7 +65,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
             ExposureStartTime = msg.MetaData.Image.ExposureStart;
             ExposureDuration = msg.Duration;
             Binning = msg.MetaData.Image.Binning?.ToString();
-            ReadoutMode = 0; // TODO: FIX
+            ReadoutMode = readoutMode ?? 0;
             ROI = roi;
 
             Gain = msg.MetaData.Camera.Gain;
@@ -92,7 +94,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
             FocuserPosition = msg.MetaData.Focuser.Position;
             FocuserTemp = msg.MetaData.Focuser.Temperature;
             RotatorPosition = Double.IsNaN(msg.MetaData.Rotator.Position) ? 0 : msg.MetaData.Rotator.Position;
-            RotatorMechanicalPosition = Double.IsNaN(msg.MetaData.Rotator.MechanicalPosition) ? 0 : msg.MetaData.Rotator.MechanicalPosition;
+            RotatorMechanicalPosition = Double.IsNaN(msg.MetaData.Rotator.MechanicalPosition) ? NO_ROTATOR_ANGLE : msg.MetaData.Rotator.MechanicalPosition;
             PierSide = GetPierSide(msg.MetaData.Telescope.SideOfPier);
 
             CameraTemp = msg.MetaData.Camera.Temperature;

@@ -409,7 +409,7 @@ namespace Assistant.NINAPlugin.Plan {
             // If this target is different from the previous, add the slew and 'Before Target' instructions
             if (!planTarget.Equals(previousPlanTarget)) {
                 instructions.Add(new PlanSlew(true));
-                instructions.Add(new PlanBeforeTargetContainer());
+                instructions.Add(new PlanBeforeNewTargetContainer());
             }
 
             NighttimeCircumstances nighttimeCircumstances = NighttimeCircumstances.AdjustNighttimeCircumstances(observerInfo, atTime);
