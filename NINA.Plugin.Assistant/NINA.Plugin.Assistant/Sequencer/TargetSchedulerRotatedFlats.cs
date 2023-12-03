@@ -326,7 +326,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     return null;
                 }
 
-                if (target.Project.FlatsHandling != Project.FLATS_HANDLING_ROTATED) {
+                if (target.Project.FlatsHandling != Project.FLATS_HANDLING_IMMEDIATE) {
                     TSLogger.Warning($"current target does not specify rotated flats: {target.Project.Name}/{target.Name}");
                     return null;
                 }

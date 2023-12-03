@@ -16,15 +16,13 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         public void TestGetPotentialTargets() {
             List<Project> projects = GetTestProjects1();
             List<Target> targets = new FlatsExpert().GetTargetsForPeriodicFlats(projects);
-            targets.Count.Should().Be(4);
+            targets.Count.Should().Be(3);
             targets[0].Name.Should().Be("T3");
             targets[0].Id.Should().Be(3);
             targets[1].Name.Should().Be("T5");
             targets[1].Id.Should().Be(5);
             targets[2].Name.Should().Be("T6");
             targets[2].Id.Should().Be(6);
-            targets[3].Name.Should().Be("T7");
-            targets[3].Id.Should().Be(7);
         }
 
         [Test]
@@ -41,7 +39,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             FlatsExpert sut = new FlatsExpert();
             List<Project> projects = GetTestProjects1();
             List<Target> targets = sut.GetTargetsForPeriodicFlats(projects);
-            targets.Count.Should().Be(4);
+            targets.Count.Should().Be(3);
 
             List<LightSession> sessions = sut.GetLightSessions(targets, GetTestAcquiredImages());
             sessions.Count.Should().Be(12);
@@ -148,6 +146,73 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         }
 
         [Test]
+        public void TestCadenceExact() {
+            FlatsExpert sut = new FlatsExpert();
+
+            List<Target> targets = sut.GetTargetsForPeriodicFlats(GetTestProjects5());
+            targets.Count.Should().Be(3);
+            targets[0].Project.FlatsHandling.Should().Be(1);
+            targets[1].Project.FlatsHandling.Should().Be(2);
+            targets[2].Project.FlatsHandling.Should().Be(3);
+
+            DateTime baseDate = new DateTime(2023, 12, 1).AddHours(18);
+            List<LightSession> sessions = new List<LightSession>();
+            List<FlatHistory> history = new List<FlatHistory>();
+
+            DateTime sd1 = sut.GetLightSessionDate(baseDate);
+            FlatSpec fs1 = new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+            FlatSpec fs2 = new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+            //FlatSpec fs3 = new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+
+            LightSession ls1 = new LightSession(1, sd1, fs1);
+            LightSession ls2 = new LightSession(1, sd1, fs2);
+            LightSession ls3 = new LightSession(2, sd1, fs1);
+            LightSession ls4 = new LightSession(2, sd1, fs2);
+            LightSession ls5 = new LightSession(3, sd1, fs1);
+            LightSession ls6 = new LightSession(3, sd1, fs2);
+            sessions = new List<LightSession>() { ls1, ls2, ls3, ls4, ls5, ls6 };
+
+            // Target 1 has flats handling = 1 so should take on current or next day
+            List<LightSession> got = sut.GetNeededPeriodicFlats(baseDate, targets, sessions, history);
+            got.Count.Should().Be(2);
+            got[0].TargetId.Should().Be(1);
+            got[1].TargetId.Should().Be(1);
+            got = sut.GetNeededPeriodicFlats(baseDate.AddDays(1), targets, sessions, history);
+            got.Count.Should().Be(2);
+            got[0].TargetId.Should().Be(1);
+            got[1].TargetId.Should().Be(1);
+
+            // Advance a day and target 2 is now eligible
+            got = sut.GetNeededPeriodicFlats(baseDate.AddDays(2), targets, sessions, history);
+            got.Count.Should().Be(4);
+            got[0].TargetId.Should().Be(1);
+            got[1].TargetId.Should().Be(1);
+            got[2].TargetId.Should().Be(2);
+            got[3].TargetId.Should().Be(2);
+
+            // Advance another day and target 3 is now eligible
+            got = sut.GetNeededPeriodicFlats(baseDate.AddDays(3), targets, sessions, history);
+            got.Count.Should().Be(6);
+            got[0].TargetId.Should().Be(1);
+            got[1].TargetId.Should().Be(1);
+            got[2].TargetId.Should().Be(2);
+            got[3].TargetId.Should().Be(2);
+            got[4].TargetId.Should().Be(3);
+            got[5].TargetId.Should().Be(3);
+
+            // Target 2 now has flats history so dropped
+            FlatHistory fh1 = GetFlatHistory(2, sd1, baseDate.AddDays(2), fs1);
+            FlatHistory fh2 = GetFlatHistory(2, sd1, baseDate.AddDays(2), fs2);
+            history = new List<FlatHistory>() { fh1, fh2 };
+            got = sut.GetNeededPeriodicFlats(baseDate.AddDays(3), targets, sessions, history);
+            got.Count.Should().Be(4);
+            got[0].TargetId.Should().Be(1);
+            got[1].TargetId.Should().Be(1);
+            got[2].TargetId.Should().Be(3);
+            got[3].TargetId.Should().Be(3);
+        }
+
+        [Test]
         public void TestGetNeededTargetCompletionFlats() {
             FlatsExpert sut = new FlatsExpert();
 
@@ -215,6 +280,56 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             // All done
             needed = sut.GetNeededTargetCompletionFlats(targets, sessions, history);
             needed.Count.Should().Be(0);
+        }
+
+        [Test]
+        public void TestCullFlatsByHistory() {
+            FlatsExpert sut = new FlatsExpert();
+
+            DateTime baseDate = new DateTime(2023, 12, 1).AddHours(18);
+            List<LightSession> sessions = new List<LightSession>();
+            List<FlatHistory> history = new List<FlatHistory>();
+
+            DateTime sd1 = sut.GetLightSessionDate(baseDate);
+            DateTime sd2 = sut.GetLightSessionDate(baseDate.AddDays(-2));
+            FlatSpec fs1 = new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+            FlatSpec fs2 = new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+            FlatSpec fs3 = new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+
+            LightSession ls1 = new LightSession(1, sd1, fs1);
+            LightSession ls2 = new LightSession(1, sd1, fs2);
+            LightSession ls3 = new LightSession(1, sd1, fs3);
+            sessions = new List<LightSession>() { ls1, ls2, ls3 };
+
+            // No history
+            List<LightSession> list = sut.CullFlatsByHistory(sessions, history);
+            list.Count.Should().Be(sessions.Count);
+            list[0].Should().BeSameAs(ls1);
+            list[1].Should().BeSameAs(ls2);
+            list[2].Should().BeSameAs(ls3);
+
+            FlatHistory fh1 = GetFlatHistory(1, sd1, baseDate.AddMinutes(4), fs1);
+            FlatHistory fh2 = GetFlatHistory(1, sd1, baseDate.AddMinutes(4), fs2);
+            history = new List<FlatHistory>() { fh1, fh2 };
+
+            // Cull two
+            list = sut.CullFlatsByHistory(sessions, history);
+            list.Count.Should().Be(1);
+            list[0].Should().BeSameAs(ls3);
+
+            // But not if session date differs
+            fh1 = GetFlatHistory(1, sd2, baseDate.AddMinutes(4), fs1);
+            fh2 = GetFlatHistory(1, sd2, baseDate.AddMinutes(4), fs2);
+            history = new List<FlatHistory>() { fh1, fh2 };
+            list = sut.CullFlatsByHistory(sessions, history);
+            list.Count.Should().Be(sessions.Count);
+
+            // Or if target Id differs
+            fh1 = GetFlatHistory(1, sd2, baseDate.AddMinutes(4), fs1);
+            fh2 = GetFlatHistory(1, sd2, baseDate.AddMinutes(4), fs2);
+            history = new List<FlatHistory>() { fh1, fh2 };
+            list = sut.CullFlatsByHistory(sessions, history);
+            list.Count.Should().Be(sessions.Count);
         }
 
         [Test]
@@ -367,7 +482,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             Project p2 = new Project("abcd-1234") { Name = "P2", State = ProjectState.Active, FlatsHandling = Project.FLATS_HANDLING_OFF };
             Project p3 = new Project("abcd-1234") { Name = "P3", State = ProjectState.Active, FlatsHandling = 3 };
             Project p4 = new Project("abcd-1234") { Name = "P4", State = ProjectState.Active, FlatsHandling = Project.FLATS_HANDLING_TARGET_COMPLETION };
-            Project p5 = new Project("abcd-1234") { Name = "P5", State = ProjectState.Active, FlatsHandling = Project.FLATS_HANDLING_ROTATED };
+            Project p5 = new Project("abcd-1234") { Name = "P5", State = ProjectState.Active, FlatsHandling = Project.FLATS_HANDLING_IMMEDIATE };
 
             Target t1 = new Target() { Id = 1, Name = "T1" };
             Target t2 = new Target() { Id = 2, Name = "T2" };
@@ -423,6 +538,22 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             p2.Targets.Add(t2);
 
             return new List<Project>() { p1, p2 };
+        }
+
+        private List<Project> GetTestProjects5() {
+            Project p1 = new Project("abcd-1234") { Name = "P1", State = ProjectState.Active, FlatsHandling = 1 };
+            Project p2 = new Project("abcd-1234") { Name = "P2", State = ProjectState.Active, FlatsHandling = 2 };
+            Project p3 = new Project("abcd-1234") { Name = "P3", State = ProjectState.Active, FlatsHandling = 3 };
+
+            Target t1 = new Target() { Id = 1, Project = p1, Name = "T1" };
+            Target t2 = new Target() { Id = 2, Project = p2, Name = "T2" };
+            Target t3 = new Target() { Id = 3, Project = p3, Name = "T3" };
+
+            p1.Targets.Add(t1);
+            p2.Targets.Add(t2);
+            p3.Targets.Add(t3);
+
+            return new List<Project>() { p1, p2, p3 };
         }
 
         private List<AcquiredImage> GetTestAcquiredImages() {

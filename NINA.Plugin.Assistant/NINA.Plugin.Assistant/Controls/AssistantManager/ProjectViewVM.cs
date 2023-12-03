@@ -100,7 +100,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             FlatsHandlingChoices = new List<string> {
                 "Off",
                 "1","2","3","5","7","10","14",
-                "Target Completion"
+                "Target Completion",
+                "Use With Immediate"
             };
         }
 

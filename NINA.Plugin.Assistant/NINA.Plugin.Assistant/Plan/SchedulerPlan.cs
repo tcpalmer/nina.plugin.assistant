@@ -194,6 +194,7 @@ namespace Assistant.NINAPlugin.Plan {
         int DitherEvery { get; set; }
         bool EnableGrader { get; set; }
         bool IsMosaic { get; set; }
+        int FlatsHandling { get; set; }
         Dictionary<string, double> RuleWeights { get; set; }
 
         List<IPlanTarget> Targets { get; set; }
@@ -225,6 +226,7 @@ namespace Assistant.NINAPlugin.Plan {
         public int DitherEvery { get; set; }
         public bool EnableGrader { get; set; }
         public bool IsMosaic { get; set; }
+        public int FlatsHandling { get; set; }
         public Dictionary<string, double> RuleWeights { get; set; }
 
         public List<IPlanTarget> Targets { get; set; }
@@ -253,6 +255,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.DitherEvery = project.DitherEvery;
             this.EnableGrader = project.EnableGrader;
             this.IsMosaic = project.IsMosaic;
+            this.FlatsHandling = project.FlatsHandling;
             this.RuleWeights = GetRuleWeightsDictionary(project.RuleWeights);
 
             this.HorizonDefinition = DetermineHorizon(profile, project);
@@ -292,6 +295,7 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"DitherEvery: {DitherEvery}");
             sb.AppendLine($"EnableGrader: {EnableGrader}");
             sb.AppendLine($"IsMosaic: {IsMosaic}");
+            sb.AppendLine($"FlatsHandling: {FlatsHandling}");
             sb.AppendLine($"RuleWeights:");
             foreach (KeyValuePair<string, double> entry in RuleWeights) {
                 sb.AppendLine($"  {entry.Key}: {entry.Value}");

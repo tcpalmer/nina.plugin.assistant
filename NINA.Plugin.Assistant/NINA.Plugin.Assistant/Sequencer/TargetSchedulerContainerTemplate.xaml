@@ -620,7 +620,7 @@
 
                                 <ninactrl:DetachingExpander>
                                     <ninactrl:DetachingExpander.Header>
-                                        <TextBlock Text="After All Targets Instructions" />
+                                        <TextBlock Text="After Each Target Instructions" />
                                     </ninactrl:DetachingExpander.Header>
                                     <StackPanel Orientation="Vertical">
                                         <Border

@@ -26,6 +26,14 @@ namespace Assistant.NINAPlugin.Sequencer {
             AttachNewParent(Parent);
         }
 
+        public override void Initialize() {
+            foreach (ISequenceItem item in Items) {
+                item.Initialize();
+            }
+
+            base.Initialize();
+        }
+
         public override object Clone() {
             InstructionContainer ic = new InstructionContainer(Name, Parent);
             ic.Items = new ObservableCollection<ISequenceItem>(Items.Select(i => i.Clone() as ISequenceItem));

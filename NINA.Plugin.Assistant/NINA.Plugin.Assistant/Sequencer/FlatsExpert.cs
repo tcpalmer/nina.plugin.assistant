@@ -5,6 +5,7 @@ using NINA.Plugin.Assistant.Shared.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Assistant.NINAPlugin.Sequencer.FlatsExpert;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
@@ -24,7 +25,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             foreach (Project project in allProjects) {
                 if (project.State != ProjectState.Active ||
                     project.FlatsHandling == Project.FLATS_HANDLING_OFF ||
-                    project.FlatsHandling == Project.FLATS_HANDLING_TARGET_COMPLETION) { continue; }
+                    project.FlatsHandling == Project.FLATS_HANDLING_TARGET_COMPLETION ||
+                    project.FlatsHandling == Project.FLATS_HANDLING_IMMEDIATE) { continue; }
 
                 targets.AddRange(project.Targets.Where(t => t.Enabled == true));
             }
@@ -104,7 +106,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     foreach (FlatHistory flatHistory in targetFlatHistory) {
 
                         // Remove if there is a flat set for the light session
-                        if (lightSession.SessionDate == flatHistory.LightSessionDate && lightSession.FlatSpec.Equals(FlatSpecFromFlatHistory(flatHistory))) {
+                        if (lightSession.SessionDate == flatHistory.LightSessionDate && lightSession.FlatSpec.Equals(new FlatSpec(flatHistory))) {
                             potentialLightSessions.Remove(lightSession);
                             continue;
                         }
@@ -113,7 +115,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 // Skip if not enough days have passed based on project setting
                 foreach (LightSession lightSession in potentialLightSessions) {
-                    if ((checkDate - lightSession.SessionDate).TotalDays < flatsPeriod) { continue; }
+                    if (flatsPeriod > 1 && (checkDate - lightSession.SessionDate).TotalDays < flatsPeriod) { continue; }
                     missingLightSessions.Add(lightSession);
                 }
             }
@@ -146,7 +148,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     foreach (FlatHistory flatHistory in targetFlatHistory) {
 
                         // Remove if there is a flat set for the light session
-                        if (lightSession.SessionDate == flatHistory.LightSessionDate && lightSession.FlatSpec.Equals(FlatSpecFromFlatHistory(flatHistory))) {
+                        if (lightSession.SessionDate == flatHistory.LightSessionDate && lightSession.FlatSpec.Equals(new FlatSpec(flatHistory))) {
                             missingLightSessions.Remove(lightSession);
                             continue;
                         }
@@ -155,6 +157,34 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             return missingLightSessions;
+        }
+
+        /// <summary>
+        /// Remove light sessions from the needed list if the same flat spec is in one of the history records.
+        /// </summary>
+        /// <param name="neededFlats"></param>
+        /// <param name="takenFlats"></param>
+        /// <returns></returns>
+        public List<LightSession> CullFlatsByHistory(List<LightSession> neededFlats, List<FlatHistory> takenFlats) {
+
+            if (takenFlats.Count == 0) {
+                return neededFlats;
+            }
+
+            List<LightSession> culledList = new List<LightSession>();
+            foreach (LightSession lightSession in neededFlats) {
+                culledList.Add(lightSession);
+                foreach (FlatHistory flatHistory in takenFlats) {
+                    if (lightSession.SessionDate == flatHistory.LightSessionDate &&
+                        lightSession.TargetId == flatHistory.TargetId &&
+                        lightSession.FlatSpec.Equals(new FlatSpec(flatHistory))) {
+                        culledList.Remove(lightSession);
+                        break;
+                    }
+                }
+            }
+
+            return culledList;
         }
 
         /// <summary>
@@ -168,10 +198,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             return (exposureDate.Hour >= 12 && exposureDate.Hour <= 23)
                 ? exposureDate.Date.AddHours(12)
                 : exposureDate.Date.AddDays(-1).AddHours(12);
-        }
-
-        private FlatSpec FlatSpecFromFlatHistory(FlatHistory flatHistory) {
-            return new FlatSpec(flatHistory.FilterName, flatHistory.Gain, flatHistory.Offset, flatHistory.BinningMode, flatHistory.ReadoutMode, flatHistory.Rotation, flatHistory.ROI);
         }
     }
 
@@ -207,6 +233,17 @@ namespace Assistant.NINAPlugin.Sequencer {
             ReadoutMode = exposure.Metadata.ReadoutMode;
             Rotation = exposure.Metadata.RotatorMechanicalPosition;
             ROI = exposure.Metadata.ROI;
+            Key = GetKey();
+        }
+
+        public FlatSpec(FlatHistory flatHistory) {
+            FilterName = flatHistory.FilterName;
+            Gain = flatHistory.Gain;
+            Offset = flatHistory.Offset;
+            BinningMode = flatHistory.BinningMode;
+            ReadoutMode = flatHistory.ReadoutMode;
+            Rotation = flatHistory.Rotation;
+            ROI = flatHistory.ROI;
             Key = GetKey();
         }
 

@@ -13,6 +13,7 @@ namespace Assistant.NINAPlugin.Controls.Converters {
             switch (val) {
                 case Project.FLATS_HANDLING_OFF: return "Off";
                 case Project.FLATS_HANDLING_TARGET_COMPLETION: return "Target Completion";
+                case Project.FLATS_HANDLING_IMMEDIATE: return "Use With Immediate";
                 default: return $"{val}";
             }
         }
@@ -26,6 +27,7 @@ namespace Assistant.NINAPlugin.Controls.Converters {
             switch (val) {
                 case "Off": return Project.FLATS_HANDLING_OFF;
                 case "Target Completion": return Project.FLATS_HANDLING_TARGET_COMPLETION;
+                case "Use With Immediate": return Project.FLATS_HANDLING_IMMEDIATE;
                 default: return int.Parse(val);
             }
         }

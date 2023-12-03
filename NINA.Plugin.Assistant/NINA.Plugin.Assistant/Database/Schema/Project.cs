@@ -23,7 +23,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public const int FLATS_HANDLING_OFF = 0;
         public const int FLATS_HANDLING_TARGET_COMPLETION = 100;
-        public const int FLATS_HANDLING_ROTATED = 200;
+        public const int FLATS_HANDLING_IMMEDIATE = 200;
 
         [Key] public int Id { get; set; }
         [Required] public string ProfileId { get; set; }
