@@ -30,8 +30,10 @@ namespace NINA.Plugin.Assistant.Test.Database {
             db = new SchedulerDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
 
             DateTime dt = DateTime.Now.Date.AddDays(-5).AddHours(18);
-            int gain = 139;
-            int offset = 21;
+            //int gain = 139;
+            //int offset = 21;
+            int gain = -1;
+            int offset = -1;
             double rotation = ImageMetadata.NO_ROTATOR_ANGLE;
             string binning = "1x1";
 

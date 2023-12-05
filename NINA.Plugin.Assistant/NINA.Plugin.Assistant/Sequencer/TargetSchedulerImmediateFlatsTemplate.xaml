@@ -11,7 +11,10 @@
         <nina:SequenceBlockView DataContext="{Binding}">
             <nina:SequenceBlockView.SequenceItemContent>
                 <WrapPanel Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="Repeat Flat Sets: " ToolTip="Repeat flat sets, even if duplicates" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Text="Repeat Flat Sets: "
+                        ToolTip="Repeat flat sets, even if duplicates" />
                     <CheckBox
                         Margin="4,0,4,0"
                         VerticalAlignment="Center"

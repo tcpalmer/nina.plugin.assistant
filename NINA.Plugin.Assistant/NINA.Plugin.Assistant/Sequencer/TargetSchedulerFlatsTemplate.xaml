@@ -11,7 +11,15 @@
         <nina:SequenceBlockView DataContext="{Binding}">
             <nina:SequenceBlockView.SequenceItemContent>
                 <WrapPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding DisplayText}"/>
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Text="Repeat Flat Sets: "
+                        ToolTip="Repeat flat sets, even if duplicates" />
+                    <CheckBox
+                        Margin="4,0,4,0"
+                        VerticalAlignment="Center"
+                        IsChecked="{Binding AlwaysRepeatFlatSet}" />
+                    <TextBlock VerticalAlignment="Center" Text="{Binding DisplayText}" />
                 </WrapPanel>
             </nina:SequenceBlockView.SequenceItemContent>
             <nina:SequenceBlockView.SequenceItemProgressContent>
@@ -29,7 +37,7 @@
     </DataTemplate>
 
     <DataTemplate x:Key="Assistant.NINAPlugin.Sequencer.TargetSchedulerFlats_Mini">
-        <mini:MiniSequenceItem/>
+        <mini:MiniSequenceItem />
     </DataTemplate>
 
 </ResourceDictionary>

@@ -33,8 +33,8 @@ namespace Assistant.NINAPlugin.Plan {
 
             switch (CallNumber) {
                 case 1: plan = WaitForTime(DateTime.Now.AddSeconds(6)); break;
-                case 2: plan = Plan4(); break;
-                case 3: plan = Plan5(); break;
+                case 2: plan = Plan6(); break;
+                //case 3: plan = Plan5(); break;
                 //case 5: plan = Plan3(); break;
                 //case 6: plan = Plan3(); break;
                 //case 7: plan = Plan3(); break;
@@ -258,6 +258,46 @@ namespace Assistant.NINAPlugin.Plan {
             IPlanExposure red = GetExposurePlan("Red", 4, 139, 21, 3, 102);
             IPlanExposure grn = GetExposurePlan("Green", 4, 139, 21, 3, 103);
             IPlanExposure blu = GetExposurePlan("Blue", 4, 139, 21, 3, 104);
+            planTarget.ExposurePlans.Add(lum);
+            planTarget.ExposurePlans.Add(red);
+            planTarget.ExposurePlans.Add(grn);
+            planTarget.ExposurePlans.Add(blu);
+
+            List<IPlanInstruction> instructions = new List<IPlanInstruction>();
+            instructions.Add(new PlanMessage("planner emulator: Plan5"));
+            instructions.Add(new PlanSlew(false));
+            instructions.Add(new PlanSwitchFilter(lum));
+            instructions.Add(new PlanTakeExposure(lum));
+            instructions.Add(new PlanSwitchFilter(red));
+            instructions.Add(new PlanTakeExposure(red));
+            instructions.Add(new PlanSwitchFilter(grn));
+            instructions.Add(new PlanTakeExposure(grn));
+            instructions.Add(new PlanSwitchFilter(blu));
+            instructions.Add(new PlanTakeExposure(blu));
+
+            return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions, false);
+        }
+
+        private SchedulerPlan Plan6() {
+            DateTime endTime = atTime.AddMinutes(5);
+            TimeInterval timeInterval = new TimeInterval(atTime, endTime);
+
+            IPlanProject planProject = new PlanProjectEmulator();
+            planProject.Name = "Project 6";
+            planProject.UseCustomHorizon = false;
+            planProject.MinimumAltitude = 10;
+            planProject.DitherEvery = 0;
+            planProject.EnableGrader = false;
+            planProject.FlatsHandling = 1;
+
+            IPlanTarget planTarget = GetBasePlanTarget("Target 6", planProject, Cp5n5);
+            planTarget.EndTime = endTime;
+            planTarget.DatabaseId = 1;
+
+            IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3, 101);
+            IPlanExposure red = GetExposurePlan("Red", 4, null, null, 3, 102);
+            IPlanExposure grn = GetExposurePlan("Green", 4, null, null, 3, 103);
+            IPlanExposure blu = GetExposurePlan("Blue", 4, null, null, 3, 104);
             planTarget.ExposurePlans.Add(lum);
             planTarget.ExposurePlans.Add(red);
             planTarget.ExposurePlans.Add(grn);

@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Util;
+using Newtonsoft.Json;
 using NINA.Core.Locale;
 using NINA.Core.Model;
 using NINA.Core.Model.Equipment;
@@ -73,6 +74,17 @@ namespace Assistant.NINAPlugin.Sequencer {
             Validate();
         }
 
+        private bool alwaysRepeatFlatSet = true;
+
+        [JsonProperty]
+        public bool AlwaysRepeatFlatSet {
+            get => alwaysRepeatFlatSet;
+            set {
+                alwaysRepeatFlatSet = value;
+                RaisePropertyChanged(nameof(AlwaysRepeatFlatSet));
+            }
+        }
+
         private string displayText = "";
         public string DisplayText {
             get => displayText;
@@ -99,6 +111,9 @@ namespace Assistant.NINAPlugin.Sequencer {
                 RaisePropertyChanged(nameof(CompletedIterations));
             }
         }
+
+        private string targetName = null;
+        public string TargetName { get => targetName; set => targetName = value; }
 
         protected async Task<bool> TakeFlatSet(FlatSpec flatSpec, bool applyRotation, IProgress<ApplicationStatus> progress, CancellationToken token) {
 
@@ -162,6 +177,39 @@ namespace Assistant.NINAPlugin.Sequencer {
                 return false;
             }
         }
+
+        protected void SetTargetName(int targetId) {
+            using (var context = database.GetContext()) {
+                Target target = context.GetTargetOnly(targetId);
+                TargetName = target?.Name;
+            }
+        }
+
+        // TODO: replace with ImageSaveMediator_BeforeFinalizeImageSaved below
+        protected Task BeforeImageSaved(object sender, BeforeImageSavedEventArgs args) {
+            if (string.IsNullOrEmpty(args.Image.MetaData.Target.Name) && TargetName != null) {
+                args.Image.MetaData.Target.Name = TargetName;
+
+                // TODO: is there not another way to get TARGETNAME set 
+                /// It is possible to wait for the image processing by awaiting the BeforeFinalizeImageSavedEventArgs.ImagePrepareTask if necessary
+                //await args.ImagePrepareTask;
+                //
+                // Or some sort of closure that wraps the current TNAME just for 1 flat set?
+            }
+
+            return Task.CompletedTask;
+        }
+
+        /*
+      private Task ImageSaveMediator_BeforeFinalizeImageSaved(object sender, BeforeFinalizeImageSavedEventArgs e) {
+            // Populate the example image pattern with data. This can provide data that may not be immediately available
+            e.AddImagePattern(new ImagePattern(exampleImagePattern.Key, exampleImagePattern.Description, exampleImagePattern.Category) {
+                Value = $"{DateTime.Now:yyyy-MM-ddTHH:mm:ss.ffffffK}"
+            });
+
+            return Task.CompletedTask;
+        }
+         */
 
         protected void SaveFlatHistory(LightSession neededFlat) {
             if (database == null) {
@@ -231,14 +279,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             if (!cameraInfo.Connected) {
                 i.Add(Loc.Instance["LblCameraNotConnected"]);
             }
-            else {
-                if (!cameraInfo.CanSetGain) {
-                    i.Add("camera can't set gain, unusable for Target Scheduler Flats");
-                }
-                if (!cameraInfo.CanSetOffset) {
-                    i.Add("camera can't set offset, unusable for Target Scheduler Flats");
-                }
-            }
 
             FlatDeviceInfo flatDeviceInfo = flatDeviceMediator.GetInfo();
             if (!flatDeviceInfo.Connected) {
@@ -260,12 +300,44 @@ namespace Assistant.NINAPlugin.Sequencer {
             if (filterPosition == -1) { return null; }
 
             Collection<TrainedFlatExposureSetting> settings = profileService.ActiveProfile.FlatDeviceSettings.TrainedFlatExposureSettings;
-            return settings.FirstOrDefault(
+            TrainedFlatExposureSetting setting;
+
+            // Exact match?
+            setting = settings.FirstOrDefault(
                 setting => setting.Filter == filterPosition
                 && setting.Binning.X == flatSpec.BinningMode.X
                 && setting.Binning.Y == flatSpec.BinningMode.Y
                 && setting.Gain == flatSpec.Gain
                 && setting.Offset == flatSpec.Offset);
+            if (setting != null) { return setting; }
+
+            // Match without gain?
+            setting = settings.FirstOrDefault(
+                x => x.Filter == filterPosition
+                && x.Binning.X == flatSpec.BinningMode.X
+                && x.Binning.Y == flatSpec.BinningMode.Y
+                && x.Gain == -1
+                && x.Offset == flatSpec.Offset);
+            if (setting != null) { return setting; }
+
+            // Match without offset?
+            setting = settings.FirstOrDefault(
+                x => x.Filter == filterPosition
+                && x.Binning.X == flatSpec.BinningMode.X
+                && x.Binning.Y == flatSpec.BinningMode.Y
+                && x.Gain == flatSpec.Gain
+                && x.Offset == -1);
+            if (setting != null) { return setting; }
+
+            // Match without gain or offset?
+            setting = settings.FirstOrDefault(
+                x => x.Filter == filterPosition
+                && x.Binning.X == flatSpec.BinningMode.X
+                && x.Binning.Y == flatSpec.BinningMode.Y
+                && x.Gain == -1
+                && x.Offset == -1);
+
+            return setting;
         }
 
         protected short GetFilterPosition(string filterName) {
@@ -283,6 +355,15 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             /* Write training flats for testing.
             BinningMode binning = new BinningMode(1, 1);
+
+            settings.Add(new TrainedFlatExposureSetting() { Filter = 0, Gain = -1, Offset = -1, Binning = binning, Time = 0.78125, Brightness = 21 });
+            settings.Add(new TrainedFlatExposureSetting() { Filter = 1, Gain = -1, Offset = -1, Binning = binning, Time = 4.0625, Brightness = 21 });
+            settings.Add(new TrainedFlatExposureSetting() { Filter = 2, Gain = -1, Offset = -1, Binning = binning, Time = 2.875, Brightness = 21 });
+            settings.Add(new TrainedFlatExposureSetting() { Filter = 3, Gain = -1, Offset = -1, Binning = binning, Time = 2.28125, Brightness = 21 });
+            settings.Add(new TrainedFlatExposureSetting() { Filter = 4, Gain = -1, Offset = -1, Binning = binning, Time = 8.8125, Brightness = 30 });
+            settings.Add(new TrainedFlatExposureSetting() { Filter = 5, Gain = -1, Offset = -1, Binning = binning, Time = 9.125, Brightness = 40 });
+            settings.Add(new TrainedFlatExposureSetting() { Filter = 6, Gain = -1, Offset = -1, Binning = binning, Time = 6.25, Brightness = 30 });
+
             settings.Add(new TrainedFlatExposureSetting() { Filter = 0, Gain = 139, Offset = 21, Binning = binning, Time = 0.78125, Brightness = 21 });
             settings.Add(new TrainedFlatExposureSetting() { Filter = 1, Gain = 139, Offset = 21, Binning = binning, Time = 4.0625, Brightness = 21 });
             settings.Add(new TrainedFlatExposureSetting() { Filter = 2, Gain = 139, Offset = 21, Binning = binning, Time = 2.875, Brightness = 21 });
@@ -328,6 +409,5 @@ namespace Assistant.NINAPlugin.Sequencer {
                 RaisePropertyChanged();
             }
         }
-
     }
 }

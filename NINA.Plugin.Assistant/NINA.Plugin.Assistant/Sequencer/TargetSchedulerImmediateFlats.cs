@@ -57,17 +57,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             cloneMe.rotatorMediator,
             cloneMe.flatDeviceMediator) {
             CopyMetaData(cloneMe);
-        }
-
-        private bool alwaysRepeatFlatSet = true;
-
-        [JsonProperty]
-        public bool AlwaysRepeatFlatSet {
-            get => alwaysRepeatFlatSet;
-            set {
-                alwaysRepeatFlatSet = value;
-                RaisePropertyChanged(nameof(AlwaysRepeatFlatSet));
-            }
+            AlwaysRepeatFlatSet = cloneMe.AlwaysRepeatFlatSet;
         }
 
         public override object Clone() {
@@ -75,13 +65,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-
-            /* TODO: how are we going to handle a wall panel?  They can insert explicit slew instruction before this but
-             * need to get back to target.  If they insert an implicit slew/center then the Target on parent may not be correct
-             * since we're running this based on the previous plan?
-             * 
-             * ACTUALLY, it looks like we don't set the new target until AFTER this would have run so should be good but TEST
-             */
 
             try {
                 DisplayText = "Determining needed flats";

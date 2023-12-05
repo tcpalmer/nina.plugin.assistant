@@ -53,6 +53,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             cloneMe.rotatorMediator,
             cloneMe.flatDeviceMediator) {
             CopyMetaData(cloneMe);
+            AlwaysRepeatFlatSet = cloneMe.AlwaysRepeatFlatSet;
         }
 
         public override object Clone() {
@@ -76,10 +77,19 @@ namespace Assistant.NINAPlugin.Sequencer {
                 await CloseCover(progress, token);
                 await ToggleLight(true, progress, token);
 
+                imageSaveMediator.BeforeImageSaved += BeforeImageSaved;
+
                 List<FlatSpec> takenFlats = new List<FlatSpec>();
                 foreach (LightSession neededFlat in neededFlats) {
                     bool success = true;
                     if (!takenFlats.Contains(neededFlat.FlatSpec)) {
+                        /* TODO:
+                        You might be on to something about TARGETNAME not being set right at the beginning/end of a set.
+                        I can see how the async image pipeline might not be done when we flip the name for the next set.
+                        So flat 1 of set N+1 gets the TARGETNAME of set N.  Actually, I think it would be the reverse.
+                        The last flat of set N might get the TARGETNAME of set N+1.
+                         */
+                        SetTargetName(neededFlat.TargetId);
                         success = await TakeFlatSet(neededFlat.FlatSpec, true, progress, token);
                         if (success) {
                             takenFlats.Add(neededFlat.FlatSpec);
@@ -118,6 +128,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 throw new SequenceEntityFailedException($"exception taking flats: {ex.Message}", ex);
             }
+            finally {
+                imageSaveMediator.BeforeImageSaved -= BeforeImageSaved;
+            }
 
             return;
         }
@@ -154,6 +167,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                     List<LightSession> lightSessions = flatsExpert.GetLightSessions(targets, acquiredImages);
                     if (lightSessions.Count > 0) {
                         List<FlatHistory> takenFlats = context.GetFlatsHistory(targets);
+                        // TODO: implement AlwaysRepeatFlatSet here
+                        // BUT what does it mean here?  What's the 'repeat time span'?  Same as cadence?
                         neededFlats.AddRange(flatsExpert.GetNeededTargetCompletionFlats(targets, lightSessions, takenFlats));
                     }
                     else {

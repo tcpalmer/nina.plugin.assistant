@@ -13,6 +13,33 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
     public class FlatsExpertTest {
 
         [Test]
+        public void TestSessionIdentifier() {
+            FlatsExpert expert = new FlatsExpert();
+            int flatsHandling = 7;
+
+            DateTime baseDate = DateTime.Now.Date.AddHours(18);
+            DateTime targetStartDate = baseDate.AddDays(-215);
+            TestContext.WriteLine($"{targetStartDate} {baseDate}\n");
+
+            List<DateTime> lightSessions = new List<DateTime>();
+            for (int i = 0; i < 26; i++) {
+                lightSessions.Add(expert.GetLightSessionDate(baseDate.AddDays(i)));
+            }
+
+            // remainder of the day count relative to the start of the target divided by the cadence
+            // .e.g. 14th day / 7 == 2 or 3rd day / 2 == 1; add 1 if you want them to be 1-based rather than 0-based
+
+            int j = 0;
+            foreach (DateTime dt in lightSessions) {
+                int days = (int)(dt - targetStartDate).TotalDays;
+                int session = (days / flatsHandling) + 1;
+
+                TestContext.WriteLine($"{dt} {days} {session}");
+                //if (++j == 17) { flatsHandling = 7; }
+            }
+        }
+
+        [Test]
         public void TestGetPotentialTargets() {
             List<Project> projects = GetTestProjects1();
             List<Target> targets = new FlatsExpert().GetTargetsForPeriodicFlats(projects);
