@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
 using NINA.Core.Locale;
@@ -74,7 +75,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             Validate();
         }
 
-        private bool alwaysRepeatFlatSet = true;
+        private bool alwaysRepeatFlatSet = false;
 
         [JsonProperty]
         public bool AlwaysRepeatFlatSet {
@@ -91,6 +92,24 @@ namespace Assistant.NINAPlugin.Sequencer {
             set {
                 displayText = value;
                 RaisePropertyChanged(nameof(DisplayText));
+            }
+        }
+
+        private int totalFlatSets = 0;
+        public int TotalFlatSets {
+            get => totalFlatSets;
+            set {
+                totalFlatSets = value;
+                RaisePropertyChanged(nameof(TotalFlatSets));
+            }
+        }
+
+        private int completedFlatSets = 0;
+        public int CompletedFlatSets {
+            get => completedFlatSets;
+            set {
+                completedFlatSets = value;
+                RaisePropertyChanged(nameof(CompletedFlatSets));
             }
         }
 
@@ -114,6 +133,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private string targetName = null;
         public string TargetName { get => targetName; set => targetName = value; }
+
+        private int sessionId = 0;
+        public int SessionId { get => sessionId; set => sessionId = value; }
 
         protected async Task<bool> TakeFlatSet(FlatSpec flatSpec, bool applyRotation, IProgress<ApplicationStatus> progress, CancellationToken token) {
 
@@ -185,31 +207,21 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        // TODO: replace with ImageSaveMediator_BeforeFinalizeImageSaved below
-        protected Task BeforeImageSaved(object sender, BeforeImageSavedEventArgs args) {
+        protected async Task BeforeImageSaved(object sender, BeforeImageSavedEventArgs args) {
             if (string.IsNullOrEmpty(args.Image.MetaData.Target.Name) && TargetName != null) {
                 args.Image.MetaData.Target.Name = TargetName;
 
-                // TODO: is there not another way to get TARGETNAME set 
-                /// It is possible to wait for the image processing by awaiting the BeforeFinalizeImageSavedEventArgs.ImagePrepareTask if necessary
-                //await args.ImagePrepareTask;
-                //
-                // Or some sort of closure that wraps the current TNAME just for 1 flat set?
+                // Unfortunate but we need to wait until we've set TargetName - hopefully not too bad for flats
+                await args.ImagePrepareTask;
             }
-
-            return Task.CompletedTask;
         }
 
-        /*
-      private Task ImageSaveMediator_BeforeFinalizeImageSaved(object sender, BeforeFinalizeImageSavedEventArgs e) {
-            // Populate the example image pattern with data. This can provide data that may not be immediately available
-            e.AddImagePattern(new ImagePattern(exampleImagePattern.Key, exampleImagePattern.Description, exampleImagePattern.Category) {
-                Value = $"{DateTime.Now:yyyy-MM-ddTHH:mm:ss.ffffffK}"
-            });
-
+        protected Task BeforeFinalizeImageSaved(object sender, BeforeFinalizeImageSavedEventArgs args) {
+            string sessionIdentifier = new FlatsExpert().GetSessionIdentifier(SessionId);
+            ImagePattern proto = AssistantPlugin.FlatSessionIdImagePattern;
+            args.AddImagePattern(new ImagePattern(proto.Key, proto.Description) { Value = sessionIdentifier });
             return Task.CompletedTask;
         }
-         */
 
         protected void SaveFlatHistory(LightSession neededFlat) {
             if (database == null) {
@@ -390,6 +402,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             return new FlatHistory(neededFlat.TargetId,
                 neededFlat.SessionDate,
                 DateTime.Now,
+                neededFlat.SessionId,
                 profileService.ActiveProfile.Id.ToString(),
                 FlatHistory.FLAT_TYPE_PANEL,
                 neededFlat.FlatSpec.FilterName,

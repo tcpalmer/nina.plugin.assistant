@@ -442,6 +442,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             return new FlatHistory(neededFlat.TargetId,
                 neededFlat.SessionDate,
                 DateTime.Now,
+                neededFlat.SessionId,
                 profileService.ActiveProfile.Id.ToString(),
                 FlatHistory.FLAT_TYPE_PANEL,
                 neededFlat.FlatSpec.FilterName,

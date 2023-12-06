@@ -89,6 +89,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
         private ImageMetadata GetImageMetadata(string filterName, int gain, int offset, string binning, int readoutMode, double rotation, double roi) {
             return new ImageMetadata() {
+                SessionId = 23,
                 FilterName = filterName,
                 Gain = gain,
                 Offset = offset,

@@ -2,6 +2,7 @@
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
+using NINA.Core.Model;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;
@@ -11,6 +12,7 @@ using System.Data.Entity.Migrations;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
@@ -39,8 +41,6 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private IPlanTarget planTarget;
         private bool enableGrader;
-        private bool synchronizationEnabled;
-        private CancellationTokenSource syncClientExposureWatcherCts;
 
         public ImageSaveWatcher(IProfile profile, IImageSaveMediator imageSaveMediator, IPlanTarget planTarget, bool synchronizationEnabled) {
             this.profile = profile;
@@ -49,12 +49,12 @@ namespace Assistant.NINAPlugin.Sequencer {
             exposureDictionary = new ConcurrentDictionary<int, int>(Environment.ProcessorCount * 2, 31);
             this.planTarget = planTarget;
             this.enableGrader = planTarget.Project.EnableGrader;
-            this.synchronizationEnabled = synchronizationEnabled;
         }
 
         public void Start() {
             exposureDictionary.Clear();
             imageSaveMediator.ImageSaved += ImageSaved;
+            imageSaveMediator.BeforeFinalizeImageSaved += BeforeFinalizeImageSaved;
             TSLogger.Debug($"start watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
         }
 
@@ -82,6 +82,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             imageSaveMediator.ImageSaved -= ImageSaved;
+            imageSaveMediator.BeforeFinalizeImageSaved -= BeforeFinalizeImageSaved;
 
             TSLogger.Debug($"stopped watching image saves for {planTarget.Project.Name}/{planTarget.Name}");
         }
@@ -160,7 +161,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                             filterName,
                             accepted,
                             rejectReason,
-                            new ImageMetadata(msg, planTarget.ROI, exposurePlan?.ExposureTemplate.ReadoutMode));
+                            new ImageMetadata(msg, planTarget.Project.SessionId, planTarget.ROI, exposurePlan?.ExposureTemplate.ReadoutMode));
                         context.AcquiredImageSet.Add(acquiredImage);
 
                         context.SaveChanges();
@@ -171,6 +172,14 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
                 }
             }
+        }
+
+        private Task BeforeFinalizeImageSaved(object sender, BeforeFinalizeImageSavedEventArgs args) {
+            string sessionIdentifier = new FlatsExpert().GetSessionIdentifier(planTarget.Project.SessionId);
+            ImagePattern proto = AssistantPlugin.FlatSessionIdImagePattern;
+            args.AddImagePattern(new ImagePattern(proto.Key, proto.Description) { Value = sessionIdentifier });
+
+            return Task.CompletedTask;
         }
 
         private string ExposureIdsLog() {

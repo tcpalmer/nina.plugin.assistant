@@ -74,6 +74,9 @@ namespace Assistant.NINAPlugin.Sequencer {
                     return;
                 }
 
+                TotalFlatSets = neededFlats.Count;
+                CompletedFlatSets = 0;
+
                 LogTrainedFlatDetails();
 
                 // Prep the flat device
@@ -95,6 +98,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
 
                     if (success) {
+                        CompletedFlatSets++;
                         SaveFlatHistory(neededFlat);
                     }
                 }
@@ -122,6 +126,13 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 throw new SequenceEntityFailedException($"exception taking immediate flats: {ex.Message}", ex);
+            }
+            finally {
+                DisplayText = "";
+                TotalFlatSets = 0;
+                CompletedFlatSets = 0;
+                Iterations = 0;
+                CompletedIterations = 0;
             }
 
             return;
@@ -187,7 +198,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             List<LightSession> neededFlats = new List<LightSession>();
             DateTime lightSessionDate = flatsExpert.GetLightSessionDate(DateTime.Now);
             foreach (FlatSpec flatSpec in flatSpecs) {
-                neededFlats.Add(new LightSession(plan.PlanTarget.DatabaseId, lightSessionDate, flatSpec));
+                neededFlats.Add(new LightSession(plan.PlanTarget.DatabaseId, lightSessionDate, 0, flatSpec));
             }
 
             // If always repeat is false, then remove where we've already taken a flat during this same light session

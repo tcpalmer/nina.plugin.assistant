@@ -70,6 +70,9 @@ namespace Assistant.NINAPlugin.Sequencer {
                     return;
                 }
 
+                TotalFlatSets = neededFlats.Count;
+                CompletedFlatSets = 0;
+
                 LogTrainedFlatDetails();
 
                 // Prep the flat device
@@ -78,18 +81,16 @@ namespace Assistant.NINAPlugin.Sequencer {
                 await ToggleLight(true, progress, token);
 
                 imageSaveMediator.BeforeImageSaved += BeforeImageSaved;
+                imageSaveMediator.BeforeFinalizeImageSaved += BeforeFinalizeImageSaved;
 
                 List<FlatSpec> takenFlats = new List<FlatSpec>();
                 foreach (LightSession neededFlat in neededFlats) {
                     bool success = true;
-                    if (!takenFlats.Contains(neededFlat.FlatSpec)) {
-                        /* TODO:
-                        You might be on to something about TARGETNAME not being set right at the beginning/end of a set.
-                        I can see how the async image pipeline might not be done when we flip the name for the next set.
-                        So flat 1 of set N+1 gets the TARGETNAME of set N.  Actually, I think it would be the reverse.
-                        The last flat of set N might get the TARGETNAME of set N+1.
-                         */
+
+                    if (AlwaysRepeatFlatSet || !takenFlats.Contains(neededFlat.FlatSpec)) {
                         SetTargetName(neededFlat.TargetId);
+                        SessionId = neededFlat.SessionId;
+
                         success = await TakeFlatSet(neededFlat.FlatSpec, true, progress, token);
                         if (success) {
                             takenFlats.Add(neededFlat.FlatSpec);
@@ -100,13 +101,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
 
                     if (success) {
+                        CompletedFlatSets++;
                         SaveFlatHistory(neededFlat);
                     }
                 }
-
-                DisplayText = "";
-                Iterations = 0;
-                CompletedIterations = 0;
 
                 await ToggleLight(false, progress, token);
             }
@@ -129,7 +127,14 @@ namespace Assistant.NINAPlugin.Sequencer {
                 throw new SequenceEntityFailedException($"exception taking flats: {ex.Message}", ex);
             }
             finally {
+                DisplayText = "";
+                TotalFlatSets = 0;
+                CompletedFlatSets = 0;
+                Iterations = 0;
+                CompletedIterations = 0;
+
                 imageSaveMediator.BeforeImageSaved -= BeforeImageSaved;
+                imageSaveMediator.BeforeFinalizeImageSaved += BeforeFinalizeImageSaved;
             }
 
             return;

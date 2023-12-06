@@ -13,6 +13,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
         public static readonly double NO_ROTATOR_ANGLE = double.MinValue;
 
         public string FileName { get; set; }
+        public int SessionId { get; set; }
         public string FilterName { get; set; }
         public DateTime ExposureStartTime { get; set; }
         public double ExposureDuration { get; set; }
@@ -55,12 +56,13 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
 
         public ImageMetadata() { }
 
-        public ImageMetadata(ImageSavedEventArgs msg, double roi, int? readoutMode) {
+        public ImageMetadata(ImageSavedEventArgs msg, int sessionId, double roi, int? readoutMode) {
             if (msg == null) {
                 throw new Exception("msg cannot be null");
             }
 
             FileName = msg.PathToImage.LocalPath;
+            SessionId = sessionId;
             FilterName = msg.Filter;
             ExposureStartTime = msg.MetaData.Image.ExposureStart;
             ExposureDuration = msg.Duration;
@@ -131,6 +133,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"FileName: {FileName}");
+            sb.AppendLine($"SessionId: {SessionId}");
             sb.AppendLine($"FilterName: {FilterName}");
             sb.AppendLine($"ExposureStartTime: {ExposureStartTime}");
             sb.AppendLine($"ExposureDuration: {ExposureDuration}");

@@ -14,6 +14,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public int targetId { get; set; }
         public long lightSessionDate { get; set; }
+        public int lightSessionId { get; set; }
         public long flatsTakenDate { get; set; }
         public string profileId { get; set; }
         public string flatsType { get; set; }
@@ -31,6 +32,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public FlatHistory(int targetId,
                            DateTime lightSessionDate,
                            DateTime flatsTakenDate,
+                           int lightSessionId,
                            string profileId,
                            string flatsType,
                            string filterName,
@@ -43,6 +45,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
             TargetId = targetId;
             LightSessionDate = lightSessionDate;
+            LightSessionId = lightSessionId;
             FlatsTakenDate = flatsTakenDate;
             ProfileId = profileId;
             FlatsType = flatsType;
@@ -65,6 +68,12 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public DateTime LightSessionDate {
             get { return SchedulerDatabaseContext.UnixSecondsToDateTime(lightSessionDate); }
             set { lightSessionDate = SchedulerDatabaseContext.DateTimeToUnixSeconds(value); }
+        }
+
+        [NotMapped]
+        public int LightSessionId {
+            get { return lightSessionId; }
+            set { lightSessionId = value; }
         }
 
         [NotMapped]

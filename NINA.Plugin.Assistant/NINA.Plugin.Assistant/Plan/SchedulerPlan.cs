@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan.Scoring.Rules;
+using Assistant.NINAPlugin.Sequencer;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Model.Equipment;
@@ -184,6 +185,7 @@ namespace Assistant.NINAPlugin.Plan {
         DateTime CreateDate { get; set; }
         DateTime? ActiveDate { get; set; }
         DateTime? InactiveDate { get; set; }
+        int SessionId { get; }
 
         int MinimumTime { get; set; }
         double MinimumAltitude { get; set; }
@@ -216,6 +218,7 @@ namespace Assistant.NINAPlugin.Plan {
         public DateTime CreateDate { get; set; }
         public DateTime? ActiveDate { get; set; }
         public DateTime? InactiveDate { get; set; }
+        public int SessionId { get; }
 
         public int MinimumTime { get; set; }
         public double MinimumAltitude { get; set; }
@@ -245,6 +248,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.CreateDate = project.CreateDate;
             this.ActiveDate = project.ActiveDate;
             this.InactiveDate = project.InactiveDate;
+            this.SessionId = GetFlatsSessionId(project);
 
             this.MinimumTime = project.MinimumTime;
             this.MinimumAltitude = project.MinimumAltitude;
@@ -269,6 +273,22 @@ namespace Assistant.NINAPlugin.Plan {
             }
         }
 
+        private int GetFlatsSessionId(Project project) {
+            int flatsHandling;
+            if (project.FlatsHandling == Project.FLATS_HANDLING_OFF
+                || project.FlatsHandling == Project.FLATS_HANDLING_TARGET_COMPLETION
+                || project.FlatsHandling == Project.FLATS_HANDLING_IMMEDIATE) {
+                flatsHandling = 1;
+            }
+            else {
+                flatsHandling = project.FlatsHandling;
+            }
+
+            DateTime lightSessionDate = new FlatsExpert().GetLightSessionDate(DateTime.Now);
+            int daysSinceProjectCreate = (int)(lightSessionDate - project.CreateDate).TotalDays;
+            return (daysSinceProjectCreate / flatsHandling) + 1;
+        }
+
         private Dictionary<string, double> GetRuleWeightsDictionary(List<RuleWeight> ruleWeights) {
             Dictionary<string, double> dict = new Dictionary<string, double>(ruleWeights.Count);
             ruleWeights.ForEach((rw) => {
@@ -285,6 +305,7 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"Description: {Description}");
             sb.AppendLine($"State: {State}");
             sb.AppendLine($"Priority: {Priority}");
+            sb.AppendLine($"SessionId: {SessionId}");
 
             sb.AppendLine($"MinimumTime: {MinimumTime}");
             sb.AppendLine($"MinimumAltitude: {MinimumAltitude}");

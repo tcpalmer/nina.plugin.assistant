@@ -409,6 +409,7 @@ namespace Assistant.NINAPlugin.Plan {
         public ProjectPriority Priority { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DateTime CreateDate { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DateTime? ActiveDate { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public int SessionId { get => 23; set => throw new NotImplementedException(); }
         public DateTime? InactiveDate { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DateTime? StartDate { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DateTime? EndDate { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }

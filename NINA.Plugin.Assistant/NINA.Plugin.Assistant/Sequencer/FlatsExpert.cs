@@ -5,7 +5,6 @@ using NINA.Plugin.Assistant.Shared.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Assistant.NINAPlugin.Sequencer.FlatsExpert;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
@@ -63,7 +62,10 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 foreach (AcquiredImage exposure in acquiredImages) {
                     if (target.Id != exposure.TargetId) { continue; }
-                    LightSession lightSession = new LightSession(exposure.TargetId, GetLightSessionDate(exposure.AcquiredDate), new FlatSpec(exposure));
+                    LightSession lightSession = new LightSession(exposure.TargetId,
+                                                                 GetLightSessionDate(exposure.AcquiredDate),
+                                                                 exposure.Metadata.SessionId,
+                                                                 new FlatSpec(exposure));
 
                     if (!lightSessions.Contains(lightSession)) {
                         lightSessions.Add(lightSession);
@@ -93,7 +95,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             DateTime checkDate = GetLightSessionDate(runDate);
 
             foreach (Target target in targets) {
-                int flatsPeriod = target.Project.FlatsHandling;
 
                 // Get the light sessions and flat history for this target
                 List<LightSession> targetLightSessions = allLightSessions.Where(ls => ls.TargetId == target.Id).ToList();
@@ -105,8 +106,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                     potentialLightSessions.Add(lightSession);
                     foreach (FlatHistory flatHistory in targetFlatHistory) {
 
-                        // Remove if there is a flat set for the light session
-                        if (lightSession.SessionDate == flatHistory.LightSessionDate && lightSession.FlatSpec.Equals(new FlatSpec(flatHistory))) {
+                        // Remove if there is already a flat history record for this light session
+                        if (lightSession.SessionDate == flatHistory.LightSessionDate
+                            && lightSession.SessionId == flatHistory.LightSessionId
+                            && lightSession.FlatSpec.Equals(new FlatSpec(flatHistory))) {
                             potentialLightSessions.Remove(lightSession);
                             continue;
                         }
@@ -114,6 +117,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 // Skip if not enough days have passed based on project setting
+                int flatsPeriod = target.Project.FlatsHandling;
                 foreach (LightSession lightSession in potentialLightSessions) {
                     if (flatsPeriod > 1 && (checkDate - lightSession.SessionDate).TotalDays < flatsPeriod) { continue; }
                     missingLightSessions.Add(lightSession);
@@ -148,7 +152,9 @@ namespace Assistant.NINAPlugin.Sequencer {
                     foreach (FlatHistory flatHistory in targetFlatHistory) {
 
                         // Remove if there is a flat set for the light session
-                        if (lightSession.SessionDate == flatHistory.LightSessionDate && lightSession.FlatSpec.Equals(new FlatSpec(flatHistory))) {
+                        if (lightSession.SessionDate == flatHistory.LightSessionDate
+                            && lightSession.SessionId == flatHistory.LightSessionId
+                            && lightSession.FlatSpec.Equals(new FlatSpec(flatHistory))) {
                             missingLightSessions.Remove(lightSession);
                             continue;
                         }
@@ -161,6 +167,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         /// <summary>
         /// Remove light sessions from the needed list if the same flat spec is in one of the history records.
+        /// Note that the comparison ignores the SessionId since this is used for immediate flats.
         /// </summary>
         /// <param name="neededFlats"></param>
         /// <param name="takenFlats"></param>
@@ -198,6 +205,11 @@ namespace Assistant.NINAPlugin.Sequencer {
             return (exposureDate.Hour >= 12 && exposureDate.Hour <= 23)
                 ? exposureDate.Date.AddHours(12)
                 : exposureDate.Date.AddDays(-1).AddHours(12);
+        }
+
+        public string GetSessionIdentifier(int? sessionId) {
+            int id = (sessionId != null) ? (int)sessionId : 0;
+            return string.Format("{0:D4}", id);
         }
     }
 
@@ -270,16 +282,18 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public int TargetId { get; private set; }
         public DateTime SessionDate { get; private set; }
+        public int SessionId { get; private set; }
         public FlatSpec FlatSpec { get; private set; }
 
-        public LightSession(int targetId, DateTime sessionDate, FlatSpec flatSpec) {
+        public LightSession(int targetId, DateTime sessionDate, int sessionId, FlatSpec flatSpec) {
             TargetId = targetId;
             SessionDate = sessionDate;
+            SessionId = sessionId;
             FlatSpec = flatSpec;
         }
 
         public override string ToString() {
-            return $"{TargetId} {Utils.FormatDateTimeFull(SessionDate)} {FlatSpec}";
+            return $"{TargetId} {Utils.FormatDateTimeFull(SessionDate)} {SessionId} {FlatSpec}";
         }
 
         public int CompareTo(object obj) {
@@ -292,7 +306,10 @@ namespace Assistant.NINAPlugin.Sequencer {
             if (ReferenceEquals(this, other)) { return true; }
             if (GetType() != other.GetType()) { return false; }
 
-            return TargetId == other.TargetId && SessionDate == other.SessionDate && FlatSpec.Equals(other.FlatSpec);
+            return TargetId == other.TargetId
+                && SessionDate == other.SessionDate
+                && SessionId == other.SessionId
+                && FlatSpec.Equals(other.FlatSpec);
         }
     }
 }

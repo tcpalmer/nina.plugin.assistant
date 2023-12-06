@@ -147,13 +147,13 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 context.GetAcquiredImages(1, "nada").Count.Should().Be(0);
 
                 ImageSavedEventArgs msg = PlanMocks.GetImageSavedEventArgs(markDate.AddDays(1), "Ha");
-                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1), "Ha", true, "rr1", new ImageMetadata(msg, 100, 0)));
-                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(1), "Ha", true, "rr2", new ImageMetadata(msg, 100, 0)));
-                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(2), "Ha", true, "rr3", new ImageMetadata(msg, 100, 0)));
-                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(3), "Ha", true, "rr4", new ImageMetadata(msg, 100, 0)));
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1), "Ha", true, "rr1", new ImageMetadata(msg, 1, 100, 0)));
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(1), "Ha", true, "rr2", new ImageMetadata(msg, 2, 100, 0)));
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(2), "Ha", true, "rr3", new ImageMetadata(msg, 3, 100, 0)));
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(3), "Ha", true, "rr4", new ImageMetadata(msg, 4, 100, 0)));
 
                 msg.MetaData.Rotator.MechanicalPosition = ImageMetadata.NO_ROTATOR_ANGLE;
-                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(4), "Ha", true, "rr5", new ImageMetadata(msg, 100, 0)));
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(4), "Ha", true, "rr5", new ImageMetadata(msg, 5, 100, 0)));
 
                 context.SaveChanges();
 
@@ -172,6 +172,12 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 ai[2].RejectReason.Should().Be("rr3");
                 ai[3].RejectReason.Should().Be("rr2");
                 ai[4].RejectReason.Should().Be("rr1");
+
+                ai[0].Metadata.SessionId.Should().Be(5);
+                ai[1].Metadata.SessionId.Should().Be(4);
+                ai[2].Metadata.SessionId.Should().Be(3);
+                ai[3].Metadata.SessionId.Should().Be(2);
+                ai[4].Metadata.SessionId.Should().Be(1);
 
                 ai[0].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(4).TimeOfDay);
                 ai[1].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(3).TimeOfDay);
@@ -349,9 +355,9 @@ namespace NINA.Plugin.Assistant.Test.Database {
         public void TestFlatHistory() {
 
             DateTime dt = DateTime.Now;
-            FlatHistory record1 = new FlatHistory(1, dt, dt.AddDays(2), "abcd-1234", FlatHistory.FLAT_TYPE_PANEL, "Ha", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
-            FlatHistory record2 = new FlatHistory(1, dt.AddDays(1), dt.AddDays(3), "abcd-1234", FlatHistory.FLAT_TYPE_SKY, "O3", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
-            FlatHistory record3 = new FlatHistory(1, dt.AddDays(1), dt.AddDays(4), "abcd-1234", FlatHistory.FLAT_TYPE_PANEL, "S2", 10, 20, new BinningMode(2, 2), 0, ImageMetadata.NO_ROTATOR_ANGLE, 89);
+            FlatHistory record1 = new FlatHistory(1, dt, dt.AddDays(2), 23, "abcd-1234", FlatHistory.FLAT_TYPE_PANEL, "Ha", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
+            FlatHistory record2 = new FlatHistory(1, dt.AddDays(1), dt.AddDays(3), 24, "abcd-1234", FlatHistory.FLAT_TYPE_SKY, "O3", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
+            FlatHistory record3 = new FlatHistory(1, dt.AddDays(1), dt.AddDays(4), 25, "abcd-1234", FlatHistory.FLAT_TYPE_PANEL, "S2", 10, 20, new BinningMode(2, 2), 0, ImageMetadata.NO_ROTATOR_ANGLE, 89);
 
             using (var context = db.GetContext()) {
                 context.FlatHistorySet.Add(record1);
@@ -370,6 +376,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 sut.TargetId.Should().Be(1);
                 Assert.That(sut.LightSessionDate, Is.EqualTo(dt).Within(TimeSpan.FromSeconds(1.0)));
                 Assert.That(sut.FlatsTakenDate, Is.EqualTo(dt.AddDays(2)).Within(TimeSpan.FromSeconds(1.0)));
+                sut.LightSessionId.Should().Be(23);
                 sut.ProfileId.Should().Be("abcd-1234");
                 sut.FlatsType.Should().Be(FlatHistory.FLAT_TYPE_PANEL);
                 sut.FilterName.Should().Be("Ha");
@@ -402,6 +409,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 sut.TargetId.Should().Be(1);
                 Assert.That(sut.LightSessionDate, Is.EqualTo(dt.AddDays(1)).Within(TimeSpan.FromSeconds(1.0)));
                 Assert.That(sut.FlatsTakenDate, Is.EqualTo(dt.AddDays(3)).Within(TimeSpan.FromSeconds(1.0)));
+                sut.LightSessionId.Should().Be(24);
                 sut.ProfileId.Should().Be("abcd-1234");
                 sut.FlatsType.Should().Be(FlatHistory.FLAT_TYPE_SKY);
                 sut.FilterName.Should().Be("O3");
@@ -416,6 +424,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 sut.TargetId.Should().Be(1);
                 Assert.That(sut.LightSessionDate, Is.EqualTo(dt.AddDays(1)).Within(TimeSpan.FromSeconds(1.0)));
                 Assert.That(sut.FlatsTakenDate, Is.EqualTo(dt.AddDays(4)).Within(TimeSpan.FromSeconds(1.0)));
+                sut.LightSessionId.Should().Be(25);
                 sut.ProfileId.Should().Be("abcd-1234");
                 sut.FlatsType.Should().Be(FlatHistory.FLAT_TYPE_PANEL);
                 sut.FilterName.Should().Be("S2");

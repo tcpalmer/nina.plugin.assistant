@@ -13,33 +13,6 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
     public class FlatsExpertTest {
 
         [Test]
-        public void TestSessionIdentifier() {
-            FlatsExpert expert = new FlatsExpert();
-            int flatsHandling = 7;
-
-            DateTime baseDate = DateTime.Now.Date.AddHours(18);
-            DateTime targetStartDate = baseDate.AddDays(-215);
-            TestContext.WriteLine($"{targetStartDate} {baseDate}\n");
-
-            List<DateTime> lightSessions = new List<DateTime>();
-            for (int i = 0; i < 26; i++) {
-                lightSessions.Add(expert.GetLightSessionDate(baseDate.AddDays(i)));
-            }
-
-            // remainder of the day count relative to the start of the target divided by the cadence
-            // .e.g. 14th day / 7 == 2 or 3rd day / 2 == 1; add 1 if you want them to be 1-based rather than 0-based
-
-            int j = 0;
-            foreach (DateTime dt in lightSessions) {
-                int days = (int)(dt - targetStartDate).TotalDays;
-                int session = (days / flatsHandling) + 1;
-
-                TestContext.WriteLine($"{dt} {days} {session}");
-                //if (++j == 17) { flatsHandling = 7; }
-            }
-        }
-
-        [Test]
         public void TestGetPotentialTargets() {
             List<Project> projects = GetTestProjects1();
             List<Target> targets = new FlatsExpert().GetTargetsForPeriodicFlats(projects);
@@ -68,23 +41,23 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             List<Target> targets = sut.GetTargetsForPeriodicFlats(projects);
             targets.Count.Should().Be(3);
 
-            List<LightSession> sessions = sut.GetLightSessions(targets, GetTestAcquiredImages());
+            List<LightSession> sessions = sut.GetLightSessions(targets, GetTestAcquiredImages1());
             sessions.Count.Should().Be(12);
             DateTime d1 = sut.GetLightSessionDate(DateTime.Now.Date.AddDays(-5).AddHours(23));
             DateTime d2 = sut.GetLightSessionDate(DateTime.Now.Date.AddDays(-4).AddHours(26));
 
-            sessions.Contains(new LightSession(3, d1, new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(3, d1, new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(3, d1, new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(5, d1, new FlatSpec("Ha", 11, 20, new BinningMode(1, 1), 0, 0, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(5, d1, new FlatSpec("O3", 11, 20, new BinningMode(1, 1), 0, 0, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(5, d1, new FlatSpec("S2", 11, 20, new BinningMode(1, 1), 0, 0, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(6, d1, new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 12, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(6, d1, new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 12, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(6, d1, new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 12, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(3, d2, new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(3, d2, new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(3, d2, new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
+            sessions.Contains(new LightSession(3, d1, 1, new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
+            sessions.Contains(new LightSession(3, d1, 1, new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
+            sessions.Contains(new LightSession(3, d1, 1, new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
+            sessions.Contains(new LightSession(5, d1, 1, new FlatSpec("Ha", 11, 20, new BinningMode(1, 1), 0, 0, 100))).Should().BeTrue();
+            sessions.Contains(new LightSession(5, d1, 1, new FlatSpec("O3", 11, 20, new BinningMode(1, 1), 0, 0, 100))).Should().BeTrue();
+            sessions.Contains(new LightSession(5, d1, 1, new FlatSpec("S2", 11, 20, new BinningMode(1, 1), 0, 0, 100))).Should().BeTrue();
+            sessions.Contains(new LightSession(6, d1, 2, new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 12, 100))).Should().BeTrue();
+            sessions.Contains(new LightSession(6, d1, 2, new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 12, 100))).Should().BeTrue();
+            sessions.Contains(new LightSession(6, d1, 2, new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 12, 100))).Should().BeTrue();
+            sessions.Contains(new LightSession(3, d2, 1, new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
+            sessions.Contains(new LightSession(3, d2, 1, new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
+            sessions.Contains(new LightSession(3, d2, 1, new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
 
             sessions[0].TargetId.Should().Be(3);
             sessions[1].TargetId.Should().Be(3);
@@ -98,6 +71,17 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             sessions[9].TargetId.Should().Be(3);
             sessions[10].TargetId.Should().Be(3);
             sessions[11].TargetId.Should().Be(3);
+        }
+
+        [Test]
+        public void TestGetLightSessionsWithSessionId() {
+            FlatsExpert sut = new FlatsExpert();
+            List<Project> projects = GetTestProjects1();
+            List<Target> targets = sut.GetTargetsForPeriodicFlats(projects);
+            targets.Count.Should().Be(3);
+
+            List<LightSession> sessions = sut.GetLightSessions(targets, GetTestAcquiredImages2());
+            sessions.Count.Should().Be(15);
         }
 
         [Test]
@@ -119,9 +103,9 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             FlatSpec fs2 = new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 12, 100);
             FlatSpec fs3 = new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 12, 100);
 
-            LightSession ls1 = new LightSession(1, sd1, fs1);
-            LightSession ls2 = new LightSession(1, sd1, fs2);
-            LightSession ls3 = new LightSession(1, sd1, fs3);
+            LightSession ls1 = new LightSession(1, sd1, 1, fs1);
+            LightSession ls2 = new LightSession(1, sd1, 1, fs2);
+            LightSession ls3 = new LightSession(1, sd1, 1, fs3);
             sessions = new List<LightSession>() { ls1, ls2, ls3 };
 
             // Three light sessions and no flat history but too soon ...
@@ -139,17 +123,17 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
             // Now 'take' the flats and none will be needed ...
             DateTime flatsTaken = baseDate.AddDays(5);
-            FlatHistory fh1 = GetFlatHistory(1, sd1, flatsTaken, fs1);
-            FlatHistory fh2 = GetFlatHistory(1, sd1, flatsTaken, fs2);
-            FlatHistory fh3 = GetFlatHistory(1, sd1, flatsTaken, fs3);
+            FlatHistory fh1 = GetFlatHistory(1, sd1, 1, flatsTaken, fs1);
+            FlatHistory fh2 = GetFlatHistory(1, sd1, 1, flatsTaken, fs2);
+            FlatHistory fh3 = GetFlatHistory(1, sd1, 1, flatsTaken, fs3);
             history = new List<FlatHistory>() { fh1, fh2, fh3 };
             sut.GetNeededPeriodicFlats(baseDate.AddDays(5), targets, sessions, history).Count.Should().Be(0);
 
             // Additional sessions are added but too soon for them ...
             DateTime sd2 = sut.GetLightSessionDate(baseDate).AddDays(6);
-            LightSession ls4 = new LightSession(1, sd2, fs1);
-            LightSession ls5 = new LightSession(1, sd2, fs2);
-            LightSession ls6 = new LightSession(1, sd2, fs3);
+            LightSession ls4 = new LightSession(1, sd2, 1, fs1);
+            LightSession ls5 = new LightSession(1, sd2, 1, fs2);
+            LightSession ls6 = new LightSession(1, sd2, 1, fs3);
             sessions = new List<LightSession>() { ls1, ls2, ls3, ls4, ls5, ls6 };
             sut.GetNeededPeriodicFlats(baseDate.AddDays(7), targets, sessions, history).Count.Should().Be(0);
             sut.GetNeededPeriodicFlats(baseDate.AddDays(8), targets, sessions, history).Count.Should().Be(0);
@@ -165,9 +149,9 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
             // Now take the latest flats and none will be needed ...
             flatsTaken = baseDate.AddDays(11);
-            FlatHistory fh4 = GetFlatHistory(1, sd2, flatsTaken, fs1);
-            FlatHistory fh5 = GetFlatHistory(1, sd2, flatsTaken, fs2);
-            FlatHistory fh6 = GetFlatHistory(1, sd2, flatsTaken, fs3);
+            FlatHistory fh4 = GetFlatHistory(1, sd2, 1, flatsTaken, fs1);
+            FlatHistory fh5 = GetFlatHistory(1, sd2, 1, flatsTaken, fs2);
+            FlatHistory fh6 = GetFlatHistory(1, sd2, 1, flatsTaken, fs3);
             history = new List<FlatHistory>() { fh1, fh2, fh3, fh4, fh5, fh6 };
             sut.GetNeededPeriodicFlats(baseDate.AddDays(5), targets, sessions, history).Count.Should().Be(0);
         }
@@ -191,12 +175,12 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             FlatSpec fs2 = new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 12, 100);
             //FlatSpec fs3 = new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 12, 100);
 
-            LightSession ls1 = new LightSession(1, sd1, fs1);
-            LightSession ls2 = new LightSession(1, sd1, fs2);
-            LightSession ls3 = new LightSession(2, sd1, fs1);
-            LightSession ls4 = new LightSession(2, sd1, fs2);
-            LightSession ls5 = new LightSession(3, sd1, fs1);
-            LightSession ls6 = new LightSession(3, sd1, fs2);
+            LightSession ls1 = new LightSession(1, sd1, 1, fs1);
+            LightSession ls2 = new LightSession(1, sd1, 1, fs2);
+            LightSession ls3 = new LightSession(2, sd1, 1, fs1);
+            LightSession ls4 = new LightSession(2, sd1, 1, fs2);
+            LightSession ls5 = new LightSession(3, sd1, 1, fs1);
+            LightSession ls6 = new LightSession(3, sd1, 1, fs2);
             sessions = new List<LightSession>() { ls1, ls2, ls3, ls4, ls5, ls6 };
 
             // Target 1 has flats handling = 1 so should take on current or next day
@@ -228,8 +212,8 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             got[5].TargetId.Should().Be(3);
 
             // Target 2 now has flats history so dropped
-            FlatHistory fh1 = GetFlatHistory(2, sd1, baseDate.AddDays(2), fs1);
-            FlatHistory fh2 = GetFlatHistory(2, sd1, baseDate.AddDays(2), fs2);
+            FlatHistory fh1 = GetFlatHistory(2, sd1, 1, baseDate.AddDays(2), fs1);
+            FlatHistory fh2 = GetFlatHistory(2, sd1, 1, baseDate.AddDays(2), fs2);
             history = new List<FlatHistory>() { fh1, fh2 };
             got = sut.GetNeededPeriodicFlats(baseDate.AddDays(3), targets, sessions, history);
             got.Count.Should().Be(4);
@@ -259,12 +243,12 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             FlatSpec fs2 = new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 12, 100);
             FlatSpec fs3 = new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 12, 100);
 
-            LightSession ls1 = new LightSession(1, sd1, fs1);
-            LightSession ls2 = new LightSession(1, sd1, fs2);
-            LightSession ls3 = new LightSession(1, sd1, fs3);
-            LightSession ls4 = new LightSession(1, sd2, fs1);
-            LightSession ls5 = new LightSession(1, sd2, fs2);
-            LightSession ls6 = new LightSession(1, sd2, fs3);
+            LightSession ls1 = new LightSession(1, sd1, 1, fs1);
+            LightSession ls2 = new LightSession(1, sd1, 1, fs2);
+            LightSession ls3 = new LightSession(1, sd1, 1, fs3);
+            LightSession ls4 = new LightSession(1, sd2, 1, fs1);
+            LightSession ls5 = new LightSession(1, sd2, 1, fs2);
+            LightSession ls6 = new LightSession(1, sd2, 1, fs3);
             sessions = new List<LightSession>() { ls1, ls2, ls3, ls4, ls5, ls6 };
 
             // Six light sessions and no flat history ...
@@ -277,8 +261,8 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             needed[4].FlatSpec.FilterName.Should().Be("O3");
             needed[5].FlatSpec.FilterName.Should().Be("S2");
 
-            FlatHistory fh1 = GetFlatHistory(1, sd1, baseDate.AddDays(4), fs1);
-            FlatHistory fh2 = GetFlatHistory(1, sd1, baseDate.AddDays(4), fs2);
+            FlatHistory fh1 = GetFlatHistory(1, sd1, 1, baseDate.AddDays(4), fs1);
+            FlatHistory fh2 = GetFlatHistory(1, sd1, 1, baseDate.AddDays(4), fs2);
             history = new List<FlatHistory>() { fh1, fh2 };
 
             // Two already taken, four remain ...
@@ -289,7 +273,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             needed[2].FlatSpec.FilterName.Should().Be("O3");
             needed[3].FlatSpec.FilterName.Should().Be("S2");
 
-            FlatHistory fh3 = GetFlatHistory(1, sd1, baseDate.AddDays(5), fs3);
+            FlatHistory fh3 = GetFlatHistory(1, sd1, 1, baseDate.AddDays(5), fs3);
             history = new List<FlatHistory>() { fh1, fh2, fh3 };
 
             // Three remaining ...
@@ -299,9 +283,9 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             needed[1].FlatSpec.FilterName.Should().Be("O3");
             needed[2].FlatSpec.FilterName.Should().Be("S2");
 
-            FlatHistory fh4 = GetFlatHistory(1, sd2, baseDate.AddDays(6), fs1);
-            FlatHistory fh5 = GetFlatHistory(1, sd2, baseDate.AddDays(6), fs2);
-            FlatHistory fh6 = GetFlatHistory(1, sd2, baseDate.AddDays(6), fs3);
+            FlatHistory fh4 = GetFlatHistory(1, sd2, 1, baseDate.AddDays(6), fs1);
+            FlatHistory fh5 = GetFlatHistory(1, sd2, 1, baseDate.AddDays(6), fs2);
+            FlatHistory fh6 = GetFlatHistory(1, sd2, 1, baseDate.AddDays(6), fs3);
             history = new List<FlatHistory>() { fh1, fh2, fh3, fh4, fh5, fh6 };
 
             // All done
@@ -323,9 +307,9 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             FlatSpec fs2 = new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 12, 100);
             FlatSpec fs3 = new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 12, 100);
 
-            LightSession ls1 = new LightSession(1, sd1, fs1);
-            LightSession ls2 = new LightSession(1, sd1, fs2);
-            LightSession ls3 = new LightSession(1, sd1, fs3);
+            LightSession ls1 = new LightSession(1, sd1, 1, fs1);
+            LightSession ls2 = new LightSession(1, sd1, 1, fs2);
+            LightSession ls3 = new LightSession(1, sd1, 1, fs3);
             sessions = new List<LightSession>() { ls1, ls2, ls3 };
 
             // No history
@@ -335,8 +319,8 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             list[1].Should().BeSameAs(ls2);
             list[2].Should().BeSameAs(ls3);
 
-            FlatHistory fh1 = GetFlatHistory(1, sd1, baseDate.AddMinutes(4), fs1);
-            FlatHistory fh2 = GetFlatHistory(1, sd1, baseDate.AddMinutes(4), fs2);
+            FlatHistory fh1 = GetFlatHistory(1, sd1, 1, baseDate.AddMinutes(4), fs1);
+            FlatHistory fh2 = GetFlatHistory(1, sd1, 1, baseDate.AddMinutes(4), fs2);
             history = new List<FlatHistory>() { fh1, fh2 };
 
             // Cull two
@@ -345,15 +329,15 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             list[0].Should().BeSameAs(ls3);
 
             // But not if session date differs
-            fh1 = GetFlatHistory(1, sd2, baseDate.AddMinutes(4), fs1);
-            fh2 = GetFlatHistory(1, sd2, baseDate.AddMinutes(4), fs2);
+            fh1 = GetFlatHistory(1, sd2, 1, baseDate.AddMinutes(4), fs1);
+            fh2 = GetFlatHistory(1, sd2, 1, baseDate.AddMinutes(4), fs2);
             history = new List<FlatHistory>() { fh1, fh2 };
             list = sut.CullFlatsByHistory(sessions, history);
             list.Count.Should().Be(sessions.Count);
 
             // Or if target Id differs
-            fh1 = GetFlatHistory(1, sd2, baseDate.AddMinutes(4), fs1);
-            fh2 = GetFlatHistory(1, sd2, baseDate.AddMinutes(4), fs2);
+            fh1 = GetFlatHistory(1, sd2, 1, baseDate.AddMinutes(4), fs1);
+            fh2 = GetFlatHistory(1, sd2, 1, baseDate.AddMinutes(4), fs2);
             history = new List<FlatHistory>() { fh1, fh2 };
             list = sut.CullFlatsByHistory(sessions, history);
             list.Count.Should().Be(sessions.Count);
@@ -375,6 +359,20 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         }
 
         [Test]
+        [TestCase(null, "0000")]
+        [TestCase(0, "0000")]
+        [TestCase(1, "0001")]
+        [TestCase(11, "0011")]
+        [TestCase(111, "0111")]
+        [TestCase(975, "0975")]
+        [TestCase(1111, "1111")]
+        [TestCase(11111, "11111")]
+        public void TestGetSessionIdentifier(int sessionId, string expected) {
+            FlatsExpert sut = new FlatsExpert();
+            sut.GetSessionIdentifier(sessionId).Should().Be(expected);
+        }
+
+        [Test]
         public void TestFlatsSpec() {
             FlatSpec fs1 = new FlatSpec("Ha", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
             fs1.FilterName.Should().Be("Ha");
@@ -386,7 +384,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             fs1.ROI.Should().Be(89);
             fs1.Key.Should().Be("Ha_10_20_2x2_0_123.4_89");
 
-            ImageMetadata imageMetaData = GetImageMetadata("Ha", 10, 20, "2x2", 0, 123.4, 89);
+            ImageMetadata imageMetaData = GetImageMetadata(1, "Ha", 10, 20, "2x2", 0, 123.4, 89);
             AcquiredImage acquiredImage = new AcquiredImage(imageMetaData);
             acquiredImage.FilterName = imageMetaData.FilterName;
             FlatSpec fs2 = new FlatSpec(acquiredImage);
@@ -411,7 +409,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             fs3.ROI.Should().Be(89);
             fs3.Key.Should().Be("Ha_10_20_2x2_0_na_89");
 
-            imageMetaData = GetImageMetadata("Ha", 10, 20, "2x2", 0, ImageMetadata.NO_ROTATOR_ANGLE, 89);
+            imageMetaData = GetImageMetadata(1, "Ha", 10, 20, "2x2", 0, ImageMetadata.NO_ROTATOR_ANGLE, 89);
             acquiredImage = new AcquiredImage(imageMetaData);
             acquiredImage.FilterName = imageMetaData.FilterName;
             FlatSpec fs4 = new FlatSpec(acquiredImage);
@@ -446,53 +444,54 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             DateTime sd2 = fe.GetLightSessionDate(DateTime.Now.Date.AddDays(2).AddHours(18));
             DateTime sd3 = fe.GetLightSessionDate(DateTime.Now.Date.AddDays(3).AddHours(18));
 
-            LightSession ls1 = new LightSession(1, sd1, fs1);
+            LightSession ls1 = new LightSession(1, sd1, 1, fs1);
             ls1.Equals(ls1).Should().BeTrue();
-            LightSession ls2 = new LightSession(1, sd1, fs1);
+            LightSession ls2 = new LightSession(1, sd1, 1, fs1);
             ls1.Equals(ls2).Should().BeTrue();
 
-            ls2 = new LightSession(2, sd1, fs1);
+            ls2 = new LightSession(2, sd1, 1, fs1);
             ls1.Equals(ls2).Should().BeFalse();
-            ls2 = new LightSession(2, sd1, fs2);
+            ls2 = new LightSession(2, sd1, 1, fs2);
             ls1.Equals(ls2).Should().BeFalse();
 
-            ls1 = new LightSession(1, sd2, fs1);
-            ls2 = new LightSession(1, sd2, fs1);
+            ls1 = new LightSession(1, sd2, 1, fs1);
+            ls2 = new LightSession(1, sd2, 1, fs1);
             ls1.Equals(ls2).Should().BeTrue();
-            ls2 = new LightSession(2, sd1, fs1);
+            ls2 = new LightSession(2, sd1, 1, fs1);
             ls1.Equals(ls2).Should().BeFalse();
 
             List<LightSession> list = new List<LightSession> { ls1, ls2 };
             list.Contains(ls1).Should().BeTrue();
             list.Contains(ls2).Should().BeTrue();
-            LightSession ls3 = new LightSession(3, sd3, fs3);
+            LightSession ls3 = new LightSession(3, sd3, 1, fs3);
             list.Contains(ls3).Should().BeFalse();
             list.Add(ls3);
             list.Contains(ls3).Should().BeTrue();
 
-            LightSession ls4 = new LightSession(1, sd1, fs4);
+            LightSession ls4 = new LightSession(1, sd1, 1, fs4);
             ls4.Equals(ls4).Should().BeTrue();
-            LightSession ls5 = new LightSession(1, sd1, fs4);
+            LightSession ls5 = new LightSession(1, sd1, 1, fs4);
             ls4.Equals(ls5).Should().BeTrue();
 
-            ls5 = new LightSession(2, sd1, fs4);
+            ls5 = new LightSession(2, sd1, 1, fs4);
             ls4.Equals(ls5).Should().BeFalse();
 
-            ls4 = new LightSession(2, sd2, fs4);
-            ls5 = new LightSession(2, sd2, fs4);
+            ls4 = new LightSession(2, sd2, 1, fs4);
+            ls5 = new LightSession(2, sd2, 1, fs4);
             ls4.Equals(ls5).Should().BeTrue();
 
-            ls5 = new LightSession(2, sd1, fs4);
+            ls5 = new LightSession(2, sd1, 1, fs4);
             ls4.Equals(ls5).Should().BeFalse();
 
-            ls5 = new LightSession(2, sd2, fs5);
+            ls5 = new LightSession(2, sd2, 1, fs5);
             ls4.Equals(ls5).Should().BeFalse();
         }
 
-        private FlatHistory GetFlatHistory(int targetId, DateTime lightSessionDate, DateTime flatsTakenDate, FlatSpec flatSpec) {
+        private FlatHistory GetFlatHistory(int targetId, DateTime lightSessionDate, int lightSessionId, DateTime flatsTakenDate, FlatSpec flatSpec) {
             return new FlatHistory() {
                 TargetId = targetId,
                 LightSessionDate = lightSessionDate,
+                LightSessionId = lightSessionId,
                 FlatsTakenDate = flatsTakenDate,
                 FilterName = flatSpec.FilterName,
                 Gain = flatSpec.Gain,
@@ -583,31 +582,31 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             return new List<Project>() { p1, p2, p3 };
         }
 
-        private List<AcquiredImage> GetTestAcquiredImages() {
+        private List<AcquiredImage> GetTestAcquiredImages1() {
 
             DateTime d1 = DateTime.Now.Date.AddDays(-5).AddHours(23);
 
-            AcquiredImage T3a1 = GetAcquiredImage(d1, 3, GetImageMetadata("Ha", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T3a2 = GetAcquiredImage(d1, 3, GetImageMetadata("O3", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T3a3 = GetAcquiredImage(d1, 3, GetImageMetadata("S2", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T3a1 = GetAcquiredImage(d1, 3, GetImageMetadata(1, "Ha", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T3a2 = GetAcquiredImage(d1, 3, GetImageMetadata(1, "O3", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T3a3 = GetAcquiredImage(d1, 3, GetImageMetadata(1, "S2", 10, 20, "1x1", 0, 10, 100));
 
-            AcquiredImage T4a1 = GetAcquiredImage(d1, 4, GetImageMetadata("Ha", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T4a2 = GetAcquiredImage(d1, 4, GetImageMetadata("O3", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T4a3 = GetAcquiredImage(d1, 4, GetImageMetadata("S2", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T4a1 = GetAcquiredImage(d1, 4, GetImageMetadata(1, "Ha", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T4a2 = GetAcquiredImage(d1, 4, GetImageMetadata(1, "O3", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T4a3 = GetAcquiredImage(d1, 4, GetImageMetadata(1, "S2", 10, 20, "1x1", 0, 10, 100));
 
-            AcquiredImage T5a1 = GetAcquiredImage(d1, 5, GetImageMetadata("Ha", 11, 20, "1x1", 0, 0, 100));
-            AcquiredImage T5a2 = GetAcquiredImage(d1, 5, GetImageMetadata("O3", 11, 20, "1x1", 0, 0, 100));
-            AcquiredImage T5a3 = GetAcquiredImage(d1, 5, GetImageMetadata("S2", 11, 20, "1x1", 0, 0, 100));
+            AcquiredImage T5a1 = GetAcquiredImage(d1, 5, GetImageMetadata(1, "Ha", 11, 20, "1x1", 0, 0, 100));
+            AcquiredImage T5a2 = GetAcquiredImage(d1, 5, GetImageMetadata(1, "O3", 11, 20, "1x1", 0, 0, 100));
+            AcquiredImage T5a3 = GetAcquiredImage(d1, 5, GetImageMetadata(1, "S2", 11, 20, "1x1", 0, 0, 100));
 
-            AcquiredImage T6a1 = GetAcquiredImage(d1, 6, GetImageMetadata("Ha", 10, 20, "1x1", 0, 12, 100));
-            AcquiredImage T6a2 = GetAcquiredImage(d1, 6, GetImageMetadata("O3", 10, 20, "1x1", 0, 12, 100));
-            AcquiredImage T6a3 = GetAcquiredImage(d1, 6, GetImageMetadata("S2", 10, 20, "1x1", 0, 12, 100));
+            AcquiredImage T6a1 = GetAcquiredImage(d1, 6, GetImageMetadata(2, "Ha", 10, 20, "1x1", 0, 12, 100));
+            AcquiredImage T6a2 = GetAcquiredImage(d1, 6, GetImageMetadata(2, "O3", 10, 20, "1x1", 0, 12, 100));
+            AcquiredImage T6a3 = GetAcquiredImage(d1, 6, GetImageMetadata(2, "S2", 10, 20, "1x1", 0, 12, 100));
 
             DateTime d2 = DateTime.Now.Date.AddDays(-4).AddHours(26);
 
-            AcquiredImage T3a4 = GetAcquiredImage(d2, 3, GetImageMetadata("Ha", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T3a5 = GetAcquiredImage(d2, 3, GetImageMetadata("O3", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T3a6 = GetAcquiredImage(d2, 3, GetImageMetadata("S2", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T3a4 = GetAcquiredImage(d2, 3, GetImageMetadata(1, "Ha", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T3a5 = GetAcquiredImage(d2, 3, GetImageMetadata(1, "O3", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T3a6 = GetAcquiredImage(d2, 3, GetImageMetadata(1, "S2", 10, 20, "1x1", 0, 10, 100));
 
             return new List<AcquiredImage> {
                 T3a1, T3a2, T3a3,
@@ -618,9 +617,49 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             };
         }
 
+        private List<AcquiredImage> GetTestAcquiredImages2() {
 
-        private ImageMetadata GetImageMetadata(string filterName, int gain, int offset, string binning, int readoutMode, double rotation, double roi) {
+            DateTime d1 = DateTime.Now.Date.AddDays(-5).AddHours(23);
+
+            AcquiredImage T3a1 = GetAcquiredImage(d1, 3, GetImageMetadata(1, "Ha", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T3a2 = GetAcquiredImage(d1, 3, GetImageMetadata(1, "O3", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T3a3 = GetAcquiredImage(d1, 3, GetImageMetadata(1, "S2", 10, 20, "1x1", 0, 10, 100));
+
+            AcquiredImage T4a1 = GetAcquiredImage(d1, 4, GetImageMetadata(1, "Ha", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T4a2 = GetAcquiredImage(d1, 4, GetImageMetadata(1, "O3", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T4a3 = GetAcquiredImage(d1, 4, GetImageMetadata(1, "S2", 10, 20, "1x1", 0, 10, 100));
+
+            AcquiredImage T5a1 = GetAcquiredImage(d1, 5, GetImageMetadata(1, "Ha", 11, 20, "1x1", 0, 0, 100));
+            AcquiredImage T5a2 = GetAcquiredImage(d1, 5, GetImageMetadata(1, "O3", 11, 20, "1x1", 0, 0, 100));
+            AcquiredImage T5a3 = GetAcquiredImage(d1, 5, GetImageMetadata(1, "S2", 11, 20, "1x1", 0, 0, 100));
+
+            AcquiredImage T6a1 = GetAcquiredImage(d1, 6, GetImageMetadata(2, "Ha", 10, 20, "1x1", 0, 12, 100));
+            AcquiredImage T6a2 = GetAcquiredImage(d1, 6, GetImageMetadata(2, "O3", 10, 20, "1x1", 0, 12, 100));
+            AcquiredImage T6a3 = GetAcquiredImage(d1, 6, GetImageMetadata(2, "S2", 10, 20, "1x1", 0, 12, 100));
+
+            DateTime d2 = DateTime.Now.Date.AddDays(-4).AddHours(26);
+
+            AcquiredImage T3a4 = GetAcquiredImage(d2, 3, GetImageMetadata(1, "Ha", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T3a5 = GetAcquiredImage(d2, 3, GetImageMetadata(1, "O3", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T3a6 = GetAcquiredImage(d2, 3, GetImageMetadata(1, "S2", 10, 20, "1x1", 0, 10, 100));
+
+            AcquiredImage T6a4 = GetAcquiredImage(d2, 6, GetImageMetadata(3, "Ha", 10, 20, "1x1", 0, 12, 100));
+            AcquiredImage T6a5 = GetAcquiredImage(d2, 6, GetImageMetadata(3, "O3", 10, 20, "1x1", 0, 12, 100));
+            AcquiredImage T6a6 = GetAcquiredImage(d2, 6, GetImageMetadata(3, "S2", 10, 20, "1x1", 0, 12, 100));
+
+            return new List<AcquiredImage> {
+                T3a1, T3a2, T3a3,
+                T4a1, T4a2, T4a3,
+                T5a1, T5a2, T5a3,
+                T6a1, T6a2, T6a3,
+                T3a4, T3a5, T3a6,
+                T6a4, T6a5, T6a6,
+            };
+        }
+
+        private ImageMetadata GetImageMetadata(int sessionId, string filterName, int gain, int offset, string binning, int readoutMode, double rotation, double roi) {
             return new ImageMetadata() {
+                SessionId = sessionId,
                 FilterName = filterName,
                 Gain = gain,
                 Offset = offset,
