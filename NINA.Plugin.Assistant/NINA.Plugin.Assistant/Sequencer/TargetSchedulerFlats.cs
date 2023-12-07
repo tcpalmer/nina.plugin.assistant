@@ -9,6 +9,7 @@ using NINA.Profile.Interfaces;
 using NINA.Sequencer.SequenceItem;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
+using NINA.WPF.Base.Mediator;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -82,6 +83,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 imageSaveMediator.BeforeImageSaved += BeforeImageSaved;
                 imageSaveMediator.BeforeFinalizeImageSaved += BeforeFinalizeImageSaved;
+                imageSaveMediator.ImageSaved += ImageSaved;
 
                 List<FlatSpec> takenFlats = new List<FlatSpec>();
                 foreach (LightSession neededFlat in neededFlats) {
@@ -134,7 +136,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 CompletedIterations = 0;
 
                 imageSaveMediator.BeforeImageSaved -= BeforeImageSaved;
-                imageSaveMediator.BeforeFinalizeImageSaved += BeforeFinalizeImageSaved;
+                imageSaveMediator.BeforeFinalizeImageSaved -= BeforeFinalizeImageSaved;
+                imageSaveMediator.ImageSaved -= ImageSaved;
             }
 
             return;

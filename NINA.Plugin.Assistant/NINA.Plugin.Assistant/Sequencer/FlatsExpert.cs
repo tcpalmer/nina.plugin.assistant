@@ -1,12 +1,11 @@
-﻿using Assistant.NINAPlugin.Database.Schema;
+﻿using Assistant.NINAPlugin.Database;
+using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Util;
 using NINA.Core.Model.Equipment;
 using NINA.Plugin.Assistant.Shared.Utility;
-using NINA.Profile;
 using NINA.Profile.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 
 namespace Assistant.NINAPlugin.Sequencer {
@@ -221,7 +220,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         /// <param name="activeProfile"></param>
         /// <param name="database"></param>
         /// <returns></returns>
-        public List<LightSession> GetNeededCadenceOrCompletedTargetFlats(IProfile activeProfile, Database.SchedulerDatabaseInteraction database) {
+        public List<LightSession> GetNeededCadenceOrCompletedTargetFlats(IProfile activeProfile, SchedulerDatabaseInteraction database) {
 
             List<LightSession> neededFlats = new List<LightSession>();
             DateTime cutoff = DateTime.Now.Date.AddDays(FlatsExpert.ACQUIRED_IMAGES_CUTOFF_DAYS);
@@ -270,12 +269,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                     return null;
                 }
 
-                // Sort in increasing rotation angle order to minimize rotator movements
-                neededFlats.Sort(delegate (LightSession x, LightSession y) {
-                    return x.FlatSpec.Rotation.CompareTo(y.FlatSpec.Rotation);
-                });
-
-                return neededFlats;
+                // Sort in increasing rotation angle order to minimize rotator movements, then by target ID
+                return neededFlats.OrderBy(ls => ls.FlatSpec.Rotation).ThenBy(ls => ls.TargetId).ToList();
             }
         }
     }

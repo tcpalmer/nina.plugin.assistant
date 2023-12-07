@@ -1,6 +1,5 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
 using NINA.Core.Locale;
@@ -214,7 +213,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                 args.Image.MetaData.Target.Name = TargetName;
 
                 // Unfortunate but we need to wait until we've set TargetName - hopefully not too bad for flats
+                TSLogger.Debug($"TS Flats: BeforeImageSaved, about to wait for ImagePrepareTask");
                 await args.ImagePrepareTask;
+
+                TSLogger.Debug($"TS Flats: BeforeImageSaved: {TargetName} filter={args.Image?.MetaData?.FilterWheel?.Filter}");
             }
         }
 
@@ -222,7 +224,13 @@ namespace Assistant.NINAPlugin.Sequencer {
             string sessionIdentifier = new FlatsExpert().GetSessionIdentifier(SessionId);
             ImagePattern proto = AssistantPlugin.FlatSessionIdImagePattern;
             args.AddImagePattern(new ImagePattern(proto.Key, proto.Description) { Value = sessionIdentifier });
+
+            TSLogger.Debug($"TS Flats: BeforeFinalizeImageSaved: setting sid={sessionIdentifier}");
             return Task.CompletedTask;
+        }
+
+        protected void ImageSaved(object sender, ImageSavedEventArgs args) {
+            TSLogger.Debug($"TS Flats: ImageSaved: {args.MetaData?.Target?.Name} filter={args.Filter} file={args.PathToImage?.LocalPath}");
         }
 
         protected void SaveFlatHistory(LightSession neededFlat) {
