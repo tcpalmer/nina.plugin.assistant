@@ -1,7 +1,9 @@
 # Release Notes
 
-## 4.1.0.0 - 2023-11-XX
+## 4.1.0.0 - 2023-12-XX
 * Added support for taking automated flats
+* Optimized the condition check in Target Scheduler condition
+* Added a 'need flats' check to Target Scheduler condition
 
 ## 4.0.5.1 - 2023-11-26
 * Improved handling when TS is canceled/interrupted which means it behaves better in safety scenarios and with Powerups safety controls.

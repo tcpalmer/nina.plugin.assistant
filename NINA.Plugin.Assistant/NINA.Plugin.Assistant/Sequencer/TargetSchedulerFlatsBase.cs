@@ -47,6 +47,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         protected IFlatDeviceMediator flatDeviceMediator;
 
         protected SchedulerDatabaseInteraction database;
+        protected FlatsExpert flatsExpert;
 
         public TargetSchedulerFlatsBase(IProfileService profileService,
                                         ICameraMediator cameraMediator,
@@ -68,6 +69,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public override void Initialize() {
             database = new SchedulerDatabaseInteraction();
+            flatsExpert = new FlatsExpert();
             Validate();
         }
 

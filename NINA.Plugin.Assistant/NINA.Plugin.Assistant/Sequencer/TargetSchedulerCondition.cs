@@ -2,8 +2,8 @@
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Newtonsoft.Json;
+using NINA.Core.Enum;
 using NINA.Core.Model;
-using NINA.Core.Utility.Notification;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Conditions;
@@ -11,7 +11,6 @@ using NINA.Sequencer.SequenceItem;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
@@ -23,8 +22,9 @@ namespace Assistant.NINAPlugin.Sequencer {
     [JsonObject(MemberSerialization.OptIn)]
     public class TargetSchedulerCondition : SequenceCondition {
 
-        private readonly string TARGETS_REMAIN = "While Targets Remain Tonight";
-        private readonly string ACTIVE_PROJECTS_REMAIN = "While Active Projects Remain";
+        private const string TARGETS_REMAIN = "While Targets Remain Tonight";
+        private const string ACTIVE_PROJECTS_REMAIN = "While Active Projects Remain";
+        private const string FLATS_NEEDED = "While Flats Needed";
 
         private IProfileService profileService;
 
@@ -32,7 +32,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         public TargetSchedulerCondition(IProfileService profileService) {
             this.profileService = profileService;
 
-            Modes = new List<string>() { TARGETS_REMAIN, ACTIVE_PROJECTS_REMAIN };
+            Modes = new List<string>() { TARGETS_REMAIN, ACTIVE_PROJECTS_REMAIN, FLATS_NEEDED };
             SelectedMode = TARGETS_REMAIN;
         }
 
@@ -58,24 +58,33 @@ namespace Assistant.NINAPlugin.Sequencer {
             };
         }
 
-        public static readonly bool DISABLE = false;
-        public static bool WARNED = false;
+        private bool blockFinished = false;
+        private SchedulerDatabaseInteraction database;
 
         public override bool Check(ISequenceItem previousItem, ISequenceItem nextItem) {
-            if (DISABLE) {
-                if (!WARNED) {
-                    Notification.ShowInformation("REMINDER: TS Condition disabled, always true");
-                    WARNED = true;
-                }
 
+            if (!blockFinished) {
                 return true;
             }
 
-            if (CalledFromSchedulerStrategy()) {
-                return true;
+            blockFinished = false;
+
+            switch (SelectedMode) {
+                case TARGETS_REMAIN: return HasRemainingTargets();
+                case ACTIVE_PROJECTS_REMAIN: return HasActiveProjects();
+                case FLATS_NEEDED: return NeedsFlats();
             }
 
-            return SelectedMode == TARGETS_REMAIN ? HasRemainingTargets() : HasActiveProjects();
+            return false;
+        }
+
+        public override void SequenceBlockFinished() {
+            blockFinished = true;
+        }
+
+        public override void ResetProgress() {
+            Status = SequenceEntityStatus.CREATED;
+            blockFinished = false;
         }
 
         private bool HasRemainingTargets() {
@@ -105,34 +114,19 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        private bool CalledFromSchedulerStrategy() {
-
-            // Not a thing of beauty but a decent way to determine if we're being invoked as part of a TS.  If so, we
-            // don't want to run the condition check but will instead let it only run when it's being checked as part
-            // of an outer container.  Seems reasonably fast - much faster than a useless planner run at least and keeps
-            // the TS logs much cleaner.
-
-            // An alternative would be to use the ConditionWatchdog approach but that still means you'd have to run the
-            // check every few seconds - almost certainly much more than this approach.  No watchdog in core NINA uses
-            // more than 5s.
-
+        private bool NeedsFlats() {
             try {
-                StackTrace stackTrace = new StackTrace();
-                StackFrame[] stackFrames = stackTrace.GetFrames();
-                foreach (StackFrame stackFrame in stackFrames) {
-                    Type declaringType = stackFrame.GetMethod().DeclaringType;
-                    if (declaringType == typeof(PlanTargetContainerStrategy) ||
-                        declaringType == typeof(InstructionContainerStrategy)) {
-                        return true;
-                    }
+                if (database == null) {
+                    database = new SchedulerDatabaseInteraction();
                 }
 
-                return false;
+                bool result = new FlatsExpert().GetNeededCadenceOrCompletedTargetFlats(profileService.ActiveProfile, database) != null;
+                TSLogger.Info($"TargetSchedulerCondition check for needed flats, continue={result}");
+                return result;
             }
             catch (Exception ex) {
-                TSLogger.Error($"exception determining origin of call for TargetSchedulerCondition: {ex.Message}");
-                TSLogger.Error(ex);
-                return false;
+                TSLogger.Error($"exception determining needed flats: {ex.StackTrace}");
+                throw new SequenceEntityFailedException($"TargetSchedulerCondition: exception determining needed flats: {ex.Message}", ex);
             }
         }
 

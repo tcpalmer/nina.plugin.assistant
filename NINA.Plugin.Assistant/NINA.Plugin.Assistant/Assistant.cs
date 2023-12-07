@@ -34,7 +34,7 @@ namespace Assistant.NINAPlugin {
         private IPlanetariumFactory planetariumFactory;
 
         // Plugin specific image file patterns
-        public static readonly ImagePattern FlatSessionIdImagePattern = new ImagePattern("$$TSSESSIONID$$", "Set a session identifier for working with TS lights and flats", "Target Scheduler");
+        public static readonly ImagePattern FlatSessionIdImagePattern = new ImagePattern("$$TSSESSIONID$$", "Session identifier for working with TS lights and flats", "Target Scheduler");
 
         [ImportingConstructor]
         public AssistantPlugin(IProfileService profileService,

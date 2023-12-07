@@ -2,8 +2,11 @@
 using Assistant.NINAPlugin.Util;
 using NINA.Core.Model.Equipment;
 using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Profile;
+using NINA.Profile.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 
 namespace Assistant.NINAPlugin.Sequencer {
@@ -66,7 +69,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                                                                  GetLightSessionDate(exposure.AcquiredDate),
                                                                  exposure.Metadata.SessionId,
                                                                  new FlatSpec(exposure));
-
                     if (!lightSessions.Contains(lightSession)) {
                         lightSessions.Add(lightSession);
                     }
@@ -210,6 +212,71 @@ namespace Assistant.NINAPlugin.Sequencer {
         public string GetSessionIdentifier(int? sessionId) {
             int id = (sessionId != null) ? (int)sessionId : 0;
             return string.Format("{0:D4}", id);
+        }
+
+        /// <summary>
+        /// This method encapsulates getting needed flats for cadence or target completed profiles/targets - including
+        /// the database access.  It's here so that it can be shared between TS Flats instruction and TS Condition.
+        /// </summary>
+        /// <param name="activeProfile"></param>
+        /// <param name="database"></param>
+        /// <returns></returns>
+        public List<LightSession> GetNeededCadenceOrCompletedTargetFlats(IProfile activeProfile, Database.SchedulerDatabaseInteraction database) {
+
+            List<LightSession> neededFlats = new List<LightSession>();
+            DateTime cutoff = DateTime.Now.Date.AddDays(FlatsExpert.ACQUIRED_IMAGES_CUTOFF_DAYS);
+            string profileId = activeProfile.Id.ToString();
+
+            using (var context = database.GetContext()) {
+                List<Project> activeProjects = context.GetActiveProjects(profileId);
+                List<AcquiredImage> acquiredImages = context.GetAcquiredImages(profileId, cutoff);
+
+                // Handle flats taken periodically
+                List<Target> targets = GetTargetsForPeriodicFlats(activeProjects);
+                if (targets.Count > 0) {
+                    List<LightSession> lightSessions = GetLightSessions(targets, acquiredImages);
+                    if (lightSessions.Count > 0) {
+                        List<FlatHistory> takenFlats = context.GetFlatsHistory(targets);
+                        neededFlats.AddRange(GetNeededPeriodicFlats(DateTime.Now, targets, lightSessions, takenFlats));
+                    }
+                    else {
+                        TSLogger.Info("TS Flats: no light sessions for targets active for periodic flats");
+                    }
+                }
+                else {
+                    TSLogger.Info("TS Flats: no targets active for periodic flats");
+                }
+
+                // Add any flats needed for target completion targets
+                targets = GetCompletedTargetsForFlats(activeProjects);
+                if (targets.Count > 0) {
+                    List<LightSession> lightSessions = GetLightSessions(targets, acquiredImages);
+                    if (lightSessions.Count > 0) {
+                        List<FlatHistory> takenFlats = context.GetFlatsHistory(targets);
+                        // TODO: implement AlwaysRepeatFlatSet here
+                        // BUT what does it mean here?  What's the 'repeat time span'?  Same as cadence?
+                        neededFlats.AddRange(GetNeededTargetCompletionFlats(targets, lightSessions, takenFlats));
+                    }
+                    else {
+                        TSLogger.Info("TS Flats: no light sessions for targets active for target completed flats");
+                    }
+                }
+                else {
+                    TSLogger.Info("TS Flats: no targets active for target completed flats");
+                }
+
+                if (neededFlats.Count == 0) {
+                    TSLogger.Info("TS Flats: no flats needed");
+                    return null;
+                }
+
+                // Sort in increasing rotation angle order to minimize rotator movements
+                neededFlats.Sort(delegate (LightSession x, LightSession y) {
+                    return x.FlatSpec.Rotation.CompareTo(y.FlatSpec.Rotation);
+                });
+
+                return neededFlats;
+            }
         }
     }
 

@@ -64,7 +64,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             try {
                 DisplayText = "Determining needed flats";
-                List<LightSession> neededFlats = GetNeededFlats();
+                List<LightSession> neededFlats = flatsExpert.GetNeededCadenceOrCompletedTargetFlats(profileService.ActiveProfile, database);
                 if (neededFlats == null) {
                     DisplayText = "";
                     return;
@@ -138,64 +138,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             return;
-        }
-
-        private List<LightSession> GetNeededFlats() {
-            List<LightSession> neededFlats = new List<LightSession>();
-            FlatsExpert flatsExpert = new FlatsExpert();
-            DateTime cutoff = DateTime.Now.Date.AddDays(FlatsExpert.ACQUIRED_IMAGES_CUTOFF_DAYS);
-            string profileId = profileService.ActiveProfile.Id.ToString();
-
-            using (var context = database.GetContext()) {
-                List<Project> activeProjects = context.GetActiveProjects(profileId);
-                List<AcquiredImage> acquiredImages = context.GetAcquiredImages(profileId, cutoff);
-
-                // Handle flats taken periodically
-                List<Target> targets = flatsExpert.GetTargetsForPeriodicFlats(activeProjects);
-                if (targets.Count > 0) {
-                    List<LightSession> lightSessions = flatsExpert.GetLightSessions(targets, acquiredImages);
-                    if (lightSessions.Count > 0) {
-                        List<FlatHistory> takenFlats = context.GetFlatsHistory(targets);
-                        neededFlats.AddRange(flatsExpert.GetNeededPeriodicFlats(DateTime.Now, targets, lightSessions, takenFlats));
-                    }
-                    else {
-                        TSLogger.Info("TS Flats: no light sessions for targets active for periodic flats");
-                    }
-                }
-                else {
-                    TSLogger.Info("TS Flats: no targets active for periodic flats");
-                }
-
-                // Add any flats needed for target completion targets
-                targets = flatsExpert.GetCompletedTargetsForFlats(activeProjects);
-                if (targets.Count > 0) {
-                    List<LightSession> lightSessions = flatsExpert.GetLightSessions(targets, acquiredImages);
-                    if (lightSessions.Count > 0) {
-                        List<FlatHistory> takenFlats = context.GetFlatsHistory(targets);
-                        // TODO: implement AlwaysRepeatFlatSet here
-                        // BUT what does it mean here?  What's the 'repeat time span'?  Same as cadence?
-                        neededFlats.AddRange(flatsExpert.GetNeededTargetCompletionFlats(targets, lightSessions, takenFlats));
-                    }
-                    else {
-                        TSLogger.Info("TS Flats: no light sessions for targets active for target completed flats");
-                    }
-                }
-                else {
-                    TSLogger.Info("TS Flats: no targets active for target completed flats");
-                }
-
-                if (neededFlats.Count == 0) {
-                    TSLogger.Info("TS Flats: no flats needed");
-                    return null;
-                }
-
-                // Sort in increasing rotation angle order to minimize rotator movements
-                neededFlats.Sort(delegate (LightSession x, LightSession y) {
-                    return x.FlatSpec.Rotation.CompareTo(y.FlatSpec.Rotation);
-                });
-
-                return neededFlats;
-            }
         }
     }
 }
