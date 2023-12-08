@@ -88,7 +88,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 foreach (LightSession neededFlat in neededFlats) {
                     bool success = true;
                     if (!takenFlats.Contains(neededFlat.FlatSpec)) {
-                        success = await TakeFlatSet(neededFlat.FlatSpec, false, progress, token);
+                        success = await TakeFlatSet(neededFlat, false, progress, token);
                         if (success) {
                             takenFlats.Add(neededFlat.FlatSpec);
                         }

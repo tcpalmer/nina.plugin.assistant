@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Util;
+using Castle.Core.Internal;
 using NINA.Core.Model.Equipment;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
@@ -211,6 +212,29 @@ namespace Assistant.NINAPlugin.Sequencer {
         public string GetSessionIdentifier(int? sessionId) {
             int id = (sessionId != null) ? (int)sessionId : 0;
             return string.Format("{0:D4}", id);
+        }
+
+        public const char OVERLOAD_SEP = '@';
+
+        public string GetOverloadTargetName(string name, int sessionId) {
+            return name != null ? $"{name}{OVERLOAD_SEP}{sessionId}" : $"{OVERLOAD_SEP}{sessionId}";
+        }
+
+        public Tuple<string, string> DeOverloadTargetName(string overloadedName) {
+            if (overloadedName == null) {
+                TSLogger.Warning("TS Flats: overloaded target name is null");
+                return new Tuple<string, string>("", "0");
+            }
+
+            int pos = overloadedName.LastIndexOf(OVERLOAD_SEP);
+            if (pos == -1) {
+                TSLogger.Warning($"TS Flats: overloaded target name is missing sep: {overloadedName}");
+                return new Tuple<string, string>("", "0");
+            }
+
+            string name = overloadedName.Substring(0, pos);
+            string sid = overloadedName.Substring(pos + 1);
+            return new Tuple<string, string>(name, sid);
         }
 
         /// <summary>

@@ -2,6 +2,7 @@
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
+using NINA.Astrometry;
 using NINA.Core.Locale;
 using NINA.Core.Model;
 using NINA.Core.Model.Equipment;
@@ -15,6 +16,8 @@ using NINA.Equipment.Model;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
+using NINA.Sequencer.Conditions;
+using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
 using NINA.Sequencer.SequenceItem.Camera;
 using NINA.Sequencer.SequenceItem.FilterWheel;
@@ -27,6 +30,7 @@ using NINA.WPF.Base.Interfaces.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -135,10 +139,9 @@ namespace Assistant.NINAPlugin.Sequencer {
         private string targetName = null;
         public string TargetName { get => targetName; set => targetName = value; }
 
-        private int sessionId = 0;
-        public int SessionId { get => sessionId; set => sessionId = value; }
-
-        protected async Task<bool> TakeFlatSet(FlatSpec flatSpec, bool applyRotation, IProgress<ApplicationStatus> progress, CancellationToken token) {
+        protected async Task<bool> TakeFlatSet(LightSession neededFlat, bool applyRotation, IProgress<ApplicationStatus> progress, CancellationToken token) {
+            FlatSpec flatSpec = neededFlat.FlatSpec;
+            Target target = GetTarget(neededFlat.TargetId);
 
             try {
                 TrainedFlatExposureSetting setting = GetTrainedFlatExposureSetting(flatSpec);
@@ -178,20 +181,18 @@ namespace Assistant.NINAPlugin.Sequencer {
                 // Take the exposures
                 TakeSubframeExposure takeExposure = new TakeSubframeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM) {
                     ImageType = CaptureSequence.ImageTypes.FLAT,
-                    ExposureCount = 0,
                     Gain = flatSpec.Gain,
                     Offset = flatSpec.Offset,
                     Binning = flatSpec.BinningMode,
                     ExposureTime = setting.Time,
-                    ROI = flatSpec.ROI
+                    ROI = flatSpec.ROI,
                 };
 
-                TSLogger.Info($"TS Flats: taking {count} flats: exp:{setting.Time}, brightness: {setting.Brightness}, for {flatSpec}");
+                TSLogger.Info($"TS Flats: {target.Name} sid: {neededFlat.SessionId}, taking {count} flats: exp:{setting.Time}, brightness: {setting.Brightness}, for {flatSpec}");
 
-                for (int i = 0; i < count; i++) {
-                    await takeExposure.Execute(progress, token);
-                    CompletedIterations++;
-                }
+                FlatTargetContainer container = new FlatTargetContainer(this, target, count, neededFlat.SessionId);
+                container.Add(takeExposure);
+                await container.Execute(progress, token);
 
                 return true;
             }
@@ -201,31 +202,42 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        protected void SetTargetName(int targetId) {
+        protected Target GetTarget(int targetId) {
             using (var context = database.GetContext()) {
                 Target target = context.GetTargetOnly(targetId);
-                TargetName = target?.Name;
+                if (target == null) {
+                    TSLogger.Warning($"TS Flats: failed to load target for id={targetId}");
+                }
+
+                return target;
             }
         }
 
-        protected async Task BeforeImageSaved(object sender, BeforeImageSavedEventArgs args) {
-            if (string.IsNullOrEmpty(args.Image.MetaData.Target.Name) && TargetName != null) {
-                args.Image.MetaData.Target.Name = TargetName;
+        protected Task BeforeImageSaved(object sender, BeforeImageSavedEventArgs args) {
+            var tuple = flatsExpert.DeOverloadTargetName(args.Image.MetaData.Target.Name);
+            string targetName = tuple.Item1;
+            string sessionId = tuple.Item2;
 
-                // Unfortunate but we need to wait until we've set TargetName - hopefully not too bad for flats
-                TSLogger.Debug($"TS Flats: BeforeImageSaved, about to wait for ImagePrepareTask");
-                await args.ImagePrepareTask;
+            TSLogger.Debug($"TS Flats: BeforeImageSaved: {targetName} sid={sessionId} filter={args.Image?.MetaData?.FilterWheel?.Filter}");
+            args.Image.MetaData.Target.Name = targetName;
+            args.Image.MetaData.Sequence.Title = sessionId;
 
-                TSLogger.Debug($"TS Flats: BeforeImageSaved: {TargetName} filter={args.Image?.MetaData?.FilterWheel?.Filter}");
-            }
+            return Task.CompletedTask;
         }
 
         protected Task BeforeFinalizeImageSaved(object sender, BeforeFinalizeImageSavedEventArgs args) {
-            string sessionIdentifier = new FlatsExpert().GetSessionIdentifier(SessionId);
+            string sid = args.Image?.RawImageData?.MetaData?.Sequence?.Title;
+            if (sid == null) {
+                TSLogger.Warning($"TS Flats: failed to get sessionId from squirrelled sequence title");
+                sid = "0";
+            }
+
+            string sessionIdentifier = new FlatsExpert().GetSessionIdentifier(int.Parse(sid));
             ImagePattern proto = AssistantPlugin.FlatSessionIdImagePattern;
             args.AddImagePattern(new ImagePattern(proto.Key, proto.Description) { Value = sessionIdentifier });
 
             TSLogger.Debug($"TS Flats: BeforeFinalizeImageSaved: setting sid={sessionIdentifier}");
+
             return Task.CompletedTask;
         }
 
@@ -431,6 +443,45 @@ namespace Assistant.NINAPlugin.Sequencer {
                 issues = value;
                 RaisePropertyChanged();
             }
+        }
+    }
+
+    /// <summary>
+    /// FlatTargetContainer provides the means to get target name and session ID saved such that
+    /// they can be picked up as the images come through the pipeline.
+    /// 
+    /// A bit squirrelly with the overload but it's necessary to get the details into image metadata
+    /// so that images get the right target name and session ID.
+    /// </summary>
+    public class FlatTargetContainer : SequentialContainer, IDeepSkyObjectContainer {
+
+        private TargetSchedulerFlatsBase parent;
+        private InputTarget inputTarget;
+        private LoopCondition loopCondition;
+
+        public FlatTargetContainer(TargetSchedulerFlatsBase parent, Target target, int count, int sessionId) {
+            this.parent = parent;
+
+            string overloadedName = new FlatsExpert().GetOverloadTargetName(target.Name, sessionId);
+            inputTarget = new InputTarget(Angle.Zero, Angle.Zero, null) { TargetName = overloadedName };
+
+            loopCondition = new LoopCondition() { Iterations = count };
+            loopCondition.PropertyChanged += LoopCondition_PropertyChanged;
+            Conditions.Add(loopCondition);
+        }
+
+        private void LoopCondition_PropertyChanged(object sender, PropertyChangedEventArgs args) {
+            if (args.PropertyName == "CompletedIterations") {
+                parent.CompletedIterations = loopCondition.CompletedIterations;
+            }
+        }
+
+        public InputTarget Target { get => inputTarget; set => throw new NotImplementedException(); }
+
+        public NighttimeData NighttimeData => throw new NotImplementedException();
+
+        public override object Clone() {
+            throw new NotImplementedException();
         }
     }
 }

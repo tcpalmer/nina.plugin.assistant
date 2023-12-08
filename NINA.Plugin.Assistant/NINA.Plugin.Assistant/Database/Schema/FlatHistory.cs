@@ -1,4 +1,6 @@
-﻿using NINA.Core.Model.Equipment;
+﻿using Assistant.NINAPlugin.Sequencer;
+using Assistant.NINAPlugin.Util;
+using NINA.Core.Model.Equipment;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -141,6 +143,10 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public int CompareTo(object obj) {
             FlatHistory flatHistory = obj as FlatHistory;
             return (flatHistory != null) ? FlatsTakenDate.CompareTo(flatHistory.FlatsTakenDate) : 0;
+        }
+
+        public override string ToString() {
+            return $"tid={TargetId} lsd={LightSessionDate} ftd={FlatsTakenDate} sid={LightSessionId} filter={FilterName}";
         }
     }
 }

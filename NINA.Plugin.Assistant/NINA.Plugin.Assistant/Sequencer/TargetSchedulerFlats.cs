@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Util;
+using Castle.DynamicProxy.Contributors;
 using Newtonsoft.Json;
 using NINA.Core.Enum;
 using NINA.Core.Model;
@@ -90,10 +91,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     bool success = true;
 
                     if (AlwaysRepeatFlatSet || !takenFlats.Contains(neededFlat.FlatSpec)) {
-                        SetTargetName(neededFlat.TargetId);
-                        SessionId = neededFlat.SessionId;
-
-                        success = await TakeFlatSet(neededFlat.FlatSpec, true, progress, token);
+                        success = await TakeFlatSet(neededFlat, true, progress, token);
                         if (success) {
                             takenFlats.Add(neededFlat.FlatSpec);
                         }

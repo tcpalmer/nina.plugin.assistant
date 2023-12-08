@@ -373,6 +373,29 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         }
 
         [Test]
+        public void TestOverloadTargetName() {
+            FlatsExpert sut = new FlatsExpert();
+
+            string overloaded = sut.GetOverloadTargetName(null, 43);
+            overloaded.Should().Be($"{FlatsExpert.OVERLOAD_SEP}43");
+            var result = sut.DeOverloadTargetName(overloaded);
+            result.Item1.Should().Be("");
+            result.Item2.Should().Be("43");
+
+            overloaded = sut.GetOverloadTargetName("", 43);
+            overloaded.Should().Be($"{FlatsExpert.OVERLOAD_SEP}43");
+            result = sut.DeOverloadTargetName(overloaded);
+            result.Item1.Should().Be("");
+            result.Item2.Should().Be("43");
+
+            overloaded = sut.GetOverloadTargetName("foo", 43);
+            overloaded.Should().Be($"foo{FlatsExpert.OVERLOAD_SEP}43");
+            result = sut.DeOverloadTargetName(overloaded);
+            result.Item1.Should().Be("foo");
+            result.Item2.Should().Be("43");
+        }
+
+        [Test]
         public void TestFlatsSpec() {
             FlatSpec fs1 = new FlatSpec("Ha", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
             fs1.FilterName.Should().Be("Ha");
