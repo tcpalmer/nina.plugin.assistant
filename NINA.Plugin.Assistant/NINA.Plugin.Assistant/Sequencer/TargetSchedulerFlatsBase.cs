@@ -232,7 +232,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 sid = "0";
             }
 
-            string sessionIdentifier = new FlatsExpert().GetSessionIdentifier(int.Parse(sid));
+            string sessionIdentifier = flatsExpert.FormatSessionIdentifier(int.Parse(sid));
             ImagePattern proto = AssistantPlugin.FlatSessionIdImagePattern;
             args.AddImagePattern(new ImagePattern(proto.Key, proto.Description) { Value = sessionIdentifier });
 
@@ -414,7 +414,8 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             StringBuilder sb = new StringBuilder();
             foreach (TrainedFlatExposureSetting trainedFlat in settings) {
-                sb.AppendLine($"    filter pos: {trainedFlat.Filter} gain: {trainedFlat.Gain} offset: {trainedFlat.Offset} binning: {trainedFlat.Binning} exposure: {trainedFlat.Time} brightness: {trainedFlat.Brightness}");
+                string filterName = profileService.ActiveProfile.FilterWheelSettings.FilterWheelFilters[trainedFlat.Filter].Name;
+                sb.AppendLine($"    filter[{trainedFlat.Filter}]: {filterName} gain: {trainedFlat.Gain} offset: {trainedFlat.Offset} binning: {trainedFlat.Binning} exposure: {trainedFlat.Time} brightness: {trainedFlat.Brightness}");
             }
 
             TSLogger.Debug($"TS Flats: trained flat exposure details:\n{sb}");

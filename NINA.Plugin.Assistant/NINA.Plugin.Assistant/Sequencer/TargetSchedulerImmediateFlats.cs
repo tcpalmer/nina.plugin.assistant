@@ -84,6 +84,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                 await CloseCover(progress, token);
                 await ToggleLight(true, progress, token);
 
+                imageSaveMediator.BeforeImageSaved += BeforeImageSaved;
+                imageSaveMediator.BeforeFinalizeImageSaved += BeforeFinalizeImageSaved;
+                imageSaveMediator.ImageSaved += ImageSaved;
+
                 List<FlatSpec> takenFlats = new List<FlatSpec>();
                 foreach (LightSession neededFlat in neededFlats) {
                     bool success = true;
@@ -133,6 +137,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                 CompletedFlatSets = 0;
                 Iterations = 0;
                 CompletedIterations = 0;
+
+                imageSaveMediator.BeforeImageSaved -= BeforeImageSaved;
+                imageSaveMediator.BeforeFinalizeImageSaved -= BeforeFinalizeImageSaved;
+                imageSaveMediator.ImageSaved -= ImageSaved;
             }
 
             return;
@@ -197,8 +205,11 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             List<LightSession> neededFlats = new List<LightSession>();
             DateTime lightSessionDate = flatsExpert.GetLightSessionDate(DateTime.Now);
+            Target target = flatsExpert.GetTarget(plan.PlanTarget.Project.DatabaseId, plan.PlanTarget.DatabaseId);
+            int sessionId = flatsExpert.GetCurrentSessionId(target?.Project, DateTime.Now);
+
             foreach (FlatSpec flatSpec in flatSpecs) {
-                neededFlats.Add(new LightSession(plan.PlanTarget.DatabaseId, lightSessionDate, 0, flatSpec));
+                neededFlats.Add(new LightSession(plan.PlanTarget.DatabaseId, lightSessionDate, sessionId, flatSpec));
             }
 
             // If always repeat is false, then remove where we've already taken a flat during this same light session
@@ -210,7 +221,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                        .ToList();
                 }
 
-                neededFlats = flatsExpert.CullFlatsByHistory(neededFlats, takenFlats);
+                // Note that we don't cull immediate flats by flats history ...
             }
 
             if (neededFlats.Count == 0) {

@@ -29,7 +29,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
             var testDbPath = @"C:\Users\Tom\AppData\Local\NINA\SchedulerPlugin\schedulerdb.sqlite";
             db = new SchedulerDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
 
-            DateTime dt = DateTime.Now.Date.AddDays(-5).AddHours(18);
+            DateTime dt = DateTime.Now.Date.AddDays(-25).AddHours(18);
             //int gain = 139;
             //int offset = 21;
             int gain = -1;
@@ -43,19 +43,25 @@ namespace NINA.Plugin.Assistant.Test.Database {
             using (SchedulerDatabaseContext context = db.GetContext()) {
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Lum", 11, gain, offset, binning, 0, rotation, 100));
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Lum", 5, gain, offset, binning, 0, rotation, 100));
                     context.AcquiredImageSet.Add(ai);
                 }
 
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Red", 12, gain, offset, binning, 0, rotation, 100));
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Lum", 6, gain, offset, binning, 0, rotation, 100));
                     context.AcquiredImageSet.Add(ai);
                 }
 
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Green", 13, gain, offset, binning, 0, rotation, 100));
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Red", 6, gain, offset, binning, 0, rotation, 100));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Green", 7, gain, offset, binning, 0, rotation, 100));
                     context.AcquiredImageSet.Add(ai);
                 }
 

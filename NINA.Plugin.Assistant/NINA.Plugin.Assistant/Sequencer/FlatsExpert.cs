@@ -1,13 +1,13 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Util;
-using Castle.Core.Internal;
 using NINA.Core.Model.Equipment;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
@@ -15,185 +15,241 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public static readonly double ACQUIRED_IMAGES_CUTOFF_DAYS = -45;
 
+        private SchedulerDatabaseInteraction _database = null;
+
         public FlatsExpert() { }
 
         /// <summary>
-        /// Get the list of active targets using periodic flat timing.
+        /// Get all needed flats across all targets that are either cadence type or target completed
+        /// flats handling, as determined at the provided check time.
         /// </summary>
-        /// <param name="allProjects"></param>
+        /// <param name="activeProfile"></param>
+        /// <param name="checkDateTime"></param>
         /// <returns></returns>
-        public List<Target> GetTargetsForPeriodicFlats(List<Project> allProjects) {
-            List<Target> targets = new List<Target>();
-            foreach (Project project in allProjects) {
-                if (project.State != ProjectState.Active ||
-                    project.FlatsHandling == Project.FLATS_HANDLING_OFF ||
-                    project.FlatsHandling == Project.FLATS_HANDLING_TARGET_COMPLETION ||
-                    project.FlatsHandling == Project.FLATS_HANDLING_IMMEDIATE) { continue; }
+        public List<LightSession> GetNeededFlats(IProfile activeProfile, DateTime checkDateTime) {
 
-                targets.AddRange(project.Targets.Where(t => t.Enabled == true));
-            }
+            List<LightSession> neededFlats = new List<LightSession>();
+            List<AcquiredImage> allAcquiredImages = GetAcquiredImages(activeProfile);
 
-            return targets;
-        }
-
-        /// <summary>
-        /// Get the list of active targets using completion flat timing and with all exposure plans complete.
-        /// </summary>
-        /// <param name="allProjects"></param>
-        /// <returns></returns>
-        public List<Target> GetCompletedTargetsForFlats(List<Project> allProjects) {
-            List<Target> targets = new List<Target>();
-            foreach (Project project in allProjects) {
-                if (project.State != ProjectState.Active || project.FlatsHandling != Project.FLATS_HANDLING_TARGET_COMPLETION) { continue; }
-
-                targets.AddRange(project.Targets.Where(t => t.Enabled == true && t.PercentComplete >= 100));
-            }
-
-            return targets;
-        }
-
-        /// <summary>
-        /// Get all light sessions associated with the provided targets as determined from acquired image records.
-        /// </summary>
-        /// <param name="targets"></param>
-        /// <param name="acquiredImages"></param>
-        /// <returns></returns>
-        public List<LightSession> GetLightSessions(List<Target> targets, List<AcquiredImage> acquiredImages) {
-            List<LightSession> lightSessions = new List<LightSession>();
+            // Get needed flats for cadence period flats
+            List<Target> targets = GetTargetsForPeriodicFlats(activeProfile);
+            TSLogger.Debug($"TS Flats: processing {targets.Count} targets as cadence type");
 
             foreach (Target target in targets) {
+                List<AcquiredImage> targetAcquiredImages = allAcquiredImages.Where(ai => ai.TargetId == target.Id).ToList();
+                List<LightSession> lightSessions = GetLightSessions(target, targetAcquiredImages);
 
-                foreach (AcquiredImage exposure in acquiredImages) {
-                    if (target.Id != exposure.TargetId) { continue; }
-                    LightSession lightSession = new LightSession(exposure.TargetId,
-                                                                 GetLightSessionDate(exposure.AcquiredDate),
-                                                                 exposure.Metadata.SessionId,
-                                                                 new FlatSpec(exposure));
-                    if (!lightSessions.Contains(lightSession)) {
-                        lightSessions.Add(lightSession);
+                if (lightSessions.Count > 0) {
+                    lightSessions = CullByCadencePeriod(target, lightSessions, checkDateTime);
+                    if (lightSessions.Count > 0) {
+                        List<FlatHistory> targetFlatHistories = GetFlatHistory(target);
+                        LogFlatHistories($"flat history for {target.Name}", targetFlatHistories);
+                        lightSessions = CullByFlatsHistory(target, lightSessions, targetFlatHistories);
+                        neededFlats.AddRange(lightSessions);
                     }
+                }
+            }
+
+            // Get needed flats for target completed flats
+            targets = GetTargetsForCompletionFlats(activeProfile);
+            TSLogger.Debug($"TS Flats: processing {targets.Count} targets as target completed type");
+
+            foreach (Target target in targets) {
+                List<AcquiredImage> targetAcquiredImages = allAcquiredImages.Where(ai => ai.TargetId == target.Id).ToList();
+                List<LightSession> lightSessions = GetLightSessions(target, targetAcquiredImages);
+
+                if (lightSessions.Count > 0) {
+                    List<FlatHistory> targetFlatHistories = GetFlatHistory(target);
+                    LogFlatHistories($"flat history for {target.Name}", targetFlatHistories);
+                    lightSessions = CullByFlatsHistory(target, lightSessions, targetFlatHistories);
+                    neededFlats.AddRange(lightSessions);
+                }
+            }
+
+            LogLightSessions("raw needed flats", neededFlats);
+            return neededFlats;
+        }
+
+        /// <summary>
+        /// Aggregate the acquired images into a set of unique light sessions for the target.
+        /// 
+        /// The provided acquired images are assumed to have been prefiltered to only those for
+        /// the provided target.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="targetAcquiredImages"></param>
+        /// <returns></returns>
+        public List<LightSession> GetLightSessions(Target target, List<AcquiredImage> targetAcquiredImages) {
+            List<LightSession> lightSessions = new List<LightSession>();
+
+            foreach (AcquiredImage light in targetAcquiredImages) {
+                LightSession lightSession = new LightSession(light.TargetId,
+                                                         GetLightSessionDate(light.AcquiredDate),
+                                                         light.Metadata.SessionId,
+                                                         new FlatSpec(light));
+                if (!lightSessions.Contains(lightSession)) {
+                    lightSessions.Add(lightSession);
                 }
             }
 
             lightSessions.Sort();
+            LogLightSessions($"Raw light sessions for {target.Name}", lightSessions);
+
             return lightSessions;
         }
 
         /// <summary>
-        /// Find light sessions without corresponding flats history that are older than the flats cadence for the targets
-        /// that employ periodic flats.
+        /// Remove light sessions that are in the 'current' cadence period for the target
+        /// and therefore not yet ready to have flats taken.
         /// 
-        /// Note that the list returned may well contain what would amount to duplicate flat sets if the same set is
-        /// needed by more than one target.  The list will be culled for dups before actually generating the flats but
-        /// we need the whole list to ultimately write flat history records when done.
+        /// The provided light sessions have been prefiltered to only those for the provided
+        /// target.
         /// </summary>
-        /// <param name="checkDate"></param>
-        /// <param name="targets"></param>
-        /// <param name="allLightSessions"></param>
-        /// <param name="takenFlats"></param>
+        /// <param name="target"></param>
+        /// <param name="targetLightSessions"></param>
+        /// <param name="checkDateTime"></param>
         /// <returns></returns>
-        public List<LightSession> GetNeededPeriodicFlats(DateTime runDate, List<Target> targets, List<LightSession> allLightSessions, List<FlatHistory> takenFlats) {
-            List<LightSession> missingLightSessions = new List<LightSession>();
-            DateTime checkDate = GetLightSessionDate(runDate);
+        public List<LightSession> CullByCadencePeriod(Target target, List<LightSession> targetLightSessions, DateTime checkDateTime) {
 
-            foreach (Target target in targets) {
+            // If the cadence period is 1, nothing is culled: all light sessions are due flats
+            if (target.Project.FlatsHandling == 1) {
+                return targetLightSessions;
+            }
 
-                // Get the light sessions and flat history for this target
-                List<LightSession> targetLightSessions = allLightSessions.Where(ls => ls.TargetId == target.Id).ToList();
-                List<FlatHistory> targetFlatHistory = takenFlats.Where(tf => tf.TargetId == target.Id).ToList();
+            List<LightSession> remainingLightSessions = new List<LightSession>();
+            int currentSessionId = GetCurrentSessionId(target.Project, checkDateTime);
 
-                List<LightSession> potentialLightSessions = new List<LightSession>();
-
-                foreach (LightSession lightSession in targetLightSessions) {
-                    potentialLightSessions.Add(lightSession);
-                    foreach (FlatHistory flatHistory in targetFlatHistory) {
-
-                        // Remove if there is already a flat history record for this light session
-                        if (lightSession.SessionDate == flatHistory.LightSessionDate
-                            && lightSession.SessionId == flatHistory.LightSessionId
-                            && lightSession.FlatSpec.Equals(new FlatSpec(flatHistory))) {
-                            potentialLightSessions.Remove(lightSession);
-                            continue;
-                        }
-                    }
-                }
-
-                // Skip if not enough days have passed based on project setting
-                int flatsPeriod = target.Project.FlatsHandling;
-                foreach (LightSession lightSession in potentialLightSessions) {
-                    if (flatsPeriod > 1 && (checkDate - lightSession.SessionDate).TotalDays < flatsPeriod) { continue; }
-                    missingLightSessions.Add(lightSession);
+            foreach (LightSession lightSession in targetLightSessions) {
+                if (lightSession.SessionId < currentSessionId) {
+                    remainingLightSessions.Add(lightSession);
                 }
             }
 
-            return missingLightSessions;
+            LogLightSessions($"after culled by cadence for {target.Name}, current sid: {currentSessionId}", remainingLightSessions);
+            return remainingLightSessions;
         }
 
         /// <summary>
-        /// Find light sessions without corresponding flats history for targets that employ target completion flats.
-        /// 
-        /// Note that the list returned may well contain what would amount to duplicate flat sets if the same set is
-        /// needed by more than one target.  The list will be culled for dups before actually generating the flats but
-        /// we need the whole list to ultimately write flat history records when done.
+        /// Remove light sessions that are already covered by flats history (flats already taken).
         /// </summary>
-        /// <param name="targets"></param>
-        /// <param name="allLightSessions"></param>
-        /// <param name="takenFlats"></param>
+        /// <param name="target"></param>
+        /// <param name="targetLightSessions"></param>
+        /// <param name="targetFlatHistory"></param>
         /// <returns></returns>
-        public List<LightSession> GetNeededTargetCompletionFlats(List<Target> targets, List<LightSession> allLightSessions, List<FlatHistory> takenFlats) {
-            List<LightSession> missingLightSessions = new List<LightSession>();
+        public List<LightSession> CullByFlatsHistory(Target target, List<LightSession> targetLightSessions, List<FlatHistory> targetFlatHistory) {
+            List<LightSession> remainingLightSessions = new List<LightSession>();
 
-            foreach (Target target in targets) {
-
-                // Get the light sessions and flat history for this target
-                List<LightSession> targetLightSessions = allLightSessions.Where(ls => ls.TargetId == target.Id).ToList();
-                List<FlatHistory> targetFlatHistory = takenFlats.Where(tf => tf.TargetId == target.Id).ToList();
-
-                foreach (LightSession lightSession in targetLightSessions) {
-                    missingLightSessions.Add(lightSession);
-                    foreach (FlatHistory flatHistory in targetFlatHistory) {
-
-                        // Remove if there is a flat set for the light session
-                        if (lightSession.SessionDate == flatHistory.LightSessionDate
-                            && lightSession.SessionId == flatHistory.LightSessionId
-                            && lightSession.FlatSpec.Equals(new FlatSpec(flatHistory))) {
-                            missingLightSessions.Remove(lightSession);
-                            continue;
-                        }
+            foreach (LightSession lightSession in targetLightSessions) {
+                remainingLightSessions.Add(lightSession);
+                foreach (FlatHistory flatHistory in targetFlatHistory) {
+                    if (LightSessionAndFlatHistoryEqual(lightSession, flatHistory)) {
+                        remainingLightSessions.Remove(lightSession);
+                        continue;
                     }
                 }
             }
 
-            return missingLightSessions;
+            LogLightSessions($"after culled by flats history for {target.Name}", remainingLightSessions);
+            return remainingLightSessions;
         }
 
         /// <summary>
-        /// Remove light sessions from the needed list if the same flat spec is in one of the history records.
-        /// Note that the comparison ignores the SessionId since this is used for immediate flats.
+        /// Determine whether we need to take this flat set or not.
+        /// 
+        /// We never want to repeat a flat set for the same (current) target, so targetTakenFlats maintains the list of flats
+        /// that have already been taken for the current target.
         /// </summary>
-        /// <param name="neededFlats"></param>
-        /// <param name="takenFlats"></param>
+        /// <param name="alwaysRepeatFlatSet"></param>
+        /// <param name="neededFlat"></param>
+        /// <param name="targetTakenFlats"></param>
+        /// <param name="allTakenFlats"></param>
         /// <returns></returns>
-        public List<LightSession> CullFlatsByHistory(List<LightSession> neededFlats, List<FlatHistory> takenFlats) {
+        public bool IsRequiredFlat(bool alwaysRepeatFlatSet, LightSession neededFlat, List<FlatSpec> targetTakenFlats, List<FlatSpec> allTakenFlats) {
 
-            if (takenFlats.Count == 0) {
-                return neededFlats;
+            // Never repeat a flat set for the same target
+            if (targetTakenFlats.Contains(neededFlat.FlatSpec)) {
+                return false;
             }
 
-            List<LightSession> culledList = new List<LightSession>();
-            foreach (LightSession lightSession in neededFlats) {
-                culledList.Add(lightSession);
-                foreach (FlatHistory flatHistory in takenFlats) {
-                    if (lightSession.SessionDate == flatHistory.LightSessionDate &&
-                        lightSession.TargetId == flatHistory.TargetId &&
-                        lightSession.FlatSpec.Equals(new FlatSpec(flatHistory))) {
-                        culledList.Remove(lightSession);
-                        break;
+            // If repeat is off and the flat has already been taken, skip
+            if (!alwaysRepeatFlatSet && allTakenFlats.Contains(neededFlat.FlatSpec)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Get all targets from the database where both project and target are active and the project
+        /// is set for cadence-based flats handling.
+        /// </summary>
+        /// <param name="activeProfile"></param>
+        /// <returns></returns>
+        public virtual List<Target> GetTargetsForPeriodicFlats(IProfile activeProfile) {
+            string profileId = activeProfile.Id.ToString();
+
+            using (var context = GetDatabaseContext().GetContext()) {
+                List<Project> activeProjects = context.GetActiveProjects(profileId);
+                List<Target> targets = new List<Target>();
+                foreach (Project project in activeProjects) {
+                    if (project.FlatsHandling == Project.FLATS_HANDLING_OFF ||
+                        project.FlatsHandling == Project.FLATS_HANDLING_TARGET_COMPLETION ||
+                        project.FlatsHandling == Project.FLATS_HANDLING_IMMEDIATE) { continue; }
+
+                    targets.AddRange(project.Targets.Where(t => t.Enabled == true));
+                }
+
+                return targets;
+            }
+        }
+
+        /// <summary>
+        /// Get all targets from the database where both project and target are active, the project is
+        /// set for target completion flats handling, and the targets are 100% complete.
+        /// </summary>
+        /// <param name="activeProfile"></param>
+        /// <returns></returns>
+        public virtual List<Target> GetTargetsForCompletionFlats(IProfile activeProfile) {
+            string profileId = activeProfile.Id.ToString();
+
+            using (var context = GetDatabaseContext().GetContext()) {
+                List<Project> activeProjects = context.GetActiveProjects(profileId);
+                List<Target> targets = new List<Target>();
+                foreach (Project project in activeProjects) {
+                    if (project.FlatsHandling == Project.FLATS_HANDLING_TARGET_COMPLETION) {
+                        targets.AddRange(project.Targets.Where(t => t.Enabled == true && t.PercentComplete >= 100));
                     }
                 }
-            }
 
-            return culledList;
+                return targets;
+            }
+        }
+
+        /// <summary>
+        /// Get all acquired image records for the current profile that are more recent than
+        /// the cutoff date.  Note that we also filter out records where the session id is
+        /// zero: those were saved before TS flats support and wouldn't be handled correctly.
+        /// </summary>
+        /// <param name="activeProfile"></param>
+        /// <returns></returns>
+        public virtual List<AcquiredImage> GetAcquiredImages(IProfile activeProfile) {
+            string profileId = activeProfile.Id.ToString();
+            DateTime cutoff = DateTime.Now.Date.AddDays(FlatsExpert.ACQUIRED_IMAGES_CUTOFF_DAYS);
+
+            using (var context = GetDatabaseContext().GetContext()) {
+                return context.GetAcquiredImages(profileId, cutoff).Where(ai => ai.Metadata.SessionId != 0).ToList();
+            }
+        }
+
+        /// <summary>
+        /// Get all flat history records for the target.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public virtual List<FlatHistory> GetFlatHistory(Target target) {
+            using (var context = GetDatabaseContext().GetContext()) {
+                return context.GetFlatsHistory(target.Id);
+            }
         }
 
         /// <summary>
@@ -209,17 +265,64 @@ namespace Assistant.NINAPlugin.Sequencer {
                 : exposureDate.Date.AddDays(-1).AddHours(12);
         }
 
-        public string GetSessionIdentifier(int? sessionId) {
+        /// <summary>
+        /// Calculate the session identifier for the provided date/time, based on the project's flats
+        /// handling configuration and creation date.
+        /// </summary>
+        /// <param name="project"></param>
+        /// <param name="checkDateTime"></param>
+        /// <returns></returns>
+        public int GetCurrentSessionId(Project project, DateTime checkDateTime) {
+
+            if (project == null) {
+                return 1;
+            }
+
+            int flatsHandling;
+            if (project.FlatsHandling == Project.FLATS_HANDLING_OFF
+                || project.FlatsHandling == Project.FLATS_HANDLING_TARGET_COMPLETION
+                || project.FlatsHandling == Project.FLATS_HANDLING_IMMEDIATE) {
+                flatsHandling = 1;
+            }
+            else {
+                flatsHandling = project.FlatsHandling;
+            }
+
+            DateTime lightSessionDate = GetLightSessionDate(checkDateTime);
+            DateTime createSessionDate = GetLightSessionDate(project.CreateDate);
+            int daysSinceProjectCreate = (int)(lightSessionDate - createSessionDate).TotalDays;
+            return (daysSinceProjectCreate / flatsHandling) + 1;
+        }
+
+        /// <summary>
+        /// Format the session identifier.
+        /// </summary>
+        /// <param name="sessionId"></param>
+        /// <returns></returns>
+        public string FormatSessionIdentifier(int? sessionId) {
             int id = (sessionId != null) ? (int)sessionId : 0;
             return string.Format("{0:D4}", id);
         }
 
         public const char OVERLOAD_SEP = '@';
 
+        /// <summary>
+        /// Overload a target name with both name and session identifier.  This is used while flats are
+        /// coming through the image pipeline so we can save name/sid in the image metadata where it
+        /// follows the image on the same thread.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="sessionId"></param>
+        /// <returns></returns>
         public string GetOverloadTargetName(string name, int sessionId) {
             return name != null ? $"{name}{OVERLOAD_SEP}{sessionId}" : $"{OVERLOAD_SEP}{sessionId}";
         }
 
+        /// <summary>
+        /// Undo target name overloading.
+        /// </summary>
+        /// <param name="overloadedName"></param>
+        /// <returns></returns>
         public Tuple<string, string> DeOverloadTargetName(string overloadedName) {
             if (overloadedName == null) {
                 TSLogger.Warning("TS Flats: overloaded target name is null");
@@ -237,65 +340,52 @@ namespace Assistant.NINAPlugin.Sequencer {
             return new Tuple<string, string>(name, sid);
         }
 
-        /// <summary>
-        /// This method encapsulates getting needed flats for cadence or target completed profiles/targets - including
-        /// the database access.  It's here so that it can be shared between TS Flats instruction and TS Condition.
-        /// </summary>
-        /// <param name="activeProfile"></param>
-        /// <param name="database"></param>
-        /// <returns></returns>
-        public List<LightSession> GetNeededCadenceOrCompletedTargetFlats(IProfile activeProfile, SchedulerDatabaseInteraction database) {
-
-            List<LightSession> neededFlats = new List<LightSession>();
-            DateTime cutoff = DateTime.Now.Date.AddDays(FlatsExpert.ACQUIRED_IMAGES_CUTOFF_DAYS);
-            string profileId = activeProfile.Id.ToString();
-
-            using (var context = database.GetContext()) {
-                List<Project> activeProjects = context.GetActiveProjects(profileId);
-                List<AcquiredImage> acquiredImages = context.GetAcquiredImages(profileId, cutoff);
-
-                // Handle flats taken periodically
-                List<Target> targets = GetTargetsForPeriodicFlats(activeProjects);
-                if (targets.Count > 0) {
-                    List<LightSession> lightSessions = GetLightSessions(targets, acquiredImages);
-                    if (lightSessions.Count > 0) {
-                        List<FlatHistory> takenFlats = context.GetFlatsHistory(targets);
-                        neededFlats.AddRange(GetNeededPeriodicFlats(DateTime.Now, targets, lightSessions, takenFlats));
-                    }
-                    else {
-                        TSLogger.Info("TS Flats: no light sessions for targets active for periodic flats");
-                    }
-                }
-                else {
-                    TSLogger.Info("TS Flats: no targets active for periodic flats");
-                }
-
-                // Add any flats needed for target completion targets
-                targets = GetCompletedTargetsForFlats(activeProjects);
-                if (targets.Count > 0) {
-                    List<LightSession> lightSessions = GetLightSessions(targets, acquiredImages);
-                    if (lightSessions.Count > 0) {
-                        List<FlatHistory> takenFlats = context.GetFlatsHistory(targets);
-                        // TODO: implement AlwaysRepeatFlatSet here
-                        // BUT what does it mean here?  What's the 'repeat time span'?  Same as cadence?
-                        neededFlats.AddRange(GetNeededTargetCompletionFlats(targets, lightSessions, takenFlats));
-                    }
-                    else {
-                        TSLogger.Info("TS Flats: no light sessions for targets active for target completed flats");
-                    }
-                }
-                else {
-                    TSLogger.Info("TS Flats: no targets active for target completed flats");
-                }
-
-                if (neededFlats.Count == 0) {
-                    TSLogger.Info("TS Flats: no flats needed");
-                    return null;
-                }
-
-                // Sort in increasing rotation angle order to minimize rotator movements, then by target ID
-                return neededFlats.OrderBy(ls => ls.FlatSpec.Rotation).ThenBy(ls => ls.TargetId).ToList();
+        public Target GetTarget(int projectId, int targetId) {
+            using (var context = GetDatabaseContext().GetContext()) {
+                return context.GetTarget(projectId, targetId);
             }
+        }
+
+        public void LogLightSessions(string header, List<LightSession> list) {
+            if (list.Count == 0) {
+                TSLogger.Debug($"TS Flats: {header} - empty");
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            foreach (LightSession lightSession in list) {
+                sb.AppendLine(lightSession.ToString());
+            }
+
+            TSLogger.Debug($"TS Flats: {header}\n{sb}\n");
+        }
+
+        private void LogFlatHistories(string header, List<FlatHistory> list) {
+            if (list.Count == 0) {
+                TSLogger.Debug($"TS Flats: {header} - empty");
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            foreach (FlatHistory fh in list) {
+                sb.AppendLine(fh.ToString());
+            }
+
+            TSLogger.Debug($"TS Flats: {header}\n{sb}\n");
+        }
+
+        private bool LightSessionAndFlatHistoryEqual(LightSession lightSession, FlatHistory flatHistory) {
+            return lightSession.SessionDate == flatHistory.LightSessionDate
+                && lightSession.SessionId == flatHistory.LightSessionId
+                && lightSession.FlatSpec.Equals(new FlatSpec(flatHistory));
+        }
+
+        private SchedulerDatabaseInteraction GetDatabaseContext() {
+            if (_database == null) {
+                _database = new SchedulerDatabaseInteraction();
+            }
+
+            return _database;
         }
     }
 

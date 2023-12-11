@@ -152,7 +152,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private Task BeforeFinalizeImageSaved(object sender, BeforeFinalizeImageSavedEventArgs args) {
-            string sessionIdentifier = new FlatsExpert().GetSessionIdentifier(planTarget?.Project?.SessionId);
+            string sessionIdentifier = new FlatsExpert().FormatSessionIdentifier(planTarget?.Project?.SessionId);
             ImagePattern proto = AssistantPlugin.FlatSessionIdImagePattern;
             args.AddImagePattern(new ImagePattern(proto.Key, proto.Description) { Value = sessionIdentifier });
 

@@ -248,7 +248,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.CreateDate = project.CreateDate;
             this.ActiveDate = project.ActiveDate;
             this.InactiveDate = project.InactiveDate;
-            this.SessionId = GetFlatsSessionId(project);
+            this.SessionId = new FlatsExpert().GetCurrentSessionId(project, DateTime.Now);
 
             this.MinimumTime = project.MinimumTime;
             this.MinimumAltitude = project.MinimumAltitude;
@@ -271,22 +271,6 @@ namespace Assistant.NINAPlugin.Plan {
                     Targets.Add(new PlanTarget(this, target));
                 }
             }
-        }
-
-        private int GetFlatsSessionId(Project project) {
-            int flatsHandling;
-            if (project.FlatsHandling == Project.FLATS_HANDLING_OFF
-                || project.FlatsHandling == Project.FLATS_HANDLING_TARGET_COMPLETION
-                || project.FlatsHandling == Project.FLATS_HANDLING_IMMEDIATE) {
-                flatsHandling = 1;
-            }
-            else {
-                flatsHandling = project.FlatsHandling;
-            }
-
-            DateTime lightSessionDate = new FlatsExpert().GetLightSessionDate(DateTime.Now);
-            int daysSinceProjectCreate = (int)(lightSessionDate - project.CreateDate).TotalDays;
-            return (daysSinceProjectCreate / flatsHandling) + 1;
         }
 
         private Dictionary<string, double> GetRuleWeightsDictionary(List<RuleWeight> ruleWeights) {

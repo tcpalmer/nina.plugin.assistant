@@ -1,305 +1,242 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Sequencer;
 using FluentAssertions;
+using Moq;
 using NINA.Core.Model.Equipment;
 using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Profile.Interfaces;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 
 namespace NINA.Plugin.Assistant.Test.Sequencer {
 
-    [TestFixture]
     public class FlatsExpertTest {
 
         [Test]
-        public void TestGetPotentialTargets() {
-            List<Project> projects = GetTestProjects1();
-            List<Target> targets = new FlatsExpert().GetTargetsForPeriodicFlats(projects);
-            targets.Count.Should().Be(3);
-            targets[0].Name.Should().Be("T3");
-            targets[0].Id.Should().Be(3);
-            targets[1].Name.Should().Be("T5");
-            targets[1].Id.Should().Be(5);
-            targets[2].Name.Should().Be("T6");
-            targets[2].Id.Should().Be(6);
+        public void TestGetNeededFlats() {
+            DateTime baseDate = new DateTime(2023, 12, 1).AddHours(20);
+            Mock<IProfile> profileMock = new Mock<IProfile>();
+            profileMock.SetupProperty(m => m.Id, new Guid("01234567-0000-0000-0000-000000000000"));
+
+            List<Target> cadenceTargets = new List<Target>();
+            List<Target> completedTargets = new List<Target>();
+            List<AcquiredImage> acquiredImages = new List<AcquiredImage>();
+            List<FlatHistory> flatHistories = new List<FlatHistory>();
+
+            Mock<FlatsExpert> mock = new Mock<FlatsExpert> { };
+            mock.Setup(m => m.GetTargetsForPeriodicFlats(It.IsAny<IProfile>())).Returns(cadenceTargets);
+            mock.Setup(m => m.GetTargetsForCompletionFlats(It.IsAny<IProfile>())).Returns(completedTargets);
+            mock.Setup(m => m.GetAcquiredImages(It.IsAny<IProfile>())).Returns(acquiredImages);
+            mock.Setup(m => m.GetFlatHistory(It.IsAny<Target>())).Returns(flatHistories);
+
+            mock.Object.GetNeededFlats(profileMock.Object, baseDate).Count.Should().Be(0);
+
+            acquiredImages.AddRange(GetTestAcquiredImages(baseDate, 1, 3, 1));
+
+            // Cadence = 3
+            cadenceTargets.Add(GetTestTarget(1, baseDate, 3));
+            mock.Object.GetNeededFlats(profileMock.Object, baseDate.AddDays(0)).Count.Should().Be(0);
+            mock.Object.GetNeededFlats(profileMock.Object, baseDate.AddDays(1)).Count.Should().Be(0);
+            mock.Object.GetNeededFlats(profileMock.Object, baseDate.AddDays(2)).Count.Should().Be(0);
+            mock.Object.GetNeededFlats(profileMock.Object, baseDate.AddDays(3)).Count.Should().Be(3);
+            mock.Object.GetNeededFlats(profileMock.Object, baseDate.AddDays(4)).Count.Should().Be(3);
+            mock.Object.GetNeededFlats(profileMock.Object, baseDate.AddDays(5)).Count.Should().Be(3);
+            mock.Object.GetNeededFlats(profileMock.Object, baseDate.AddDays(6)).Count.Should().Be(6);
+            mock.Object.GetNeededFlats(profileMock.Object, baseDate.AddDays(7)).Count.Should().Be(6);
+            mock.Object.GetNeededFlats(profileMock.Object, baseDate.AddDays(8)).Count.Should().Be(6);
+            mock.Object.GetNeededFlats(profileMock.Object, baseDate.AddDays(9)).Count.Should().Be(9);
+
+            // Skip for existing flat history
+            FlatSpec fs1 = new FlatSpec("R", 10, 20, new BinningMode(1, 1), 0, 10, 100);
+            FlatSpec fs2 = new FlatSpec("G", 10, 20, new BinningMode(1, 1), 0, 10, 100);
+            FlatSpec fs3 = new FlatSpec("B", 10, 20, new BinningMode(1, 1), 0, 10, 100);
+            DateTime lightSessionDate = new FlatsExpert().GetLightSessionDate(baseDate);
+            flatHistories.Add(GetFlatHistory(1, lightSessionDate, 1, baseDate.AddMinutes(0), fs1));
+            flatHistories.Add(GetFlatHistory(1, lightSessionDate, 1, baseDate.AddMinutes(1), fs2));
+            flatHistories.Add(GetFlatHistory(1, lightSessionDate, 1, baseDate.AddMinutes(2), fs3));
+
+            mock.Object.GetNeededFlats(profileMock.Object, baseDate.AddDays(9)).Count.Should().Be(6);
+
+            // Check for completed project
+            acquiredImages.AddRange(GetTestAcquiredImages(baseDate, 2, 1, 1));
+            completedTargets.Add(GetTestTarget(2, baseDate, Project.FLATS_HANDLING_TARGET_COMPLETION));
+            flatHistories.Clear();
+            List<LightSession> lightSessions = mock.Object.GetNeededFlats(profileMock.Object, baseDate.AddDays(9));
+            lightSessions.Count.Should().Be(12);
+            lightSessions[0].TargetId.Should().Be(1); lightSessions[0].SessionId.Should().Be(1);
+            lightSessions[1].TargetId.Should().Be(1); lightSessions[1].SessionId.Should().Be(1);
+            lightSessions[2].TargetId.Should().Be(1); lightSessions[2].SessionId.Should().Be(1);
+            lightSessions[3].TargetId.Should().Be(1); lightSessions[3].SessionId.Should().Be(2);
+            lightSessions[4].TargetId.Should().Be(1); lightSessions[4].SessionId.Should().Be(2);
+            lightSessions[5].TargetId.Should().Be(1); lightSessions[5].SessionId.Should().Be(2);
+            lightSessions[6].TargetId.Should().Be(1); lightSessions[6].SessionId.Should().Be(3);
+            lightSessions[7].TargetId.Should().Be(1); lightSessions[7].SessionId.Should().Be(3);
+            lightSessions[8].TargetId.Should().Be(1); lightSessions[8].SessionId.Should().Be(3);
+
+            lightSessions[9].TargetId.Should().Be(2); lightSessions[9].SessionId.Should().Be(1);
+            lightSessions[10].TargetId.Should().Be(2); lightSessions[10].SessionId.Should().Be(1);
+            lightSessions[11].TargetId.Should().Be(2); lightSessions[11].SessionId.Should().Be(1);
         }
 
-        [Test]
-        public void TestGetCompletedTargetsForFlats() {
-            List<Project> projects = GetTestProjects2();
-            List<Target> targets = new FlatsExpert().GetCompletedTargetsForFlats(projects);
-            targets.Count.Should().Be(1);
-            targets[0].Name.Should().Be("T8");
-            targets[0].Id.Should().Be(8);
+        private List<AcquiredImage> GetTestAcquiredImages(DateTime baseDate, int targetId, int numSessions, int startSessionId) {
+            List<AcquiredImage> list = new List<AcquiredImage>();
+
+            DateTime running;
+            int sid = startSessionId;
+
+            for (int i = 0; i < numSessions; i++) {
+                running = baseDate.AddDays(i);
+
+                for (int j = 0; j < 3; j++) {
+                    list.Add(GetAcquiredImage(running.AddMinutes(j), targetId, GetImageMetadata(sid, "R", 10, 20, "1x1", 0, 10, 100)));
+                    list.Add(GetAcquiredImage(running.AddMinutes(j + 1), targetId, GetImageMetadata(sid, "G", 10, 20, "1x1", 0, 10, 100)));
+                    list.Add(GetAcquiredImage(running.AddMinutes(j + 2), targetId, GetImageMetadata(sid, "B", 10, 20, "1x1", 0, 10, 100)));
+                    running = running.AddMinutes(2);
+                }
+
+                sid++;
+            }
+
+            return list;
         }
 
         [Test]
         public void TestGetLightSessions() {
+            DateTime d1 = DateTime.Now.Date.AddDays(-5).AddHours(23);
+
+            AcquiredImage T1R1 = GetAcquiredImage(d1, 1, GetImageMetadata(1, "R", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1R2 = GetAcquiredImage(d1.AddMinutes(1), 1, GetImageMetadata(1, "R", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1R3 = GetAcquiredImage(d1.AddMinutes(2), 1, GetImageMetadata(1, "R", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1G1 = GetAcquiredImage(d1.AddMinutes(3), 1, GetImageMetadata(1, "G", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1G2 = GetAcquiredImage(d1.AddMinutes(4), 1, GetImageMetadata(1, "G", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1B1 = GetAcquiredImage(d1.AddMinutes(5), 1, GetImageMetadata(1, "B", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1B2 = GetAcquiredImage(d1.AddMinutes(6), 1, GetImageMetadata(1, "B", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1B3 = GetAcquiredImage(d1.AddMinutes(7), 1, GetImageMetadata(1, "B", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1B4 = GetAcquiredImage(d1.AddMinutes(8), 1, GetImageMetadata(1, "B", 10, 20, "1x1", 0, 10, 100));
+
+            List<AcquiredImage> acquiredImages = new List<AcquiredImage> { T1R1, T1R2, T1R3, T1G1, T1G2, T1B1, T1B2, T1B3, T1B4 };
+
+            DateTime na = DateTime.Now;
+            Target t = GetTestTarget(1, na, 3);
             FlatsExpert sut = new FlatsExpert();
-            List<Project> projects = GetTestProjects1();
-            List<Target> targets = sut.GetTargetsForPeriodicFlats(projects);
-            targets.Count.Should().Be(3);
 
-            List<LightSession> sessions = sut.GetLightSessions(targets, GetTestAcquiredImages1());
-            sessions.Count.Should().Be(12);
-            DateTime d1 = sut.GetLightSessionDate(DateTime.Now.Date.AddDays(-5).AddHours(23));
-            DateTime d2 = sut.GetLightSessionDate(DateTime.Now.Date.AddDays(-4).AddHours(26));
+            List<LightSession> lightSessions = sut.GetLightSessions(t, acquiredImages);
+            lightSessions.Count.Should().Be(3);
+            AssertLightSession(sut, lightSessions[0], d1, 1, "R");
+            AssertLightSession(sut, lightSessions[1], d1, 1, "G");
+            AssertLightSession(sut, lightSessions[2], d1, 1, "B");
 
-            sessions.Contains(new LightSession(3, d1, 1, new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(3, d1, 1, new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(3, d1, 1, new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(5, d1, 1, new FlatSpec("Ha", 11, 20, new BinningMode(1, 1), 0, 0, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(5, d1, 1, new FlatSpec("O3", 11, 20, new BinningMode(1, 1), 0, 0, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(5, d1, 1, new FlatSpec("S2", 11, 20, new BinningMode(1, 1), 0, 0, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(6, d1, 2, new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 12, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(6, d1, 2, new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 12, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(6, d1, 2, new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 12, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(3, d2, 1, new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(3, d2, 1, new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
-            sessions.Contains(new LightSession(3, d2, 1, new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 10, 100))).Should().BeTrue();
+            DateTime d2 = d1.AddDays(1);
+            AcquiredImage T1R4 = GetAcquiredImage(d2, 1, GetImageMetadata(2, "R", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1G3 = GetAcquiredImage(d2.AddMinutes(1), 1, GetImageMetadata(2, "G", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1G4 = GetAcquiredImage(d2.AddMinutes(2), 1, GetImageMetadata(2, "G", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1G5 = GetAcquiredImage(d2.AddMinutes(3), 1, GetImageMetadata(2, "G", 10, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1B5 = GetAcquiredImage(d2.AddMinutes(4), 1, GetImageMetadata(2, "B", 10, 20, "1x1", 0, 10, 100));
+            acquiredImages.Add(T1R4);
+            acquiredImages.Add(T1G3);
+            acquiredImages.Add(T1G4);
+            acquiredImages.Add(T1G5);
+            acquiredImages.Add(T1B5);
 
-            sessions[0].TargetId.Should().Be(3);
-            sessions[1].TargetId.Should().Be(3);
-            sessions[2].TargetId.Should().Be(3);
-            sessions[3].TargetId.Should().Be(5);
-            sessions[4].TargetId.Should().Be(5);
-            sessions[5].TargetId.Should().Be(5);
-            sessions[6].TargetId.Should().Be(6);
-            sessions[7].TargetId.Should().Be(6);
-            sessions[8].TargetId.Should().Be(6);
-            sessions[9].TargetId.Should().Be(3);
-            sessions[10].TargetId.Should().Be(3);
-            sessions[11].TargetId.Should().Be(3);
+            lightSessions = sut.GetLightSessions(t, acquiredImages);
+            lightSessions.Count.Should().Be(6);
+            AssertLightSession(sut, lightSessions[0], d1, 1, "R");
+            AssertLightSession(sut, lightSessions[1], d1, 1, "G");
+            AssertLightSession(sut, lightSessions[2], d1, 1, "B");
+            AssertLightSession(sut, lightSessions[3], d2, 2, "R");
+            AssertLightSession(sut, lightSessions[4], d2, 2, "G");
+            AssertLightSession(sut, lightSessions[5], d2, 2, "B");
+
+            // Gain changes on 2nd R exposure
+            DateTime d3 = d1.AddDays(2);
+            AcquiredImage T1R5 = GetAcquiredImage(d3, 1, GetImageMetadata(3, "R", 10, 20, "1x1", 0, 10, 100)); // old gain
+            AcquiredImage T1R6 = GetAcquiredImage(d3.AddMinutes(1), 1, GetImageMetadata(3, "R", 15, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1G6 = GetAcquiredImage(d3.AddMinutes(2), 1, GetImageMetadata(3, "G", 15, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1G7 = GetAcquiredImage(d3.AddMinutes(3), 1, GetImageMetadata(3, "G", 15, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1G8 = GetAcquiredImage(d3.AddMinutes(4), 1, GetImageMetadata(3, "G", 15, 20, "1x1", 0, 10, 100));
+            AcquiredImage T1B6 = GetAcquiredImage(d3.AddMinutes(5), 1, GetImageMetadata(3, "B", 15, 20, "1x1", 0, 10, 100));
+            acquiredImages.Add(T1R5);
+            acquiredImages.Add(T1R6);
+            acquiredImages.Add(T1G6);
+            acquiredImages.Add(T1G7);
+            acquiredImages.Add(T1G8);
+            acquiredImages.Add(T1B6);
+
+            lightSessions = sut.GetLightSessions(t, acquiredImages);
+            lightSessions.Count.Should().Be(10);
+            AssertLightSession(sut, lightSessions[0], d1, 1, "R");
+            AssertLightSession(sut, lightSessions[1], d1, 1, "G");
+            AssertLightSession(sut, lightSessions[2], d1, 1, "B");
+            AssertLightSession(sut, lightSessions[3], d2, 2, "R");
+            AssertLightSession(sut, lightSessions[4], d2, 2, "G");
+            AssertLightSession(sut, lightSessions[5], d2, 2, "B");
+            AssertLightSession(sut, lightSessions[6], d3, 3, "R"); // R gain 10
+            AssertLightSession(sut, lightSessions[7], d3, 3, "R"); // R gain 15
+            AssertLightSession(sut, lightSessions[8], d3, 3, "G");
+            AssertLightSession(sut, lightSessions[9], d3, 3, "B");
+
+            lightSessions[6].FlatSpec.Gain.Should().Be(10);
+            lightSessions[7].FlatSpec.Gain.Should().Be(15);
         }
 
         [Test]
-        public void TestGetLightSessionsWithSessionId() {
+        public void TestCullByCadencePeriod() {
             FlatsExpert sut = new FlatsExpert();
-            List<Project> projects = GetTestProjects1();
-            List<Target> targets = sut.GetTargetsForPeriodicFlats(projects);
-            targets.Count.Should().Be(3);
+            List<LightSession> lightSessions = new List<LightSession>();
 
-            List<LightSession> sessions = sut.GetLightSessions(targets, GetTestAcquiredImages2());
-            sessions.Count.Should().Be(15);
-        }
-
-        [Test]
-        public void TestGetNeededPeriodicFlats() {
-            FlatsExpert sut = new FlatsExpert();
-
-            List<Target> targets = sut.GetTargetsForPeriodicFlats(GetTestProjects3());
-            targets.Count.Should().Be(1);
-
-            DateTime baseDate = new DateTime(2023, 12, 1).AddHours(18);
-            List<LightSession> sessions = new List<LightSession>();
-            List<FlatHistory> history = new List<FlatHistory>();
-
-            // No light sessions ...
-            sut.GetNeededPeriodicFlats(baseDate.AddDays(2), targets, sessions, history).Count.Should().Be(0);
-
-            DateTime sd1 = sut.GetLightSessionDate(baseDate);
-            FlatSpec fs1 = new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 12, 100);
-            FlatSpec fs2 = new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 12, 100);
-            FlatSpec fs3 = new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 12, 100);
-
-            LightSession ls1 = new LightSession(1, sd1, 1, fs1);
-            LightSession ls2 = new LightSession(1, sd1, 1, fs2);
-            LightSession ls3 = new LightSession(1, sd1, 1, fs3);
-            sessions = new List<LightSession>() { ls1, ls2, ls3 };
-
-            // Three light sessions and no flat history but too soon ...
-            sut.GetNeededPeriodicFlats(baseDate.AddDays(1), targets, sessions, history).Count.Should().Be(0);
-            sut.GetNeededPeriodicFlats(baseDate.AddDays(2), targets, sessions, history).Count.Should().Be(0);
-            sut.GetNeededPeriodicFlats(baseDate.AddDays(3), targets, sessions, history).Count.Should().Be(0);
-            sut.GetNeededPeriodicFlats(baseDate.AddDays(4), targets, sessions, history).Count.Should().Be(0);
-
-            // It's time ...
-            List<LightSession> got = sut.GetNeededPeriodicFlats(baseDate.AddDays(5), targets, sessions, history);
-            got.Count.Should().Be(3);
-            got[0].Should().BeEquivalentTo(ls1);
-            got[1].Should().BeEquivalentTo(ls2);
-            got[2].Should().BeEquivalentTo(ls3);
-
-            // Now 'take' the flats and none will be needed ...
-            DateTime flatsTaken = baseDate.AddDays(5);
-            FlatHistory fh1 = GetFlatHistory(1, sd1, 1, flatsTaken, fs1);
-            FlatHistory fh2 = GetFlatHistory(1, sd1, 1, flatsTaken, fs2);
-            FlatHistory fh3 = GetFlatHistory(1, sd1, 1, flatsTaken, fs3);
-            history = new List<FlatHistory>() { fh1, fh2, fh3 };
-            sut.GetNeededPeriodicFlats(baseDate.AddDays(5), targets, sessions, history).Count.Should().Be(0);
-
-            // Additional sessions are added but too soon for them ...
-            DateTime sd2 = sut.GetLightSessionDate(baseDate).AddDays(6);
-            LightSession ls4 = new LightSession(1, sd2, 1, fs1);
-            LightSession ls5 = new LightSession(1, sd2, 1, fs2);
-            LightSession ls6 = new LightSession(1, sd2, 1, fs3);
-            sessions = new List<LightSession>() { ls1, ls2, ls3, ls4, ls5, ls6 };
-            sut.GetNeededPeriodicFlats(baseDate.AddDays(7), targets, sessions, history).Count.Should().Be(0);
-            sut.GetNeededPeriodicFlats(baseDate.AddDays(8), targets, sessions, history).Count.Should().Be(0);
-            sut.GetNeededPeriodicFlats(baseDate.AddDays(9), targets, sessions, history).Count.Should().Be(0);
-            sut.GetNeededPeriodicFlats(baseDate.AddDays(10), targets, sessions, history).Count.Should().Be(0);
-
-            // It's time ...
-            got = sut.GetNeededPeriodicFlats(baseDate.AddDays(11), targets, sessions, history);
-            got.Count.Should().Be(3);
-            got[0].Should().BeEquivalentTo(ls4);
-            got[1].Should().BeEquivalentTo(ls5);
-            got[2].Should().BeEquivalentTo(ls6);
-
-            // Now take the latest flats and none will be needed ...
-            flatsTaken = baseDate.AddDays(11);
-            FlatHistory fh4 = GetFlatHistory(1, sd2, 1, flatsTaken, fs1);
-            FlatHistory fh5 = GetFlatHistory(1, sd2, 1, flatsTaken, fs2);
-            FlatHistory fh6 = GetFlatHistory(1, sd2, 1, flatsTaken, fs3);
-            history = new List<FlatHistory>() { fh1, fh2, fh3, fh4, fh5, fh6 };
-            sut.GetNeededPeriodicFlats(baseDate.AddDays(5), targets, sessions, history).Count.Should().Be(0);
-        }
-
-        [Test]
-        public void TestCadenceExact() {
-            FlatsExpert sut = new FlatsExpert();
-
-            List<Target> targets = sut.GetTargetsForPeriodicFlats(GetTestProjects5());
-            targets.Count.Should().Be(3);
-            targets[0].Project.FlatsHandling.Should().Be(1);
-            targets[1].Project.FlatsHandling.Should().Be(2);
-            targets[2].Project.FlatsHandling.Should().Be(3);
-
-            DateTime baseDate = new DateTime(2023, 12, 1).AddHours(18);
-            List<LightSession> sessions = new List<LightSession>();
-            List<FlatHistory> history = new List<FlatHistory>();
-
-            DateTime sd1 = sut.GetLightSessionDate(baseDate);
-            FlatSpec fs1 = new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 12, 100);
-            FlatSpec fs2 = new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 12, 100);
-            //FlatSpec fs3 = new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 12, 100);
-
-            LightSession ls1 = new LightSession(1, sd1, 1, fs1);
-            LightSession ls2 = new LightSession(1, sd1, 1, fs2);
-            LightSession ls3 = new LightSession(2, sd1, 1, fs1);
-            LightSession ls4 = new LightSession(2, sd1, 1, fs2);
-            LightSession ls5 = new LightSession(3, sd1, 1, fs1);
-            LightSession ls6 = new LightSession(3, sd1, 1, fs2);
-            sessions = new List<LightSession>() { ls1, ls2, ls3, ls4, ls5, ls6 };
-
-            // Target 1 has flats handling = 1 so should take on current or next day
-            List<LightSession> got = sut.GetNeededPeriodicFlats(baseDate, targets, sessions, history);
-            got.Count.Should().Be(2);
-            got[0].TargetId.Should().Be(1);
-            got[1].TargetId.Should().Be(1);
-            got = sut.GetNeededPeriodicFlats(baseDate.AddDays(1), targets, sessions, history);
-            got.Count.Should().Be(2);
-            got[0].TargetId.Should().Be(1);
-            got[1].TargetId.Should().Be(1);
-
-            // Advance a day and target 2 is now eligible
-            got = sut.GetNeededPeriodicFlats(baseDate.AddDays(2), targets, sessions, history);
-            got.Count.Should().Be(4);
-            got[0].TargetId.Should().Be(1);
-            got[1].TargetId.Should().Be(1);
-            got[2].TargetId.Should().Be(2);
-            got[3].TargetId.Should().Be(2);
-
-            // Advance another day and target 3 is now eligible
-            got = sut.GetNeededPeriodicFlats(baseDate.AddDays(3), targets, sessions, history);
-            got.Count.Should().Be(6);
-            got[0].TargetId.Should().Be(1);
-            got[1].TargetId.Should().Be(1);
-            got[2].TargetId.Should().Be(2);
-            got[3].TargetId.Should().Be(2);
-            got[4].TargetId.Should().Be(3);
-            got[5].TargetId.Should().Be(3);
-
-            // Target 2 now has flats history so dropped
-            FlatHistory fh1 = GetFlatHistory(2, sd1, 1, baseDate.AddDays(2), fs1);
-            FlatHistory fh2 = GetFlatHistory(2, sd1, 1, baseDate.AddDays(2), fs2);
-            history = new List<FlatHistory>() { fh1, fh2 };
-            got = sut.GetNeededPeriodicFlats(baseDate.AddDays(3), targets, sessions, history);
-            got.Count.Should().Be(4);
-            got[0].TargetId.Should().Be(1);
-            got[1].TargetId.Should().Be(1);
-            got[2].TargetId.Should().Be(3);
-            got[3].TargetId.Should().Be(3);
-        }
-
-        [Test]
-        public void TestGetNeededTargetCompletionFlats() {
-            FlatsExpert sut = new FlatsExpert();
-
-            List<Target> targets = sut.GetCompletedTargetsForFlats(GetTestProjects4());
-            targets.Count.Should().Be(2);
-
-            DateTime baseDate = new DateTime(2023, 12, 1).AddHours(18);
-            List<LightSession> sessions = new List<LightSession>();
-            List<FlatHistory> history = new List<FlatHistory>();
-
-            // No light sessions ...
-            sut.GetNeededTargetCompletionFlats(targets, sessions, history).Count.Should().Be(0);
-
-            DateTime sd1 = sut.GetLightSessionDate(baseDate);
+            DateTime baseDate = DateTime.Now.Date.AddDays(-5).AddHours(23);
+            DateTime sd0 = sut.GetLightSessionDate(baseDate);
+            DateTime sd1 = sut.GetLightSessionDate(baseDate.AddDays(1));
             DateTime sd2 = sut.GetLightSessionDate(baseDate.AddDays(2));
-            FlatSpec fs1 = new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 12, 100);
-            FlatSpec fs2 = new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 12, 100);
-            FlatSpec fs3 = new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+            DateTime sd3 = sut.GetLightSessionDate(baseDate.AddDays(3));
 
-            LightSession ls1 = new LightSession(1, sd1, 1, fs1);
-            LightSession ls2 = new LightSession(1, sd1, 1, fs2);
-            LightSession ls3 = new LightSession(1, sd1, 1, fs3);
-            LightSession ls4 = new LightSession(1, sd2, 1, fs1);
-            LightSession ls5 = new LightSession(1, sd2, 1, fs2);
-            LightSession ls6 = new LightSession(1, sd2, 1, fs3);
-            sessions = new List<LightSession>() { ls1, ls2, ls3, ls4, ls5, ls6 };
+            FlatSpec fsR = new FlatSpec("R", 10, 20, new BinningMode(1, 1), 0, 10, 100);
+            FlatSpec fsG = new FlatSpec("G", 10, 20, new BinningMode(1, 1), 0, 10, 100);
+            FlatSpec fsB = new FlatSpec("B", 10, 20, new BinningMode(1, 1), 0, 10, 100);
 
-            // Six light sessions and no flat history ...
-            List<LightSession> needed = sut.GetNeededTargetCompletionFlats(targets, sessions, history);
-            needed.Count.Should().Be(6);
-            needed[0].FlatSpec.FilterName.Should().Be("Ha");
-            needed[1].FlatSpec.FilterName.Should().Be("O3");
-            needed[2].FlatSpec.FilterName.Should().Be("S2");
-            needed[3].FlatSpec.FilterName.Should().Be("Ha");
-            needed[4].FlatSpec.FilterName.Should().Be("O3");
-            needed[5].FlatSpec.FilterName.Should().Be("S2");
+            lightSessions.Add(new LightSession(1, sd0, 1, fsR));
+            lightSessions.Add(new LightSession(1, sd0, 1, fsG));
+            lightSessions.Add(new LightSession(1, sd0, 1, fsB));
 
-            FlatHistory fh1 = GetFlatHistory(1, sd1, 1, baseDate.AddDays(4), fs1);
-            FlatHistory fh2 = GetFlatHistory(1, sd1, 1, baseDate.AddDays(4), fs2);
-            history = new List<FlatHistory>() { fh1, fh2 };
+            DateTime createDate = DateTime.Now.Date.AddDays(-5);
 
-            // Two already taken, four remain ...
-            needed = sut.GetNeededTargetCompletionFlats(targets, sessions, history);
-            needed.Count.Should().Be(4);
-            needed[0].FlatSpec.FilterName.Should().Be("S2");
-            needed[1].FlatSpec.FilterName.Should().Be("Ha");
-            needed[2].FlatSpec.FilterName.Should().Be("O3");
-            needed[3].FlatSpec.FilterName.Should().Be("S2");
+            // For cadence 1, nothing should ever be culled
+            Target target = GetTestTarget(1, createDate, 1);
+            List<LightSession> culled = sut.CullByCadencePeriod(target, lightSessions, createDate);
+            culled.Count.Should().Be(3);
+            culled = sut.CullByCadencePeriod(target, lightSessions, createDate.AddDays(10));
+            culled.Count.Should().Be(3);
 
-            FlatHistory fh3 = GetFlatHistory(1, sd1, 1, baseDate.AddDays(5), fs3);
-            history = new List<FlatHistory>() { fh1, fh2, fh3 };
+            // Cadence 2
+            target = GetTestTarget(1, createDate, 2);
+            culled = sut.CullByCadencePeriod(target, lightSessions, createDate);
+            culled.Count.Should().Be(0);
+            culled = sut.CullByCadencePeriod(target, lightSessions, createDate.AddDays(1));
+            culled.Count.Should().Be(0);
+            culled = sut.CullByCadencePeriod(target, lightSessions, createDate.AddDays(2));
+            culled.Count.Should().Be(3);
 
-            // Three remaining ...
-            needed = sut.GetNeededTargetCompletionFlats(targets, sessions, history);
-            needed.Count.Should().Be(3);
-            needed[0].FlatSpec.FilterName.Should().Be("Ha");
-            needed[1].FlatSpec.FilterName.Should().Be("O3");
-            needed[2].FlatSpec.FilterName.Should().Be("S2");
-
-            FlatHistory fh4 = GetFlatHistory(1, sd2, 1, baseDate.AddDays(6), fs1);
-            FlatHistory fh5 = GetFlatHistory(1, sd2, 1, baseDate.AddDays(6), fs2);
-            FlatHistory fh6 = GetFlatHistory(1, sd2, 1, baseDate.AddDays(6), fs3);
-            history = new List<FlatHistory>() { fh1, fh2, fh3, fh4, fh5, fh6 };
-
-            // All done
-            needed = sut.GetNeededTargetCompletionFlats(targets, sessions, history);
-            needed.Count.Should().Be(0);
+            // Cadence 3
+            target = GetTestTarget(1, createDate, 3);
+            culled = sut.CullByCadencePeriod(target, lightSessions, createDate);
+            culled.Count.Should().Be(0);
+            culled = sut.CullByCadencePeriod(target, lightSessions, createDate.AddDays(1));
+            culled.Count.Should().Be(0);
+            culled = sut.CullByCadencePeriod(target, lightSessions, createDate.AddDays(2));
+            culled.Count.Should().Be(0);
+            culled = sut.CullByCadencePeriod(target, lightSessions, createDate.AddDays(3));
+            culled.Count.Should().Be(3);
         }
 
         [Test]
-        public void TestCullFlatsByHistory() {
+        public void TestCullByFlatsHistory() {
             FlatsExpert sut = new FlatsExpert();
 
             DateTime baseDate = new DateTime(2023, 12, 1).AddHours(18);
             List<LightSession> sessions = new List<LightSession>();
             List<FlatHistory> history = new List<FlatHistory>();
+            Target t = new Target() { Id = 1, Name = "Test" };
 
             DateTime sd1 = sut.GetLightSessionDate(baseDate);
             DateTime sd2 = sut.GetLightSessionDate(baseDate.AddDays(-2));
@@ -313,7 +250,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             sessions = new List<LightSession>() { ls1, ls2, ls3 };
 
             // No history
-            List<LightSession> list = sut.CullFlatsByHistory(sessions, history);
+            List<LightSession> list = sut.CullByFlatsHistory(t, sessions, history);
             list.Count.Should().Be(sessions.Count);
             list[0].Should().BeSameAs(ls1);
             list[1].Should().BeSameAs(ls2);
@@ -324,7 +261,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             history = new List<FlatHistory>() { fh1, fh2 };
 
             // Cull two
-            list = sut.CullFlatsByHistory(sessions, history);
+            list = sut.CullByFlatsHistory(t, sessions, history);
             list.Count.Should().Be(1);
             list[0].Should().BeSameAs(ls3);
 
@@ -332,15 +269,46 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             fh1 = GetFlatHistory(1, sd2, 1, baseDate.AddMinutes(4), fs1);
             fh2 = GetFlatHistory(1, sd2, 1, baseDate.AddMinutes(4), fs2);
             history = new List<FlatHistory>() { fh1, fh2 };
-            list = sut.CullFlatsByHistory(sessions, history);
+            list = sut.CullByFlatsHistory(t, sessions, history);
             list.Count.Should().Be(sessions.Count);
 
             // Or if target Id differs
             fh1 = GetFlatHistory(1, sd2, 1, baseDate.AddMinutes(4), fs1);
             fh2 = GetFlatHistory(1, sd2, 1, baseDate.AddMinutes(4), fs2);
             history = new List<FlatHistory>() { fh1, fh2 };
-            list = sut.CullFlatsByHistory(sessions, history);
+            list = sut.CullByFlatsHistory(t, sessions, history);
             list.Count.Should().Be(sessions.Count);
+        }
+
+        [Test]
+        public void TestIsRequiredFlat() {
+            FlatsExpert sut = new FlatsExpert();
+            DateTime baseDate = new DateTime(2023, 12, 1).AddHours(18);
+            List<FlatSpec> allTakenFlats = new List<FlatSpec>();
+
+            FlatSpec fs1 = new FlatSpec("R", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+            FlatSpec fs2 = new FlatSpec("G", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+            FlatSpec fs3 = new FlatSpec("B", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+            FlatSpec fs4 = new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+            List<FlatSpec> targetTakenFlats = new List<FlatSpec> { fs1, fs2, fs3 };
+
+            // Always repeat is false ...
+            LightSession neededFlat = new LightSession(1, baseDate, 1, fs1);
+            sut.IsRequiredFlat(false, neededFlat, targetTakenFlats, allTakenFlats).Should().BeFalse();
+            neededFlat = new LightSession(1, baseDate, 1, fs2);
+            sut.IsRequiredFlat(false, neededFlat, targetTakenFlats, allTakenFlats).Should().BeFalse();
+            neededFlat = new LightSession(1, baseDate, 1, fs3);
+            sut.IsRequiredFlat(false, neededFlat, targetTakenFlats, allTakenFlats).Should().BeFalse();
+
+            neededFlat = new LightSession(1, baseDate, 1, fs4);
+            sut.IsRequiredFlat(false, neededFlat, targetTakenFlats, allTakenFlats).Should().BeTrue();
+
+            // Now fs4 is already taken for another target so can skip ...
+            allTakenFlats.Add(fs4);
+            sut.IsRequiredFlat(false, neededFlat, targetTakenFlats, allTakenFlats).Should().BeFalse();
+
+            // ... but not if Always repeat is true ... have to retake even if already taken
+            sut.IsRequiredFlat(true, neededFlat, targetTakenFlats, allTakenFlats).Should().BeTrue();
         }
 
         [Test]
@@ -359,6 +327,118 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         }
 
         [Test]
+        public void TestGetCurrentSessionId() {
+            DateTime baseDate = new DateTime(2023, 12, 5).AddHours(18);
+            int flatsHandling = 1;
+            FlatsExpert sut = new FlatsExpert();
+
+            sut.GetCurrentSessionId(null, baseDate).Should().Be(1);
+
+            Project project = new Project() {
+                CreateDate = baseDate,
+                FlatsHandling = flatsHandling,
+                RuleWeights = new List<RuleWeight>(),
+                Targets = new List<Target>()
+            };
+
+            // Flats Handling = cadence 1
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(1);
+
+            project.CreateDate = baseDate.AddDays(-1);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(2);
+
+            project.CreateDate = baseDate.AddDays(-2);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(3);
+
+            project.CreateDate = baseDate.AddDays(-3);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(4);
+
+            // Flats Handling = cadence 2
+            project.FlatsHandling = 2;
+            project.CreateDate = baseDate;
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(1);
+
+            project.CreateDate = baseDate.AddDays(-1);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(1);
+
+            project.CreateDate = baseDate.AddDays(-2);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(2);
+
+            project.CreateDate = baseDate.AddDays(-3);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(2);
+
+            project.CreateDate = baseDate.AddDays(-4);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(3);
+
+            // Flats Handling = target completion
+            project.CreateDate = baseDate;
+            project.FlatsHandling = Project.FLATS_HANDLING_TARGET_COMPLETION;
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(1);
+
+            project.CreateDate = baseDate.AddDays(-1);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(2);
+
+            project.CreateDate = baseDate.AddDays(-2);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(3);
+
+            project.CreateDate = baseDate.AddDays(-3);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(4);
+
+            // Flats Handling = immediate
+            project.CreateDate = baseDate;
+            project.FlatsHandling = Project.FLATS_HANDLING_IMMEDIATE;
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(1);
+
+            project.CreateDate = baseDate.AddDays(-1);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(2);
+
+            project.CreateDate = baseDate.AddDays(-2);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(3);
+
+            project.CreateDate = baseDate.AddDays(-3);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(4);
+
+            // Flats Handling = off
+            project.CreateDate = baseDate;
+            project.FlatsHandling = Project.FLATS_HANDLING_OFF;
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(1);
+
+            project.CreateDate = baseDate.AddDays(-1);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(2);
+
+            project.CreateDate = baseDate.AddDays(-2);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(3);
+
+            project.CreateDate = baseDate.AddDays(-3);
+            sut.GetCurrentSessionId(project, baseDate).Should().Be(4);
+
+            project.FlatsHandling = 5;
+            project.CreateDate = baseDate;
+            int expectedSid = 1;
+            for (int i = 0; i < 10; i++) {
+                DateTime current = baseDate.AddDays(i);
+                sut.GetCurrentSessionId(project, current).Should().Be(expectedSid);
+                if (i == 4) { expectedSid++; }
+            }
+
+            DateTime newDate = baseDate.AddDays(10);
+            expectedSid = 3;
+            for (int i = 0; i < 10; i++) {
+                DateTime current = newDate.AddDays(i);
+                sut.GetCurrentSessionId(project, current).Should().Be(expectedSid);
+                if (i == 4) { expectedSid++; }
+            }
+
+            project.FlatsHandling = 7;
+            expectedSid = 1;
+            for (int i = 0; i < 80; i++) {
+                DateTime current = baseDate.AddDays(i);
+                sut.GetCurrentSessionId(project, current).Should().Be(expectedSid);
+                if (i % 7 == 6) { expectedSid++; }
+            }
+        }
+
+        [Test]
         [TestCase(null, "0000")]
         [TestCase(0, "0000")]
         [TestCase(1, "0001")]
@@ -367,9 +447,9 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         [TestCase(975, "0975")]
         [TestCase(1111, "1111")]
         [TestCase(11111, "11111")]
-        public void TestGetSessionIdentifier(int sessionId, string expected) {
+        public void TestFormatSessionIdentifier(int sessionId, string expected) {
             FlatsExpert sut = new FlatsExpert();
-            sut.GetSessionIdentifier(sessionId).Should().Be(expected);
+            sut.FormatSessionIdentifier(sessionId).Should().Be(expected);
         }
 
         [Test]
@@ -472,6 +552,9 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             LightSession ls2 = new LightSession(1, sd1, 1, fs1);
             ls1.Equals(ls2).Should().BeTrue();
 
+            ls2 = new LightSession(1, sd1, 2, fs1);
+            ls1.Equals(ls2).Should().BeFalse();
+
             ls2 = new LightSession(2, sd1, 1, fs1);
             ls1.Equals(ls2).Should().BeFalse();
             ls2 = new LightSession(2, sd1, 1, fs2);
@@ -510,174 +593,24 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             ls4.Equals(ls5).Should().BeFalse();
         }
 
-        private FlatHistory GetFlatHistory(int targetId, DateTime lightSessionDate, int lightSessionId, DateTime flatsTakenDate, FlatSpec flatSpec) {
-            return new FlatHistory() {
-                TargetId = targetId,
-                LightSessionDate = lightSessionDate,
-                LightSessionId = lightSessionId,
-                FlatsTakenDate = flatsTakenDate,
-                FilterName = flatSpec.FilterName,
-                Gain = flatSpec.Gain,
-                Offset = flatSpec.Offset,
-                BinningMode = flatSpec.BinningMode,
-                ReadoutMode = flatSpec.ReadoutMode,
-                Rotation = flatSpec.Rotation,
-                ROI = flatSpec.ROI
+        private Target GetTestTarget(int id, DateTime createDate, int flatsHandling) {
+            Project p1 = new Project("abcd-1234") {
+                Name = "P1",
+                State = ProjectState.Active,
+                CreateDate = createDate,
+                FlatsHandling = flatsHandling
             };
-        }
 
-        private List<Project> GetTestProjects1() {
-            Project p1 = new Project("abcd-1234") { Name = "P1", State = ProjectState.Inactive, FlatsHandling = 1 };
-            Project p2 = new Project("abcd-1234") { Name = "P2", State = ProjectState.Active, FlatsHandling = Project.FLATS_HANDLING_OFF };
-            Project p3 = new Project("abcd-1234") { Name = "P3", State = ProjectState.Active, FlatsHandling = 3 };
-            Project p4 = new Project("abcd-1234") { Name = "P4", State = ProjectState.Active, FlatsHandling = Project.FLATS_HANDLING_TARGET_COMPLETION };
-            Project p5 = new Project("abcd-1234") { Name = "P5", State = ProjectState.Active, FlatsHandling = Project.FLATS_HANDLING_IMMEDIATE };
-
-            Target t1 = new Target() { Id = 1, Name = "T1" };
-            Target t2 = new Target() { Id = 2, Name = "T2" };
-            Target t3 = new Target() { Id = 3, Name = "T3" };
-            Target t4 = new Target() { Id = 4, Name = "T4" };
-            Target t5 = new Target() { Id = 5, Name = "T5" };
-            Target t6 = new Target() { Id = 6, Name = "T6" };
-            Target t7 = new Target() { Id = 7, Name = "T7" };
-
+            Target t1 = new Target() { Id = id, Name = "T1" };
+            t1.Project = p1;
             p1.Targets.Add(t1);
-            p2.Targets.Add(t2);
-            p3.Targets.Add(t3);
-            p4.Targets.Add(t4);
-            p3.Targets.Add(t5);
-            p3.Targets.Add(t6);
-            p5.Targets.Add(t7);
-
-            return new List<Project>() { p1, p2, p3, p4, p5 };
+            return t1;
         }
 
-        private List<Project> GetTestProjects2() {
-            List<Project> projects = GetTestProjects1();
-
-            Target t8 = new Target() { Id = 8, Name = "T8" };
-            t8.ExposurePlans.Add(new ExposurePlan() { Desired = 10, Accepted = 10 });
-            Target t9 = new Target() { Id = 9, Name = "T9" };
-            t9.ExposurePlans.Add(new ExposurePlan() { Desired = 10, Accepted = 5 });
-
-            projects[3].Targets.Add(t8);
-            projects[3].Targets.Add(t9);
-
-            return projects;
-        }
-
-        private List<Project> GetTestProjects3() {
-            Project p1 = new Project("abcd-1234") { Name = "P1", State = ProjectState.Active, FlatsHandling = 5 };
-            Target t1 = new Target() { Id = 1, Name = "T1", Project = p1 };
-            p1.Targets.Add(t1);
-
-            return new List<Project>() { p1 };
-        }
-
-        private List<Project> GetTestProjects4() {
-            Project p1 = new Project("abcd-1234") { Name = "P1", State = ProjectState.Active, FlatsHandling = Project.FLATS_HANDLING_TARGET_COMPLETION };
-            Project p2 = new Project("abcd-1234") { Name = "P2", State = ProjectState.Active, FlatsHandling = Project.FLATS_HANDLING_TARGET_COMPLETION };
-
-            Target t1 = new Target() { Id = 1, Name = "T1", Project = p1 };
-            t1.ExposurePlans.Add(new ExposurePlan() { Desired = 10, Accepted = 10 });
-            p1.Targets.Add(t1);
-
-            Target t2 = new Target() { Id = 2, Name = "T2", Project = p2 };
-            t2.ExposurePlans.Add(new ExposurePlan() { Desired = 20, Accepted = 30 });
-            p2.Targets.Add(t2);
-
-            return new List<Project>() { p1, p2 };
-        }
-
-        private List<Project> GetTestProjects5() {
-            Project p1 = new Project("abcd-1234") { Name = "P1", State = ProjectState.Active, FlatsHandling = 1 };
-            Project p2 = new Project("abcd-1234") { Name = "P2", State = ProjectState.Active, FlatsHandling = 2 };
-            Project p3 = new Project("abcd-1234") { Name = "P3", State = ProjectState.Active, FlatsHandling = 3 };
-
-            Target t1 = new Target() { Id = 1, Project = p1, Name = "T1" };
-            Target t2 = new Target() { Id = 2, Project = p2, Name = "T2" };
-            Target t3 = new Target() { Id = 3, Project = p3, Name = "T3" };
-
-            p1.Targets.Add(t1);
-            p2.Targets.Add(t2);
-            p3.Targets.Add(t3);
-
-            return new List<Project>() { p1, p2, p3 };
-        }
-
-        private List<AcquiredImage> GetTestAcquiredImages1() {
-
-            DateTime d1 = DateTime.Now.Date.AddDays(-5).AddHours(23);
-
-            AcquiredImage T3a1 = GetAcquiredImage(d1, 3, GetImageMetadata(1, "Ha", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T3a2 = GetAcquiredImage(d1, 3, GetImageMetadata(1, "O3", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T3a3 = GetAcquiredImage(d1, 3, GetImageMetadata(1, "S2", 10, 20, "1x1", 0, 10, 100));
-
-            AcquiredImage T4a1 = GetAcquiredImage(d1, 4, GetImageMetadata(1, "Ha", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T4a2 = GetAcquiredImage(d1, 4, GetImageMetadata(1, "O3", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T4a3 = GetAcquiredImage(d1, 4, GetImageMetadata(1, "S2", 10, 20, "1x1", 0, 10, 100));
-
-            AcquiredImage T5a1 = GetAcquiredImage(d1, 5, GetImageMetadata(1, "Ha", 11, 20, "1x1", 0, 0, 100));
-            AcquiredImage T5a2 = GetAcquiredImage(d1, 5, GetImageMetadata(1, "O3", 11, 20, "1x1", 0, 0, 100));
-            AcquiredImage T5a3 = GetAcquiredImage(d1, 5, GetImageMetadata(1, "S2", 11, 20, "1x1", 0, 0, 100));
-
-            AcquiredImage T6a1 = GetAcquiredImage(d1, 6, GetImageMetadata(2, "Ha", 10, 20, "1x1", 0, 12, 100));
-            AcquiredImage T6a2 = GetAcquiredImage(d1, 6, GetImageMetadata(2, "O3", 10, 20, "1x1", 0, 12, 100));
-            AcquiredImage T6a3 = GetAcquiredImage(d1, 6, GetImageMetadata(2, "S2", 10, 20, "1x1", 0, 12, 100));
-
-            DateTime d2 = DateTime.Now.Date.AddDays(-4).AddHours(26);
-
-            AcquiredImage T3a4 = GetAcquiredImage(d2, 3, GetImageMetadata(1, "Ha", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T3a5 = GetAcquiredImage(d2, 3, GetImageMetadata(1, "O3", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T3a6 = GetAcquiredImage(d2, 3, GetImageMetadata(1, "S2", 10, 20, "1x1", 0, 10, 100));
-
-            return new List<AcquiredImage> {
-                T3a1, T3a2, T3a3,
-                T4a1, T4a2, T4a3,
-                T5a1, T5a2, T5a3,
-                T6a1, T6a2, T6a3,
-                T3a4, T3a5, T3a6,
-            };
-        }
-
-        private List<AcquiredImage> GetTestAcquiredImages2() {
-
-            DateTime d1 = DateTime.Now.Date.AddDays(-5).AddHours(23);
-
-            AcquiredImage T3a1 = GetAcquiredImage(d1, 3, GetImageMetadata(1, "Ha", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T3a2 = GetAcquiredImage(d1, 3, GetImageMetadata(1, "O3", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T3a3 = GetAcquiredImage(d1, 3, GetImageMetadata(1, "S2", 10, 20, "1x1", 0, 10, 100));
-
-            AcquiredImage T4a1 = GetAcquiredImage(d1, 4, GetImageMetadata(1, "Ha", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T4a2 = GetAcquiredImage(d1, 4, GetImageMetadata(1, "O3", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T4a3 = GetAcquiredImage(d1, 4, GetImageMetadata(1, "S2", 10, 20, "1x1", 0, 10, 100));
-
-            AcquiredImage T5a1 = GetAcquiredImage(d1, 5, GetImageMetadata(1, "Ha", 11, 20, "1x1", 0, 0, 100));
-            AcquiredImage T5a2 = GetAcquiredImage(d1, 5, GetImageMetadata(1, "O3", 11, 20, "1x1", 0, 0, 100));
-            AcquiredImage T5a3 = GetAcquiredImage(d1, 5, GetImageMetadata(1, "S2", 11, 20, "1x1", 0, 0, 100));
-
-            AcquiredImage T6a1 = GetAcquiredImage(d1, 6, GetImageMetadata(2, "Ha", 10, 20, "1x1", 0, 12, 100));
-            AcquiredImage T6a2 = GetAcquiredImage(d1, 6, GetImageMetadata(2, "O3", 10, 20, "1x1", 0, 12, 100));
-            AcquiredImage T6a3 = GetAcquiredImage(d1, 6, GetImageMetadata(2, "S2", 10, 20, "1x1", 0, 12, 100));
-
-            DateTime d2 = DateTime.Now.Date.AddDays(-4).AddHours(26);
-
-            AcquiredImage T3a4 = GetAcquiredImage(d2, 3, GetImageMetadata(1, "Ha", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T3a5 = GetAcquiredImage(d2, 3, GetImageMetadata(1, "O3", 10, 20, "1x1", 0, 10, 100));
-            AcquiredImage T3a6 = GetAcquiredImage(d2, 3, GetImageMetadata(1, "S2", 10, 20, "1x1", 0, 10, 100));
-
-            AcquiredImage T6a4 = GetAcquiredImage(d2, 6, GetImageMetadata(3, "Ha", 10, 20, "1x1", 0, 12, 100));
-            AcquiredImage T6a5 = GetAcquiredImage(d2, 6, GetImageMetadata(3, "O3", 10, 20, "1x1", 0, 12, 100));
-            AcquiredImage T6a6 = GetAcquiredImage(d2, 6, GetImageMetadata(3, "S2", 10, 20, "1x1", 0, 12, 100));
-
-            return new List<AcquiredImage> {
-                T3a1, T3a2, T3a3,
-                T4a1, T4a2, T4a3,
-                T5a1, T5a2, T5a3,
-                T6a1, T6a2, T6a3,
-                T3a4, T3a5, T3a6,
-                T6a4, T6a5, T6a6,
-            };
+        private void AssertLightSession(FlatsExpert sut, LightSession ls, DateTime expDate, int sid, string filter) {
+            ls.SessionDate.Should().Be(sut.GetLightSessionDate(expDate));
+            ls.SessionId.Should().Be(sid);
+            ls.FlatSpec.FilterName.Should().Be(filter);
         }
 
         private ImageMetadata GetImageMetadata(int sessionId, string filterName, int gain, int offset, string binning, int readoutMode, double rotation, double roi) {
@@ -699,6 +632,22 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
                 AcquiredDate = dt,
                 FilterName = metadata.FilterName,
                 TargetId = targetId
+            };
+        }
+
+        private FlatHistory GetFlatHistory(int targetId, DateTime lightSessionDate, int lightSessionId, DateTime flatsTakenDate, FlatSpec flatSpec) {
+            return new FlatHistory() {
+                TargetId = targetId,
+                LightSessionDate = lightSessionDate,
+                LightSessionId = lightSessionId,
+                FlatsTakenDate = flatsTakenDate,
+                FilterName = flatSpec.FilterName,
+                Gain = flatSpec.Gain,
+                Offset = flatSpec.Offset,
+                BinningMode = flatSpec.BinningMode,
+                ReadoutMode = flatSpec.ReadoutMode,
+                Rotation = flatSpec.Rotation,
+                ROI = flatSpec.ROI
             };
         }
     }

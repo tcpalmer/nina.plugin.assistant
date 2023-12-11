@@ -1,6 +1,5 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Util;
-using Castle.DynamicProxy.Contributors;
 using Newtonsoft.Json;
 using NINA.Core.Enum;
 using NINA.Core.Model;
@@ -10,10 +9,10 @@ using NINA.Profile.Interfaces;
 using NINA.Sequencer.SequenceItem;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
-using NINA.WPF.Base.Mediator;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -66,8 +65,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             try {
                 DisplayText = "Determining needed flats";
-                List<LightSession> neededFlats = flatsExpert.GetNeededCadenceOrCompletedTargetFlats(profileService.ActiveProfile, database);
-                if (neededFlats == null) {
+                List<LightSession> neededFlats = flatsExpert.GetNeededFlats(profileService.ActiveProfile, DateTime.Now);
+                if (neededFlats.Count == 0) {
+                    TSLogger.Info("TS Flats: no flats needed");
                     DisplayText = "";
                     return;
                 }
@@ -86,23 +86,37 @@ namespace Assistant.NINAPlugin.Sequencer {
                 imageSaveMediator.BeforeFinalizeImageSaved += BeforeFinalizeImageSaved;
                 imageSaveMediator.ImageSaved += ImageSaved;
 
-                List<FlatSpec> takenFlats = new List<FlatSpec>();
+                // Get the unique set of target ids over all neededFlats
+                List<int> targetIds = new List<int>();
                 foreach (LightSession neededFlat in neededFlats) {
-                    bool success = true;
+                    if (!targetIds.Contains(neededFlat.TargetId)) {
+                        targetIds.Add(neededFlat.TargetId);
+                    }
+                }
 
-                    if (AlwaysRepeatFlatSet || !takenFlats.Contains(neededFlat.FlatSpec)) {
-                        success = await TakeFlatSet(neededFlat, true, progress, token);
-                        if (success) {
-                            takenFlats.Add(neededFlat.FlatSpec);
+                List<FlatSpec> allTakenFlats = new List<FlatSpec>();
+
+                foreach (int targetId in targetIds) {
+                    List<LightSession> targetNeededFlats = neededFlats.Where(ls => ls.TargetId == targetId).ToList();
+                    foreach (LightSession neededFlat in targetNeededFlats) {
+                        List<FlatSpec> targetTakenFlats = new List<FlatSpec>();
+                        bool success = true;
+
+                        if (flatsExpert.IsRequiredFlat(AlwaysRepeatFlatSet, neededFlat, targetTakenFlats, allTakenFlats)) {
+                            success = await TakeFlatSet(neededFlat, true, progress, token);
+                            if (success) {
+                                targetTakenFlats.Add(neededFlat.FlatSpec);
+                                allTakenFlats.Add(neededFlat.FlatSpec);
+                            }
                         }
-                    }
-                    else {
-                        TSLogger.Info($"TS Flats: flat already taken, skipping: {neededFlat}");
-                    }
+                        else {
+                            TSLogger.Info($"TS Flats: flat already taken, skipping: {neededFlat}");
+                        }
 
-                    if (success) {
-                        CompletedFlatSets++;
-                        SaveFlatHistory(neededFlat);
+                        if (success) {
+                            CompletedFlatSets++;
+                            SaveFlatHistory(neededFlat);
+                        }
                     }
                 }
 

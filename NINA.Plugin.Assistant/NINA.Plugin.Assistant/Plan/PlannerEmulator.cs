@@ -288,11 +288,14 @@ namespace Assistant.NINAPlugin.Plan {
             planProject.MinimumAltitude = 10;
             planProject.DitherEvery = 0;
             planProject.EnableGrader = false;
-            planProject.FlatsHandling = 1;
+            planProject.CreateDate = DateTime.Now.AddDays(-42);
+            planProject.FlatsHandling = Project.FLATS_HANDLING_IMMEDIATE;
+            planProject.DatabaseId = 1;
 
             IPlanTarget planTarget = GetBasePlanTarget("Target 6", planProject, Cp5n5);
             planTarget.EndTime = endTime;
             planTarget.DatabaseId = 1;
+            planTarget.Project = planProject;
 
             IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3, 101);
             IPlanExposure red = GetExposurePlan("Red", 4, null, null, 3, 102);
@@ -304,7 +307,7 @@ namespace Assistant.NINAPlugin.Plan {
             planTarget.ExposurePlans.Add(blu);
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
-            instructions.Add(new PlanMessage("planner emulator: Plan5"));
+            instructions.Add(new PlanMessage("planner emulator: Plan6"));
             instructions.Add(new PlanSlew(false));
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
@@ -397,6 +400,7 @@ namespace Assistant.NINAPlugin.Plan {
         public string PlanId { get; set; }
         public int DatabaseId { get; set; }
         public string Name { get; set; }
+        public DateTime CreateDate { get; set; }
         public bool UseCustomHorizon { get; set; }
         public double MinimumAltitude { get; set; }
         public int DitherEvery { get; set; }
@@ -407,7 +411,6 @@ namespace Assistant.NINAPlugin.Plan {
         public string Description { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public ProjectState State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public ProjectPriority Priority { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public DateTime CreateDate { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DateTime? ActiveDate { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public int SessionId { get => 23; set => throw new NotImplementedException(); }
         public DateTime? InactiveDate { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }

@@ -59,7 +59,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private bool blockFinished = false;
-        private SchedulerDatabaseInteraction database;
 
         public override bool Check(ISequenceItem previousItem, ISequenceItem nextItem) {
 
@@ -116,11 +115,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private bool NeedsFlats() {
             try {
-                if (database == null) {
-                    database = new SchedulerDatabaseInteraction();
-                }
-
-                bool result = new FlatsExpert().GetNeededCadenceOrCompletedTargetFlats(profileService.ActiveProfile, database) != null;
+                bool result = new FlatsExpert().GetNeededFlats(profileService.ActiveProfile, DateTime.Now).Count > 0;
                 TSLogger.Info($"TargetSchedulerCondition check for needed flats, continue={result}");
                 return result;
             }
