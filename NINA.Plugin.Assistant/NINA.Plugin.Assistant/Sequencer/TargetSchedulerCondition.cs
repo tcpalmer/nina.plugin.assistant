@@ -58,7 +58,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             };
         }
 
-        private bool blockFinished = false;
+        private bool blockFinished = true;
 
         public override bool Check(ISequenceItem previousItem, ISequenceItem nextItem) {
 

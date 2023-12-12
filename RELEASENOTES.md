@@ -1,5 +1,8 @@
 # Release Notes
 
+## 4.1.0.9 - 2023-12-XX
+* Fixed bug in TS Condition - check wasn't running the first time through
+
 ## 4.1.0.8 - 2023-12-12
 * Added support for taking automated flats
 * Optimized the condition check in Target Scheduler condition
