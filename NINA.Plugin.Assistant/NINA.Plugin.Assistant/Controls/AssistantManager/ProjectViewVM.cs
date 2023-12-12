@@ -96,6 +96,13 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             for (int i = 0; i <= 60; i += 5) {
                 MinimumAltitudeChoices.Add(i + "°");
             }
+
+            FlatsHandlingChoices = new List<string> {
+                "Off",
+                "1","2","3","5","7","10","14",
+                "Target Completion",
+                "Use With Immediate"
+            };
         }
 
         private List<RuleWeight> ruleWeights = new List<RuleWeight>();
@@ -124,6 +131,17 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             set {
                 _minimumAltitudeChoices = value;
                 RaisePropertyChanged(nameof(MinimumAltitudeChoices));
+            }
+        }
+
+        private List<string> _flatsHandlingChoices;
+        public List<string> FlatsHandlingChoices {
+            get {
+                return _flatsHandlingChoices;
+            }
+            set {
+                _flatsHandlingChoices = value;
+                RaisePropertyChanged(nameof(FlatsHandlingChoices));
             }
         }
 

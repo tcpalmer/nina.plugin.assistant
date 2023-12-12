@@ -1,5 +1,11 @@
 # Target Scheduler
 
+## 4.1.0.8 - 2023-12-12
+* Added support for taking automated flats
+* Optimized the condition check in Target Scheduler condition
+* Target Scheduler Container instruction has a new custom event container: _After Each Target_
+* Added a 'need flats' check to Target Scheduler condition
+
 ## 4.0.5.1 - 2023-11-26
 * Improved handling when TS is canceled/interrupted which means it behaves better in safety scenarios and with Powerups safety controls.
 

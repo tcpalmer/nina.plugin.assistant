@@ -15,15 +15,17 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
         public void TestImageMetadata() {
             DateTime saveDate = new DateTime(2023, 1, 17, 13, 2, 3);
             ImageSavedEventArgs msg = PlanMocks.GetImageSavedEventArgs(saveDate, "Ha");
-            var sut = new ImageMetadata(msg, 100);
+            var sut = new ImageMetadata(msg, 23, 100, 1);
 
             sut.FileName.Should().Be("\\\\path\\to\\image.fits");
+            sut.SessionId.Should().Be(23);
             sut.FilterName.Should().Be("Ha");
             TestUtil.AssertTime(saveDate, sut.ExposureStartTime, saveDate.Hour, saveDate.Minute, saveDate.Second);
             sut.ExposureDuration.Should().Be(60);
             sut.Gain.Should().Be(306);
             sut.Offset.Should().Be(307);
             sut.Binning.Should().Be("1x1");
+            sut.ReadoutMode.Should().Be(1);
             sut.ROI.Should().Be(100);
             sut.DetectedStars.Should().Be(100);
             sut.HFR.Should().Be(101);

@@ -23,6 +23,101 @@ namespace NINA.Plugin.Assistant.Test.Database {
         }*/
 
         //[Test]
+        public void AddAcquiredImagesForTSFlats() {
+
+            // BEWARE! THIS WILL UPDATE ACTUAL DATABASE USED BY THE PLUGIN
+            var testDbPath = @"C:\Users\Tom\AppData\Local\NINA\SchedulerPlugin\schedulerdb.sqlite";
+            db = new SchedulerDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
+
+            DateTime dt = DateTime.Now.Date.AddDays(-25).AddHours(18);
+            //int gain = 139;
+            //int offset = 21;
+            int gain = -1;
+            int offset = -1;
+            double rotation = ImageMetadata.NO_ROTATOR_ANGLE;
+            string binning = "1x1";
+
+            string profileId = "c0e1645f-4d4c-4cff-b6f8-c66a58be9cd4";
+            //string profileId = "4033c406-2709-488c-bf12-5c9387302c05"; // TS Flats Test on astropc
+
+            using (SchedulerDatabaseContext context = db.GetContext()) {
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Lum", 5, gain, offset, binning, 0, rotation, 100));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Lum", 6, gain, offset, binning, 0, rotation, 100));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Red", 6, gain, offset, binning, 0, rotation, 100));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Green", 7, gain, offset, binning, 0, rotation, 100));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 2, 2, profileId, GetImageMetadata("Lum", 21, gain, offset, binning, 0, rotation, 100));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 2, 2, profileId, GetImageMetadata("Red", 22, gain, offset, binning, 0, rotation, 100));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 2, 2, profileId, GetImageMetadata("Green", 23, gain, offset, binning, 0, rotation, 100));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    dt = dt.AddMinutes(i * 3);
+                    AcquiredImage ai = GetAcquiredImage(dt, 2, 2, profileId, GetImageMetadata("Blue", 24, gain, offset, binning, 0, rotation, 100));
+                    context.AcquiredImageSet.Add(ai);
+                }
+
+                context.SaveChanges();
+            }
+        }
+
+        private ImageMetadata GetImageMetadata(string filterName, int sessionId, int gain, int offset, string binning, int readoutMode, double rotation, double roi) {
+            return new ImageMetadata() {
+                SessionId = sessionId,
+                FilterName = filterName,
+                Gain = gain,
+                Offset = offset,
+                Binning = binning,
+                ReadoutMode = readoutMode,
+                RotatorPosition = rotation,
+                RotatorMechanicalPosition = rotation,
+                ROI = roi
+            };
+        }
+
+        private AcquiredImage GetAcquiredImage(DateTime dt, int projectId, int targetId, string profileId, ImageMetadata metadata) {
+            return new AcquiredImage(metadata) {
+                AcquiredDate = dt,
+                FilterName = metadata.FilterName,
+                ProjectId = projectId,
+                TargetId = targetId,
+                ProfileId = profileId
+            };
+        }
+
+        //[Test]
         public void AddAcquiredImages() {
 
             // BEWARE! THIS WILL UPDATE ACTUAL DATABASE USED BY THE PLUGIN

@@ -1,12 +1,9 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using FluentAssertions;
-using Moq;
 using NINA.Core.Model.Equipment;
 using NINA.Plugin.Assistant.Test.Astrometry;
 using NUnit.Framework;
-using System;
-using System.Xml.Linq;
 
 namespace NINA.Plugin.Assistant.Test.Plan {
 
@@ -14,7 +11,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
     public class SchedulerPlanTest {
 
         [Test]
-        public void testPlanExposureNoThrottle() {
+        public void TestPlanExposureNoThrottle() {
 
             IPlanTarget planTarget = PlanMocks.GetMockPlanTarget("target", TestUtil.M31).Object;
             ExposureTemplate exposureTemplate = GetExposureTemplate();
@@ -37,7 +34,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         }
 
         [Test]
-        public void testPlanExposureThrottle() {
+        public void TestPlanExposureThrottle() {
 
             IPlanTarget planTarget = PlanMocks.GetMockPlanTarget("target", TestUtil.M31).Object;
             ExposureTemplate exposureTemplate = GetExposureTemplate();

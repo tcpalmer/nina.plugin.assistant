@@ -10,7 +10,10 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
 
     public class ImageMetadata {
 
+        public static readonly double NO_ROTATOR_ANGLE = double.MinValue;
+
         public string FileName { get; set; }
+        public int SessionId { get; set; }
         public string FilterName { get; set; }
         public DateTime ExposureStartTime { get; set; }
         public double ExposureDuration { get; set; }
@@ -18,6 +21,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
         public int Gain { get; set; }
         public int Offset { get; set; }
         public string Binning { get; set; }
+        public int ReadoutMode { get; set; }
         public double ROI { get; set; }
 
         public int DetectedStars { get; set; }
@@ -43,6 +47,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
         public int? FocuserPosition { get; set; }
         public double FocuserTemp { get; set; }
         public double RotatorPosition { get; set; }
+        public double RotatorMechanicalPosition { get; set; }
         public string PierSide { get; set; }
 
         public double CameraTemp { get; set; }
@@ -51,16 +56,18 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
 
         public ImageMetadata() { }
 
-        public ImageMetadata(ImageSavedEventArgs msg, double roi) {
+        public ImageMetadata(ImageSavedEventArgs msg, int sessionId, double roi, int? readoutMode) {
             if (msg == null) {
                 throw new Exception("msg cannot be null");
             }
 
             FileName = msg.PathToImage.LocalPath;
+            SessionId = sessionId;
             FilterName = msg.Filter;
             ExposureStartTime = msg.MetaData.Image.ExposureStart;
             ExposureDuration = msg.Duration;
             Binning = msg.MetaData.Image.Binning?.ToString();
+            ReadoutMode = readoutMode ?? 0;
             ROI = roi;
 
             Gain = msg.MetaData.Camera.Gain;
@@ -89,6 +96,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
             FocuserPosition = msg.MetaData.Focuser.Position;
             FocuserTemp = msg.MetaData.Focuser.Temperature;
             RotatorPosition = Double.IsNaN(msg.MetaData.Rotator.Position) ? 0 : msg.MetaData.Rotator.Position;
+            RotatorMechanicalPosition = Double.IsNaN(msg.MetaData.Rotator.MechanicalPosition) ? NO_ROTATOR_ANGLE : msg.MetaData.Rotator.MechanicalPosition;
             PierSide = GetPierSide(msg.MetaData.Telescope.SideOfPier);
 
             CameraTemp = msg.MetaData.Camera.Temperature;
@@ -125,12 +133,14 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"FileName: {FileName}");
+            sb.AppendLine($"SessionId: {SessionId}");
             sb.AppendLine($"FilterName: {FilterName}");
             sb.AppendLine($"ExposureStartTime: {ExposureStartTime}");
             sb.AppendLine($"ExposureDuration: {ExposureDuration}");
             sb.AppendLine($"Gain: {Gain}");
             sb.AppendLine($"Offset: {Offset}");
             sb.AppendLine($"Binning: {Binning}");
+            sb.AppendLine($"ReadoutMode: {ReadoutMode}");
             sb.AppendLine($"ROI: {ROI}");
             sb.AppendLine($"DetectedStars: {DetectedStars}");
             sb.AppendLine($"HFR: {HFR}");
@@ -149,6 +159,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
             sb.AppendLine($"FocuserPosition: {FocuserPosition}");
             sb.AppendLine($"FocuserTemp: {FocuserTemp}");
             sb.AppendLine($"RotatorPosition: {RotatorPosition}");
+            sb.AppendLine($"RotatorMechanicalPosition: {RotatorMechanicalPosition}");
             sb.AppendLine($"PierSide: {PierSide}");
             sb.AppendLine($"CameraTemp: {CameraTemp}");
             sb.AppendLine($"CameraTargetTemp: {CameraTargetTemp}");

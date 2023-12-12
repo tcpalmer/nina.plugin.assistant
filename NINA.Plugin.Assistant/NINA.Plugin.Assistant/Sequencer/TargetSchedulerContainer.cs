@@ -68,6 +68,9 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IApplicationMediator applicationMediator;
         private bool synchronizationEnabled;
 
+        /* Before renaming BeforeTargetContainer and AfterTargetContainer to contain 'New'
+         * (again) consider that it would break any existing sequence using those. */
+
         [JsonProperty]
         public InstructionContainer BeforeWaitContainer { get; set; }
 
@@ -80,10 +83,15 @@ namespace Assistant.NINAPlugin.Sequencer {
         [JsonProperty]
         public InstructionContainer AfterTargetContainer { get; set; }
 
+        [JsonProperty]
+        public InstructionContainer AfterAllTargetsContainer { get; set; }
+
         private ProfilePreference profilePreferences;
 
         public object lockObj = new object();
         public int TotalExposureCount { get; set; }
+
+        public SchedulerPlan previousSchedulerPlan { get; private set; }
 
         [ImportingConstructor]
         public TargetSchedulerContainer(
@@ -125,8 +133,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             BeforeWaitContainer = new InstructionContainer("BeforeWait", Parent);
             AfterWaitContainer = new InstructionContainer("AfterWait", Parent);
-            BeforeTargetContainer = new InstructionContainer("BeforeTarget", Parent);
-            AfterTargetContainer = new InstructionContainer("AfterTarget", Parent);
+            BeforeTargetContainer = new InstructionContainer("BeforeNewTarget", Parent);
+            AfterTargetContainer = new InstructionContainer("AfterNewTarget", Parent);
+            AfterAllTargetsContainer = new InstructionContainer("AfterEachTarget", this);
 
             Task.Run(() => NighttimeData = nighttimeCalculator.Calculate());
             Target = new InputTarget(Angle.ByDegree(profileService.ActiveProfile.AstrometrySettings.Latitude), Angle.ByDegree(profileService.ActiveProfile.AstrometrySettings.Longitude), profileService.ActiveProfile.AstrometrySettings.Horizon);
@@ -149,6 +158,12 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             SchedulerProgress = new SchedulerProgressVM();
             SchedulerProgress.PropertyChanged += SchedulerProgress_PropertyChanged;
+
+            BeforeWaitContainer.Initialize();
+            AfterWaitContainer.Initialize();
+            BeforeTargetContainer.Initialize();
+            AfterTargetContainer.Initialize();
+            AfterAllTargetsContainer.Initialize();
         }
 
         public override void AfterParentChanged() {
@@ -162,6 +177,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 AfterWaitContainer.AttachNewParent(Parent);
                 BeforeTargetContainer.AttachNewParent(Parent);
                 AfterTargetContainer.AttachNewParent(Parent);
+                AfterAllTargetsContainer.AttachNewParent(this);
 
                 if (Parent.Status == SequenceEntityStatus.RUNNING) {
                     SequenceBlockInitialize();
@@ -176,6 +192,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             AfterWaitContainer.ResetProgress();
             BeforeTargetContainer.ResetProgress();
             AfterTargetContainer.ResetProgress();
+            AfterAllTargetsContainer.ResetProgress();
 
             if (SchedulerProgress != null) {
                 SchedulerProgress.Reset();
@@ -195,6 +212,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             TSLogger.Debug("Scheduler instruction: Execute");
 
             IPlanTarget previousPlanTarget = null;
+            previousSchedulerPlan = null;
             synchronizationEnabled = IsSynchronizationEnabled();
 
             while (true) {
@@ -206,6 +224,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 if (plan == null) {
                     if (previousPlanTarget != null) {
                         await ExecuteEventContainer(AfterTargetContainer, progress, token);
+                        await ExecuteEventContainer(AfterAllTargetsContainer, progress, token);
                     }
 
                     SchedulerProgress.End();
@@ -218,7 +237,9 @@ namespace Assistant.NINAPlugin.Sequencer {
                 if (plan.WaitForNextTargetTime != null) {
                     if (previousPlanTarget != null) {
                         await ExecuteEventContainer(AfterTargetContainer, progress, token);
+                        await ExecuteEventContainer(AfterAllTargetsContainer, progress, token);
                         previousPlanTarget = null;
+                        previousSchedulerPlan = null;
                     }
 
                     TSLogger.Info($"planner waiting for next target to become available: {Utils.FormatDateTimeFull(plan.WaitForNextTargetTime)}");
@@ -241,18 +262,27 @@ namespace Assistant.NINAPlugin.Sequencer {
                             await ExecuteEventContainer(AfterTargetContainer, progress, token);
                         }
 
+                        if (previousPlanTarget != null && previousSchedulerPlan != null) {
+                            await ExecuteEventContainer(AfterAllTargetsContainer, progress, token);
+                        }
+
                         SchedulerProgress.End();
 
                         TSLogger.Info("--BEGIN PLAN EXECUTION--------------------------------------------------------");
                         TSLogger.Info($"plan target: {planTarget.Name}");
+
                         SetTarget(atTime, planTarget);
                         ResetCenterAfterDrift();
+                        SetTargetForCustomEventContainers();
+
                         SchedulerProgress.TargetStart(planTarget.Project.Name, planTarget.Name);
 
                         // Create a container for this target, add the instructions, and execute
                         PlanTargetContainer targetContainer = GetPlanTargetContainer(previousPlanTarget, plan, SchedulerProgress);
                         targetContainer.Execute(progress, token).Wait();
+
                         previousPlanTarget = planTarget;
+                        previousSchedulerPlan = plan;
                     }
                     catch (Exception ex) {
                         if (Utils.IsCancelException(ex)) {
@@ -467,6 +497,13 @@ namespace Assistant.NINAPlugin.Sequencer {
             return null;
         }
 
+        private void SetTargetForCustomEventContainers() {
+            CoordinatesInjector injector = new CoordinatesInjector(Target);
+            injector.Inject(BeforeTargetContainer);
+            injector.Inject(AfterTargetContainer);
+            injector.Inject(AfterAllTargetsContainer);
+        }
+
         private void SchedulerProgress_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             RaisePropertyChanged(nameof(SchedulerProgress));
             RaisePropertyChanged(nameof(ProgressItemsView));
@@ -586,11 +623,13 @@ namespace Assistant.NINAPlugin.Sequencer {
             clone.AfterWaitContainer = (InstructionContainer)AfterWaitContainer.Clone();
             clone.BeforeTargetContainer = (InstructionContainer)BeforeTargetContainer.Clone();
             clone.AfterTargetContainer = (InstructionContainer)AfterTargetContainer.Clone();
+            clone.AfterAllTargetsContainer = (InstructionContainer)AfterAllTargetsContainer.Clone();
 
             clone.BeforeWaitContainer.AttachNewParent(clone);
             clone.AfterWaitContainer.AttachNewParent(clone);
             clone.BeforeTargetContainer.AttachNewParent(clone);
             clone.AfterTargetContainer.AttachNewParent(clone);
+            clone.AfterAllTargetsContainer.AttachNewParent(clone);
 
             foreach (var item in clone.Items) {
                 item.AttachNewParent(clone);

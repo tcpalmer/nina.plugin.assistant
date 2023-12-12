@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan.Scoring.Rules;
+using Assistant.NINAPlugin.Sequencer;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Model.Equipment;
@@ -184,6 +185,7 @@ namespace Assistant.NINAPlugin.Plan {
         DateTime CreateDate { get; set; }
         DateTime? ActiveDate { get; set; }
         DateTime? InactiveDate { get; set; }
+        int SessionId { get; }
 
         int MinimumTime { get; set; }
         double MinimumAltitude { get; set; }
@@ -194,6 +196,7 @@ namespace Assistant.NINAPlugin.Plan {
         int DitherEvery { get; set; }
         bool EnableGrader { get; set; }
         bool IsMosaic { get; set; }
+        int FlatsHandling { get; set; }
         Dictionary<string, double> RuleWeights { get; set; }
 
         List<IPlanTarget> Targets { get; set; }
@@ -215,6 +218,7 @@ namespace Assistant.NINAPlugin.Plan {
         public DateTime CreateDate { get; set; }
         public DateTime? ActiveDate { get; set; }
         public DateTime? InactiveDate { get; set; }
+        public int SessionId { get; }
 
         public int MinimumTime { get; set; }
         public double MinimumAltitude { get; set; }
@@ -225,6 +229,7 @@ namespace Assistant.NINAPlugin.Plan {
         public int DitherEvery { get; set; }
         public bool EnableGrader { get; set; }
         public bool IsMosaic { get; set; }
+        public int FlatsHandling { get; set; }
         public Dictionary<string, double> RuleWeights { get; set; }
 
         public List<IPlanTarget> Targets { get; set; }
@@ -243,6 +248,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.CreateDate = project.CreateDate;
             this.ActiveDate = project.ActiveDate;
             this.InactiveDate = project.InactiveDate;
+            this.SessionId = new FlatsExpert().GetCurrentSessionId(project, DateTime.Now);
 
             this.MinimumTime = project.MinimumTime;
             this.MinimumAltitude = project.MinimumAltitude;
@@ -253,6 +259,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.DitherEvery = project.DitherEvery;
             this.EnableGrader = project.EnableGrader;
             this.IsMosaic = project.IsMosaic;
+            this.FlatsHandling = project.FlatsHandling;
             this.RuleWeights = GetRuleWeightsDictionary(project.RuleWeights);
 
             this.HorizonDefinition = DetermineHorizon(profile, project);
@@ -282,6 +289,7 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"Description: {Description}");
             sb.AppendLine($"State: {State}");
             sb.AppendLine($"Priority: {Priority}");
+            sb.AppendLine($"SessionId: {SessionId}");
 
             sb.AppendLine($"MinimumTime: {MinimumTime}");
             sb.AppendLine($"MinimumAltitude: {MinimumAltitude}");
@@ -292,6 +300,7 @@ namespace Assistant.NINAPlugin.Plan {
             sb.AppendLine($"DitherEvery: {DitherEvery}");
             sb.AppendLine($"EnableGrader: {EnableGrader}");
             sb.AppendLine($"IsMosaic: {IsMosaic}");
+            sb.AppendLine($"FlatsHandling: {FlatsHandling}");
             sb.AppendLine($"RuleWeights:");
             foreach (KeyValuePair<string, double> entry in RuleWeights) {
                 sb.AppendLine($"  {entry.Key}: {entry.Value}");

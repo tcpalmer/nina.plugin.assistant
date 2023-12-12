@@ -27,6 +27,7 @@ namespace Assistant.NINAPlugin.Database {
         public DbSet<ExposurePlan> ExposurePlanSet { get; set; }
         public DbSet<ExposureTemplate> ExposureTemplateSet { get; set; }
         public DbSet<AcquiredImage> AcquiredImageSet { get; set; }
+        public DbSet<FlatHistory> FlatHistorySet { get; set; }
         public DbSet<ImageData> ImageDataSet { get; set; }
 
         public SchedulerDatabaseContext(string connectionString) : base(new SQLiteConnection() { ConnectionString = connectionString }, true) {
@@ -150,6 +151,21 @@ namespace Assistant.NINAPlugin.Database {
             return images.ToList();
         }
 
+        public List<AcquiredImage> GetAcquiredImages(int targetId) {
+            var images = AcquiredImageSet.Where(p => p.TargetId == targetId)
+                .AsNoTracking()
+                .OrderByDescending(p => p.acquiredDate);
+            return images.ToList();
+        }
+
+        public List<AcquiredImage> GetAcquiredImages(string profileId, DateTime newerThan) {
+            var predicate = PredicateBuilder.New<AcquiredImage>();
+            long newerThanSecs = DateTimeToUnixSeconds(newerThan);
+            predicate = predicate.And(a => a.acquiredDate > newerThanSecs);
+            predicate = predicate.And(a => a.profileId == profileId);
+            return AcquiredImageSet.AsNoTracking().Where(predicate).ToList();
+        }
+
         public List<AcquiredImage> GetAcquiredImagesForGrading(int targetId, string filterName) {
             var images = AcquiredImageSet.AsNoTracking().Where(p =>
                 p.TargetId == targetId &&
@@ -189,6 +205,26 @@ namespace Assistant.NINAPlugin.Database {
                     RollbackTransaction(transaction);
                 }
             }
+        }
+
+        public List<FlatHistory> GetFlatsHistory(DateTime lightSessionDate) {
+            var predicate = PredicateBuilder.New<FlatHistory>();
+            long lightSessionDateSecs = DateTimeToUnixSeconds(lightSessionDate);
+            predicate = predicate.And(f => f.lightSessionDate == lightSessionDateSecs);
+            return FlatHistorySet.AsNoTracking().Where(predicate).ToList();
+        }
+
+        public List<FlatHistory> GetFlatsHistory(int targetId) {
+            return FlatHistorySet.AsNoTracking().Where(fh => fh.targetId == targetId).ToList();
+        }
+
+        public List<FlatHistory> GetFlatsHistory(List<Target> targets) {
+            List<FlatHistory> records = new List<FlatHistory>();
+            foreach (Target target in targets) {
+                records.AddRange(FlatHistorySet.AsNoTracking().Where(fh => fh.targetId == target.Id));
+            }
+
+            return records;
         }
 
         public ImageData GetImageData(int acquiredImageId) {
@@ -369,6 +405,11 @@ namespace Assistant.NINAPlugin.Database {
                 try {
                     target = GetTarget(target.ProjectId, target.Id);
                     TargetSet.Remove(target);
+
+                    FlatHistorySet.Where(fh => fh.targetId == target.Id).ForEach(fh => {
+                        FlatHistorySet.Remove(fh);
+                    });
+
                     SaveChanges();
                     transaction.Commit();
                     return true;

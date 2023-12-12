@@ -3,6 +3,7 @@ using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Sync;
 using Assistant.NINAPlugin.Util;
+using NINA.Core.Model;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;
@@ -13,6 +14,7 @@ using System.Data.Entity.Migrations;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
@@ -22,6 +24,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private ProfilePreference profilePreference;
         private IImageSaveMediator imageSaveMediator;
         private ConcurrentDictionary<int, ExposureDetails> exposureDictionary;
+        private IPlanTarget planTarget;
 
         public SyncImageSaveWatcher(IProfile profile, IImageSaveMediator imageSaveMediator) {
             this.profile = profile;
@@ -33,6 +36,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         public void Start() {
             exposureDictionary.Clear();
             imageSaveMediator.ImageSaved += ImageSaved;
+            imageSaveMediator.BeforeFinalizeImageSaved += BeforeFinalizeImageSaved;
             TSLogger.Debug($"SYNC client start watching image saves");
         }
 
@@ -49,6 +53,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             imageSaveMediator.ImageSaved -= ImageSaved;
+            imageSaveMediator.BeforeFinalizeImageSaved -= BeforeFinalizeImageSaved;
         }
 
         public void WaitForExposure(int imageId, int targetDatabaseId, int exposurePlanDatabaseId, string exposureId) {
@@ -73,7 +78,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 return;
             }
 
-            IPlanTarget planTarget = GetPlanTarget(exposureDetails.targetDatabaseId);
+            planTarget = GetPlanTarget(exposureDetails.targetDatabaseId);
             bool enableGrader = planTarget.Project.EnableGrader;
 
             bool accepted = false;
@@ -109,10 +114,11 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 using (var transaction = context.Database.BeginTransaction()) {
-
                     try {
+                        ExposurePlan exposurePlan = null;
+
                         // Update the exposure plan record
-                        ExposurePlan exposurePlan = context.GetExposurePlan(exposureDatabaseId);
+                        exposurePlan = context.GetExposurePlan(exposureDatabaseId);
                         if (exposurePlan != null) {
                             exposurePlan.Acquired++;
 
@@ -132,7 +138,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                             filterName,
                             accepted,
                             rejectReason,
-                            new ImageMetadata(msg, planTarget.ROI));
+                            new ImageMetadata(msg, planTarget.Project.SessionId, planTarget.ROI, exposurePlan?.ExposureTemplate.ReadoutMode));
                         context.AcquiredImageSet.Add(acquiredImage);
 
                         context.SaveChanges();
@@ -143,6 +149,14 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
                 }
             }
+        }
+
+        private Task BeforeFinalizeImageSaved(object sender, BeforeFinalizeImageSavedEventArgs args) {
+            string sessionIdentifier = new FlatsExpert().FormatSessionIdentifier(planTarget?.Project?.SessionId);
+            ImagePattern proto = AssistantPlugin.FlatSessionIdImagePattern;
+            args.AddImagePattern(new ImagePattern(proto.Key, proto.Description) { Value = sessionIdentifier });
+
+            return Task.CompletedTask;
         }
 
         private string ExposureIdsLog() {

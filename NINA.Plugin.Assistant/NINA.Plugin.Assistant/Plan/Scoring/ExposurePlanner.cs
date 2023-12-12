@@ -442,12 +442,12 @@ namespace Assistant.NINAPlugin.Plan {
         }
     }
 
-    public class PlanBeforeTargetContainer : PlanInstruction {
+    public class PlanBeforeNewTargetContainer : PlanInstruction {
 
-        public PlanBeforeTargetContainer() : base(null) { }
+        public PlanBeforeNewTargetContainer() : base(null) { }
 
         public override string ToString() {
-            return "BeforeTargetContainer";
+            return "BeforeNewTargetContainer";
         }
     }
 

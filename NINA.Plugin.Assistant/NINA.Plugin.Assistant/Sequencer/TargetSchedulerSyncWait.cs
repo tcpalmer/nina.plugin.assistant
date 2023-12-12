@@ -7,7 +7,6 @@ using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.SyncService.Sync;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
-using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
 using Scheduler.SyncService;
 using System;

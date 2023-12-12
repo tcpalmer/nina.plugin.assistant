@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using FluentAssertions;
+using NINA.Core.Model.Equipment;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.Test.Astrometry;
 using NINA.Plugin.Assistant.Test.Plan;
@@ -8,6 +9,7 @@ using NINA.WPF.Base.Interfaces.Mediator;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 using System.Data.Entity.Validation;
 using System.IO;
 using System.Linq;
@@ -62,6 +64,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 p1.DitherEvery.Should().Be(14);
                 p1.EnableGrader.Should().BeFalse();
                 p1.IsMosaic.Should().BeTrue();
+                p1.FlatsHandling.Should().Be(Project.FLATS_HANDLING_OFF);
 
                 p1.RuleWeights[0].Name.Should().Be("a");
                 p1.RuleWeights[1].Name.Should().Be("b");
@@ -95,6 +98,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 p2.DitherEvery.Should().Be(16);
                 p2.EnableGrader.Should().BeFalse();
                 p2.IsMosaic.Should().BeFalse();
+                p2.FlatsHandling.Should().Be(3);
 
                 p2.RuleWeights[0].Name.Should().Be("d");
                 p2.RuleWeights[1].Name.Should().Be("e");
@@ -143,30 +147,46 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 context.GetAcquiredImages(1, "nada").Count.Should().Be(0);
 
                 ImageSavedEventArgs msg = PlanMocks.GetImageSavedEventArgs(markDate.AddDays(1), "Ha");
-                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1), "Ha", true, "rr1", new ImageMetadata(msg, 100)));
-                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(1), "Ha", true, "rr2", new ImageMetadata(msg, 100)));
-                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(2), "Ha", true, "rr3", new ImageMetadata(msg, 100)));
-                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(3), "Ha", true, "rr4", new ImageMetadata(msg, 100)));
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1), "Ha", true, "rr1", new ImageMetadata(msg, 1, 100, 0)));
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(1), "Ha", true, "rr2", new ImageMetadata(msg, 2, 100, 0)));
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(2), "Ha", true, "rr3", new ImageMetadata(msg, 3, 100, 0)));
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(3), "Ha", true, "rr4", new ImageMetadata(msg, 4, 100, 0)));
+
+                msg.MetaData.Rotator.MechanicalPosition = ImageMetadata.NO_ROTATOR_ANGLE;
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1).AddMinutes(4), "Ha", true, "rr5", new ImageMetadata(msg, 5, 100, 0)));
+
                 context.SaveChanges();
 
                 List<AcquiredImage> ai = context.GetAcquiredImages(1, "Ha");
-                ai.Count.Should().Be(4);
+                ai.Count.Should().Be(5);
 
                 // Confirm descending order
-                ai[0].AcquiredDate.Should().BeExactly(markDate.AddDays(1).AddMinutes(3).TimeOfDay);
-                ai[1].AcquiredDate.Should().BeExactly(markDate.AddDays(1).AddMinutes(2).TimeOfDay);
-                ai[2].AcquiredDate.Should().BeExactly(markDate.AddDays(1).AddMinutes(1).TimeOfDay);
-                ai[3].AcquiredDate.Should().BeExactly(markDate.AddDays(1).AddMinutes(0).TimeOfDay);
+                ai[0].AcquiredDate.Should().BeExactly(markDate.AddDays(1).AddMinutes(4).TimeOfDay);
+                ai[1].AcquiredDate.Should().BeExactly(markDate.AddDays(1).AddMinutes(3).TimeOfDay);
+                ai[2].AcquiredDate.Should().BeExactly(markDate.AddDays(1).AddMinutes(2).TimeOfDay);
+                ai[3].AcquiredDate.Should().BeExactly(markDate.AddDays(1).AddMinutes(1).TimeOfDay);
+                ai[4].AcquiredDate.Should().BeExactly(markDate.AddDays(1).AddMinutes(0).TimeOfDay);
 
-                ai[0].RejectReason.Should().Be("rr4");
-                ai[1].RejectReason.Should().Be("rr3");
-                ai[2].RejectReason.Should().Be("rr2");
-                ai[3].RejectReason.Should().Be("rr1");
+                ai[0].RejectReason.Should().Be("rr5");
+                ai[1].RejectReason.Should().Be("rr4");
+                ai[2].RejectReason.Should().Be("rr3");
+                ai[3].RejectReason.Should().Be("rr2");
+                ai[4].RejectReason.Should().Be("rr1");
 
-                ai[0].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(3).TimeOfDay);
-                ai[1].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(2).TimeOfDay);
-                ai[2].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(1).TimeOfDay);
-                ai[3].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(0).TimeOfDay);
+                ai[0].Metadata.SessionId.Should().Be(5);
+                ai[1].Metadata.SessionId.Should().Be(4);
+                ai[2].Metadata.SessionId.Should().Be(3);
+                ai[3].Metadata.SessionId.Should().Be(2);
+                ai[4].Metadata.SessionId.Should().Be(1);
+
+                ai[0].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(4).TimeOfDay);
+                ai[1].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(3).TimeOfDay);
+                ai[2].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(2).TimeOfDay);
+                ai[3].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(1).TimeOfDay);
+                ai[4].Metadata.ExposureStartTime.Should().BeExactly(markDate.AddDays(1).AddMinutes(0).TimeOfDay);
+
+                ai[1].Metadata.RotatorMechanicalPosition.Should().Be(308);
+                ai[0].Metadata.RotatorMechanicalPosition.Should().Be(ImageMetadata.NO_ROTATOR_ANGLE);
 
                 // Associated image data
                 byte[] data1 = new byte[] { 0x21, 0x22, 0x23, 0x24, 0x25 };
@@ -330,6 +350,93 @@ namespace NINA.Plugin.Assistant.Test.Database {
             }
         }
 
+        [Test, Order(9)]
+        [NonParallelizable]
+        public void TestFlatHistory() {
+
+            DateTime dt = DateTime.Now;
+            FlatHistory record1 = new FlatHistory(1, dt, dt.AddDays(2), 23, "abcd-1234", FlatHistory.FLAT_TYPE_PANEL, "Ha", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
+            FlatHistory record2 = new FlatHistory(1, dt.AddDays(1), dt.AddDays(3), 24, "abcd-1234", FlatHistory.FLAT_TYPE_SKY, "O3", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
+            FlatHistory record3 = new FlatHistory(1, dt.AddDays(1), dt.AddDays(4), 25, "abcd-1234", FlatHistory.FLAT_TYPE_PANEL, "S2", 10, 20, new BinningMode(2, 2), 0, ImageMetadata.NO_ROTATOR_ANGLE, 89);
+
+            using (var context = db.GetContext()) {
+                context.FlatHistorySet.Add(record1);
+                context.FlatHistorySet.Add(record2);
+                context.FlatHistorySet.Add(record3);
+                context.SaveChanges();
+            }
+
+            using (var context = db.GetContext()) {
+                List<FlatHistory> records = context.GetFlatsHistory(dt.AddDays(-1));
+                records.Count.Should().Be(0);
+                records = context.GetFlatsHistory(dt);
+                records.Count.Should().Be(1);
+
+                FlatHistory sut = records[0];
+                sut.TargetId.Should().Be(1);
+                Assert.That(sut.LightSessionDate, Is.EqualTo(dt).Within(TimeSpan.FromSeconds(1.0)));
+                Assert.That(sut.FlatsTakenDate, Is.EqualTo(dt.AddDays(2)).Within(TimeSpan.FromSeconds(1.0)));
+                sut.LightSessionId.Should().Be(23);
+                sut.ProfileId.Should().Be("abcd-1234");
+                sut.FlatsType.Should().Be(FlatHistory.FLAT_TYPE_PANEL);
+                sut.FilterName.Should().Be("Ha");
+                sut.Gain.Should().Be(10);
+                sut.Offset.Should().Be(20);
+                sut.BinningMode.X.Should().Be(2);
+                sut.ReadoutMode.Should().Be(0);
+                sut.Rotation.Should().Be(123.4);
+                sut.ROI.Should().Be(89);
+
+                records = context.GetFlatsHistory(1);
+                records.Sort();
+                records.Count.Should().Be(3);
+
+                sut = records[0];
+                sut.TargetId.Should().Be(1);
+                Assert.That(sut.LightSessionDate, Is.EqualTo(dt).Within(TimeSpan.FromSeconds(1.0)));
+                Assert.That(sut.FlatsTakenDate, Is.EqualTo(dt.AddDays(2)).Within(TimeSpan.FromSeconds(1.0)));
+                sut.ProfileId.Should().Be("abcd-1234");
+                sut.FlatsType.Should().Be(FlatHistory.FLAT_TYPE_PANEL);
+                sut.FilterName.Should().Be("Ha");
+                sut.Gain.Should().Be(10);
+                sut.Offset.Should().Be(20);
+                sut.BinningMode.X.Should().Be(2);
+                sut.ReadoutMode.Should().Be(0);
+                sut.Rotation.Should().Be(123.4);
+                sut.ROI.Should().Be(89);
+
+                sut = records[1];
+                sut.TargetId.Should().Be(1);
+                Assert.That(sut.LightSessionDate, Is.EqualTo(dt.AddDays(1)).Within(TimeSpan.FromSeconds(1.0)));
+                Assert.That(sut.FlatsTakenDate, Is.EqualTo(dt.AddDays(3)).Within(TimeSpan.FromSeconds(1.0)));
+                sut.LightSessionId.Should().Be(24);
+                sut.ProfileId.Should().Be("abcd-1234");
+                sut.FlatsType.Should().Be(FlatHistory.FLAT_TYPE_SKY);
+                sut.FilterName.Should().Be("O3");
+                sut.Gain.Should().Be(10);
+                sut.Offset.Should().Be(20);
+                sut.BinningMode.X.Should().Be(2);
+                sut.ReadoutMode.Should().Be(0);
+                sut.Rotation.Should().Be(123.4);
+                sut.ROI.Should().Be(89);
+
+                sut = records[2];
+                sut.TargetId.Should().Be(1);
+                Assert.That(sut.LightSessionDate, Is.EqualTo(dt.AddDays(1)).Within(TimeSpan.FromSeconds(1.0)));
+                Assert.That(sut.FlatsTakenDate, Is.EqualTo(dt.AddDays(4)).Within(TimeSpan.FromSeconds(1.0)));
+                sut.LightSessionId.Should().Be(25);
+                sut.ProfileId.Should().Be("abcd-1234");
+                sut.FlatsType.Should().Be(FlatHistory.FLAT_TYPE_PANEL);
+                sut.FilterName.Should().Be("S2");
+                sut.Gain.Should().Be(10);
+                sut.Offset.Should().Be(20);
+                sut.BinningMode.X.Should().Be(2);
+                sut.ReadoutMode.Should().Be(0);
+                sut.Rotation.Should().Be(ImageMetadata.NO_ROTATOR_ANGLE);
+                sut.ROI.Should().Be(89);
+            }
+        }
+
         private void LoadTestDatabase() {
             using (var context = db.GetContext()) {
                 try {
@@ -346,6 +453,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p1.DitherEvery = 14;
                     p1.EnableGrader = false;
                     p1.IsMosaic = true;
+                    p1.FlatsHandling = Project.FLATS_HANDLING_OFF;
 
                     p1.RuleWeights = new List<RuleWeight> {
                         {new RuleWeight("a", .1) },
@@ -399,6 +507,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     p2.DitherEvery = 16;
                     p2.EnableGrader = false;
                     p2.IsMosaic = false;
+                    p2.FlatsHandling = 3;
 
                     p2.RuleWeights = new List<RuleWeight> {
                         {new RuleWeight("d", .4) },

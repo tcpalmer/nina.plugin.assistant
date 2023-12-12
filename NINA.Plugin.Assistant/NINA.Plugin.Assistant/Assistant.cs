@@ -3,6 +3,7 @@ using Assistant.NINAPlugin.Controls.AssistantManager;
 using Assistant.NINAPlugin.Controls.PlanPreview;
 using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
+using NINA.Core.Model;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
 using NINA.Plugin;
@@ -32,8 +33,12 @@ namespace Assistant.NINAPlugin {
         private IDeepSkyObjectSearchVM deepSkyObjectSearchVM;
         private IPlanetariumFactory planetariumFactory;
 
+        // Plugin specific image file patterns
+        public static readonly ImagePattern FlatSessionIdImagePattern = new ImagePattern("$$TSSESSIONID$$", "Session identifier for working with TS lights and flats", "Target Scheduler");
+
         [ImportingConstructor]
         public AssistantPlugin(IProfileService profileService,
+            IOptionsVM options,
             IApplicationMediator applicationMediator,
             IFramingAssistantVM framingAssistantVM,
             IDeepSkyObjectSearchVM deepSkyObjectSearchVM,
@@ -53,6 +58,8 @@ namespace Assistant.NINAPlugin {
             this.planetariumFactory = planetariumFactory;
 
             profileService.ProfileChanged += ProfileService_ProfileChanged;
+
+            options.AddImagePattern(FlatSessionIdImagePattern);
         }
 
         public override async Task Initialize() {

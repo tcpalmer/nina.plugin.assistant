@@ -237,8 +237,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                     continue;
                 }
 
-                if (instruction is PlanBeforeTargetContainer) {
-                    AddBeforeTargetInstructions();
+                if (instruction is PlanBeforeNewTargetContainer) {
+                    AddBeforeNewTargetInstructions();
                     continue;
                 }
 
@@ -285,7 +285,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             Add(slewCenter);
         }
 
-        private void AddBeforeTargetInstructions() {
+        private void AddBeforeNewTargetInstructions() {
             int? numInstructions = parentContainer.BeforeTargetContainer.Items?.Count;
             if (numInstructions != null && numInstructions > 0) {
                 TSLogger.Info($"adding BeforeNewTarget container with {numInstructions} instruction(s)");

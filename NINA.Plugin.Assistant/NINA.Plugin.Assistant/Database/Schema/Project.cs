@@ -21,6 +21,10 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
     public class Project : INotifyPropertyChanged {
 
+        public const int FLATS_HANDLING_OFF = 0;
+        public const int FLATS_HANDLING_TARGET_COMPLETION = 100;
+        public const int FLATS_HANDLING_IMMEDIATE = 200;
+
         [Key] public int Id { get; set; }
         [Required] public string ProfileId { get; set; }
         [Required] public string name { get; set; }
@@ -31,6 +35,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public long? activeDate { get; set; }
         public long? inactiveDate { get; set; }
         public int isMosaic { get; set; }
+        public int flatsHandling { get; set; }
 
         public int minimumTime { get; set; }
         public double minimumAltitude { get; set; }
@@ -61,6 +66,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             DitherEvery = 0;
             EnableGrader = true;
             IsMosaic = false;
+            FlatsHandling = FLATS_HANDLING_OFF;
 
             ruleWeights = GetDefaultRuleWeights();
             Targets = new List<Target>();
@@ -135,6 +141,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 isMosaic = value ? 1 : 0;
                 RaisePropertyChanged(nameof(IsMosaic));
+            }
+        }
+
+        [NotMapped]
+        public int FlatsHandling {
+            get { return flatsHandling; }
+            set {
+                flatsHandling = value;
+                RaisePropertyChanged(nameof(FlatsHandling));
             }
         }
 
@@ -282,6 +297,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             project.ditherEvery = ditherEvery;
             project.enableGrader = enableGrader;
             project.isMosaic = isMosaic;
+            project.flatsHandling = flatsHandling;
 
             project.Targets = new List<Target>(Targets.Count);
             Targets.ForEach(item => project.Targets.Add(item.GetPasteCopy(newProfileId)));
@@ -321,6 +337,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"DitherEvery: {DitherEvery}");
             sb.AppendLine($"EnableGrader: {EnableGrader}");
             sb.AppendLine($"IsMosaic: {IsMosaic}");
+            sb.AppendLine($"FlatsHandling: {FlatsHandling}");
             sb.AppendLine($"RuleWeights:");
             foreach (var item in RuleWeights) {
                 sb.AppendLine($"  {item.Name} {item.Weight}");
