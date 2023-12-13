@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <OutputType>Library</OutputType>
     <RootNamespace>Assistant.NINAPlugin</RootNamespace>
     <AssemblyName>Assistant.NINAPlugin</AssemblyName>
@@ -34,7 +34,7 @@
     <PackageReference Include="LinqKit" Version="1.2.4" />
     <PackageReference Include="LinqKit.Core" Version="1.2.4" />
     <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
-    <PackageReference Include="NINA.Plugin" Version="3.0.0.1056-nightly" />
+    <PackageReference Include="NINA.Plugin" Version="3.0.0.2001-beta" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NINA.Plugin.Assistant.Shared\NINA.Plugin.Assistant.Shared.csproj" />
