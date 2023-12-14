@@ -58,15 +58,16 @@ namespace Assistant.NINAPlugin.Sequencer {
             };
         }
 
-        private bool blockFinished = true;
+        private bool checkIsActive = true;
 
         public override bool Check(ISequenceItem previousItem, ISequenceItem nextItem) {
 
-            if (!blockFinished) {
+            if (!checkIsActive) {
                 return true;
             }
 
-            blockFinished = false;
+            TSLogger.Info($"TargetSchedulerCondition starting check: {SelectedMode}");
+            checkIsActive = false;
 
             switch (SelectedMode) {
                 case TARGETS_REMAIN: return HasRemainingTargets();
@@ -78,12 +79,12 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override void SequenceBlockFinished() {
-            blockFinished = true;
+            checkIsActive = true;
         }
 
         public override void ResetProgress() {
             Status = SequenceEntityStatus.CREATED;
-            blockFinished = false;
+            checkIsActive = true;
         }
 
         private bool HasRemainingTargets() {

@@ -1,7 +1,8 @@
 # Target Scheduler
 
-## 4.1.0.9 - 2023-12-XX
+## 4.1.1.0 - 2023-12-XX
 * Fixed bug in TS Condition - check wasn't running the first time through
+* Updated for latest NINA 3 beta libraries
 
 ## 4.1.0.8 - 2023-12-12
 * Added support for taking automated flats
