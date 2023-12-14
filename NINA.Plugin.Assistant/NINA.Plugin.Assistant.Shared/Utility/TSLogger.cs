@@ -7,6 +7,7 @@ using Serilog.Sinks.File;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Security.Policy;
 using System.Text;
 
 namespace NINA.Plugin.Assistant.Shared.Utility {
@@ -63,8 +64,19 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
         }
 
         private static string GetPluginVersion() {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            return FileVersionInfo.GetVersionInfo(assembly.Location).FileVersion;
+            string? version = null;
+
+            // We have to check all assemblies since this class no longer lives in the main DLL
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (Assembly assembly in assemblies) {
+                AssemblyName name = assembly.GetName();
+                if (name.Name == "Assistant.NINAPlugin") {
+                    version = name.Version?.ToString();
+                    break;
+                }
+            }
+
+            return version ?? "<version?>";
         }
 
         public static bool IsEnabled(LogEventLevel level) {

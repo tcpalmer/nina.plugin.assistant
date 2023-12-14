@@ -1,5 +1,8 @@
 # Release Notes
 
+## 4.1.1.2 - 2023-12-XX
+* Fixed missing TS version in TS log
+
 ## 4.1.1.1 - 2023-12-14
 * Fixed bug in TS Condition - check wasn't running the first time through
 * Immediate flats wasn't handling Repeat Flat Set off correctly
