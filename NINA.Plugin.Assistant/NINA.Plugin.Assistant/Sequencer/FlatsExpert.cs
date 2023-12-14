@@ -149,7 +149,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
             }
 
-            LogLightSessions($"after culled by flats history for {target.Name}", remainingLightSessions);
+            LogLightSessions($"after culled by flats history for {target?.Name}", remainingLightSessions);
             return remainingLightSessions;
         }
 

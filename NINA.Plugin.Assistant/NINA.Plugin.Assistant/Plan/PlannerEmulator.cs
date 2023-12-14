@@ -33,7 +33,8 @@ namespace Assistant.NINAPlugin.Plan {
 
             switch (CallNumber) {
                 case 1: plan = WaitForTime(DateTime.Now.AddSeconds(6)); break;
-                case 2: plan = Plan6(); break;
+                case 2: plan = Plan4(); break;
+                case 3: plan = Plan4(); break;
                 //case 3: plan = Plan5(); break;
                 //case 5: plan = Plan3(); break;
                 //case 6: plan = Plan3(); break;
@@ -210,9 +211,9 @@ namespace Assistant.NINAPlugin.Plan {
             planProject.EnableGrader = false;
             planProject.FlatsHandling = Project.FLATS_HANDLING_IMMEDIATE;
 
-            IPlanTarget planTarget = GetBasePlanTarget("Target H15", planProject, Cp1525);
+            IPlanTarget planTarget = GetBasePlanTarget("Sh2 240 Panel 1", planProject, Cp1525);
             planTarget.EndTime = endTime;
-            planTarget.DatabaseId = 3;
+            planTarget.DatabaseId = 1;
 
             IPlanExposure lum = GetExposurePlan("Lum", 4, 139, 21, 3, 101);
             IPlanExposure red = GetExposurePlan("Red", 4, 139, 21, 3, 102);
