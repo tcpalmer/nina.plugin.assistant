@@ -188,7 +188,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     ROI = flatSpec.ROI,
                 };
 
-                TSLogger.Info($"TS Flats: {target.Name} sid: {neededFlat.SessionId}, taking {count} flats: exp:{setting.Time}, brightness: {setting.Brightness}, for {flatSpec}");
+                TSLogger.Info($"TS Flats: {target?.Name} sid: {neededFlat.SessionId}, taking {count} flats: exp:{setting.Time}, brightness: {setting.Brightness}, for {flatSpec}");
 
                 FlatTargetContainer container = new FlatTargetContainer(this, target, count, neededFlat.SessionId);
                 container.Add(takeExposure);
@@ -272,6 +272,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             // Last chance to skip if flat device doesn't support open/close
             if (coverState == CoverState.Unknown || coverState == CoverState.NeitherOpenNorClosed) {
+                TSLogger.Warning($"TS Flats: flip-flat cover is not in a known state ({coverState}), skipping close)");
                 return;
             }
 
@@ -285,6 +286,33 @@ namespace Assistant.NINAPlugin.Sequencer {
             coverState = flatDeviceMediator.GetInfo().CoverState;
             if (coverState != CoverState.Closed) {
                 throw new SequenceEntityFailedException($"Failed to close flat cover");
+            }
+        }
+
+        protected async Task OpenCover(IProgress<ApplicationStatus> progress, CancellationToken token) {
+
+            if (!flatDeviceMediator.GetInfo().SupportsOpenClose) {
+                return;
+            }
+
+            CoverState coverState = flatDeviceMediator.GetInfo().CoverState;
+
+            // Last chance to skip if flat device doesn't support open/close
+            if (coverState == CoverState.Unknown || coverState == CoverState.NeitherOpenNorClosed) {
+                TSLogger.Warning($"TS Flats: flip-flat cover is not in a known state ({coverState}), skipping open)");
+                return;
+            }
+
+            if (coverState == CoverState.Open) {
+                return;
+            }
+
+            TSLogger.Info("TS Flats: opening flat device");
+            await flatDeviceMediator.OpenCover(progress, token);
+
+            coverState = flatDeviceMediator.GetInfo().CoverState;
+            if (coverState != CoverState.Open) {
+                throw new SequenceEntityFailedException($"Failed to open flat cover");
             }
         }
 
@@ -463,7 +491,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         public FlatTargetContainer(TargetSchedulerFlatsBase parent, Target target, int count, int sessionId) {
             this.parent = parent;
 
-            string overloadedName = new FlatsExpert().GetOverloadTargetName(target.Name, sessionId);
+            string overloadedName = new FlatsExpert().GetOverloadTargetName(target?.Name, sessionId);
             inputTarget = new InputTarget(Angle.Zero, Angle.Zero, null) { TargetName = overloadedName };
 
             loopCondition = new LoopCondition() { Iterations = count };

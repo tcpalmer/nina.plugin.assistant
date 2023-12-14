@@ -112,6 +112,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 CompletedIterations = 0;
 
                 await ToggleLight(false, progress, token);
+                await OpenCover(progress, token);
             }
             catch (Exception ex) {
                 DisplayText = "";
@@ -212,6 +213,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 neededFlats.Add(new LightSession(plan.PlanTarget.DatabaseId, lightSessionDate, sessionId, flatSpec));
             }
 
+            flatsExpert.LogLightSessions($"raw immediate needed flats (repeat = {AlwaysRepeatFlatSet})", neededFlats);
+
             // If always repeat is false, then remove where we've already taken a flat during this same light session
             if (!AlwaysRepeatFlatSet && neededFlats.Count > 0) {
                 List<FlatHistory> takenFlats;
@@ -221,7 +224,9 @@ namespace Assistant.NINAPlugin.Sequencer {
                        .ToList();
                 }
 
-                // Note that we don't cull immediate flats by flats history ...
+                if (takenFlats.Count > 0) {
+                    neededFlats = flatsExpert.CullByFlatsHistory(target, neededFlats, takenFlats);
+                }
             }
 
             if (neededFlats.Count == 0) {
@@ -230,6 +235,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             TSLogger.Info($"TS Immediate Flats: need {neededFlats.Count} flat sets for target: {plan.PlanTarget.Name}");
+            flatsExpert.LogLightSessions("needed immediate flats", neededFlats);
+
             return neededFlats;
         }
 

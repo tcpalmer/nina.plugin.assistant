@@ -1,7 +1,9 @@
 # Release Notes
 
-## 4.1.1.0 - 2023-12-XX
+## 4.1.1.1 - 2023-12-14
 * Fixed bug in TS Condition - check wasn't running the first time through
+* Immediate flats wasn't handling Repeat Flat Set off correctly
+* Immediate flats instruction will now open a flip-flat cover when done
 * Updated for latest NINA 3 beta libraries
 
 ## 4.1.0.8 - 2023-12-12
