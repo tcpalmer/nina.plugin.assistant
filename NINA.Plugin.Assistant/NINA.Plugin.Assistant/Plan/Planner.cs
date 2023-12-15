@@ -498,7 +498,7 @@ namespace Assistant.NINAPlugin.Plan {
             bool incomplete = false;
             foreach (IPlanTarget target in planProject.Targets) {
                 foreach (IPlanExposure planExposure in target.ExposurePlans) {
-                    if (planExposure.IsIncomplete()) {
+                    if (planExposure.NeededExposures(profilePreferences.ExposureThrottle) > 0) {
                         incomplete = true;
                     }
                     else {

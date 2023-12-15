@@ -106,6 +106,56 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         }
 
         [Test]
+        public void testFilterForIncompleteAllExposuresThrottled() {
+            Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
+            ProfilePreference prefs = GetPrefs();
+
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
+
+            // Assert setup for throttling
+            pp1.Object.EnableGrader.Should().BeFalse();
+            prefs.ExposureThrottle.Should().Be(125);
+
+            Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
+            PlanMocks.AddMockPlanTarget(pp1, pt);
+
+            ExposurePlan ep = new ExposurePlan("abcd-1234") { Desired = 12, Acquired = 15 };
+            ExposureTemplate et = new ExposureTemplate("abcd-1234", "R", "R");
+            IPlanExposure peRed = new PlanExposure(pt.Object, ep, et);
+
+            ep = new ExposurePlan("abcd-1234") { Desired = 12, Acquired = 15 };
+            et = new ExposureTemplate("abcd-1234", "G", "G");
+            IPlanExposure peGreen = new PlanExposure(pt.Object, ep, et);
+
+            ep = new ExposurePlan("abcd-1234") { Desired = 12, Acquired = 10 };
+            et = new ExposureTemplate("abcd-1234", "B", "B");
+            IPlanExposure peBlue = new PlanExposure(pt.Object, ep, et);
+
+            pt.Object.ExposurePlans = new List<IPlanExposure>() { peRed, peGreen, peBlue };
+
+            // Blue is not complete ...
+            List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
+            projects = new Planner(new DateTime(2023, 12, 15, 18, 0, 0), profileMock.Object, prefs, false).FilterForIncomplete(projects);
+            projects.Count.Should().Be(1);
+            projects[0].Rejected.Should().BeFalse();
+            projects[0].Targets[0].Rejected.Should().BeFalse();
+
+            ep = new ExposurePlan("abcd-1234") { Desired = 12, Acquired = 15 };
+            et = new ExposureTemplate("abcd-1234", "B", "B");
+            peBlue = new PlanExposure(pt.Object, ep, et);
+
+            pt.Object.ExposurePlans = new List<IPlanExposure>() { peRed, peGreen, peBlue };
+
+            // All are now complete due to throttle
+            projects = new Planner(new DateTime(2023, 12, 15, 18, 0, 0), profileMock.Object, prefs, false).FilterForIncomplete(projects);
+            projects.Count.Should().Be(1);
+            projects[0].Rejected.Should().BeTrue();
+            projects[0].RejectedReason.Should().Be(Reasons.ProjectComplete);
+            projects[0].Targets[0].Rejected.Should().BeTrue();
+            projects[0].Targets[0].RejectedReason.Should().Be(Reasons.TargetComplete);
+        }
+
+        [Test]
         public void testTargetNoExposurePlans() {
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
 
