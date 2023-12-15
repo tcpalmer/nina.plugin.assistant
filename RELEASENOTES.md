@@ -1,6 +1,7 @@
 # Release Notes
 
-## 4.1.1.2 - 2023-12-XX
+## 4.1.1.2 - 2023-12-15
+* Fixed bug in TS Flats with project flats cadence > 1
 * Fixed missing TS version in TS log
 
 ## 4.1.1.1 - 2023-12-14

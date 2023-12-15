@@ -98,8 +98,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 foreach (int targetId in targetIds) {
                     List<LightSession> targetNeededFlats = neededFlats.Where(ls => ls.TargetId == targetId).ToList();
+                    List<FlatSpec> targetTakenFlats = new List<FlatSpec>();
+
                     foreach (LightSession neededFlat in targetNeededFlats) {
-                        List<FlatSpec> targetTakenFlats = new List<FlatSpec>();
                         bool success = true;
 
                         if (flatsExpert.IsRequiredFlat(AlwaysRepeatFlatSet, neededFlat, targetTakenFlats, allTakenFlats)) {

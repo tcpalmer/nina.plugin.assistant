@@ -116,7 +116,8 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private bool NeedsFlats() {
             try {
-                bool result = new FlatsExpert().GetNeededFlats(profileService.ActiveProfile, DateTime.Now).Count > 0;
+                FlatsExpert flatsExpert = new FlatsExpert() { VerboseLogging = false };
+                bool result = flatsExpert.GetNeededFlats(profileService.ActiveProfile, DateTime.Now).Count > 0;
                 TSLogger.Info($"TargetSchedulerCondition check for needed flats, continue={result}");
                 return result;
             }

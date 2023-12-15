@@ -16,6 +16,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         public static readonly double ACQUIRED_IMAGES_CUTOFF_DAYS = -45;
 
         private SchedulerDatabaseInteraction _database = null;
+        public bool VerboseLogging = true;
 
         public FlatsExpert() { }
 
@@ -347,6 +348,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public void LogLightSessions(string header, List<LightSession> list) {
+            if (!VerboseLogging) { return; }
+
             if (list.Count == 0) {
                 TSLogger.Debug($"TS Flats: {header} - empty");
                 return;

@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Sequencer;
+using Assistant.NINAPlugin.Util;
 using FluentAssertions;
 using Moq;
 using NINA.Core.Model.Equipment;
@@ -435,6 +436,16 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
                 DateTime current = baseDate.AddDays(i);
                 sut.GetCurrentSessionId(project, current).Should().Be(expectedSid);
                 if (i % 7 == 6) { expectedSid++; }
+            }
+
+            // Test based on SRO database
+            project.FlatsHandling = 7;
+            project.CreateDate = new DateTime(2023, 5, 4).AddHours(18);
+            TestContext.WriteLine($"CREATED: {Utils.FormatDateTimeFull(project.CreateDate)}");
+            DateTime testDate = new DateTime(2023, 11, 15).AddHours(13);
+            for (int i = 0; i < 32; i++) {
+                TestContext.WriteLine($"{Utils.FormatDateTimeFull(testDate)}: {sut.GetCurrentSessionId(project, testDate)}");
+                testDate = testDate.AddDays(1);
             }
         }
 
