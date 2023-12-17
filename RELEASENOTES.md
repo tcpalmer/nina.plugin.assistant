@@ -1,5 +1,8 @@
 # Release Notes
 
+## 4.1.1.4 - 2023-12-XX
+* Fixed bug in smart plan window - was skipping projects incorrectly
+
 ## 4.1.1.3 - 2023-12-15
 * Fixed bug in TS Flats with project flats cadence > 1
 * Fixed bug with determining target completeness with exposure throttling
