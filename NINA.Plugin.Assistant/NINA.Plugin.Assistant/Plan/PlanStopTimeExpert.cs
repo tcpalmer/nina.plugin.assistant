@@ -79,7 +79,6 @@ namespace Assistant.NINAPlugin.Plan {
             List<StopEvent> futureEvents = new List<StopEvent>();
 
             foreach (IPlanProject planProject in projects) {
-                if (planProject.Rejected) { continue; }
                 foreach (IPlanTarget planTarget in planProject.Targets) {
                     if (planTarget.Rejected) {
                         switch (planTarget.RejectedReason) {
