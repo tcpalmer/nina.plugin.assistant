@@ -496,9 +496,11 @@ namespace Assistant.NINAPlugin.Plan {
 
         private bool ProjectIsInComplete(IPlanProject planProject) {
             bool incomplete = false;
+
             foreach (IPlanTarget target in planProject.Targets) {
                 foreach (IPlanExposure planExposure in target.ExposurePlans) {
-                    if (planExposure.NeededExposures(profilePreferences.ExposureThrottle) > 0) {
+                    double exposureThrottle = planProject.EnableGrader ? -1 : profilePreferences.ExposureThrottle;
+                    if (planExposure.NeededExposures(exposureThrottle) > 0) {
                         incomplete = true;
                     }
                     else {
