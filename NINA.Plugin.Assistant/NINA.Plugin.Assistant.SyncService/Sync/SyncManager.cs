@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Sync;
 using GrpcDotNetNamedPipes;
 using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Profile.Interfaces;
 using Scheduler.SyncService;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
@@ -45,12 +46,15 @@ namespace NINA.Plugin.Assistant.SyncService.Sync {
 
         private SyncManager() { }
 
-        public void Start(string profileId) {
-
+        public void Start(IProfileService profileService) {
+            string profileId = profileService.ActiveProfile.Id.ToString();
             try {
                 TryStartServer();
 
-                if (!IsServer) {
+                if (IsServer) {
+                    SyncServer.Instance.ProfileId = profileId;
+                }
+                else {
                     SyncClient.Instance.Register(profileId);
                 }
             }

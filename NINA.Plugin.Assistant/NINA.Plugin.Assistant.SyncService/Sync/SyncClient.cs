@@ -18,13 +18,13 @@ namespace Assistant.NINAPlugin.Sync {
 
         public readonly string Id = Guid.NewGuid().ToString();
         public string ProfileId { get; private set; }
+        public string ServerProfileId { get; private set; }
+
         private ClientState ClientState = ClientState.Starting;
-        private SyncedSolveRotate? ClientRotationState = null;
         private bool keepaliveRunning = false;
         private CancellationTokenSource keepaliveCts;
 
-        private SyncClient() : base(new NamedPipeChannel(".", SyncManager.PIPE_NAME, new NamedPipeChannelOptions() { ConnectionTimeout = 300000 })) {
-        }
+        private SyncClient() : base(new NamedPipeChannel(".", SyncManager.PIPE_NAME, new NamedPipeChannelOptions() { ConnectionTimeout = 300000 })) { }
 
         public void SetClientState(ClientState state) {
             lock (lockObj) {
@@ -33,7 +33,7 @@ namespace Assistant.NINAPlugin.Sync {
             }
         }
 
-        public StatusResponse Register(string profileId) {
+        public RegistrationResponse Register(string profileId) {
             ProfileId = profileId;
             RegistrationRequest request = new RegistrationRequest {
                 Guid = Id,
@@ -43,8 +43,9 @@ namespace Assistant.NINAPlugin.Sync {
             };
 
             try {
-                StatusResponse response = base.Register(request, null, deadline: DateTime.UtcNow.AddSeconds(5));
+                RegistrationResponse response = base.Register(request, null, deadline: DateTime.UtcNow.AddSeconds(5));
                 if (response.Success) {
+                    ServerProfileId = response.ServerProfileId;
                     SetClientState(ClientState.Ready);
                     StartKeepalive();
                 }
@@ -53,7 +54,7 @@ namespace Assistant.NINAPlugin.Sync {
             }
             catch (Exception ex) {
                 TSLogger.Error($"SYNC exception registering client with server: {ex.Message} {ex}");
-                return new StatusResponse { Success = false, Message = ex.Message };
+                return new RegistrationResponse { Success = false, Message = ex.Message };
             }
         }
 

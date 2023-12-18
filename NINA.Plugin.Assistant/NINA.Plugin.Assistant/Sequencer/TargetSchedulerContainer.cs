@@ -218,7 +218,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             while (true) {
                 DateTime atTime = DateTime.Now;
                 profilePreferences = GetProfilePreferences();
-                SchedulerPlan plan = new Planner(atTime, profileService, profilePreferences, false).GetPlan(previousPlanTarget);
+                SchedulerPlan plan = new Planner(atTime, profileService.ActiveProfile, profilePreferences, false).GetPlan(previousPlanTarget);
                 SetSyncServerState(ServerState.Ready);
 
                 if (plan == null) {

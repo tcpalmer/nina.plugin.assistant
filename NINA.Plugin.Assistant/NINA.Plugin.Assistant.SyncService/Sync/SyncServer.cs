@@ -6,7 +6,6 @@ using Scheduler.SyncService;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text;
-using System.Windows.Controls;
 
 namespace Assistant.NINAPlugin.Sync {
 
@@ -32,6 +31,8 @@ namespace Assistant.NINAPlugin.Sync {
         private ClientActiveState clientActiveSolveRotates = new ClientActiveState();
 
         public ServerState State { get; set; }
+        public string ProfileId { get; internal set; }
+
         private ActionResponse activeActionResponse;
         private CancellationTokenSource staleClientPurgeCts;
 
@@ -48,19 +49,19 @@ namespace Assistant.NINAPlugin.Sync {
             }
         }
 
-        public override Task<StatusResponse> Register(RegistrationRequest request, ServerCallContext context) {
+        public override Task<RegistrationResponse> Register(RegistrationRequest request, ServerCallContext context) {
             TSLogger.Info($"SYNC server received client registration request {request.Guid} {request.Pid} {request.Timestamp.ToDateTime().ToLocalTime()}");
 
             lock (lockObj) {
                 if (registeredClients.ContainsKey(request.Guid)) {
                     TSLogger.Warning($"SYNC warning: client {request.Guid} is already registered");
-                    return Task.FromResult(new StatusResponse { Success = false, Message = "client is already registered" });
+                    return Task.FromResult(new RegistrationResponse { Success = false, Message = "client is already registered" });
                 }
                 else {
                     TSLogger.Info($"SYNC registering client: {request.Guid}");
                     registeredClients[request.Guid] = new SyncClientInstance(request);
                     LogRegisteredClients();
-                    return Task.FromResult(new StatusResponse { Success = true, Message = "" });
+                    return Task.FromResult(new RegistrationResponse { Success = true, ServerProfileId = ProfileId, Message = "" });
                 }
             }
         }
