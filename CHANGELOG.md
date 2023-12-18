@@ -1,8 +1,9 @@
 # Target Scheduler
 
-## 4.1.1.4 - 2023-12-XX
+## 4.1.2.0 - 2023-12-18
 * Fixed bug in smart plan window - was skipping projects incorrectly
 * Fixed another bug with determining target completed
+* You can now choose to delete acquired image records when deleting the associated target
 * If running as a sync client, TS Condition will now use the server's data for the targets remain or projects remain checks
 
 ## 4.1.1.3 - 2023-12-15
