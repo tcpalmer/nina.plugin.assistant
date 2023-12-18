@@ -297,9 +297,12 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private void Delete(object obj) {
-            string message = $"Delete target '{TargetProxy.Target.Name}'?  This cannot be undone.";
+            bool deleteAcquiredImagesWithTarget = managerVM.GetProfilePreference(profileId).EnableDeleteAcquiredImagesWithTarget;
+            string message = deleteAcquiredImagesWithTarget
+                ? $"Delete target '{TargetProxy.Target.Name}' and all associated acquired image records?  This cannot be undone."
+                : $"Delete target '{TargetProxy.Target.Name}'?  This cannot be undone.";
             if (MyMessageBox.Show(message, "Delete Target?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
-                managerVM.DeleteTarget(TargetProxy.Proxy);
+                managerVM.DeleteTarget(TargetProxy.Proxy, deleteAcquiredImagesWithTarget);
             }
         }
 

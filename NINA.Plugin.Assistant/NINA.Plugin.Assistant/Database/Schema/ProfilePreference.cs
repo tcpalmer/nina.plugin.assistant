@@ -14,6 +14,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public int parkOnWait { get; set; }
         public double exposureThrottle { get; set; }
         public int enableSmartPlanWindow { get; set; }
+        public int enableDeleteAcquiredImagesWithTarget { get; set; }
 
         public int enableSynchronization { get; set; }
         public int syncWaitTimeout { get; set; }
@@ -42,6 +43,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             ParkOnWait = false;
             ExposureThrottle = 125;
             EnableSmartPlanWindow = true;
+            EnableDeleteAcquiredImagesWithTarget = true;
 
             EnableGradeRMS = true;
             EnableGradeStars = true;
@@ -87,6 +89,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 enableSmartPlanWindow = value ? 1 : 0;
                 RaisePropertyChanged(nameof(EnableSmartPlanWindow));
+            }
+        }
+
+        [NotMapped]
+        public bool EnableDeleteAcquiredImagesWithTarget {
+            get { return enableDeleteAcquiredImagesWithTarget == 1; }
+            set {
+                enableDeleteAcquiredImagesWithTarget = value ? 1 : 0;
+                RaisePropertyChanged(nameof(EnableDeleteAcquiredImagesWithTarget));
             }
         }
 

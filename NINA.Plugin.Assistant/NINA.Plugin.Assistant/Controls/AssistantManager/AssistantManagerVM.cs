@@ -1,4 +1,5 @@
-﻿using Assistant.NINAPlugin.Controls.Util;
+﻿using ASCOM.Com;
+using Assistant.NINAPlugin.Controls.Util;
 using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using LinqKit;
@@ -494,6 +495,13 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ShowProfilePreferencesView = Visibility.Visible;
         }
 
+        public ProfilePreference GetProfilePreference(string profileId) {
+            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+                ProfilePreference profilePreference = context.GetProfilePreference(profileId);
+                return profilePreference != null ? profilePreference : new ProfilePreference(profileId);
+            }
+        }
+
         public void SaveProfilePreference(ProfilePreference profilePreference) {
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 if (context.SaveProfilePreference(profilePreference) == null) {
@@ -565,8 +573,11 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public void DeleteProject(Project project) {
+            string profileId = profileService.ActiveProfile.Id.ToString();
+            bool deleteAcquiredImagesWithTarget = GetProfilePreference(profileId).EnableDeleteAcquiredImagesWithTarget;
+
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
-                if (context.DeleteProject(project)) {
+                if (context.DeleteProject(project, deleteAcquiredImagesWithTarget)) {
                     TreeDataItem parentItem = activeTreeDataItem.TreeParent;
                     parentItem.Items.Remove(activeTreeDataItem);
                     parentItem.IsSelected = true;
@@ -599,8 +610,11 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public bool DeleteOrphanedProject(Project project) {
+            string profileId = profileService.ActiveProfile.Id.ToString();
+            bool deleteAcquiredImagesWithTarget = GetProfilePreference(profileId).EnableDeleteAcquiredImagesWithTarget;
+
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
-                if (context.DeleteProject(project)) {
+                if (context.DeleteProject(project, deleteAcquiredImagesWithTarget)) {
                     return true;
                 }
                 else {
@@ -688,8 +702,12 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        public void DeleteTarget(Target target) {
+        public void DeleteTarget(Target target, bool deleteAcquiredImagesWithTarget) {
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+                if (deleteAcquiredImagesWithTarget) {
+                    context.DeleteAcquiredImages(target.Id);
+                }
+
                 if (context.DeleteTarget(target)) {
                     TreeDataItem parentItem = activeTreeDataItem.TreeParent;
                     parentItem.Items.Remove(activeTreeDataItem);

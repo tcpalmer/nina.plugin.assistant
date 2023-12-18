@@ -15,6 +15,7 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
+using System.Transactions;
 
 namespace Assistant.NINAPlugin.Database {
 
@@ -207,6 +208,22 @@ namespace Assistant.NINAPlugin.Database {
             }
         }
 
+        public void DeleteAcquiredImages(int targetId) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    var predicate = PredicateBuilder.New<AcquiredImage>();
+                    predicate = predicate.And(a => a.TargetId == targetId);
+                    AcquiredImageSet.RemoveRange(AcquiredImageSet.Where(predicate));
+                    SaveChanges();
+                    transaction.Commit();
+                }
+                catch (Exception e) {
+                    TSLogger.Error($"error deleting acquired images for target {targetId}: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                }
+            }
+        }
+
         public List<FlatHistory> GetFlatsHistory(DateTime lightSessionDate) {
             var predicate = PredicateBuilder.New<FlatHistory>();
             long lightSessionDateSecs = DateTimeToUnixSeconds(lightSessionDate);
@@ -325,10 +342,15 @@ namespace Assistant.NINAPlugin.Database {
             }
         }
 
-        public bool DeleteProject(Project project) {
+        public bool DeleteProject(Project project, bool deleteAcquiredImagesWithTarget) {
             using (var transaction = Database.BeginTransaction()) {
                 try {
                     project = GetProject(project.Id);
+
+                    if (deleteAcquiredImagesWithTarget) {
+                        AcquiredImageSet.RemoveRange(AcquiredImageSet.Where(a => a.ProjectId == project.Id));
+                    }
+
                     ProjectSet.Remove(project);
                     SaveChanges();
                     transaction.Commit();
