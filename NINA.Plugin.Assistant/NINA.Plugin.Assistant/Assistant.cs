@@ -66,7 +66,7 @@ namespace Assistant.NINAPlugin {
             InitPluginHome();
 
             if (SyncEnabled(profileService)) {
-                SyncManager.Instance.Start(profileService.ActiveProfile.Id.ToString());
+                SyncManager.Instance.Start(profileService);
             }
 
             TSLogger.Info("plugin initialized");
@@ -183,7 +183,7 @@ namespace Assistant.NINAPlugin {
                 if (SyncManager.Instance.IsRunning) {
                     SyncManager.Instance.Shutdown();
                     if (SyncEnabled(profileService)) {
-                        SyncManager.Instance.Start(profileService.ActiveProfile.Id.ToString());
+                        SyncManager.Instance.Start(profileService);
                     }
                 }
             }

@@ -8,7 +8,7 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
 service SchedulerSync {
-	rpc Register (RegistrationRequest) returns (StatusResponse);
+	rpc Register (RegistrationRequest) returns (RegistrationResponse);
 	rpc Unregister (ClientIdRequest) returns (StatusResponse);
 	rpc SyncWait (ClientIdRequest) returns (SyncWaitResponse);
 	rpc RequestAction (ClientIdRequest) returns (ActionResponse);
@@ -39,6 +39,12 @@ message RegistrationRequest {
 message ClientIdRequest {
   string guid = 1;
   ClientState clientState = 2;
+}
+
+message RegistrationResponse {
+	bool success = 1;
+	string serverProfileId = 2;
+	string message = 3;
 }
 
 message StatusResponse {

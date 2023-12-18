@@ -3,6 +3,7 @@
 ## 4.1.1.4 - 2023-12-XX
 * Fixed bug in smart plan window - was skipping projects incorrectly
 * Fixed another bug with determining target completed
+* If running as a sync client, TS Condition will now use the server's data for the targets remain or projects remain checks
 
 ## 4.1.1.3 - 2023-12-15
 * Fixed bug in TS Flats with project flats cadence > 1

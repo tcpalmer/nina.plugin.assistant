@@ -24,12 +24,12 @@ namespace Assistant.NINAPlugin.Plan {
         private ObserverInfo observerInfo;
         private List<IPlanProject> projects;
 
-        public Planner(DateTime atTime, IProfileService profileService, ProfilePreference profilePreferences, bool checkCondition)
-            : this(atTime, profileService, profilePreferences, checkCondition, null) { }
+        public Planner(DateTime atTime, IProfile profile, ProfilePreference profilePreferences, bool checkCondition)
+            : this(atTime, profile, profilePreferences, checkCondition, null) { }
 
-        public Planner(DateTime atTime, IProfileService profileService, ProfilePreference profilePreferences, bool checkCondition, List<IPlanProject> projects) {
+        public Planner(DateTime atTime, IProfile profile, ProfilePreference profilePreferences, bool checkCondition, List<IPlanProject> projects) {
             this.atTime = atTime;
-            this.activeProfile = profileService.ActiveProfile;
+            this.activeProfile = profile;
             this.profilePreferences = profilePreferences;
             this.checkCondition = checkCondition;
             this.projects = projects;
@@ -128,7 +128,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             try {
                 SchedulerPlan plan;
-                while ((plan = new Planner(currentTime, profileService, profilePreferences, false, projects).GetPlan(previousPlanTarget)) != null) {
+                while ((plan = new Planner(currentTime, profileService.ActiveProfile, profilePreferences, false, projects).GetPlan(previousPlanTarget)) != null) {
                     plans.Add(plan);
                     previousPlanTarget = plan.WaitForNextTargetTime != null ? null : plan.PlanTarget;
                     currentTime = plan.WaitForNextTargetTime != null ? (DateTime)plan.WaitForNextTargetTime : plan.TimeInterval.EndTime;

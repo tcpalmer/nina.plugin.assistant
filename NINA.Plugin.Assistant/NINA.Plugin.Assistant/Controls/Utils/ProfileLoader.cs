@@ -34,7 +34,7 @@ namespace Assistant.NINAPlugin.Controls.Util {
             }
 
             try {
-                using FileStream fs = new FileStream(profileMeta.Location, FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
+                using FileStream fs = new FileStream(profileMeta.Location, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 var serializer = new DataContractSerializer(typeof(Profile));
                 profile = (Profile)serializer.ReadObject(fs);
                 Instance.cache.Put(profile, cacheKey);
