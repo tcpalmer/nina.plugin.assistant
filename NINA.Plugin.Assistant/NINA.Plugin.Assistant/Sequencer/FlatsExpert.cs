@@ -343,7 +343,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public Target GetTarget(int projectId, int targetId) {
             using (var context = GetDatabaseContext().GetContext()) {
-                return context.GetTarget(projectId, targetId);
+                return context.GetTargetByProject(projectId, targetId);
             }
         }
 

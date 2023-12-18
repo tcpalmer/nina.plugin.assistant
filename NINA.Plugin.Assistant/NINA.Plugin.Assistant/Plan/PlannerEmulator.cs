@@ -34,7 +34,7 @@ namespace Assistant.NINAPlugin.Plan {
             switch (CallNumber) {
                 case 1: plan = WaitForTime(DateTime.Now.AddSeconds(6)); break;
                 case 2: plan = Plan4(); break;
-                case 3: plan = Plan4(); break;
+                //case 3: plan = Plan4(); break;
                 //case 3: plan = Plan5(); break;
                 //case 5: plan = Plan3(); break;
                 //case 6: plan = Plan3(); break;
@@ -205,6 +205,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             IPlanProject planProject = new PlanProjectEmulator();
             planProject.Name = "Project H15";
+            planProject.DatabaseId = 1;
             planProject.UseCustomHorizon = false;
             planProject.MinimumAltitude = 10;
             planProject.DitherEvery = 0;
@@ -229,12 +230,12 @@ namespace Assistant.NINAPlugin.Plan {
             instructions.Add(new PlanSlew(false));
             instructions.Add(new PlanSwitchFilter(lum));
             instructions.Add(new PlanTakeExposure(lum));
-            instructions.Add(new PlanSwitchFilter(red));
-            instructions.Add(new PlanTakeExposure(red));
-            instructions.Add(new PlanSwitchFilter(grn));
-            instructions.Add(new PlanTakeExposure(grn));
-            instructions.Add(new PlanSwitchFilter(blu));
-            instructions.Add(new PlanTakeExposure(blu));
+            //instructions.Add(new PlanSwitchFilter(red));
+            //instructions.Add(new PlanTakeExposure(red));
+            //instructions.Add(new PlanSwitchFilter(grn));
+            //instructions.Add(new PlanTakeExposure(grn));
+            //instructions.Add(new PlanSwitchFilter(blu));
+            //instructions.Add(new PlanTakeExposure(blu));
 
             return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions, false);
         }
