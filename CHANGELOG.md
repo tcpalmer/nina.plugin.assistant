@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 4.1.2.1 - 2023-12-XX
+* Fixed bug in readout mode handling
+
 ## 4.1.2.0 - 2023-12-18
 * Fixed bug in smart plan window - was skipping projects incorrectly
 * Fixed another bug with determining target completed

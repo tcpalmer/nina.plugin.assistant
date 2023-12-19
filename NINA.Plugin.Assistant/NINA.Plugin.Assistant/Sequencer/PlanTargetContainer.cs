@@ -305,14 +305,10 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void AddSetReadoutMode(IPlanExposure planExposure) {
-            int? readoutMode = planExposure.ReadoutMode;
-            readoutMode = (readoutMode == null || readoutMode < 0) ? 0 : readoutMode;
-
+            short readoutMode = GetReadoutMode(planExposure.ReadoutMode);
             TSLogger.Info($"adding set readout mode: {readoutMode}");
-            SetReadoutMode setReadoutMode = new SetReadoutMode(cameraMediator);
+            SetReadoutMode setReadoutMode = new SetReadoutMode(cameraMediator) { Mode = readoutMode };
             SetItemDefaults(setReadoutMode, nameof(SetReadoutMode));
-
-            setReadoutMode.Mode = (short)readoutMode;
 
             Add(setReadoutMode);
         }
@@ -397,6 +393,10 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private int GetOffset(int? offset) {
             return (int)((int)(offset == null ? cameraMediator.GetInfo().DefaultOffset : offset));
+        }
+
+        private short GetReadoutMode(int? readoutMode) {
+            return readoutMode != null ? (short)readoutMode : cameraMediator.GetInfo().ReadoutMode;
         }
 
         public override object Clone() {
