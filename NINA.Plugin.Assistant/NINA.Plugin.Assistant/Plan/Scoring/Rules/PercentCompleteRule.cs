@@ -18,17 +18,35 @@
 
             int desired = 0;
             int accepted = 0;
+            bool imageGradingEnabled = potentialTarget.Project.EnableGrader;
+
+            if (imageGradingEnabled) {
+                foreach (IPlanExposure planFilter in potentialTarget.ExposurePlans) {
+                    desired += planFilter.Desired;
+                    accepted += planFilter.Accepted;
+                }
+
+                if (accepted > desired) {
+                    accepted = desired;
+                }
+
+                return desired != 0 ? (double)accepted / (double)desired : 0;
+            }
+
+            // With grading off, we have to check acquired/desired relative to the throttle
+            double throttle = scoringEngine.ProfilePreference.ExposureThrottle / 100;
+            double completionTotal = 0;
+            int count = 0;
 
             foreach (IPlanExposure planFilter in potentialTarget.ExposurePlans) {
-                desired += planFilter.Desired;
-                accepted += planFilter.Accepted;
+                if (planFilter.Desired > 0) {
+                    double completion = planFilter.Acquired / (planFilter.Desired * throttle);
+                    completionTotal += completion < 1 ? completion : 1;
+                    count++;
+                }
             }
 
-            if (accepted > desired) {
-                accepted = desired;
-            }
-
-            return desired != 0 ? (double)accepted / (double)desired : 0;
+            return completionTotal / count;
         }
     }
 }

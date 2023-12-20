@@ -1,4 +1,6 @@
-﻿namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
+﻿using NINA.Plugin.Assistant.Shared.Utility;
+
+namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
 
     public class MosaicCompletionRule : ScoringRule {
 
@@ -26,15 +28,18 @@
                 return 0;
             }
 
+            bool imageGradingEnabled = potentialTarget.Project.EnableGrader;
+            double exposureThrottle = scoringEngine.ProfilePreference.ExposureThrottle;
+
             double sum = 0;
             foreach (IPlanTarget planTarget in planProject.Targets) {
                 if (planTarget.DatabaseId != potentialTarget.DatabaseId) {
-                    sum += CompletionPercentage(planTarget);
+                    sum += CompletionPercentage(planTarget, imageGradingEnabled, exposureThrottle);
                 }
             }
 
             double averageCompletionRateOthers = sum / (planProject.Targets.Count - 1);
-            double completionRatePotential = CompletionPercentage(potentialTarget);
+            double completionRatePotential = CompletionPercentage(potentialTarget, imageGradingEnabled, exposureThrottle);
 
             if (completionRatePotential >= averageCompletionRateOthers) {
                 return 0;
@@ -43,20 +48,37 @@
             return averageCompletionRateOthers - completionRatePotential;
         }
 
-        private double CompletionPercentage(IPlanTarget planTarget) {
+        private double CompletionPercentage(IPlanTarget planTarget, bool imageGradingEnabled, double exposureThrottle) {
             int desired = 0;
             int accepted = 0;
 
+            if (imageGradingEnabled) {
+                foreach (IPlanExposure planFilter in planTarget.ExposurePlans) {
+                    desired += planFilter.Desired;
+                    accepted += planFilter.Accepted;
+                }
+
+                if (accepted > desired) {
+                    accepted = desired;
+                }
+
+                return desired != 0 ? (double)accepted / (double)desired : 0;
+            }
+
+            // With grading off, we have to check acquired/desired relative to the throttle
+            double completionTotal = 0;
+            double throttle = exposureThrottle / 100;
+            int count = 0;
+
             foreach (IPlanExposure planFilter in planTarget.ExposurePlans) {
-                desired += planFilter.Desired;
-                accepted += planFilter.Accepted;
+                if (planFilter.Desired > 0) {
+                    double completion = planFilter.Acquired / (planFilter.Desired * throttle);
+                    completionTotal += completion < 1 ? completion : 1;
+                    count++;
+                }
             }
 
-            if (accepted > desired) {
-                accepted = desired;
-            }
-
-            return desired != 0 ? (double)accepted / (double)desired : 0;
+            return completionTotal / count;
         }
     }
 }

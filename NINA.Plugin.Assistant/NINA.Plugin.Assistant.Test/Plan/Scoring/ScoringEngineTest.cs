@@ -1,4 +1,5 @@
-﻿using Assistant.NINAPlugin.Plan;
+﻿using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Plan.Scoring;
 using Assistant.NINAPlugin.Plan.Scoring.Rules;
 using FluentAssertions;
@@ -19,13 +20,14 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring {
         [Test]
         public void TestOneRule() {
             Mock<IProfile> profileMock = new Mock<IProfile>();
+            ProfilePreference profilePreference = new ProfilePreference();
 
             Dictionary<string, double> ruleWeights = new Dictionary<string, double>();
             ruleWeights.Add("TestRule1", 75);
             List<IScoringRule> rules = new List<IScoringRule>();
             rules.Add(new TestRule("TestRule1", 0.5));
 
-            ScoringEngine sut = new ScoringEngine(profileMock.Object, DateTime.Now, null);
+            ScoringEngine sut = new ScoringEngine(profileMock.Object, profilePreference, DateTime.Now, null);
             sut.RuleWeights = ruleWeights;
             sut.Rules = rules;
 
@@ -37,6 +39,7 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring {
         public void TestTwoRules() {
             Logger.SetLogLevel(LogLevelEnum.DEBUG);
             Mock<IProfile> profileMock = new Mock<IProfile>();
+            ProfilePreference profilePreference = new ProfilePreference();
 
             Dictionary<string, double> ruleWeights = new Dictionary<string, double>();
             ruleWeights.Add("TestRule1", 100);
@@ -45,7 +48,7 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring {
             rules.Add(new TestRule("TestRule1", 1));
             rules.Add(new TestRule("TestRule2", 0.5));
 
-            ScoringEngine sut = new ScoringEngine(profileMock.Object, DateTime.Now, null);
+            ScoringEngine sut = new ScoringEngine(profileMock.Object, profilePreference, DateTime.Now, null);
             sut.RuleWeights = ruleWeights;
             sut.Rules = rules;
 

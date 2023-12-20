@@ -73,7 +73,7 @@ namespace Assistant.NINAPlugin.Plan {
                         return new SchedulerPlan(atTime, projects, (DateTime)waitForVisibleNow, !checkCondition);
                     }
 
-                    ScoringEngine scoringEngine = new ScoringEngine(activeProfile, atTime, previousPlanTarget);
+                    ScoringEngine scoringEngine = new ScoringEngine(activeProfile, profilePreferences, atTime, previousPlanTarget);
                     IPlanTarget planTarget = SelectTargetByScore(projects, scoringEngine);
 
                     if (planTarget != null) {
@@ -156,7 +156,13 @@ namespace Assistant.NINAPlugin.Plan {
                     planTarget.Rejected = false;
                     planTarget.RejectedReason = null;
                     foreach (IPlanExposure planExposure in planTarget.ExposurePlans) {
-                        planExposure.Accepted += planExposure.PlannedExposures;
+                        if (planProject.EnableGrader) {
+                            planExposure.Accepted += planExposure.PlannedExposures;
+                        }
+                        else {
+                            planExposure.Acquired += planExposure.PlannedExposures;
+                        }
+
                         planExposure.PlannedExposures = 0;
                         planExposure.Rejected = false;
                         planExposure.RejectedReason = null;
