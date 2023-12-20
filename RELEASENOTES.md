@@ -1,7 +1,8 @@
 # Release Notes
 
-## 4.1.2.1 - 2023-12-XX
+## 4.1.2.2 - 2023-12-XX
 * Fixed bug in readout mode handling
+* Fixed bug with Percent Complete and Mosaic Complete scoring rules if image grading is off
 
 ## 4.1.2.0 - 2023-12-18
 * Fixed bug in smart plan window - was skipping projects incorrectly

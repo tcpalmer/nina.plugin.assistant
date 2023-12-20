@@ -1,6 +1,5 @@
-﻿using Assistant.NINAPlugin.Plan.Scoring.Rules;
-using Assistant.NINAPlugin.Util;
-using NINA.Core.Utility;
+﻿using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan.Scoring.Rules;
 using NINA.Profile.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -9,6 +8,7 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
 
     public interface IScoringEngine {
         IProfile ActiveProfile { get; }
+        ProfilePreference ProfilePreference { get; set; }
         DateTime AtTime { get; }
         IPlanTarget PreviousPlanTarget { get; }
         Dictionary<string, double> RuleWeights { get; set; }
@@ -20,13 +20,15 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
     public class ScoringEngine : IScoringEngine {
 
         public IProfile ActiveProfile { get; }
+        public ProfilePreference ProfilePreference { get; set; }
         public DateTime AtTime { get; }
         public IPlanTarget PreviousPlanTarget { get; }
         public Dictionary<string, double> RuleWeights { get; set; }
         public List<IScoringRule> Rules { get; set; }
 
-        public ScoringEngine(IProfile activeProfile, DateTime atTime, IPlanTarget previousPlanTarget) {
+        public ScoringEngine(IProfile activeProfile, ProfilePreference ProfilePreference, DateTime atTime, IPlanTarget previousPlanTarget) {
             this.ActiveProfile = activeProfile;
+            this.ProfilePreference = ProfilePreference;
             this.PreviousPlanTarget = previousPlanTarget;
             this.AtTime = atTime;
         }
