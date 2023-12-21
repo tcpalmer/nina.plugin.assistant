@@ -1,6 +1,6 @@
 # Target Scheduler
 
-## 4.1.2.2 - 2023-12-XX
+## 4.1.2.2 - 2023-12-21
 * Fixed bug in readout mode handling
 * Fixed bug with Percent Complete and Mosaic Complete scoring rules if image grading is off
 
