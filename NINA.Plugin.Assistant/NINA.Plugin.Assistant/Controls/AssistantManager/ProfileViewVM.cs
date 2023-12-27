@@ -1,6 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.Util;
 using NINA.Core.Utility;
+using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;
@@ -45,6 +45,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ProfileSettingsCommand = new RelayCommand(ViewProfilePreferences);
             AddProjectCommand = new RelayCommand(AddProject);
             PasteProjectCommand = new RelayCommand(PasteProject);
+            ImportCommand = new RelayCommand(DisplayProfileImport);
             ViewProjectCommand = new RelayCommand(ViewProject);
             CopyProjectCommand = new RelayCommand(CopyProject);
         }
@@ -58,9 +59,28 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             return projects;
         }
 
+        private bool showProfileImportView = false;
+        public bool ShowProfileImportView {
+            get => showProfileImportView;
+            set {
+                showProfileImportView = value;
+                RaisePropertyChanged(nameof(ShowProfileImportView));
+            }
+        }
+
+        private ProfileImportViewVM profileImportVM;
+        public ProfileImportViewVM ProfileImportVM {
+            get => profileImportVM;
+            set {
+                profileImportVM = value;
+                RaisePropertyChanged(nameof(ProfileImportVM));
+            }
+        }
+
         public ICommand ProfileSettingsCommand { get; private set; }
         public ICommand AddProjectCommand { get; private set; }
         public ICommand PasteProjectCommand { get; private set; }
+        public ICommand ImportCommand { get; private set; }
         public ICommand ViewProjectCommand { get; private set; }
         public ICommand CopyProjectCommand { get; private set; }
 
@@ -74,6 +94,13 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private void PasteProject(object obj) {
             managerVM.PasteProject(parentItem);
+        }
+
+        private void DisplayProfileImport(object obj) {
+            ShowProfileImportView = !ShowProfileImportView;
+            if (ShowProfileImportView) {
+                ProfileImportVM = new ProfileImportViewVM(managerVM, parentItem, profileService);
+            }
         }
 
         private void CopyProject(object obj) {

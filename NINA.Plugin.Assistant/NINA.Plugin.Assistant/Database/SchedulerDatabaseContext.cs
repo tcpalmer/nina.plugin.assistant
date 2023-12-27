@@ -2,6 +2,7 @@
 using Assistant.NINAPlugin.Controls.AcquiredImages;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan.Scoring.Rules;
+using Assistant.NINAPlugin.Util;
 using LinqKit;
 using NINA.Core.Utility;
 using NINA.Plugin.Assistant.Shared.Utility;
@@ -368,6 +369,10 @@ namespace Assistant.NINAPlugin.Database {
             using (var transaction = Database.BeginTransaction()) {
                 try {
                     project = GetProject(project.Id);
+
+                    List<string> currentNames = project.Targets.Select(t => t.Name).ToList();
+                    target.Name = Utils.MakeUniqueName(currentNames, target.Name);
+
                     project.Targets.Add(target);
                     SaveChanges();
                     transaction.Commit();

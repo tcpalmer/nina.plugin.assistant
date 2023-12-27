@@ -4,10 +4,13 @@ using NINA.Core.Model.Equipment;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 
 namespace Assistant.NINAPlugin.Util {
 
@@ -62,6 +65,32 @@ namespace Assistant.NINAPlugin.Util {
             }
 
             return name + " (1)";
+        }
+
+        public static string MakeUniqueName(List<string> currentNames, string name) {
+            if (string.IsNullOrEmpty(name)) {
+                return " (1)";
+            }
+
+            name = name.Trim();
+            if (currentNames == null || currentNames.Count == 0 || !currentNames.Contains(name)) {
+                return name;
+            }
+
+            // Find current with max count
+            List<int> dupCounts = new List<int>();
+            string baseName = Regex.Replace(name, @" \((\d+)\)$", "");
+            Regex re = new Regex($"^{baseName} " + @"\((\d+)\)$");
+
+            foreach (string current in currentNames) {
+                Match match = re.Match(current);
+                if (match.Success) {
+                    dupCounts.Add(int.Parse(match.Groups[1].Value));
+                }
+            }
+
+            int newMax = dupCounts.Count == 0 ? 1 : dupCounts.Max() + 1;
+            return $"{baseName} ({newMax})";
         }
 
         public static string FormatDateTimeFull(DateTime? dateTime) {

@@ -510,7 +510,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        public void AddNewProject(TreeDataItem parentItem) {
+        public Project AddNewProject(TreeDataItem parentItem) {
             ProfileMeta profile = (ProfileMeta)parentItem.Data;
             Project project = new Project(profile.Id.ToString());
             project.Name = "<new project>";
@@ -522,9 +522,11 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     parentItem.Items.Add(projectItem);
                     projectItem.IsSelected = true;
                     parentItem.IsExpanded = true;
+                    return newProject;
                 }
                 else {
                     Notification.ShowError("Failed to save new Scheduler Project (see log for details)");
+                    return null;
                 }
             }
         }
@@ -643,8 +645,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        public void AddTargets(Project project, List<Target> targets) {
-            TreeDataItem parentItem = activeTreeDataItem;
+        public void AddTargets(Project project, List<Target> targets, TreeDataItem parentItem = null) {
+            parentItem = parentItem == null ? activeTreeDataItem : parentItem;
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 foreach (Target target in targets) {
                     Target newTarget = context.AddNewTarget(project, target);

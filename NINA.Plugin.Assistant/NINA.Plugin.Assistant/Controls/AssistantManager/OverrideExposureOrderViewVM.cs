@@ -1,10 +1,7 @@
-﻿using Assistant.NINAPlugin.Util;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;
-using System;
 using System.Collections.ObjectModel;
-using System.Text;
 using System.Windows.Input;
 
 namespace Assistant.NINAPlugin.Controls.AssistantManager {

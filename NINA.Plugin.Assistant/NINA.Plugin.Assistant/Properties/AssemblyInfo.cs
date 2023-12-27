@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 [assembly: Guid("B4541BA9-7B07-4D71-B8E1-6C73D4933EA0")]
 
 [assembly: AssemblyTitle("Target Scheduler")]
-[assembly: AssemblyDescription("An automated target scheduler for NINA *BETA RELEASE*")]
+[assembly: AssemblyDescription("An automated target scheduler for NINA")]
 [assembly: AssemblyCompany("Tom Palmer @tcpalmer")]
 [assembly: AssemblyProduct("Assistant.NINAPlugin")]
 [assembly: AssemblyCopyright("Copyright © 2023")]
@@ -13,8 +13,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("windows")]
 
-[assembly: AssemblyVersion("4.1.2.2")]
-[assembly: AssemblyFileVersion("4.1.2.2")]
+[assembly: AssemblyVersion("4.2.0.0")]
+[assembly: AssemblyFileVersion("4.2.0.0")]
 
 // The minimum Version of N.I.N.A. that this plugin is compatible with
 [assembly: AssemblyMetadata("MinimumApplicationVersion", "3.0.0.2001")]
@@ -29,6 +29,16 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyMetadata("AltScreenshotURL", "https://raw.githubusercontent.com/tcpalmer/nina.plugin.assistant/main/NINA.Plugin.Assistant/assets/screenshot-2.png?raw=true")]
 
 [assembly: AssemblyMetadata("LongDescription", @"The Target Scheduler Plugin is designed to provide a higher level of automation than is typically achievable with NINA. Specifically, it maintains a database of imaging projects describing DSO targets and associated exposure plans. Based on various criteria and preferences, it can decide at any given time what project/target should be actively imaging. A user will enter the desired projects, targets, and preferences into a UI exposed by the plugin. At runtime, a single new instruction for the NINA Advanced Sequencer will interact with the planning engine to determine the best target for imaging at each point throughout a night. The instruction will manage the slew/center to the target, switching filters, taking exposures, and dithering - all while transparently interacting with the surrounding NINA triggers and conditions.
+
+## Major Features
+* Easy to use interface for entering and managing projects, targets, and exposure plans
+* Multiple target import options - NINA catalog, NINA Framing Assistant, attached planetarium programs, Telescopius CSV, and more
+* Dynamic target selection based on visibility and flexible selection criteria
+* Plan preview
+* Image grading
+* Automated flats support
+* Synchronization across multiple instances of NINA
+* Support for 24x7 sequences for longterm unattended operation
 
 If you like this plugin and it saves you time, please consider [Buying Me a Beer](https://www.buymeacoffee.com/tcpalmer).
 

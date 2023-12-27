@@ -2,6 +2,7 @@
 using FluentAssertions;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -39,6 +40,27 @@ namespace NINA.Plugin.Assistant.Test.Util {
         public void TestCopiedItemName(string name, string expected) {
             string sut = Utils.CopiedItemName(name);
             sut.Should().Be(expected);
+        }
+
+
+        [Test]
+        public void TestMakeUniqueName() {
+            Utils.MakeUniqueName(null, null).Should().Be(" (1)");
+            Utils.MakeUniqueName(null, "").Should().Be(" (1)");
+            Utils.MakeUniqueName(null, "foo").Should().Be("foo");
+            Utils.MakeUniqueName(new List<string>(), "foo").Should().Be("foo");
+
+            List<string> current = new List<string>() { "foo", "bar" };
+            Utils.MakeUniqueName(current, "foo").Should().Be("foo (1)");
+
+            current.Add("foo (16)");
+            Utils.MakeUniqueName(current, "foo").Should().Be("foo (17)");
+
+            current.Add("foo (1)");
+            current.Add("foo (8)");
+            Utils.MakeUniqueName(current, "foo").Should().Be("foo (17)");
+            Utils.MakeUniqueName(current, "foo (7)").Should().Be("foo (7)");
+            Utils.MakeUniqueName(current, "foo (8)").Should().Be("foo (17)");
         }
 
         [Test]
@@ -95,9 +117,6 @@ namespace NINA.Plugin.Assistant.Test.Util {
             finally {
                 Directory.Delete(tempDir, true);
             }
-
-
         }
     }
-
 }

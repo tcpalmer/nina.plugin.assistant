@@ -1,5 +1,8 @@
 # Release Notes
 
+## 4.2.0.0 - 2023-12-XX
+* Added ability to bulk load targets from CSV files
+
 ## 4.1.2.2 - 2023-12-21
 * Fixed bug in readout mode handling
 * Fixed bug with Percent Complete and Mosaic Complete scoring rules if image grading is off
