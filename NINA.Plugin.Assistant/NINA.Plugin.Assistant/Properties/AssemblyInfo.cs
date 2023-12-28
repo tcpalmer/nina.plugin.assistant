@@ -32,13 +32,14 @@ using System.Runtime.InteropServices;
 
 ## Major Features
 * Easy to use interface for entering and managing projects, targets, and exposure plans
-* Multiple target import options - NINA catalog, NINA Framing Assistant, attached planetarium programs, Telescopius CSV, and more
-* Dynamic target selection based on visibility and flexible selection criteria
-* Plan preview
+* Multiple target import options: NINA catalog, NINA Framing Assistant (including mosaic panels), attached planetarium programs, Telescopius CSV, and more
+* Dynamic target selection based on visibility and weighted scoring rules
+* Flexible exposure/filter planning including moon avoidance
+* Plan previewing
 * Image grading
 * Automated flats support
 * Synchronization across multiple instances of NINA
-* Support for 24x7 sequences for longterm unattended operation
+* Support for 24x7 sequences for long term unattended operation
 
 If you like this plugin and it saves you time, please consider [Buying Me a Beer](https://www.buymeacoffee.com/tcpalmer).
 

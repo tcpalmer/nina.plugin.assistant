@@ -1,6 +1,6 @@
 # Target Scheduler
 
-## 4.2.0.0 - 2023-12-XX
+## 4.2.0.0 - 2023-12-28
 * Added ability to bulk load targets from CSV files
 
 ## 4.1.2.2 - 2023-12-21
