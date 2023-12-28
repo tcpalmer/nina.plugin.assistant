@@ -84,6 +84,31 @@
                         Stretch="Uniform" />
                 </Grid>
             </Button>
+            <Button
+                Width="25"
+                Height="25"
+                Margin="10,0,0,0"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Right"
+                Command="{Binding ImportCommand}"
+                Style="{StaticResource BackgroundButton}"
+                ToolTip="Import Multiple Targets">
+                <Grid>
+                    <Path
+                        Margin="5"
+                        Data="{StaticResource SS_ImportSVG}"
+                        Fill="{StaticResource ButtonForegroundBrush}"
+                        Stretch="Uniform" />
+                </Grid>
+            </Button>
+
+        </StackPanel>
+
+        <StackPanel
+            Margin="12,0,0,6"
+            Orientation="Vertical"
+            Visibility="{Binding ShowProfileImportView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+            <uc:ProfileImportView DataContext="{Binding ProfileImportVM}" />
         </StackPanel>
 
         <Grid>
