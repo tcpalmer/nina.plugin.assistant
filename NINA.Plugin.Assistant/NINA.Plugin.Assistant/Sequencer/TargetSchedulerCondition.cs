@@ -84,12 +84,34 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override void SequenceBlockFinished() {
+            TSLogger.Info($"TargetSchedulerCondition: SequenceBlockFinished");
             checkIsActive = true;
         }
 
         public override void ResetProgress() {
+            TSLogger.Info($"TargetSchedulerCondition: ResetProgress");
             Status = SequenceEntityStatus.CREATED;
             checkIsActive = true;
+        }
+
+        public override void Initialize() {
+            TSLogger.Info($"TargetSchedulerCondition: Initialize");
+        }
+
+        public override void SequenceBlockInitialize() {
+            TSLogger.Info($"TargetSchedulerCondition: SequenceBlockInitialize");
+        }
+
+        public override void SequenceBlockStarted() {
+            TSLogger.Info($"TargetSchedulerCondition: SequenceBlockStarted");
+        }
+
+        public override void SequenceBlockTeardown() {
+            TSLogger.Info($"TargetSchedulerCondition: SequenceBlockTeardown");
+        }
+
+        public override void Teardown() {
+            TSLogger.Info($"TargetSchedulerCondition: Teardown");
         }
 
         private bool HasRemainingTargets() {
@@ -98,8 +120,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 bool result = planner.GetPlan(null) != null;
                 TSLogger.Info($"TargetSchedulerCondition check for remaining targets, continue={result}");
                 return result;
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Error($"exception determining remaining targets: {ex.StackTrace}");
                 throw new SequenceEntityFailedException($"TargetSchedulerCondition: exception determining remaining targets: {ex.Message}", ex);
             }
@@ -111,8 +132,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 bool result = planner.HasActiveProjects(null);
                 TSLogger.Info($"TargetSchedulerCondition check for active projects, continue={result}");
                 return result;
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Error($"exception determining active projects: {ex.StackTrace}");
                 throw new SequenceEntityFailedException($"TargetSchedulerCondition: exception determining active projects: {ex.Message}", ex);
             }
@@ -124,8 +144,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 bool result = flatsExpert.GetNeededFlats(profileService.ActiveProfile, DateTime.Now).Count > 0;
                 TSLogger.Info($"TargetSchedulerCondition check for needed flats, continue={result}");
                 return result;
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Error($"exception determining needed flats: {ex.StackTrace}");
                 throw new SequenceEntityFailedException($"TargetSchedulerCondition: exception determining needed flats: {ex.Message}", ex);
             }
@@ -149,8 +168,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 TSLogger.Warning($"sync client could not load server profile id={serverProfileId}, defaulting to sync client profile");
                 return profileService.ActiveProfile;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 TSLogger.Error($"sync client failed to load server profile id={serverProfileId}: {e.Message}");
                 return profileService.ActiveProfile;
             }
@@ -164,6 +182,5 @@ namespace Assistant.NINAPlugin.Sequencer {
         public override string ToString() {
             return $"Condition: {nameof(TargetSchedulerCondition)} mode={SelectedMode}";
         }
-
     }
 }

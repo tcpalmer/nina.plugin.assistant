@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using NINA.Core.Model;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.SyncService.Sync;
-using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.SequenceItem;
 using Scheduler.SyncService;
@@ -78,16 +77,13 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
 
                     TSLogger.Info("TargetSchedulerSyncWait: server detected all sync clients are ready (or timed out waiting)");
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     if (e is TaskCanceledException) {
                         TSLogger.Warning("TargetSchedulerSyncWait: task was canceled");
-                    }
-                    else {
+                    } else {
                         TSLogger.Error("TargetSchedulerSyncWait: server exception", e);
                     }
-                }
-                finally {
+                } finally {
                     SyncServer.Instance.State = ServerState.Ready;
                     progress?.Report(new ApplicationStatus() { Status = "" });
                 }
@@ -102,19 +98,32 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                     // Allow time for updated client state to propagate
                     await Task.Delay(SyncManager.CLIENT_KEEPALIVE_PERIOD + 500, token);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     if (e is TaskCanceledException) {
                         TSLogger.Warning("TargetSchedulerSyncWait: task was canceled");
-                    }
-                    else {
+                    } else {
                         TSLogger.Error("TargetSchedulerSyncWait: client exception", e);
                     }
-                }
-                finally {
+                } finally {
                     progress?.Report(new ApplicationStatus() { Status = "" });
                 }
             }
+        }
+
+        public override void SequenceBlockInitialize() {
+            TSLogger.Debug("TargetSchedulerSyncWait: SequenceBlockInitialize");
+        }
+
+        public override void SequenceBlockStarted() {
+            TSLogger.Debug("TargetSchedulerSyncWait: SequenceBlockStarted");
+        }
+
+        public override void SequenceBlockFinished() {
+            TSLogger.Debug("TargetSchedulerSyncWait: SequenceBlockFinished");
+        }
+
+        public override void SequenceBlockTeardown() {
+            TSLogger.Debug("TargetSchedulerSyncWait: SequenceBlockTeardown");
         }
 
         private int GetSyncWaitTimeout() {

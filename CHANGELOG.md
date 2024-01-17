@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 4.2.0.1 - 2024-01-XX
+* Added additional logging of sequence item lifecycle events
+
 ## 4.2.0.0 - 2023-12-28
 * Added ability to bulk load targets from CSV files
 
