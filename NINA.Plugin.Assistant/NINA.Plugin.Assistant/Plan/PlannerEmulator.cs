@@ -31,9 +31,10 @@ namespace Assistant.NINAPlugin.Plan {
             TSLogger.Info($"PlannerEmulator.GetPlan: {CallNumber}");
             SchedulerPlan plan;
 
+            /*
             switch (CallNumber) {
                 case 1: plan = WaitForTime(DateTime.Now.AddSeconds(6)); break;
-                case 2: plan = Plan4(); break;
+                case 2: plan = SyncPlan1(); break;
                 //case 3: plan = Plan4(); break;
                 //case 3: plan = Plan5(); break;
                 //case 5: plan = Plan3(); break;
@@ -42,8 +43,9 @@ namespace Assistant.NINAPlugin.Plan {
                 default:
                     CallNumber = 0;
                     return null;
-            }
+            }*/
 
+            plan = SyncPlan1();
             plan.IsEmulator = true;
             return plan;
         }
@@ -341,11 +343,11 @@ namespace Assistant.NINAPlugin.Plan {
             planTarget.Rotation = 12.345;
             planTarget.ROI = 100;
 
-            IPlanExposure lum = GetExposurePlan("Lum", 8, 139, 21, 3, 50);
+            IPlanExposure lum = GetExposurePlan("Lum", 20, 139, 21, 3, 50);
             lum.ReadoutMode = 0;
             planTarget.ExposurePlans.Add(lum);
 
-            IPlanExposure red = GetExposurePlan("Red", 8, 139, 21, 3, 51);
+            IPlanExposure red = GetExposurePlan("Red", 20, 139, 21, 3, 51);
             red.ReadoutMode = 0;
             planTarget.ExposurePlans.Add(red);
 

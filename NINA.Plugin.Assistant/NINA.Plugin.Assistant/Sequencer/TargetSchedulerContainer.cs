@@ -149,7 +149,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override void Initialize() {
-            TSLogger.Debug("Scheduler instruction: Initialize");
+            TSLogger.Debug("TargetSchedulerContainer: Initialize");
 
             if (SchedulerProgress != null) {
                 SchedulerProgress.Reset();
@@ -171,8 +171,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             if (Parent == null) {
                 SequenceBlockTeardown();
-            }
-            else {
+            } else {
                 BeforeWaitContainer.AttachNewParent(Parent);
                 AfterWaitContainer.AttachNewParent(Parent);
                 BeforeTargetContainer.AttachNewParent(Parent);
@@ -186,7 +185,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override void ResetProgress() {
-            TSLogger.Debug("Scheduler instruction: ResetProgress");
+            TSLogger.Debug("TargetSchedulerContainer: ResetProgress");
 
             BeforeWaitContainer.ResetProgress();
             AfterWaitContainer.ResetProgress();
@@ -203,13 +202,33 @@ namespace Assistant.NINAPlugin.Sequencer {
             base.ResetProgress();
         }
 
+        public override void SequenceBlockInitialize() {
+            TSLogger.Debug("TargetSchedulerContainer: SequenceBlockInitialize");
+        }
+
+        public override void SequenceBlockStarted() {
+            TSLogger.Debug("TargetSchedulerContainer: SequenceBlockStarted");
+        }
+
+        public override void SequenceBlockFinished() {
+            TSLogger.Debug("TargetSchedulerContainer: SequenceBlockFinished");
+        }
+
+        public override void SequenceBlockTeardown() {
+            TSLogger.Debug("TargetSchedulerContainer: SequenceBlockTeardown");
+        }
+
+        public override Task Interrupt() {
+            TSLogger.Debug("TargetSchedulerContainer: Interrupt");
+            return base.Interrupt();
+        }
+
         public override void Teardown() {
-            TSLogger.Debug("Scheduler instruction: Teardown");
-            base.Teardown();
+            TSLogger.Debug("TargetSchedulerContainer: Teardown");
         }
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-            TSLogger.Debug("Scheduler instruction: Execute");
+            TSLogger.Debug("TargetSchedulerContainer: Execute");
 
             IPlanTarget previousPlanTarget = null;
             previousSchedulerPlan = null;
@@ -253,8 +272,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                     await ExecuteEventContainer(AfterWaitContainer, progress, token);
                     SchedulerProgress.End();
-                }
-                else {
+                } else {
                     try {
                         IPlanTarget planTarget = plan.PlanTarget;
 
@@ -283,22 +301,19 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                         previousPlanTarget = planTarget;
                         previousSchedulerPlan = plan;
-                    }
-                    catch (Exception ex) {
+                    } catch (Exception ex) {
                         if (Utils.IsCancelException(ex)) {
                             TSLogger.Warning("sequence was canceled or interrupted, target scheduler execution is incomplete");
                             SchedulerProgress.Reset();
                             Status = SequenceEntityStatus.CREATED;
                             token.ThrowIfCancellationRequested();
-                        }
-                        else {
+                        } else {
                             TSLogger.Error($"exception executing plan: {ex.Message}\n{ex}");
                             throw ex is SequenceEntityFailedException
                                 ? ex
                                 : new SequenceEntityFailedException($"exception executing plan: {ex.Message}", ex);
                         }
-                    }
-                    finally {
+                    } finally {
                         ClearTarget();
                         TSLogger.Info("-- END PLAN EXECUTION ----------------------------------------------------------");
                     }
@@ -319,8 +334,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 try {
                     await container.Execute(progress, token);
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     SchedulerProgress.End();
                     TSLogger.Error($"exception executing {container.Name} instruction container: {ex}");
 
@@ -329,8 +343,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
 
                     throw new SequenceEntityFailedException($"exception executing {container.Name} instruction container: {ex.Message}", ex);
-                }
-                finally {
+                } finally {
                     TSLogger.Info($"done executing '{container.Name}' event instructions, resetting progress for next execution");
                     container.ResetAll();
                 }
@@ -356,8 +369,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 SequenceCommands.SetTelescopeTracking(telescopeMediator, TrackingMode.Stopped, token);
                 _ = SequenceCommands.ParkTelescope(telescopeMediator, guiderMediator, progress, token);
                 parked = true;
-            }
-            else {
+            } else {
                 TSLogger.Info($"stopping guiding/tracking, then waiting for next target to be available at {Utils.FormatDateTimeFull(waitForNextTargetTime)}");
                 SequenceCommands.StopGuiding(guiderMediator, token);
                 SequenceCommands.SetTelescopeTracking(telescopeMediator, TrackingMode.Stopped, token);

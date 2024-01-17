@@ -11,7 +11,6 @@ using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.SyncService.Sync;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Container;
-using NINA.Sequencer.Container.ExecutionStrategy;
 using NINA.Sequencer.SequenceItem;
 using NINA.Sequencer.SequenceItem.Platesolving;
 using NINA.WPF.Base.Interfaces.Mediator;
@@ -103,9 +102,26 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public override void ResetProgress() {
             TSLogger.Debug("TargetSchedulerSyncContainer: ResetProgress");
+            // TODO: do we really want to do this here??  Better in SequenceBlockFinished?
             if (SyncManager.Instance.RunningClient) {
                 SyncClient.Instance.SetClientState(ClientState.Ready);
             }
+        }
+
+        public override void SequenceBlockInitialize() {
+            TSLogger.Debug("TargetSchedulerSyncContainer: SequenceBlockInitialize");
+        }
+
+        public override void SequenceBlockStarted() {
+            TSLogger.Debug("TargetSchedulerSyncContainer: SequenceBlockStarted");
+        }
+
+        public override void SequenceBlockFinished() {
+            TSLogger.Debug("TargetSchedulerSyncContainer: SequenceBlockFinished");
+        }
+
+        public override void SequenceBlockTeardown() {
+            TSLogger.Debug("TargetSchedulerSyncContainer: SequenceBlockTeardown");
         }
 
         public override void Teardown() {
@@ -159,16 +175,14 @@ namespace Assistant.NINAPlugin.Sequencer {
                         TSLogger.Info($"SYNC client received solve/rotate: {syncedSolveRotate.SolveRotateId} for {syncedSolveRotate.TargetName}");
                         await DoSyncedSolveRotate(syncedSolveRotate, progress, token);
                     }
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     if (Utils.IsCancelException(ex)) {
                         TSLogger.Warning("TargetSchedulerSyncContainer was canceled or interrupted, execution is incomplete");
                         syncImageSaveWatcher.Stop();
                         Status = SequenceEntityStatus.CREATED;
                         token.ThrowIfCancellationRequested();
                         return;
-                    }
-                    else {
+                    } else {
                         TSLogger.Error($"TargetSchedulerSyncContainer exception (will continue): {ex}");
                     }
                 }
@@ -211,8 +225,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             if (!rotatorMediator.GetInfo().Connected) {
                 TSLogger.Warning($"SYNC client received solve/rotate but no rotator is connected: skipping and continuing, id={syncedSolveRotate.SolveRotateId}");
                 await Task.Delay(2500, token);
-            }
-            else {
+            } else {
                 TSLogger.Info($"SYNC client starting solve/rotate, id={syncedSolveRotate.SolveRotateId}");
                 SolveAndRotate solveAndRotate = new SolveAndRotate(profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, plateSolverFactory, windowServiceFactory);
                 solveAndRotate.PositionAngle = syncedSolveRotate.TargetPositionAngle;
