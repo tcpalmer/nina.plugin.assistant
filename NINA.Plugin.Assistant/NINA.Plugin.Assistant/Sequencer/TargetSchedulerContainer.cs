@@ -248,6 +248,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                     SchedulerProgress.End();
                     SetSyncServerState(ServerState.EndSyncContainers);
+                    InformTSConditionChecks();
 
                     TSLogger.Info("planner returned empty plan, done");
                     return;
@@ -507,6 +508,21 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             return null;
+        }
+
+        private void InformTSConditionChecks() {
+            SequenceContainer container = (Parent as SequenceContainer);
+            while (container != null) {
+                var conditions = container.GetConditionsSnapshot();
+                foreach (var condition in conditions) {
+                    TargetSchedulerCondition tsCondition = condition as TargetSchedulerCondition;
+                    if (tsCondition != null) {
+                        tsCondition.EnableCheckIsActive();
+                    }
+                }
+
+                container = container.Parent as SequenceContainer;
+            }
         }
 
         private void SetTargetForCustomEventContainers() {

@@ -31,6 +31,10 @@ namespace Assistant.NINAPlugin.Plan {
             TSLogger.Info($"PlannerEmulator.GetPlan: {CallNumber}");
             SchedulerPlan plan;
 
+            if (CallNumber < 3) {
+                plan = SyncPlan1();
+            } else { return null; }
+
             /*
             switch (CallNumber) {
                 case 1: plan = WaitForTime(DateTime.Now.AddSeconds(6)); break;
@@ -45,7 +49,7 @@ namespace Assistant.NINAPlugin.Plan {
                     return null;
             }*/
 
-            plan = SyncPlan1();
+            //plan = SyncPlan1();
             plan.IsEmulator = true;
             return plan;
         }

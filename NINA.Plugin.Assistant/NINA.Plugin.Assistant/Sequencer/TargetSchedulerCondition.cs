@@ -64,15 +64,25 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private bool checkIsActive = true;
+        public bool CheckIsActive { get => checkIsActive; set => checkIsActive = value; }
+
+        /// <summary>
+        /// If the main TS container has ended normally (no more targets) then it will call this to force
+        /// a full recheck even if the container this condition belongs too hasn't finished an iteration.
+        /// </summary>
+        public void EnableCheckIsActive() {
+            TSLogger.Info("TargetSchedulerCondition informed of need to execute check on next attempt");
+            CheckIsActive = true;
+        }
 
         public override bool Check(ISequenceItem previousItem, ISequenceItem nextItem) {
 
-            if (!checkIsActive) {
+            if (!CheckIsActive) {
                 return true;
             }
 
             TSLogger.Info($"TargetSchedulerCondition starting check: {SelectedMode}");
-            checkIsActive = false;
+            CheckIsActive = false;
 
             switch (SelectedMode) {
                 case TARGETS_REMAIN: return HasRemainingTargets();
@@ -85,13 +95,13 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public override void SequenceBlockFinished() {
             TSLogger.Info($"TargetSchedulerCondition: SequenceBlockFinished");
-            checkIsActive = true;
+            CheckIsActive = true;
         }
 
         public override void ResetProgress() {
             TSLogger.Info($"TargetSchedulerCondition: ResetProgress");
             Status = SequenceEntityStatus.CREATED;
-            checkIsActive = true;
+            CheckIsActive = true;
         }
 
         public override void Initialize() {
