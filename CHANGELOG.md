@@ -3,6 +3,7 @@
 ## 4.2.0.1 - 2024-01-XX
 * Fixed issue where TS Condition wasn't working when called in outer containers
 * Added additional logging of sequence item lifecycle events
+* Increased timeout for sync client registration
 
 ## 4.2.0.0 - 2023-12-28
 * Added ability to bulk load targets from CSV files

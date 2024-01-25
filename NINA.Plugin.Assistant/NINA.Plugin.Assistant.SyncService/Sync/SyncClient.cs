@@ -4,7 +4,6 @@ using NINA.Core.Enum;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.SyncService.Sync;
 using Scheduler.SyncService;
-using System;
 using System.Diagnostics;
 
 namespace Assistant.NINAPlugin.Sync {
@@ -43,7 +42,7 @@ namespace Assistant.NINAPlugin.Sync {
             };
 
             try {
-                RegistrationResponse response = base.Register(request, null, deadline: DateTime.UtcNow.AddSeconds(5));
+                RegistrationResponse response = base.Register(request, null, deadline: DateTime.UtcNow.AddSeconds(60));
                 if (response.Success) {
                     ServerProfileId = response.ServerProfileId;
                     SetClientState(ClientState.Ready);
@@ -51,8 +50,7 @@ namespace Assistant.NINAPlugin.Sync {
                 }
 
                 return response;
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Error($"SYNC exception registering client with server: {ex.Message} {ex}");
                 return new RegistrationResponse { Success = false, Message = ex.Message };
             }
@@ -69,8 +67,7 @@ namespace Assistant.NINAPlugin.Sync {
                 StopKeepalive();
                 var task = Task.Run(() => base.UnregisterAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(2)));
                 await Task.WhenAny(task, Task.Delay(2000));
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Info($"SYNC exception unregistering client with server: {ex.Message} {ex}");
             }
         }
@@ -101,8 +98,7 @@ namespace Assistant.NINAPlugin.Sync {
                     if (!response.Continue) {
                         TSLogger.Info("SYNC client sync wait completed");
                         break;
-                    }
-                    else {
+                    } else {
                         await Task.Delay(SyncManager.CLIENT_WAIT_POLL_PERIOD, token);
                     }
 
@@ -111,9 +107,7 @@ namespace Assistant.NINAPlugin.Sync {
                         break;
                     }
                 }
-            }
-            catch (Exception) { throw; }
-            finally { SetClientState(ClientState.Ready); }
+            } catch (Exception) { throw; } finally { SetClientState(ClientState.Ready); }
         }
 
         public async Task<SyncedAction?> StartRequestAction(CancellationToken token) {
@@ -148,8 +142,7 @@ namespace Assistant.NINAPlugin.Sync {
                     }
 
                     await Task.Delay(SyncManager.CLIENT_ACTION_READY_POLL_PERIOD, token);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     if (e is TaskCanceledException || (e is RpcException && e.Message.Contains("Cancelled"))) {
                         TSLogger.Info("SYNC client sync container cancelled, ending");
                         SetClientState(ClientState.Ready);
@@ -174,8 +167,7 @@ namespace Assistant.NINAPlugin.Sync {
                 if (!response.Success) {
                     TSLogger.Error($"SYNC client problem accepting exposure: {response.Message}");
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 TSLogger.Error("SYNC client exception accepting exposure", e);
             }
         }
@@ -192,8 +184,7 @@ namespace Assistant.NINAPlugin.Sync {
                 if (!response.Success) {
                     TSLogger.Error($"SYNC client problem accepting solve/rotate: {response.Message}");
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 TSLogger.Error("SYNC client exception accepting solve/rotate", e);
             }
         }
@@ -210,8 +201,7 @@ namespace Assistant.NINAPlugin.Sync {
                 if (!response.Success) {
                     TSLogger.Error($"SYNC client problem submitting completed exposure: {response.Message}");
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 TSLogger.Error("SYNC client exception submitting completed exposure", e);
             }
         }
@@ -228,8 +218,7 @@ namespace Assistant.NINAPlugin.Sync {
                 if (!response.Success) {
                     TSLogger.Error($"SYNC client problem submitting completed solve/rotate: {response.Message}");
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 TSLogger.Error("SYNC client exception submitting completed solve/rotate", e);
             }
         }
@@ -252,24 +241,20 @@ namespace Assistant.NINAPlugin.Sync {
                                         if (!response.Success) {
                                             TSLogger.Error($"SYNC error in keepalive for {Id}: {response.Message}");
                                         }
-                                    }
-                                    catch (OperationCanceledException) {
+                                    } catch (OperationCanceledException) {
                                         TSLogger.Info($"SYNC stopping keepalive for {Id}");
-                                    }
-                                    catch (Exception ex) {
+                                    } catch (Exception ex) {
                                         TSLogger.Error($"SYNC an error occurred during keepalive for {Id}", ex);
                                     }
                                 }
                             }
                         });
-                    }
-                    else {
+                    } else {
                         keepaliveRunning = false;
                         return Task.CompletedTask;
                     }
                 }
-            }
-            else {
+            } else {
                 return Task.CompletedTask;
             }
         }
@@ -281,8 +266,7 @@ namespace Assistant.NINAPlugin.Sync {
                         TSLogger.Info($"SYNC stopping sync client keepalive for {Id}");
                         try {
                             keepaliveCts?.Cancel();
-                        }
-                        catch (Exception ex) {
+                        } catch (Exception ex) {
                             TSLogger.Error("exception stopping sync client keepalive", ex);
                         }
 
