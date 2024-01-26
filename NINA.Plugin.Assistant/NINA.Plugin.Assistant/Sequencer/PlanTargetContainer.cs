@@ -3,9 +3,7 @@ using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
-using NINA.Core.Enum;
 using NINA.Core.Model;
-using NINA.Core.Utility.Notification;
 using NINA.Core.Utility.WindowService;
 using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
@@ -21,23 +19,19 @@ using NINA.Sequencer.SequenceItem.Guider;
 using NINA.Sequencer.SequenceItem.Imaging;
 using NINA.Sequencer.SequenceItem.Platesolving;
 using NINA.Sequencer.SequenceItem.Telescope;
-using NINA.Sequencer.Trigger;
-using NINA.Sequencer.Trigger.Platesolving;
 using NINA.Sequencer.Utility;
 using NINA.Sequencer.Utility.DateTimeProvider;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
     public class PlanTargetContainer : SequenceContainer, IDeepSkyObjectContainer {
-
-        public readonly static string INSTRUCTION_CATEGORY = "Scheduler";
+        public static readonly string INSTRUCTION_CATEGORY = "Scheduler";
 
         private readonly TargetSchedulerContainer parentContainer;
         private readonly IProfileService profileService;
@@ -135,17 +129,14 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             try {
                 AddEndTimeTrigger(plan.PlanTarget);
-                AddParentTriggers();
                 AddInstructions(plan);
                 EnsureUnparked(progress, token);
 
                 ImageSaveWatcher.Start();
                 base.Execute(progress, token).Wait();
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 throw;
-            }
-            finally {
+            } finally {
                 ImageSaveWatcher.Stop();
 
                 foreach (var item in Items) {
@@ -174,34 +165,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             Add(new SchedulerTargetEndTimeTrigger(planTarget.EndTime));
         }
 
-        private void AddParentTriggers() {
-            if (parentContainer.Triggers.Count == 0) {
-                return;
-            }
-
-            // Clone the parent's triggers to this container so they can operate 'normally'
-            IList<ISequenceTrigger> localTriggers;
-            lock (parentContainer.lockObj) {
-                localTriggers = parentContainer.Triggers.ToArray();
-            }
-
-            foreach (var trigger in localTriggers) {
-                if (trigger.Status == SequenceEntityStatus.DISABLED) { continue; }
-
-                if (trigger is CenterAfterDriftTrigger) {
-                    TSLogger.Warning("Found CenterAfterDriftTrigger in Target Scheduler Container Triggers, will be ignored and should be removed");
-                    Notification.ShowWarning("Center After Drift trigger should be removed from Target Scheduler Container Triggers and added to surrounding container.");
-                    continue;
-                }
-
-                Add((ISequenceTrigger)trigger.Clone());
-            }
-        }
-
         private void AddInstructions(SchedulerPlan plan) {
-
             foreach (IPlanInstruction instruction in plan.PlanInstructions) {
-
                 if (instruction is PlanMessage) {
                     TSLogger.Debug($"exp plan msg: {((PlanMessage)instruction).msg}");
                     continue;
@@ -248,7 +213,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void AddSlew(PlanSlew instruction, IPlanTarget planTarget) {
-
             bool isPlateSolve = instruction.center;
             InputCoordinates slewCoordinates = new InputCoordinates(planTarget.Coordinates);
             SequenceItem slewCenter;
@@ -260,22 +224,19 @@ namespace Assistant.NINAPlugin.Sequencer {
                 if (rotatorMediator.GetInfo().Connected) {
                     if (synchronizationEnabled) {
                         slewCenter = new PlanCenterAndRotate(planTarget, Target, syncActionTimeout, syncSolveRotateTimeout, profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
-                    }
-                    else {
+                    } else {
                         slewCenter = new CenterAndRotate(profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
                     }
 
                     slewCenter.Name = nameof(CenterAndRotate);
                     (slewCenter as Center).Coordinates = slewCoordinates;
                     (slewCenter as CenterAndRotate).PositionAngle = planTarget.Rotation;
-                }
-                else {
+                } else {
                     slewCenter = new Center(profileService, telescopeMediator, imagingMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory);
                     slewCenter.Name = nameof(Center);
                     (slewCenter as Center).Coordinates = slewCoordinates;
                 }
-            }
-            else {
+            } else {
                 slewCenter = new SlewScopeToRaDec(telescopeMediator, guiderMediator);
                 slewCenter.Name = nameof(SlewScopeToRaDec);
                 (slewCenter as SlewScopeToRaDec).Coordinates = slewCoordinates;
@@ -355,8 +316,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 TSLogger.Info("telescope is parked before potential target slew: unparking");
                 try {
                     telescopeMediator.UnparkTelescope(progress, token).Wait();
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     TSLogger.Error($"failed to unpark telescope: {ex.Message}");
                     throw new SequenceEntityFailedException("Failed to unpark telescope");
                 }
@@ -405,6 +365,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         // IDeepSkyObjectContainer behavior, defer to parent
         public InputTarget Target { get => parentContainer.Target; set { } }
+
         public NighttimeData NighttimeData => parentContainer.NighttimeData;
     }
 }

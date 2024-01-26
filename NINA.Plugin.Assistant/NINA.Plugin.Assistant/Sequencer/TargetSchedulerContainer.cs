@@ -23,6 +23,7 @@ using NINA.Sequencer.SequenceItem;
 using NINA.Sequencer.Trigger;
 using NINA.Sequencer.Trigger.Platesolving;
 using NINA.Sequencer.Utility.DateTimeProvider;
+using NINA.Sequencer.Validations;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using System;
@@ -407,14 +408,28 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override bool Validate() {
+            TSLogger.Debug("TargetSchedulerContainer: Validate");
             var issues = new List<string>();
 
-            if (Conditions.Count > 0) {
-                TSLogger.Error("Huh?  Somehow a condition was added to TSC ... ?  Will be ignored but ...");
+            var triggers = GetTriggersSnapshot();
+            bool triggersValid = true;
+            foreach (var trigger in triggers) {
+                IValidatable validatable = trigger as IValidatable;
+                if (validatable != null) {
+                    if (!validatable.Validate()) {
+                        triggersValid = false;
+                    }
+                }
             }
 
-            if (Items.Count > 0) {
-                TSLogger.Error("Huh?  Somehow an instruction was added to TSC ... ?  Will be ignored but ...");
+            bool beforeWaitValid = BeforeWaitContainer.Validate();
+            bool afterWaitValid = AfterWaitContainer.Validate();
+            bool beforeTargetValid = BeforeTargetContainer.Validate();
+            bool afterTargetValid = AfterTargetContainer.Validate();
+            bool afterAllTargetsValid = AfterAllTargetsContainer.Validate();
+
+            if (!triggersValid || !beforeWaitValid || !afterWaitValid || !beforeTargetValid || !afterTargetValid || !afterAllTargetsValid) {
+                issues.Add("One or more triggers or custom containers is not valid");
             }
 
             Issues = issues;
