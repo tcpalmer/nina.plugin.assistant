@@ -17,10 +17,8 @@ using System.Threading.Tasks;
 namespace Assistant.NINAPlugin.Sequencer {
 
     /// <summary>
-    /// Modified from NINA.Sequencer.Container.ExecutionStrategy.SequentialStrategy.  This strategy performs two key functions:
-    /// - It manages the status monitor to keep track of progress for the parent TargetSchedulerContainer.
-    /// - It runs ancestor triggers and conditions as needed on the parent of TargetSchedulerContainer, skipping
-    ///   TargetSchedulerContainer itself.
+    /// Modified from NINA.Sequencer.Container.ExecutionStrategy.SequentialStrategy.  This strategy manages the
+    /// status monitor to keep track of progress for the parent TargetSchedulerContainer.
     /// </summary>
     public class PlanTargetContainerStrategy : IExecutionStrategy {
 
@@ -120,8 +118,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         foreach (var item in context.GetItemsSnapshot()) {
                             if (item is ISequenceContainer) {
                                 (item as ISequenceContainer).ResetAll();
-                            }
-                            else {
+                            } else {
                                 item.ResetProgress();
                             }
                         }
@@ -132,8 +129,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 foreach (var item in context.GetItemsSnapshot().Where(x => x.Status == SequenceEntityStatus.CREATED)) {
                     item.Skip();
                 }
-            }
-            finally {
+            } finally {
                 TeardownBlock(context);
             }
         }
@@ -189,52 +185,24 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private async Task RunTriggers(ISequenceContainer container, ISequenceItem previousItem, ISequenceItem nextItem, IProgress<ApplicationStatus> progress, CancellationToken token) {
-
-            // Run the triggers attached here
             var triggerable = container as ITriggerable;
             if (triggerable != null) {
                 await triggerable.RunTriggers(previousItem, nextItem, progress, token);
             }
 
-            // Run the triggers on ancestor containers above our parent
-            if (parentContainer.Parent != null) {
-                await AncestorsRunTriggers(parentContainer.Parent, previousItem, nextItem, progress, token);
-            }
-        }
-
-        private async Task AncestorsRunTriggers(ISequenceContainer container, ISequenceItem previousItem, ISequenceItem nextItem, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            var triggerable = container as ITriggerable;
-            if (triggerable != null) {
-                await triggerable.RunTriggers(previousItem, nextItem, progress, token);
-            }
-
-            if (container.Parent != null) {
-                await AncestorsRunTriggers(container.Parent, previousItem, nextItem, progress, token);
+            if (container?.Parent != null) {
+                await RunTriggers(container.Parent, previousItem, nextItem, progress, token);
             }
         }
 
         private async Task RunTriggersAfter(ISequenceContainer container, ISequenceItem previousItem, ISequenceItem nextItem, IProgress<ApplicationStatus> progress, CancellationToken token) {
-
-            // Run the triggers attached here
             var triggerable = container as ITriggerable;
             if (triggerable != null) {
                 await triggerable.RunTriggersAfter(previousItem, nextItem, progress, token);
             }
 
-            // Run the triggers on ancestor containers above our parent
-            if (parentContainer.Parent != null) {
-                await AncestorsRunTriggersAfter(parentContainer.Parent, previousItem, nextItem, progress, token);
-            }
-        }
-
-        private async Task AncestorsRunTriggersAfter(ISequenceContainer container, ISequenceItem previousItem, ISequenceItem nextItem, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            var triggerable = container as ITriggerable;
-            if (triggerable != null) {
-                await triggerable.RunTriggersAfter(previousItem, nextItem, progress, token);
-            }
-
-            if (container.Parent != null) {
-                await AncestorsRunTriggersAfter(container.Parent, previousItem, nextItem, progress, token);
+            if (container?.Parent != null) {
+                await RunTriggersAfter(container.Parent, previousItem, nextItem, progress, token);
             }
         }
 
@@ -299,8 +267,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             if (conditions != null && conditions.Count > 0) {
                 canContinue = conditionable.CheckConditions(previousItem, nextItem);
-            }
-            else {
+            } else {
                 canContinue = container.Iterations < 1;
             }
 

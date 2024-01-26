@@ -1,13 +1,10 @@
-﻿using Newtonsoft.Json;
-using NINA.Core.Model;
+﻿using NINA.Core.Model;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.Interfaces;
 using NINA.Sequencer.SequenceItem;
 using NINA.Sequencer.Trigger;
-using NINA.Sequencer.Trigger.Platesolving;
 using System;
-using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
 
