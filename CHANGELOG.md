@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 4.3.0.1 - 2024-01-XX
+* Code clean up
+
 ## 4.3.0.0 - 2024-01-26
 * Fixed issue where TS Condition wasn't working when called in outer containers
 * Increased timeout for sync client registration
