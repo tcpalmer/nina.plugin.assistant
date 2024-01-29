@@ -4,7 +4,6 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 
-
 namespace Assistant.NINAPlugin.Controls.Converters {
 
     public class StatusConverter : IValueConverter {

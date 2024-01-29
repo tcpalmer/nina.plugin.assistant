@@ -18,20 +18,19 @@ namespace Assistant.NINAPlugin.Sequencer {
 
     /// <summary>
     /// Watch for saved images and update the associated exposure plan in the scheduler database.
-    /// 
+    ///
     /// This class works in conjunction with PlanTakeExposure (the scheduler version of the core
     /// NINA instruction to take an exposure).  PlanTakeExposure.Execute will call WaitForExposure
     /// to register an image Id with the associated exposure plan database Id and tell the watcher that
     /// it can't stop until all image Ids have come through the pipeline.
-    /// 
+    ///
     /// This is crucial: we have to update the exposure plan database for each exposure while handling
     /// the asychronous nature of the NINA image save pipeline.  We also have to ensure we've processed
     /// them all before allowing this watcher to be stopped (which means the planner will be called again
     /// immediately).
-    /// 
+    ///
     /// </summary>
     public class ImageSaveWatcher : IImageSaveWatcher {
-
         public static readonly string REJECTED_SUBDIR = "rejected";
 
         private IProfile profile;
@@ -118,20 +117,16 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void UpdateDatabase(IPlanTarget planTarget, string filterName, bool accepted, string rejectReason, ImageSavedEventArgs msg, int? imageId) {
-
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 using (var transaction = context.Database.BeginTransaction()) {
-
                     try {
                         ExposurePlan exposurePlan = null;
 
                         if (imageId != null) {
-
                             int exposureDatabaseId;
                             bool found = exposureDictionary.TryGetValue((int)imageId, out exposureDatabaseId);
 
                             if (found) {
-
                                 // Update the exposure plan record
                                 exposurePlan = context.GetExposurePlan(exposureDatabaseId);
                                 if (exposurePlan != null) {
@@ -139,16 +134,13 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                                     if (accepted) { exposurePlan.Accepted++; }
                                     context.ExposurePlanSet.AddOrUpdate(exposurePlan);
-                                }
-                                else {
+                                } else {
                                     TSLogger.Warning($"failed to get exposure plan for id={exposureDatabaseId}, image id={imageId}");
                                 }
-                            }
-                            else {
+                            } else {
                                 TSLogger.Warning($"not waiting for image id={imageId}");
                             }
-                        }
-                        else {
+                        } else {
                             TSLogger.Warning("no image id to determine exposure plan database id?!");
                         }
 
@@ -166,8 +158,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                         context.SaveChanges();
                         transaction.Commit();
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         TSLogger.Error($"exception updating database for saved image: {e.Message}\n{e.StackTrace}");
                     }
                 }
@@ -206,6 +197,4 @@ namespace Assistant.NINAPlugin.Sequencer {
             TSLogger.Debug("Scheduler ImageSaveWatcherEmulator Stop");
         }
     }
-
 }
-

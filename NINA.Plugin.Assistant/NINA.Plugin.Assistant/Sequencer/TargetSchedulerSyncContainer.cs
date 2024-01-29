@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using System.Windows;
 
 namespace Assistant.NINAPlugin.Sequencer {
+
     [ExportMetadata("Name", "Target Scheduler Sync Container")]
     [ExportMetadata("Description", "Target Scheduler synchronized imaging for multiple NINA instances")]
     [ExportMetadata("Icon", "Scheduler.SchedulerSVG")]
@@ -32,7 +33,6 @@ namespace Assistant.NINAPlugin.Sequencer {
     [Export(typeof(ISequenceContainer))]
     [JsonObject(MemberSerialization.OptIn)]
     public class TargetSchedulerSyncContainer : SequentialContainer {
-
         private readonly IProfileService profileService;
         private readonly ITelescopeMediator telescopeMediator;
         private readonly IRotatorMediator rotatorMediator;
@@ -60,7 +60,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             IGuiderMediator guiderMediator,
             IPlateSolverFactory plateSolverFactory,
             IWindowServiceFactory windowServiceFactory) : base() {
-
             this.profileService = profileService;
             this.telescopeMediator = telescopeMediator;
             this.rotatorMediator = rotatorMediator;
@@ -200,6 +199,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private string displayText;
+
         public string DisplayText {
             get => displayText;
             set {
@@ -208,7 +208,9 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
-        public void UpdateDisplayTextAction(string text) { DisplayText = text; }
+        public void UpdateDisplayTextAction(string text) {
+            DisplayText = text;
+        }
 
         private async Task TakeSyncedExposure(SyncedExposure syncedExposure, IProgress<ApplicationStatus> progress, CancellationToken token) {
             SyncTakeExposureContainer container = new SyncTakeExposureContainer(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM, filterWheelMediator, syncImageSaveWatcher, syncedExposure, UpdateDisplayTextAction);
@@ -221,7 +223,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private async Task DoSyncedSolveRotate(SyncedSolveRotate syncedSolveRotate, IProgress<ApplicationStatus> progress, CancellationToken token) {
-
             if (!rotatorMediator.GetInfo().Connected) {
                 TSLogger.Warning($"SYNC client received solve/rotate but no rotator is connected: skipping and continuing, id={syncedSolveRotate.SolveRotateId}");
                 await Task.Delay(2500, token);

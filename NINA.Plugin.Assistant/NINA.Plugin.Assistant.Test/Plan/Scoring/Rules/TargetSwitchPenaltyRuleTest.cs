@@ -31,5 +31,4 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
             sut.Score(scoringEngineMock.Object, targetMock.Object).Should().BeApproximately(0, 0.00001);
         }
     }
-
 }

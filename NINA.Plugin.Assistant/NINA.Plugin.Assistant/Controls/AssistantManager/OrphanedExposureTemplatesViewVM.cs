@@ -15,10 +15,8 @@ using System.Windows.Input;
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class OrphanedExposureTemplatesViewVM : BaseVM {
-
         private AssistantManagerVM managerVM;
         private TreeDataItem parentItem;
-
 
         public OrphanedExposureTemplatesViewVM(AssistantManagerVM managerVM, IProfileService profileService, TreeDataItem profileItem, List<ExposureTemplate> orphanedExposureTemplates) : base(profileService) {
             this.managerVM = managerVM;
@@ -34,6 +32,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private ObservableCollection<ExposureTemplate> exposureTemplates;
+
         public ObservableCollection<ExposureTemplate> ExposureTemplates {
             get => exposureTemplates;
             set {
@@ -43,6 +42,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private AsyncObservableCollection<KeyValuePair<string, string>> profileChoices;
+
         public AsyncObservableCollection<KeyValuePair<string, string>> ProfileChoices {
             get {
                 return profileChoices;
@@ -53,6 +53,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private string selectedProfileId;
+
         public string SelectedProfileId {
             get => selectedProfileId;
             set {
@@ -74,7 +75,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand DeleteExposureTemplateCommand { get; private set; }
 
         private void MoveExposureTemplates(object obj) {
-
             if (string.IsNullOrEmpty(SelectedProfileId)) {
                 MyMessageBox.Show("You must select a destination profile to move an Exposure Template.", "Oops");
                 return;

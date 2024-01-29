@@ -9,7 +9,6 @@ using System;
 namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
 
     public class DSORefinerTest {
-
         private Mock<IDeepSkyObject> dsoMock = new Mock<IDeepSkyObject>();
 
         [SetUp]
@@ -29,5 +28,4 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
             ex.Message.Should().Be("target cannot be null");
         }
     }
-
 }

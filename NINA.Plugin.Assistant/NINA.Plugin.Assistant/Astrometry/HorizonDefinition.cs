@@ -6,9 +6,7 @@ using System.IO;
 
 namespace Assistant.NINAPlugin.Astrometry {
 
-
     public class HorizonDefinition {
-
         private bool isBasicMinimumAltitude;
         private readonly double minimumAltitude;
         private readonly CustomHorizon horizon;
@@ -29,8 +27,7 @@ namespace Assistant.NINAPlugin.Astrometry {
                 this.isBasicMinimumAltitude = false;
                 this.horizon = customHorizon;
                 this.offset = offset;
-            }
-            else {
+            } else {
                 // Protection against a weird horizon change in the profile
                 this.minimumAltitude = 0;
             }
@@ -91,7 +88,5 @@ namespace Assistant.NINAPlugin.Astrometry {
                 return CustomHorizon.FromReader_Standard(sr);
             }
         }
-
     }
-
 }

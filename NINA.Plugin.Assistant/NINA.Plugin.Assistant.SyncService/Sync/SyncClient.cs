@@ -9,7 +9,6 @@ using System.Diagnostics;
 namespace Assistant.NINAPlugin.Sync {
 
     public class SyncClient : SchedulerSync.SchedulerSyncClient {
-
         private static object lockObj = new object();
 
         private static readonly Lazy<SyncClient> lazy = new Lazy<SyncClient>(() => new SyncClient());
@@ -23,7 +22,8 @@ namespace Assistant.NINAPlugin.Sync {
         private bool keepaliveRunning = false;
         private CancellationTokenSource keepaliveCts;
 
-        private SyncClient() : base(new NamedPipeChannel(".", SyncManager.PIPE_NAME, new NamedPipeChannelOptions() { ConnectionTimeout = 300000 })) { }
+        private SyncClient() : base(new NamedPipeChannel(".", SyncManager.PIPE_NAME, new NamedPipeChannelOptions() { ConnectionTimeout = 300000 })) {
+        }
 
         public void SetClientState(ClientState state) {
             lock (lockObj) {
@@ -225,7 +225,6 @@ namespace Assistant.NINAPlugin.Sync {
 
         private Task StartKeepalive() {
             if (!keepaliveRunning) {
-
                 lock (lockObj) {
                     if (!keepaliveRunning) {
                         keepaliveRunning = true;
@@ -280,7 +279,6 @@ namespace Assistant.NINAPlugin.Sync {
     public class SyncedAction { }
 
     public class SyncedExposure : SyncedAction {
-
         public string ExposureId { get; private set; }
         public string TargetName { get; private set; }
         public string TargetRA { get; private set; }

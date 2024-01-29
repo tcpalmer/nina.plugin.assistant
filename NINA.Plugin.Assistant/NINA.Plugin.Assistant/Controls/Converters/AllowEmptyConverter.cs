@@ -18,11 +18,9 @@ namespace Assistant.NINAPlugin.Controls.Converters {
             int result;
             if (int.TryParse((string)value, out result)) {
                 return result;
-            }
-            else {
+            } else {
                 return null;
             }
-
         }
     }
 }

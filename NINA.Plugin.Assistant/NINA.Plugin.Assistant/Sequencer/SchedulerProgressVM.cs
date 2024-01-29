@@ -11,9 +11,11 @@ namespace Assistant.NINAPlugin.Sequencer {
 
     public class SchedulerProgressVM : BaseINPC {
 
-        public SchedulerProgressVM() { }
+        public SchedulerProgressVM() {
+        }
 
         private ProgressCollection progressItemList;
+
         public ProgressCollection ProgressItemList {
             get {
                 if (progressItemList == null) {
@@ -30,6 +32,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private ICollectionView itemsView;
+
         public ICollectionView ItemsView {
             get => itemsView;
             set {
@@ -88,7 +91,6 @@ namespace Assistant.NINAPlugin.Sequencer {
     public class ProgressCollection : ObservableCollection<SchedulerProgressRow> { }
 
     public class SchedulerProgressRow : BaseINPC {
-
         private static GeometryGroup checkMark = (GeometryGroup)Application.Current.Resources["CheckedSVG"];
 
         public SchedulerProgressRow(string group, string itemName, string filterName) {
@@ -114,5 +116,4 @@ namespace Assistant.NINAPlugin.Sequencer {
         public bool IsComplete { get; set; }
         public GeometryGroup Complete { get => checkMark; }
     }
-
 }

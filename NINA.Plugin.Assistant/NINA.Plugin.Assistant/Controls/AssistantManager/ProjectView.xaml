@@ -183,7 +183,6 @@
                 Margin="3,3,0,0"
                 Text="{Binding ProjectProxy.Project.Priority}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
         </UniformGrid>
 
         <UniformGrid
@@ -391,7 +390,6 @@
                 Margin="3,3,0,0"
                 Text="{Binding ProjectProxy.Project.FlatsHandling, Converter={StaticResource FlatsHandlingChoicesConverter}}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
         </UniformGrid>
 
         <TextBlock
@@ -505,9 +503,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-
             </DataGrid.Columns>
         </DataGrid>
-
     </StackPanel>
 </UserControl>

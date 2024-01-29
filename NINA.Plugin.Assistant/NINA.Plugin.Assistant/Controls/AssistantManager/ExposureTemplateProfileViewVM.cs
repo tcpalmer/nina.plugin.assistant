@@ -9,7 +9,6 @@ using System.Windows.Input;
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class ExposureTemplateProfileViewVM : BaseVM {
-
         private AssistantManagerVM managerVM;
         private ProfileMeta profile;
         private TreeDataItem parentItem;

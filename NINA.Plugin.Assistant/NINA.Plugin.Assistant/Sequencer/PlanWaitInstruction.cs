@@ -10,8 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
-    public class PlanWaitInstruction : SequenceItem {
 
+    public class PlanWaitInstruction : SequenceItem {
         private DateTime waitUntil;
         private IGuiderMediator guiderMediator;
         private ITelescopeMediator telescopeMediator;
@@ -37,6 +37,5 @@ namespace Assistant.NINAPlugin.Sequencer {
         public override object Clone() {
             throw new NotImplementedException();
         }
-
     }
 }

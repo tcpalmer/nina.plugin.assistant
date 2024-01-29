@@ -299,8 +299,6 @@
                 Margin="3,3,0,0"
                 IsEnabled="False"
                 Text="{Binding ExposureTemplateProxy.ExposureTemplate.MaximumHumidity}" />
-
         </UniformGrid>
-
     </StackPanel>
 </UserControl>

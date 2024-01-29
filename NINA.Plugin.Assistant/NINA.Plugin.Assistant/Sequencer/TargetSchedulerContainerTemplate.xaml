@@ -443,13 +443,9 @@
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
-
                                     </DataGrid.Columns>
-
                                 </DataGrid>
-
                             </StackPanel>
-
                         </ninactrl:DetachingExpander>
 
                         <ninactrl:DetachingExpander>
@@ -647,10 +643,8 @@
                                         </Border>
                                     </StackPanel>
                                 </ninactrl:DetachingExpander>
-
                             </StackPanel>
                         </ninactrl:DetachingExpander>
-
                     </StackPanel>
                 </Border>
             </nina:SequenceBlockView.SequenceItemContent>
@@ -680,5 +674,4 @@
             </mini:MiniContainer.Content>
         </mini:MiniContainer>
     </DataTemplate>
-
 </ResourceDictionary>

@@ -19,7 +19,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
     [TestFixture]
     public class GenerateTestDatabase {
-
         private SchedulerDatabaseInteraction db;
 
         [SetUp]
@@ -119,8 +118,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     context.SaveChanges();
 
                     ReadAndDump(profileId);
-                }
-                catch (DbEntityValidationException e) {
+                } catch (DbEntityValidationException e) {
                     StringBuilder sb = new StringBuilder();
                     foreach (var eve in e.EntityValidationErrors) {
                         foreach (var dbeve in eve.ValidationErrors) {
@@ -130,8 +128,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     TestContext.WriteLine($"DB VALIDATION EXCEPTION: {sb.ToString()}");
                     throw e;
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TestContext.WriteLine($"OTHER EXCEPTION: {e.Message}\n{e.ToString()}");
                     throw e;
                 }
@@ -141,7 +138,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
         [Test]
         [Ignore("")]
         public void RealTest1() {
-
             using (var context = db.GetContext()) {
                 try {
                     DateTime atTime = new DateTime(2023, 1, 26);
@@ -209,8 +205,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     context.ProjectSet.Add(p2);
 
                     context.SaveChanges();
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TestContext.Error.WriteLine($"failed to create test database: {e.Message}\n{e.ToString()}");
                     throw e;
                 }
@@ -220,7 +215,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
         [Test]
         [Ignore("")]
         public void DaytimeTest1() {
-
             using (var context = db.GetContext()) {
                 try {
                     DateTime atTime = new DateTime(2023, 1, 28);
@@ -263,19 +257,16 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     context.ProjectSet.Add(p1);
 
                     context.SaveChanges();
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TestContext.Error.WriteLine($"failed to create test database: {e.Message}\n{e.ToString()}");
                     throw e;
                 }
             }
         }
 
-
         [Test]
         [Ignore("")]
         public void GenMessierMarathonForChris() {
-
             // This is currently loading from target sequence files provided by Chris W.
             // TODO: create another version to just add all targets to one project, set EPs to just 1 per
 
@@ -478,8 +469,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     context.SaveChanges();
                 }
-            }
-            catch (DbEntityValidationException e) {
+            } catch (DbEntityValidationException e) {
                 StringBuilder sb = new StringBuilder();
                 foreach (var eve in e.EntityValidationErrors) {
                     foreach (var dbeve in eve.ValidationErrors) {
@@ -489,8 +479,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                 TestContext.Error.WriteLine($"DB VALIDATION EXCEPTION: {sb}");
                 throw e;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 TestContext.Error.WriteLine($"OTHER EXCEPTION: {e.Message}\n{e}");
                 throw e;
             }
@@ -520,7 +509,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
         }
 
         private List<IPlanProject> ReadAndDump(string profileId) {
-
             List<Project> projects = null;
             List<ExposureTemplate> exposureTemplates = null;
 
@@ -529,8 +517,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 try {
                     projects = context.GetActiveProjects(profileId);
                     exposureTemplates = context.GetExposureTemplates(profileId);
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     TestContext.WriteLine($"Assistant: exception accessing Assistant: {ex}");
                 }
             }

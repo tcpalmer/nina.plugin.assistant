@@ -8,7 +8,6 @@ using System.Linq;
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class TemporaryProxy<T> : BaseINPC where T : class, INotifyPropertyChanged, new() {
-
         private T original;
         private T proxy;
 
@@ -57,7 +56,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         /// <typeparam name="TEntity">The entity type</typeparam>
         /// <param name="source">The source entity</param>
         public virtual TEntity CopyEntity<TEntity>(TEntity source) where TEntity : class, new() {
-
             // Get properties from EF that are read/write and not marked with NotMappedAttribute
             var sourceProperties = typeof(TEntity)
                                     .GetProperties()
@@ -75,7 +73,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class ProfilePreferenceProxy : TemporaryProxy<ProfilePreference> {
 
-        public ProfilePreferenceProxy(ProfilePreference profilePreference) : base(profilePreference) { }
+        public ProfilePreferenceProxy(ProfilePreference profilePreference) : base(profilePreference) {
+        }
 
         public ProfilePreference ProfilePreference {
             get => Proxy;
@@ -87,7 +86,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class ProjectProxy : TemporaryProxy<Project> {
 
-        public ProjectProxy(Project project) : base(project) { }
+        public ProjectProxy(Project project) : base(project) {
+        }
 
         public Project Project {
             get => Proxy;
@@ -116,7 +116,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class TargetProxy : TemporaryProxy<Target> {
 
-        public TargetProxy(Target target) : base(target) { }
+        public TargetProxy(Target target) : base(target) {
+        }
 
         public Target Target {
             get => Proxy;
@@ -147,7 +148,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class ExposureTemplateProxy : TemporaryProxy<ExposureTemplate> {
 
-        public ExposureTemplateProxy(ExposureTemplate exposureTemplate) : base(exposureTemplate) { }
+        public ExposureTemplateProxy(ExposureTemplate exposureTemplate) : base(exposureTemplate) {
+        }
 
         public ExposureTemplate ExposureTemplate {
             get => Proxy;
@@ -156,5 +158,4 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
     }
-
 }

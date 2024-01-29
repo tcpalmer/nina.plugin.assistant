@@ -11,7 +11,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
 
         [Test]
         public void ClipTest16() {
-
             // Case 1: ------S------M======T======M -> start before the entire span (clip start)
             // Case 6: M======T======M------E------ -> end after the entire span (clip end)
             DateTime start = DateTime.Now.Date.AddHours(1);
@@ -24,7 +23,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
 
         [Test]
         public void ClipTest17() {
-
             // Case 1: ------S------M======T======M -> start before the entire span (clip start)
             // Case 7: ------M===E===T======M------ -> end in span, before transit (end no change)
             DateTime start = DateTime.Now.Date.AddHours(1);
@@ -37,7 +35,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
 
         [Test]
         public void ClipTest18() {
-
             // Case 1: ------S------M======T======M -> start before the entire span (clip start)
             // Case 8: ------M======T===E===M------ -> end in span, after transit (end no change)
             DateTime start = DateTime.Now.Date.AddHours(1);
@@ -50,7 +47,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
 
         [Test]
         public void ClipTest2() {
-
             // Case 2: M======T======M------S------ -> start after the entire span (reject)
             DateTime start = DateTime.Now.Date.AddHours(4);
             DateTime transit = start.AddHours(-2);
@@ -62,7 +58,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
 
         [Test]
         public void ClipTest36() {
-
             // Case 3: ------M===S===T======M------ -> start in span, before transit (start no change)
             // Case 6: M======T======M------E------ -> end after the entire span (clip end)
             DateTime start = DateTime.Now.Date.AddHours(3);
@@ -75,7 +70,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
 
         [Test]
         public void ClipTest5() {
-
             // Case 5: ------E------M======T======M -> end before the entire span (reject)
             DateTime start = DateTime.Now.Date.AddHours(1);
             DateTime transit = start.AddHours(4);

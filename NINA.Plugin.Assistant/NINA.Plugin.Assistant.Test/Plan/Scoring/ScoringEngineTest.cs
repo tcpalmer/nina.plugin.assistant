@@ -57,7 +57,7 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring {
         }
     }
 
-    class TestRule : ScoringRule {
+    internal class TestRule : ScoringRule {
         private string name;
         private double score;
 
@@ -73,5 +73,4 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring {
             return score;
         }
     }
-
 }

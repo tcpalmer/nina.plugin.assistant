@@ -1,5 +1,4 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.Util;
 using NINA.Core.Utility;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;
@@ -9,7 +8,6 @@ using System.Windows.Input;
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class ProfilePreferencesViewVM : BaseVM {
-
         private AssistantManagerVM managerVM;
         private ProfilePreference profilePreference;
 
@@ -26,6 +24,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private bool showEditView = false;
+
         public bool ShowEditView {
             get => showEditView;
             set {
@@ -35,6 +34,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private bool itemEdited = false;
+
         public bool ItemEdited {
             get => itemEdited;
             set {
@@ -58,8 +58,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private void ProfilePreferenceProxy_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             if (e?.PropertyName != nameof(ProfilePreferenceProxy.Proxy)) {
                 ItemEdited = true;
-            }
-            else {
+            } else {
                 RaisePropertyChanged(nameof(ProfilePreferenceProxy));
             }
         }
@@ -91,6 +90,5 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ItemEdited = false;
             managerVM.SetEditMode(false);
         }
-
     }
 }

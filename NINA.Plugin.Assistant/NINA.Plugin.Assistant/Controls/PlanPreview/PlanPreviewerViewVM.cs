@@ -21,7 +21,6 @@ using System.Windows.Input;
 namespace Assistant.NINAPlugin.Controls.PlanPreview {
 
     public class PlanPreviewerViewVM : BaseVM {
-
         private SchedulerDatabaseInteraction database;
 
         public PlanPreviewerViewVM(IProfileService profileService) : base(profileService) {
@@ -53,6 +52,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
         }
 
         private DateTime planDate = DateTime.MinValue;
+
         public DateTime PlanDate {
             get => planDate;
             set {
@@ -63,6 +63,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
         }
 
         private int planHours = 13;
+
         public int PlanHours {
             get => planHours;
             set {
@@ -73,6 +74,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
         }
 
         private int planMinutes = 0;
+
         public int PlanMinutes {
             get => planMinutes;
             set {
@@ -83,6 +85,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
         }
 
         private int planSeconds = 0;
+
         public int PlanSeconds {
             get => planSeconds;
             set {
@@ -93,6 +96,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
         }
 
         private AsyncObservableCollection<KeyValuePair<string, string>> profileChoices;
+
         public AsyncObservableCollection<KeyValuePair<string, string>> ProfileChoices {
             get {
                 return profileChoices;
@@ -105,6 +109,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
         }
 
         private string selectedProfileId;
+
         public string SelectedProfileId {
             get => selectedProfileId;
             set {
@@ -115,6 +120,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
         }
 
         private ObservableCollection<TreeViewItem> instructionList;
+
         public ObservableCollection<TreeViewItem> InstructionList {
             get => instructionList;
             set {
@@ -126,6 +132,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
         private List<SchedulerPlan> SchedulerPlans { get; set; }
 
         private bool showPlanPreview;
+
         public bool ShowPlanPreview {
             get => showPlanPreview;
             set {
@@ -135,6 +142,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
         }
 
         private bool showPlanPreviewResults;
+
         public bool ShowPlanPreviewResults {
             get => showPlanPreviewResults;
             set {
@@ -147,10 +155,9 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
         public ICommand PlanPreviewResultsCommand { get; private set; }
 
         private void LoadSchedulerPlans(DateTime atDateTime, IProfileService profileService) {
-
             /* While the caching here works and detects changes to the preview parameters (like date/time), it's not picking
              * up changes to the database.  For now just disable the caching ... doesn't take long to run anyway.
-            
+
             if (SchedulerPlans != null) {
                 return;
             }*/
@@ -186,8 +193,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
 
                 SchedulerPlans = schedulerPlans;
                 return;
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Error($"failed to run plan preview: {ex.Message} {ex.StackTrace}");
                 MyMessageBox.Show($"Exception running plan preview - see the TS log for details.", "Oops");
                 SchedulerPlans = null;
@@ -271,14 +277,14 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                 InstructionList = list;
                 ShowPlanPreviewResults = false;
                 ShowPlanPreview = true;
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Error($"failed to run plan preview: {ex.Message} {ex.StackTrace}");
                 InstructionList.Clear();
             }
         }
 
         private string planPreviewResultsLog;
+
         public string PlanPreviewResultsLog {
             get => planPreviewResultsLog;
             set {
@@ -288,7 +294,6 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
         }
 
         private void RunPlanPreviewResults(object obj) {
-
             if (PlanDate == DateTime.MinValue || SelectedProfileId == null) {
                 return;
             }
@@ -310,8 +315,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                 PlanPreviewResultsLog = sb.ToString();
                 ShowPlanPreview = false;
                 ShowPlanPreviewResults = true;
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Error($"failed to run plan preview results: {ex.Message} {ex.StackTrace}");
                 PlanPreviewResultsLog = string.Empty;
             }

@@ -7,7 +7,6 @@ using System.Text;
 namespace Assistant.NINAPlugin.Database.Schema {
 
     public class ExposurePlan : INotifyPropertyChanged {
-
         [Key] public int Id { get; set; }
         [Required] public string profileId { get; set; }
         [NotMapped] private int exposureTemplateId;
@@ -83,7 +82,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
             }
         }
 
-        public ExposurePlan() { }
+        public ExposurePlan() {
+        }
 
         public ExposurePlan(string profileId) {
             ProfileId = profileId;
@@ -94,6 +94,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

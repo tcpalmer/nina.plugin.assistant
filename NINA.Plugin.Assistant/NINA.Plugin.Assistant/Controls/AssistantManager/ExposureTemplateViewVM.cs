@@ -12,7 +12,6 @@ using System.Windows.Input;
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class ExposureTemplateViewVM : BaseVM {
-
         private AssistantManagerVM managerVM;
         private IProfile profile;
 
@@ -53,6 +52,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private List<string> _filterNameChoices;
+
         public List<string> FilterNameChoices {
             get => _filterNameChoices;
             set {
@@ -62,6 +62,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private List<BinningMode> _binningModeChoices;
+
         public List<BinningMode> BinningModeChoices {
             get => _binningModeChoices;
             set {
@@ -71,6 +72,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private ExposureTemplateProxy exposureTemplateProxy;
+
         public ExposureTemplateProxy ExposureTemplateProxy {
             get => exposureTemplateProxy;
             set {
@@ -82,13 +84,13 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private void ExposureTemplateProxy_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             if (e?.PropertyName != nameof(TargetProxy.Proxy)) {
                 ItemEdited = true;
-            }
-            else {
+            } else {
                 RaisePropertyChanged(nameof(ExposureTemplateProxy));
             }
         }
 
         private bool showEditView = false;
+
         public bool ShowEditView {
             get => showEditView;
             set {
@@ -98,6 +100,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private bool itemEdited = false;
+
         public bool ItemEdited {
             get => itemEdited;
             set {

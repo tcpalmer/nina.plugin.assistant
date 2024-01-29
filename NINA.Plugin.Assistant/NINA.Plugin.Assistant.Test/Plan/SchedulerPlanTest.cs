@@ -12,7 +12,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
         [Test]
         public void TestPlanExposureNoThrottle() {
-
             IPlanTarget planTarget = PlanMocks.GetMockPlanTarget("target", TestUtil.M31).Object;
             ExposureTemplate exposureTemplate = GetExposureTemplate();
 
@@ -35,7 +34,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
         [Test]
         public void TestPlanExposureThrottle() {
-
             IPlanTarget planTarget = PlanMocks.GetMockPlanTarget("target", TestUtil.M31).Object;
             ExposureTemplate exposureTemplate = GetExposureTemplate();
 
@@ -73,6 +71,5 @@ namespace NINA.Plugin.Assistant.Test.Plan {
                 BinningMode = new BinningMode(1, 1)
             };
         }
-
     }
 }

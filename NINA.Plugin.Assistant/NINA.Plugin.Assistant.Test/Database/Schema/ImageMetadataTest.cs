@@ -51,6 +51,5 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
             sut.CameraTargetTemp.Should().Be(305);
             sut.Airmass.Should().Be(303);
         }
-
     }
 }

@@ -1,7 +1,6 @@
 ﻿namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
 
     public class PercentCompleteRule : ScoringRule {
-
         public const string RULE_NAME = "Percent Complete";
         public const double DEFAULT_WEIGHT = .5 * WEIGHT_SCALE;
 
@@ -15,7 +14,6 @@
         /// <param name="potentialTarget"></param>
         /// <returns></returns>
         public override double Score(IScoringEngine scoringEngine, IPlanTarget potentialTarget) {
-
             int desired = 0;
             int accepted = 0;
             bool imageGradingEnabled = potentialTarget.Project.EnableGrader;

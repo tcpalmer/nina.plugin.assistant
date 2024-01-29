@@ -8,7 +8,8 @@ namespace Assistant.NINAPlugin.Plan {
 
     public class PlanStopTimeExpert {
 
-        public PlanStopTimeExpert() { }
+        public PlanStopTimeExpert() {
+        }
 
         /// <summary>
         /// Determine an appropriate end time for the target plan window.
@@ -21,7 +22,6 @@ namespace Assistant.NINAPlugin.Plan {
         public DateTime GetStopTime(bool useSmartPlanWindow, DateTime startTime,
                                     IPlanTarget selectedTarget,
                                     List<IPlanProject> projects) {
-
             // If the selected target is using a meridian window, then use the window end time
             if (selectedTarget.Project.MeridianWindow > 0 && selectedTarget.MeridianWindow != null) {
                 TSLogger.Debug($"stop time determined by end of meridian window: {Utils.FormatDateTimeFull(selectedTarget.MeridianWindow.EndTime)}");
@@ -51,9 +51,7 @@ namespace Assistant.NINAPlugin.Plan {
             DateTime minimumTime = startTime.AddMinutes(selectedTarget.Project.MinimumTime);
 
             foreach (StopEvent stopEvent in futureEvents) {
-
                 if (stopEvent.dateTime < minimumTime) {
-
                     // No future target could start before the minimum time window of the selected target.  But
                     // some (e.g. those that could have been selected now but had lower scores) could have started
                     // before that time.  We need to consider them but only if they have a shot at being selected
@@ -86,6 +84,7 @@ namespace Assistant.NINAPlugin.Plan {
                             case Reasons.TargetLowerScore:
                                 futureEvents.Add(new StopEvent(planTarget.StartTime, StopEvent.FutureTargetStartTime, planTarget));
                                 break;
+
                             case Reasons.TargetBeforeMeridianWindow:
                                 futureEvents.Add(new StopEvent(planTarget.StartTime, StopEvent.FutureTargetMWStartTime, planTarget));
                                 break;
@@ -110,8 +109,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
     }
 
-    class StopEvent : IComparable<StopEvent> {
-
+    internal class StopEvent : IComparable<StopEvent> {
         public const string FutureTargetStartTime = "future target start time";
         public const string FutureTargetMWStartTime = "future target meridian window start time";
         public const string TargetMinimumTime = "target minimum time";
@@ -138,5 +136,4 @@ namespace Assistant.NINAPlugin.Plan {
             return $"{Utils.FormatDateTimeFull(dateTime)} {description} {target.Name}";
         }
     }
-
 }

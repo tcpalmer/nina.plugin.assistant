@@ -92,6 +92,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
                     case 's':
                         list.Add(GetPlanSwitchFilter());
                         break;
+
                     default:
                         list.Add(GetPlanExposure(c.ToString()));
                         break;

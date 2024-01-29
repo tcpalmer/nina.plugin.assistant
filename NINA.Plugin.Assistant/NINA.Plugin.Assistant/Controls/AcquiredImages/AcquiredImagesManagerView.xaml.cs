@@ -6,12 +6,12 @@ using System.Windows.Controls.Primitives;
 namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
     public partial class AcquiredImagesManagerView : UserControl {
+
         public AcquiredImagesManagerView() {
             InitializeComponent();
         }
 
         private void columnHeader_Click(object sender, RoutedEventArgs e) {
-
             var columnHeader = sender as DataGridColumnHeader;
             if (columnHeader != null) {
                 string propertyName = GetPropertyName(GetColumnTitle(columnHeader));

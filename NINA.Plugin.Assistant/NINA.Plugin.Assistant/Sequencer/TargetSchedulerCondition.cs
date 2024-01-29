@@ -26,7 +26,6 @@ namespace Assistant.NINAPlugin.Sequencer {
     [Export(typeof(ISequenceCondition))]
     [JsonObject(MemberSerialization.OptIn)]
     public class TargetSchedulerCondition : SequenceCondition {
-
         private const string TARGETS_REMAIN = "While Targets Remain Tonight";
         private const string ACTIVE_PROJECTS_REMAIN = "While Active Projects Remain";
         private const string FLATS_NEEDED = "While Flats Needed";
@@ -76,7 +75,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override bool Check(ISequenceItem previousItem, ISequenceItem nextItem) {
-
             if (!CheckIsActive) {
                 return true;
             }

@@ -11,7 +11,6 @@ namespace NINA.Plugin.Assistant.Test.Util {
 
         [Test]
         public void TestSampleStandardDeviation() {
-
             Action act = () => Stats.SampleStandardDeviation(null);
             act.Should().Throw<Exception>().Where(e => e.Message == "must have >= 3 samples");
 

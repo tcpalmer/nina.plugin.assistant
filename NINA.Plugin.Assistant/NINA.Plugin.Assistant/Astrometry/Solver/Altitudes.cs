@@ -6,7 +6,6 @@ using System.Text;
 namespace Assistant.NINAPlugin.Astrometry.Solver {
 
     public class Altitudes {
-
         public List<AltitudeAtTime> AltitudeList { get; private set; }
         public DateTime StartTime { get; private set; }
         public DateTime EndTime { get; private set; }
@@ -77,7 +76,6 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
         public Altitudes ClipAscendingStart() {
-
             List<AltitudeAtTime> alts = AltitudeList;
             if (alts[0].Altitude > alts[1].Altitude) {
                 return this;
@@ -115,8 +113,7 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
                         return new Altitudes(span);
                     }
                 }
-            }
-            else {
+            } else {
                 // If ascending, find minimum and start from there
                 Tuple<int, AltitudeAtTime> min = FindMinimumAltitude();
 
@@ -155,7 +152,6 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
     }
 
     public class AltitudeAtTime {
-
         public double Altitude { get; private set; }
         public double Azimuth { get; private set; }
         public DateTime AtTime { get; private set; }
@@ -173,5 +169,4 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
             return "AltitudeAtTime{" + "altitude=" + Altitude + ", azimuth=" + Azimuth + ", atTime=" + AtTime + '}';
         }
     }
-
 }

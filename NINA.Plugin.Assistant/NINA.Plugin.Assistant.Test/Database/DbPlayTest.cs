@@ -11,7 +11,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
     [TestFixture]
     public class DbPlayTest {
-
         private SchedulerDatabaseInteraction db;
 
         /*
@@ -24,7 +23,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
         //[Test]
         public void AddAcquiredImagesForTSFlats() {
-
             // BEWARE! THIS WILL UPDATE ACTUAL DATABASE USED BY THE PLUGIN
             var testDbPath = @"C:\Users\Tom\AppData\Local\NINA\SchedulerPlugin\schedulerdb.sqlite";
             db = new SchedulerDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
@@ -119,14 +117,12 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
         //[Test]
         public void AddAcquiredImages() {
-
             // BEWARE! THIS WILL UPDATE ACTUAL DATABASE USED BY THE PLUGIN
             var testDbPath = @"C:\Users\Tom\AppData\Local\NINA\AssistantPlugin\assistantdb.sqlite";
             db = new SchedulerDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
 
             string profileId = "395fdf35-4ca8-479b-bd5a-ff24ca2b2a91";
             using (var context = db.GetContext()) {
-
                 DateTime expTime = DateTime.Now.Date.AddDays(-10);
                 for (int i = 0; i < 30; i++) {
                     context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, expTime, "L", IsAccepted(), "", GetIMD("L", expTime, 120)));
@@ -160,6 +156,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
         }
 
         private static Random rand = new Random();
+
         private bool IsAccepted() {
             return rand.NextDouble() < .2;
         }
@@ -241,8 +238,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     ///
 
                     context.SaveChanges();
-                }
-                catch (DbEntityValidationException e) {
+                } catch (DbEntityValidationException e) {
                     StringBuilder sb = new StringBuilder();
                     foreach (var eve in e.EntityValidationErrors) {
                         foreach (var dbeve in eve.ValidationErrors) {
@@ -251,8 +247,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     }
 
                     TestContext.WriteLine($"DB VALIDATION EXCEPTION: {sb.ToString()}");
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TestContext.WriteLine($"OTHER EXCEPTION: {e.Message}\n{e.ToString()}");
                 }
             }
@@ -261,7 +256,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
         //[Test]
         /*
         public void testPlay() {
-
             Logger.SetLogLevel(Core.Enum.LogLevelEnum.TRACE);
             string profileId1 = Guid.NewGuid().ToString();
             string profileId2 = Guid.NewGuid().ToString();
@@ -369,7 +363,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
                             TestContext.WriteLine($"     exp plan: {exposurePlan.FilterName} {exposurePlan.Exposure}");
                         }
                     }
-
                 }
                 catch (DbEntityValidationException e) {
                     StringBuilder sb = new StringBuilder();
@@ -386,6 +379,5 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 }
             }
         }*/
-
     }
 }

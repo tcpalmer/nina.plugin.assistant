@@ -49,7 +49,6 @@ namespace Assistant.NINAPlugin.Sequencer {
     [Export(typeof(ISequenceContainer))]
     [JsonObject(MemberSerialization.OptIn)]
     public class TargetSchedulerContainer : SequentialContainer, IDeepSkyObjectContainer {
-
         private readonly IProfileService profileService;
         private readonly IList<IDateTimeProvider> dateTimeProviders;
         private readonly ITelescopeMediator telescopeMediator;
@@ -113,7 +112,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                 IWindowServiceFactory windowServiceFactory,
                 IFramingAssistantVM framingAssistantVM,
                 IApplicationMediator applicationMediator) : base() {
-
             this.profileService = profileService;
             this.dateTimeProviders = dateTimeProviders;
             this.telescopeMediator = telescopeMediator;
@@ -362,7 +360,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void WaitForNextTarget(DateTime? waitForNextTargetTime, IProgress<ApplicationStatus> progress, CancellationToken token) {
-
             TimeSpan duration = ((DateTime)waitForNextTargetTime) - DateTime.Now;
             bool parked = false;
 
@@ -394,6 +391,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private SchedulerProgressVM schedulerProgress;
+
         public SchedulerProgressVM SchedulerProgress {
             get => schedulerProgress;
             set {
@@ -555,6 +553,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         public NighttimeData NighttimeData { get; private set; }
 
         private InputTarget target;
+
         public InputTarget Target {
             get => target;
             set {
@@ -591,7 +590,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private CustomHorizon GetCustomHorizon(IProfile activeProfile, IPlanProject project) {
-
             // For display in the Nighttime altitude chart, we either use the profile's custom horizon as-is or generate
             // a fixed constant horizon using the project's minimum altitude.  If using the regular custom horizon, we
             // won't show any modifications due to horizon offset or a base minimum altitude.  Not ideal but core
@@ -652,7 +650,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                 windowServiceFactory,
                 framingAssistantVM,
                 applicationMediator) {
-
                 Icon = Icon,
                 Name = Name,
                 Category = Category,

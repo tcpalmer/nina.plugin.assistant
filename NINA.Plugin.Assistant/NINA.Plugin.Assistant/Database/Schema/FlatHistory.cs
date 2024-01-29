@@ -1,6 +1,4 @@
-﻿using Assistant.NINAPlugin.Sequencer;
-using Assistant.NINAPlugin.Util;
-using NINA.Core.Model.Equipment;
+﻿using NINA.Core.Model.Equipment;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,7 +6,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Assistant.NINAPlugin.Database.Schema {
 
     public class FlatHistory : IComparable {
-
         public const string FLAT_TYPE_PANEL = "panel";
         public const string FLAT_TYPE_SKY = "sky";
 
@@ -29,7 +26,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public double rotation { get; set; }
         public double roi { get; set; }
 
-        public FlatHistory() { }
+        public FlatHistory() {
+        }
 
         public FlatHistory(int targetId,
                            DateTime lightSessionDate,
@@ -44,7 +42,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
                            int readoutMode,
                            double rotation,
                            double roi) {
-
             TargetId = targetId;
             LightSessionDate = lightSessionDate;
             LightSessionId = lightSessionId;

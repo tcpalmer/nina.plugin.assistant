@@ -3,7 +3,6 @@
 namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
 
     public class MeridianWindowPriorityRule : ScoringRule {
-
         public const string RULE_NAME = "Meridian Window Priority";
         public const double DEFAULT_WEIGHT = .75 * WEIGHT_SCALE;
 
@@ -21,6 +20,5 @@ namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
             IPlanProject project = potentialTarget.Project;
             return project.MeridianWindow > 0 ? 1 : 0;
         }
-
     }
 }

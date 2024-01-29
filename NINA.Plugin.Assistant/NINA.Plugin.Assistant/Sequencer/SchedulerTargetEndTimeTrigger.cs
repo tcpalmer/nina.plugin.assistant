@@ -11,8 +11,7 @@ using System.Threading.Tasks;
 namespace Assistant.NINAPlugin.Sequencer {
 
     public class SchedulerTargetEndTimeTrigger : SequenceTrigger {
-
-        DateTime EndTime;
+        private DateTime EndTime;
 
         public SchedulerTargetEndTimeTrigger(DateTime endTime) {
             Name = nameof(SchedulerTargetEndTimeTrigger);
@@ -40,5 +39,4 @@ namespace Assistant.NINAPlugin.Sequencer {
             return shouldTrigger;
         }
     }
-
 }

@@ -19,18 +19,17 @@ namespace Assistant.NINAPlugin.Sequencer {
     /// exposure plan that initiated the exposure.  We also have a reference to the InstructionWrapper
     /// that contains this so we can handle parent relationships.  Works in conjunction with the provided
     /// IImageSaveWatcher.
-    /// 
+    ///
     /// We also handle ROI < 1 by using parts of TakeSubframeExposure here rather than a separate instruction.
-    /// 
+    ///
     /// If synchronization is enabled, we handle getting exposures to registered clients and then waiting for
     /// them to complete.
-    /// 
+    ///
     /// This is far from ideal.  If the core TakeExposure instruction changes, we'd be doing something different
     /// until this code was updated.  Ideally, NINA would provide a way to track some metadata or id all the way
     /// through the image pipeline to the save operation.
     /// </summary>
     public class PlanTakeExposure : SchedulerTakeExposure {
-
         private bool synchronizationEnabled;
         private int syncExposureTimeout;
         private IImageSaveWatcher imageSaveWatcher;
@@ -50,7 +49,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             IImageSaveWatcher imageSaveWatcher,
             int targetDatabaseId,
             int exposureDatabaseId) : base(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM) {
-
             this.dsoContainer = dsoContainer;
             this.synchronizationEnabled = synchronizationEnabled;
             this.syncExposureTimeout = syncExposureTimeout;
@@ -60,7 +58,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-
             var capture = new CaptureSequence() {
                 ExposureTime = ExposureTime,
                 Binning = Binning,
@@ -138,12 +135,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                 var container = parent as IDeepSkyObjectContainer;
                 if (container != null) {
                     return container.Target;
-                }
-                else {
+                } else {
                     return RetrieveTarget(parent.Parent);
                 }
-            }
-            else {
+            } else {
                 return null;
             }
         }

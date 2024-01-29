@@ -25,7 +25,6 @@ namespace Assistant.NINAPlugin.Astrometry {
     /// a single 'night'.
     /// </summary>
     public class NighttimeCircumstances {
-
         public DateTime CivilTwilightStart { get; protected set; }
         public DateTime CivilTwilightEnd { get; protected set; }
         public DateTime? NauticalTwilightStart { get; protected set; }
@@ -46,7 +45,9 @@ namespace Assistant.NINAPlugin.Astrometry {
         private readonly ObserverInfo observerInfo;
         private readonly DateTime onDate;
 
-        public NighttimeCircumstances() { /* support testing */ }
+        public NighttimeCircumstances() {
+            /* support testing */
+        }
 
         public static NighttimeCircumstances AdjustNighttimeCircumstances(ObserverInfo observerInfo, DateTime atTime) {
             NighttimeCircumstances nighttimeCircumstances = new NighttimeCircumstances(observerInfo, atTime);
@@ -91,8 +92,7 @@ namespace Assistant.NINAPlugin.Astrometry {
             if (cached == null) {
                 Calculate();
                 NighttimeCircumstancesCache.Put(this, cacheKey);
-            }
-            else {
+            } else {
                 this.CivilTwilightStart = cached.CivilTwilightStart;
                 this.CivilTwilightEnd = cached.CivilTwilightEnd;
                 this.NauticalTwilightStart = cached.NauticalTwilightStart;
@@ -104,10 +104,21 @@ namespace Assistant.NINAPlugin.Astrometry {
             }
         }
 
-        public bool HasNighttime() { return NighttimeStart != null; }
-        public bool HasAstronomicalTwilight() { return AstronomicalTwilightStart != null; }
-        public bool HasNauticalTwilight() { return NauticalTwilightStart != null; }
-        public bool HasCivilTwilight() { return CivilTwilightStart != null; }
+        public bool HasNighttime() {
+            return NighttimeStart != null;
+        }
+
+        public bool HasAstronomicalTwilight() {
+            return AstronomicalTwilightStart != null;
+        }
+
+        public bool HasNauticalTwilight() {
+            return NauticalTwilightStart != null;
+        }
+
+        public bool HasCivilTwilight() {
+            return CivilTwilightStart != null;
+        }
 
         public TimeInterval GetTwilightSpan(TwilightLevel twilightLevel) {
             switch (twilightLevel) {
@@ -121,18 +132,15 @@ namespace Assistant.NINAPlugin.Astrometry {
         }
 
         public TimeInterval GetTwilightWindow(TwilightLevel twilightLevel, TwilightStage twilightStage) {
-
             if (twilightLevel == TwilightLevel.Nighttime) {
                 return HasNighttime() ? SafeTwilightSpan(NighttimeStart, NighttimeEnd) : null;
             }
 
             if (twilightStage == TwilightStage.Dusk) {
-
                 if (twilightLevel == TwilightLevel.Astronomical) {
                     if (HasAstronomicalTwilight()) {
                         return HasNighttime() ? SafeTwilightSpan(AstronomicalTwilightStart, NighttimeStart) : SafeTwilightSpan(AstronomicalTwilightStart, AstronomicalTwilightEnd);
-                    }
-                    else {
+                    } else {
                         return null;
                     }
                 }
@@ -140,8 +148,7 @@ namespace Assistant.NINAPlugin.Astrometry {
                 if (twilightLevel == TwilightLevel.Nautical) {
                     if (HasNauticalTwilight()) {
                         return HasAstronomicalTwilight() ? SafeTwilightSpan(NauticalTwilightStart, AstronomicalTwilightStart) : SafeTwilightSpan(NauticalTwilightStart, NauticalTwilightEnd);
-                    }
-                    else {
+                    } else {
                         return null;
                     }
                 }
@@ -149,18 +156,15 @@ namespace Assistant.NINAPlugin.Astrometry {
                 if (twilightLevel == TwilightLevel.Civil) {
                     if (HasCivilTwilight()) {
                         return HasNauticalTwilight() ? SafeTwilightSpan(CivilTwilightStart, NauticalTwilightStart) : SafeTwilightSpan(CivilTwilightStart, CivilTwilightEnd);
-                    }
-                    else {
+                    } else {
                         return null;
                     }
                 }
-            }
-            else {
+            } else {
                 if (twilightLevel == TwilightLevel.Astronomical) {
                     if (HasAstronomicalTwilight()) {
                         return HasNighttime() ? SafeTwilightSpan(NighttimeEnd, AstronomicalTwilightEnd) : SafeTwilightSpan(AstronomicalTwilightStart, AstronomicalTwilightEnd);
-                    }
-                    else {
+                    } else {
                         return null;
                     }
                 }
@@ -168,8 +172,7 @@ namespace Assistant.NINAPlugin.Astrometry {
                 if (twilightLevel == TwilightLevel.Nautical) {
                     if (HasNauticalTwilight()) {
                         return HasAstronomicalTwilight() ? SafeTwilightSpan(AstronomicalTwilightEnd, NauticalTwilightEnd) : SafeTwilightSpan(NauticalTwilightStart, NauticalTwilightEnd);
-                    }
-                    else {
+                    } else {
                         return null;
                     }
                 }
@@ -177,8 +180,7 @@ namespace Assistant.NINAPlugin.Astrometry {
                 if (twilightLevel == TwilightLevel.Civil) {
                     if (HasCivilTwilight()) {
                         return HasNauticalTwilight() ? SafeTwilightSpan(NauticalTwilightEnd, CivilTwilightEnd) : SafeTwilightSpan(CivilTwilightStart, CivilTwilightEnd);
-                    }
-                    else {
+                    } else {
                         return null;
                     }
                 }
@@ -216,7 +218,6 @@ namespace Assistant.NINAPlugin.Astrometry {
         }
 
         private Altitudes ResampleForHighLatitudes(Altitudes altitudes, int minPos) {
-
             // Restrict to approximate set-rise
             int startPos = 0;
             for (int i = minPos; i >= 0; i--) {
@@ -248,7 +249,6 @@ namespace Assistant.NINAPlugin.Astrometry {
         }
 
         private DateTime? DetectAltitudeEvent(Altitudes altitudes, double targetAltitude, bool descending) {
-
             // Assuming initial sample is 24 (1h) then 24/6/10/6/5/2 (52 total) uses intervals of 1h, 10m, 1m, 10s, 2s, 1s
             int[] resample = { 6, 10, 6, 5, 2 };
 
@@ -276,7 +276,6 @@ namespace Assistant.NINAPlugin.Astrometry {
         }
 
         private Altitudes GetSamples(DateTime start, DateTime end, int samples) {
-
             int timeSpan = (int)(end - start).TotalSeconds;
             int timeStep = timeSpan / samples;
             List<AltitudeAtTime> alts = new List<AltitudeAtTime>(samples + 1);
@@ -321,11 +320,9 @@ namespace Assistant.NINAPlugin.Astrometry {
             sb.Append($"{observerInfo.Longitude.ToString("0.000000", CultureInfo.InvariantCulture)}");
             return sb.ToString();
         }
-
     }
 
-    class NighttimeCircumstancesCache {
-
+    internal class NighttimeCircumstancesCache {
         private static readonly TimeSpan ITEM_TIMEOUT = TimeSpan.FromHours(12);
         private static readonly MemoryCache _cache = new MemoryCache("Scheduler NighttimeCircumstances");
 
@@ -337,7 +334,7 @@ namespace Assistant.NINAPlugin.Astrometry {
             _cache.Add(cacheKey, nighttimeCircumstances, DateTime.Now.Add(ITEM_TIMEOUT));
         }
 
-        private NighttimeCircumstancesCache() { }
+        private NighttimeCircumstancesCache() {
+        }
     }
-
 }

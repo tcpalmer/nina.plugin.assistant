@@ -59,7 +59,6 @@
                 </Expander.Header>
                 <ai:AcquiredImagesManagerView DataContext="{Binding AcquiredImagesManagerViewVM}" />
             </Expander>
-
         </StackPanel>
     </DataTemplate>
 </ResourceDictionary>

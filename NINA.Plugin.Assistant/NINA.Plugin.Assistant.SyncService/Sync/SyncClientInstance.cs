@@ -1,10 +1,9 @@
 ﻿using NINA.Plugin.Assistant.Shared.Utility;
 using Scheduler.SyncService;
-using System;
 
 namespace Assistant.NINAPlugin.Sync {
 
-    class SyncClientInstance {
+    internal class SyncClientInstance {
         public ClientState ClientState { get; private set; }
         public string Guid { get; private set; }
         public int Pid { get; private set; }

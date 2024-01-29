@@ -190,7 +190,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
         [Test]
         public void testFilterForVisibilityNeverRises() {
-
             // Southern hemisphere location and IC1805
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_2);
 
@@ -616,7 +615,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         [Test]
         [Ignore("should test in the future")]
         public void testPerfectPlan() {
-
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
             DateTime atTime = new DateTime(2023, 1, 26);
 
@@ -630,7 +628,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
                 TestContext.WriteLine("PLAN -----------------------------------------------------");
                 TestContext.WriteLine(plan.PlanSummary());
             }
-
         }
 
         [Test]
@@ -642,7 +639,5 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         private ProfilePreference GetPrefs(string profileId = "abcd-1234") {
             return new ProfilePreference(profileId);
         }
-
     }
-
 }

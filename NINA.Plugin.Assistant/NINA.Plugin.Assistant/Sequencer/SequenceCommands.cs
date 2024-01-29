@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
-    class SequenceCommands {
+    internal class SequenceCommands {
 
         public static void StopGuiding(IGuiderMediator guiderMediator, CancellationToken token) {
             if (guiderMediator.GetInfo().Connected) {
@@ -16,8 +16,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 var stoppedGuiding = Task.Run(async () => {
                     await guiderMediator.StopGuiding(token);
                 });
-            }
-            else {
+            } else {
                 TSLogger.Warning("no guider connected, skipping StopGuiding");
             }
         }
@@ -28,8 +27,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 var stoppedGuiding = Task.Run(async () => {
                     await guiderMediator.StartGuiding(false, progress, token);
                 });
-            }
-            else {
+            } else {
                 TSLogger.Warning("no guider connected, skipping StartGuiding");
             }
         }
@@ -38,8 +36,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             if (telescopeMediator.GetInfo().Connected) {
                 TSLogger.Info($"set mount tracking to {trackingMode}");
                 telescopeMediator.SetTrackingMode(trackingMode);
-            }
-            else {
+            } else {
                 TSLogger.Warning("no mount connected, skipping SetTelescopeTracking");
             }
         }
@@ -52,8 +49,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 if (!await telescopeMediator.ParkTelescope(progress, token)) {
                     throw new SequenceEntityFailedException();
                 }
-            }
-            else {
+            } else {
                 TSLogger.Warning("no mount connected, skipping ParkTelescope");
             }
         }
@@ -65,8 +61,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 if (!success) {
                     throw new SequenceEntityFailedException();
                 }
-            }
-            else {
+            } else {
                 TSLogger.Warning("no mount connected, skipping UnparkTelescope");
             }
         }
@@ -77,12 +72,12 @@ namespace Assistant.NINAPlugin.Sequencer {
                 if (!await domeMediator.Park(token)) {
                     throw new SequenceEntityFailedException();
                 }
-            }
-            else {
+            } else {
                 TSLogger.Warning("no dome connected, skipping ParkDome");
             }
         }
 
-        private SequenceCommands() { }
+        private SequenceCommands() {
+        }
     }
 }

@@ -4,7 +4,6 @@ using System.Windows.Markup;
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class EnumBindingSourceExtension : MarkupExtension {
-
         public Type EnumType { get; private set; }
 
         public EnumBindingSourceExtension(Type enumType) {

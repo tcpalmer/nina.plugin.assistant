@@ -4,7 +4,6 @@ using System.Collections.Generic;
 namespace Assistant.NINAPlugin.Plan.Scoring {
 
     public class DitherInjector {
-
         private List<IPlanInstruction> instructions;
         private List<string> exposureOrder;
         private int ditherEvery;
@@ -22,7 +21,6 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
         }
 
         public List<IPlanInstruction> Inject() {
-
             if (ditherEvery == 0) {
                 return instructions;
             }
@@ -57,7 +55,6 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
         }
 
         public List<string> ExposureOrderInject() {
-
             if (ditherEvery == 0) {
                 return exposureOrder;
             }
@@ -166,7 +163,5 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
 
             return dict;
         }
-
     }
-
 }

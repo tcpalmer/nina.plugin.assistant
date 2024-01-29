@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 
 namespace Assistant.NINAPlugin.Astrometry.Solver {
-
     // Note that NINA has ItemUtility.CalculateTimeAtAltitude() which will return the rise/set/meridian for a target
     // based on location and a target altitude.  However, it seems that it's using some approximation since my testing
     // showed its results differed by minutes (even for the transit time where no refraction could be impacting).  Not
@@ -12,7 +11,6 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
     // certainly more expensive).
 
     public class ImagingDay {
-
         public DateTime StartDate { get; private set; }
         public DateTime EndDate { get; private set; }
         public Coordinates Target { get; private set; }
@@ -23,7 +21,6 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         private readonly DSORefiner refiner;
 
         public ImagingDay(DateTime startDate, DateTime endDate, ObserverInfo location, Coordinates target, HorizonDefinition horizonDefinition) {
-
             Assert.notNull(location, "location cannot be null");
             Assert.notNull(target, "target cannot be null");
             Assert.notNull(horizonDefinition, "horizonDefinition cannot be null");
@@ -39,7 +36,6 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         }
 
         public bool IsEverAboveMinimumAltitude() {
-
             foreach (AltitudeAtTime aat in SamplePositions.AltitudeList) {
                 double targetAltitude = horizonDefinition.GetTargetAltitude(aat);
                 if (aat.Altitude > targetAltitude) {
@@ -82,20 +78,17 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         }
 
         public DateTime GetTransitTime() {
-
             try {
                 // Objects that never rise at location won't have a proper transit
                 AltitudeAtTime transit = new CircumstanceSolver(refiner, 1).FindTransit(GetInitialTransitSpan());
                 return transit != null ? transit.AtTime : DateTime.MinValue;
-            }
-            catch (Exception) {
+            } catch (Exception) {
                 return DateTime.MinValue;
             }
         }
 
         /*
         public DateTime GetSetBelowMinimumTimeNEW() {
-
             List<AltitudeAtTime> list = SamplePositions.AltitudeList;
             AltitudeAtTime aat;
             int pos = 0;
@@ -153,5 +146,4 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
             return refiner.Refine(new Altitudes(alts), numPoints);
         }
     }
-
 }

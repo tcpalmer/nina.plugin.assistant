@@ -19,7 +19,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
     [TestFixture]
     public class SchedulerDatabaseTest {
-
         private const string profileId = "01234567-abcd-9876-gfed-0123456abcde";
         private static DateTime markDate = DateTime.Now.Date;
 
@@ -28,7 +27,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
         [OneTimeSetUp]
         public void OneTimeSetUp() {
-
             testDatabasePath = Path.Combine(Path.GetTempPath(), $"scheduler-unittest.sqlite");
             if (File.Exists(testDatabasePath)) {
                 File.Delete(testDatabasePath);
@@ -43,7 +41,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
         [NonParallelizable]
         public void TestLoad() {
             using (var context = db.GetContext()) {
-
                 context.HasActiveTargets("").Should().BeFalse();
                 context.HasActiveTargets(profileId).Should().BeTrue();
 
@@ -265,7 +262,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
         [NonParallelizable]
         public void TestPasteTarget() {
             using (var context = db.GetContext()) {
-
                 List<Project> projects = context.GetAllProjects(profileId);
                 projects.Count.Should().Be(2);
 
@@ -281,7 +277,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
         [NonParallelizable]
         public void TestNewExposurePlan() {
             using (var context = db.GetContext()) {
-
                 ExposureTemplate et = context.GetExposureTemplate(1);
                 ExposurePlan ep = new ExposurePlan(et.profileId);
                 ep.ExposureTemplateId = et.Id;
@@ -302,7 +297,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
         [NonParallelizable]
         public void TestProfilePreference() {
             using (var context = db.GetContext()) {
-
                 ProfilePreference pp = context.GetProfilePreference("abcd-1234");
                 pp.Should().BeNull();
 
@@ -335,7 +329,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
         [NonParallelizable]
         public void TestDeleteExposurePlans() {
             using (var context = db.GetContext()) {
-
                 ExposureTemplate et = context.GetExposureTemplate(1);
                 ExposurePlan ep = new ExposurePlan(et.profileId);
                 ep.ExposureTemplateId = et.Id;
@@ -353,7 +346,6 @@ namespace NINA.Plugin.Assistant.Test.Database {
         [Test, Order(9)]
         [NonParallelizable]
         public void TestFlatHistory() {
-
             DateTime dt = DateTime.Now;
             FlatHistory record1 = new FlatHistory(1, dt, dt.AddDays(2), 23, "abcd-1234", FlatHistory.FLAT_TYPE_PANEL, "Ha", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
             FlatHistory record2 = new FlatHistory(1, dt.AddDays(1), dt.AddDays(3), 24, "abcd-1234", FlatHistory.FLAT_TYPE_SKY, "O3", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
@@ -542,8 +534,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                     context.ProjectSet.Add(p2);
 
                     context.SaveChanges();
-                }
-                catch (DbEntityValidationException e) {
+                } catch (DbEntityValidationException e) {
                     StringBuilder sb = new StringBuilder();
                     foreach (var eve in e.EntityValidationErrors) {
                         foreach (var dbeve in eve.ValidationErrors) {
@@ -553,8 +544,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                     TestContext.Error.WriteLine($"DB VALIDATION EXCEPTION: {sb}");
                     throw e;
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TestContext.Error.WriteLine($"OTHER EXCEPTION: {e.Message}\n{e}");
                     throw e;
                 }

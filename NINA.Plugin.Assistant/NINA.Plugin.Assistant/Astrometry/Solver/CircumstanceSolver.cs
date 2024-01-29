@@ -5,16 +5,18 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
 
     public class CircumstanceSolver : Solver {
 
-        public CircumstanceSolver(IAltitudeRefiner refiner) : base(refiner) { }
+        public CircumstanceSolver(IAltitudeRefiner refiner) : base(refiner) {
+        }
 
-        public CircumstanceSolver(IAltitudeRefiner refiner, long maxFinalTimeStep) : base(refiner, maxFinalTimeStep) { }
+        public CircumstanceSolver(IAltitudeRefiner refiner, long maxFinalTimeStep) : base(refiner, maxFinalTimeStep) {
+        }
 
         /// <summary>
         /// Find the rising time of the object to the specified accuracy.  The value returned will be the second sample in
         /// the final interval found where altitude goes positive and the sample interval is less than the defined maximum.
         /// This ensures that the value returned has a positive altitude.  If it is too great, decrease the maximum allowed
         /// interval and try again.
-        /// 
+        ///
         /// It is assumed that the set of sample altitudes does span the rising time(even if that step is wrapped in the set,
         /// from the last to the first point), otherwise null will be returned.
         /// </summary>
@@ -47,7 +49,7 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         /// span this time (otherwise null will be returned).  The argument altitudes typically sample from the rising time
         /// to the transit to ensure sample coverage. The minimum value must also be less that the object's transit altitude,
         /// otherwise the minimum will never be reached.
-        /// 
+        ///
         /// A circumpolar object where lat + (dec-min) > 90 is always above the minimum(at least for Northern hemisphere).
         /// This case should be detected before calling this method.
         /// </summary>
@@ -94,7 +96,7 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         /// the second sample in the final interval found where altitude reaches a maximum and the sample interval is
         /// less than the defined maximum interval.This ensures that the value returned has actually passed the meridian.
         /// If it is too far after, decrease the maximum allowed interval and try again.
-        /// 
+        ///
         /// It is assumed that the set of sample altitudes does span the transit time (even if that step is wrapped in the
         /// set, from the last to the first point), otherwise null will be returned.
         /// </summary>
@@ -127,7 +129,7 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         /// span this time (otherwise null will be returned).  The argument altitudes typically sample from the transit time
         /// to setting to ensure sample coverage. The minimum value must also be less that the object's transit altitude,
         /// otherwise the minimum will never be reached.
-        /// 
+        ///
         /// A circumpolar object where lat + (dec-min) > 90 is always above the minimum(at least for Northern hemisphere).
         /// This case should be detected before calling this method.
         /// </summary>
@@ -174,7 +176,7 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         /// the final interval found where altitude goes negative and the sample interval is less than the defined maximum.
         /// This ensures that the value returned has a positive altitude. If it is too great, decrease the maximum allowed
         /// interval and try again.
-        /// 
+        ///
         /// It is assumed that the set of sample altitudes does span the setting time(even if that step is wrapped in the set,
         /// from the last to the first point), otherwise null will be returned.
         /// </summary>
@@ -202,5 +204,4 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
             return FindSetting(refiner.Refine(targetStep, 10));
         }
     }
-
 }

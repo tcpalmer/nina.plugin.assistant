@@ -21,7 +21,6 @@ using System.Windows.Input;
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class TargetViewVM : BaseVM {
-
         private AssistantManagerVM managerVM;
         private Project project;
         private IProfile profile;
@@ -36,7 +35,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             IPlanetariumFactory planetariumFactory,
             Target target,
             Project project) : base(profileService) {
-
             this.managerVM = managerVM;
             this.project = project;
 
@@ -84,6 +82,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private TargetProxy targetProxy;
+
         public TargetProxy TargetProxy {
             get => targetProxy;
             set {
@@ -95,14 +94,14 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private void TargetProxy_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             if (e?.PropertyName != nameof(TargetProxy.Proxy)) {
                 ItemEdited = true;
-            }
-            else {
+            } else {
                 TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
                 RaisePropertyChanged(nameof(TargetProxy));
             }
         }
 
         private bool targetActive;
+
         public bool TargetActive {
             get {
                 return targetActive;
@@ -136,6 +135,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private List<ExposurePlan> exposurePlans = new List<ExposurePlan>();
+
         public List<ExposurePlan> ExposurePlans {
             get => exposurePlans;
             set {
@@ -160,6 +160,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private AsyncObservableCollection<KeyValuePair<int, string>> exposureTemplateChoices;
+
         public AsyncObservableCollection<KeyValuePair<int, string>> ExposureTemplateChoices {
             get {
                 return exposureTemplateChoices;
@@ -170,6 +171,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private bool showEditView = false;
+
         public bool ShowEditView {
             get => showEditView;
             set {
@@ -182,6 +184,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private bool showTargetImportView = false;
+
         public bool ShowTargetImportView {
             get => showTargetImportView;
             set {
@@ -191,6 +194,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private bool itemEdited = false;
+
         public bool ItemEdited {
             get => itemEdited;
             set {
@@ -274,8 +278,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             if (TargetProxy.Original.OverrideExposureOrder != null) {
                 OverrideExposureOrder = new OverrideExposureOrder(TargetProxy.Original.OverrideExposureOrder, ExposurePlans);
                 OverrideExposureOrderDisplay = GetOverrideExposureOrder();
-            }
-            else {
+            } else {
                 DefaultExposureOrder = GetDefaultExposureOrder();
             }
 
@@ -352,8 +355,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 string overrideExposureOrder = OverrideExposureOrder == null ? null : OverrideExposureOrder.Serialize();
                 ExposurePlansClipboard.SetItem(exposurePlans, overrideExposureOrder);
                 RaisePropertyChanged(nameof(ExposurePlansPasteEnabled));
-            }
-            else {
+            } else {
                 ExposurePlansClipboard.Clear();
                 RaisePropertyChanged(nameof(ExposurePlansPasteEnabled));
             }
@@ -414,7 +416,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             if (TargetProxy.Original.ExposurePlans?.Count > 0) {
                 string message = "Delete all exposure plans for this target?  This cannot be undone.";
                 if (MyMessageBox.Show(message, "Delete all Exposure Plans?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
-
                     // Have to clear any override exposure order on deleted exposure plans
                     TargetProxy.Original.OverrideExposureOrder = null;
 
@@ -439,7 +440,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             if (exposurePlan != null) {
                 string message = $"Delete exposure plan using template '{exposurePlan.ExposureTemplate?.Name}'?  This cannot be undone.";
                 if (MyMessageBox.Show(message, "Delete Exposure Plan?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
-
                     // Have to clear any override exposure order on deleted exposure plan
                     TargetProxy.Original.OverrideExposureOrder = null;
 
@@ -454,13 +454,13 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         DefaultExposureOrder = GetDefaultExposureOrder();
                     }
                 }
-            }
-            else {
+            } else {
                 TSLogger.Error($"failed to find original exposure plan: {item.Id}");
             }
         }
 
         private string defaultExposureOrder;
+
         public string DefaultExposureOrder {
             get {
                 return defaultExposureOrder;
@@ -472,6 +472,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private string overrideExposureOrderDisplay;
+
         public string OverrideExposureOrderDisplay {
             get {
                 return overrideExposureOrderDisplay;
@@ -483,6 +484,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private bool showOverrideExposureOrderPopup = false;
+
         public bool ShowOverrideExposureOrderPopup {
             get => showOverrideExposureOrderPopup;
             set {
@@ -492,6 +494,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private OverrideExposureOrderViewVM overrideExposureOrderVM;
+
         public OverrideExposureOrderViewVM OverrideExposureOrderVM {
             get => overrideExposureOrderVM;
             set {
@@ -501,6 +504,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private OverrideExposureOrder overrideExposureOrder;
+
         public OverrideExposureOrder OverrideExposureOrder {
             get => overrideExposureOrder;
             set {
@@ -523,8 +527,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ExposurePlans.ForEach((plan) => {
                 if (filterSwitchFrequency == 0) {
                     sb.Append(plan.ExposureTemplate.Name).Append("..., ");
-                }
-                else {
+                } else {
                     for (int i = 0; i < filterSwitchFrequency; i++) {
                         sb.Append(plan.ExposureTemplate.Name).Append(", ");
                         exposureInstructions.Add(plan.ExposureTemplate.Name);
@@ -546,7 +549,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private string GetOverrideExposureOrder() {
-
             if (OverrideExposureOrder == null || OverrideExposureOrder.OverrideItems.Count == 0) {
                 return "";
             }
@@ -560,11 +562,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private void DisplayOverrideExposureOrder(object obj) {
-
             if (OverrideExposureOrder == null) {
                 OverrideExposureOrderVM.OverrideExposureOrder = new OverrideExposureOrder(TargetProxy.Proxy.ExposurePlans);
-            }
-            else {
+            } else {
                 // Clone it for popup
                 OverrideExposureOrderVM.OverrideExposureOrder = new OverrideExposureOrder(OverrideExposureOrder.Serialize(), TargetProxy.Proxy.ExposurePlans);
             }

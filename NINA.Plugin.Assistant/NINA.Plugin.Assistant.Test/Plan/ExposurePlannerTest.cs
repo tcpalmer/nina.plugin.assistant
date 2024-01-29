@@ -350,7 +350,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         }
 
         private void AssertPlan(List<IPlanInstruction> expectedPlan, List<IPlanInstruction> actualPlan) {
-
             /*
             TestContext.WriteLine("EXPECTED:");
             for (int i = 0; i < expectedPlan.Count; i++) {
@@ -725,7 +724,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         }
     }
 
-    class TestNighttimeCircumstances : NighttimeCircumstances {
+    internal class TestNighttimeCircumstances : NighttimeCircumstances {
 
         public TestNighttimeCircumstances(DateTime civilTwilightStart,
                                           DateTime? nauticalTwilightStart,
@@ -735,7 +734,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
                                           DateTime? astronomicalTwilightEnd,
                                           DateTime? nauticalTwilightEnd,
                                           DateTime civilTwilightEnd) {
-
             this.CivilTwilightStart = civilTwilightStart;
             this.NauticalTwilightStart = nauticalTwilightStart;
             this.AstronomicalTwilightStart = astronomicalTwilightStart;

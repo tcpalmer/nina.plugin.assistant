@@ -36,7 +36,6 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             instructionProgressQueue = new Queue<InstructionMonitor>();
             foreach (IPlanInstruction instruction in schedulerPlan.PlanInstructions) {
-
                 if (instruction is PlanMessage) {
                     continue;
                 }
@@ -47,7 +46,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 if (instruction is PlanSwitchFilter) {
-
                     instructionProgressQueue.Enqueue(new InstructionMonitor("SwitchFilter", instruction.planExposure.FilterName));
                     continue;
                 }
@@ -248,7 +246,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private bool CanContinue(ISequenceContainer container, ISequenceItem previousItem, ISequenceItem nextItem) {
-
             // There can't be any conditions directly on PlanTargetContainer so no need to check
 
             // Check conditions on ancestor containers above our parent
@@ -279,8 +276,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
     }
 
-    class InstructionMonitor {
-
+    internal class InstructionMonitor {
         public string Name { get; private set; }
         public string Filter { get; private set; }
 

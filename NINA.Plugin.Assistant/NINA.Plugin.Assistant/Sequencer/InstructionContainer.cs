@@ -15,7 +15,6 @@ namespace Assistant.NINAPlugin.Sequencer {
     [Export(typeof(ISequenceContainer))]
     [JsonObject(MemberSerialization.OptIn)]
     public class InstructionContainer : SequenceContainer, ISequenceContainer, IValidatable {
-
         private Object lockObj = new Object();
 
         [ImportingConstructor]
@@ -50,8 +49,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 var index = Items.IndexOf(item);
                 if (index == 0) {
                     return;
-                }
-                else {
+                } else {
                     base.MoveUp(item);
                 }
             }

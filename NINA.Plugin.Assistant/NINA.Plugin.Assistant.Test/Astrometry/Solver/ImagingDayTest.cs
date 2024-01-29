@@ -11,7 +11,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
 
         [Test]
         public void TestIsEverAboveMinimumAltitude() {
-
             DateTime start = new DateTime(2022, 10, 15, 18, 0, 0);
             DateTime end = new DateTime(2022, 10, 16, 6, 0, 0);
 
@@ -97,7 +96,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
 
         [Test]
         public void TestGetSetBelowMinimumTimeDescending() {
-
             // This tests the case where the target has an anti-meridian in the time span which leads to
             // altitude dropping below minimum but then later rising above.
 
@@ -230,5 +228,4 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
             ex.Message.Should().Be("horizonDefinition cannot be null");
         }
     }
-
 }

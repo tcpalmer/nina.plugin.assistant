@@ -7,7 +7,6 @@ using System.Globalization;
 using System.IO;
 
 namespace Assistant.NINAPlugin.Controls.Util {
-
     // Approach cribbed from NINA SimpleSequenceVM.ImportTargets()
 
     public class CsvTargetLoader {
@@ -43,7 +42,6 @@ namespace Assistant.NINAPlugin.Controls.Util {
                     csv.ReadHeader();
 
                     while (csv.Read()) {
-
                         string type = string.Empty;
                         if (typeFilter != null && csv.TryGetField<string>("type", out type) && type != typeFilter) {
                             continue;
@@ -67,8 +65,7 @@ namespace Assistant.NINAPlugin.Controls.Util {
                                 Coordinates = new Coordinates(Angle.ByDegree(ra), Angle.ByDegree(dec), Epoch.J2000),
                                 Rotation = angle
                             });
-                        }
-                        else {
+                        } else {
                             // Target Scheduler format
                             if (csv.TryGetField<string>("name", out name)) {
                                 var ra = AstroUtil.HMSToDegrees(csv.GetField("ra"));

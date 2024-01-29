@@ -3,7 +3,6 @@
 namespace NINA.Plugin.Assistant.Shared.Utility {
 
     public class Common {
-
         public static readonly string PLUGIN_HOME = Path.Combine(CoreUtil.APPLICATIONTEMPPATH, "SchedulerPlugin");
         public static readonly bool USE_EMULATOR = false;
 
@@ -17,6 +16,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
             return System.Text.Encoding.UTF8.GetString(bytes);
         }
 
-        private Common() { }
+        private Common() {
+        }
     }
 }

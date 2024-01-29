@@ -183,7 +183,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
 
         [Test]
         public void TestBad() {
-
             var ex = Assert.Throws<ArgumentException>(() => new Altitudes(null));
             Assert.AreEqual("altitudes cannot be null", ex.Message);
 
@@ -234,5 +233,4 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
             Assert.AreEqual("azimuth must be >= 0 and <= 360", ex.Message);
         }
     }
-
 }

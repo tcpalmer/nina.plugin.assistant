@@ -24,7 +24,6 @@ namespace Assistant.NINAPlugin.Util {
             sb.Append("{");
             bool inObject = false;
             foreach (string line in File.ReadAllLines(pathToFile)) {
-
                 if (line.Contains("TargetName") || line.Contains("PositionAngle")) {
                     sb.Append(line);
                 }
@@ -48,17 +47,18 @@ namespace Assistant.NINAPlugin.Util {
             throw new Exception($"failed to parse sequence target json from file (key lines not found): {pathToFile}");
         }
 
-        private SequenceTargetParser() { }
+        private SequenceTargetParser() {
+        }
     }
 
     public class SequenceTarget {
-        int RAHours { get; set; }
-        int RAMinutes { get; set; }
-        double RASeconds { get; set; }
-        bool NegativeDec { get; set; }
-        int DecDegrees { get; set; }
-        int DecMinutes { get; set; }
-        double DecSeconds { get; set; }
+        private int RAHours { get; set; }
+        private int RAMinutes { get; set; }
+        private double RASeconds { get; set; }
+        private bool NegativeDec { get; set; }
+        private int DecDegrees { get; set; }
+        private int DecMinutes { get; set; }
+        private double DecSeconds { get; set; }
 
         public string TargetName { get; set; }
         public double Rotation { get; set; }
@@ -66,7 +66,6 @@ namespace Assistant.NINAPlugin.Util {
         public SequenceTarget(int raHours, int raMinutes, double raSeconds,
             bool negativeDec, int decDegrees, int decMinutes, double decSeconds,
             string targetName, double positionAngle) {
-
             RAHours = raHours;
             RAMinutes = raMinutes;
             RASeconds = raSeconds;
@@ -83,7 +82,5 @@ namespace Assistant.NINAPlugin.Util {
             string dms = string.Format("{0:00}:{1:00}:{2:00}", DecDegrees, DecMinutes, DecSeconds);
             return new Coordinates(AstroUtil.HMSToDegrees(hms), AstroUtil.DMSToDegrees(dms), Epoch.J2000, Coordinates.RAType.Degrees);
         }
-
     }
-
 }

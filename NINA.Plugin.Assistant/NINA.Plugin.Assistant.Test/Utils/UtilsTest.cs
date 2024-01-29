@@ -42,7 +42,6 @@ namespace NINA.Plugin.Assistant.Test.Util {
             sut.Should().Be(expected);
         }
 
-
         [Test]
         public void TestMakeUniqueName() {
             Utils.MakeUniqueName(null, null).Should().Be(" (1)");
@@ -93,7 +92,6 @@ namespace NINA.Plugin.Assistant.Test.Util {
 
         [Test]
         public void TestMoveFile() {
-
             string tempDir = null;
             try {
                 tempDir = Path.Combine(Path.GetTempPath(), "movefiletest");
@@ -113,8 +111,7 @@ namespace NINA.Plugin.Assistant.Test.Util {
 
                 string newFile2 = Path.Combine(dstDir, Path.GetFileName(srcFile2));
                 File.Exists(newFile2).Should().BeTrue();
-            }
-            finally {
+            } finally {
                 Directory.Delete(tempDir, true);
             }
         }

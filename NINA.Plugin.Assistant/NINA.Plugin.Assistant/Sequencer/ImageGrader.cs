@@ -16,7 +16,6 @@ using System.Text;
 namespace Assistant.NINAPlugin.Sequencer {
 
     public class ImageGrader {
-
         public static readonly string REJECT_RMS = "Guiding RMS";
         public static readonly string REJECT_STARS = "Star Count";
         public static readonly string REJECT_HFR = "HFR";
@@ -27,7 +26,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         public ImageGraderPreferences Preferences { get; set; }
         private bool enableGradeRMS;
 
-        public ImageGrader() { }
+        public ImageGrader() {
+        }
 
         public ImageGrader(IProfile profile) {
             this.Profile = profile;
@@ -42,7 +42,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public (bool, string) GradeImage(IPlanTarget planTarget, ImageSavedEventArgs msg) {
-
             if (!enableGradeRMS && NoGradingMetricsEnabled()) {
                 TSLogger.Info("image grading: no metrics enabled => accepted");
                 return (true, "");
@@ -90,8 +89,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     double fwhm = GetHocusFocusMetric(msg.StarDetectionAnalysis, "FWHM");
                     if (Double.IsNaN(fwhm)) {
                         TSLogger.Warning("image grading: FWHM grading is enabled but image doesn't have FWHM metric.  Is Hocus Focus installed, enabled, and configured for star detection?");
-                    }
-                    else {
+                    } else {
                         List<double> samples = GetSamples(images, i => { return i.Metadata.FWHM; });
                         if (SamplesHaveData(samples)) {
                             TSLogger.Info("image grading: FWHM ->");
@@ -99,8 +97,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                                 TSLogger.Info("image grading: failed FWHM grading => NOT accepted");
                                 return (false, REJECT_FWHM);
                             }
-                        }
-                        else {
+                        } else {
                             TSLogger.Warning("All comparison samples for FWHM don't have valid data, skipping FWHM grading");
                         }
                     }
@@ -110,8 +107,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     double eccentricity = GetHocusFocusMetric(msg.StarDetectionAnalysis, "Eccentricity");
                     if (eccentricity == Double.NaN) {
                         TSLogger.Warning("image grading: eccentricity grading is enabled but image doesn't have eccentricity metric.  Is Hocus Focus installed, enabled, and configured for star detection?");
-                    }
-                    else {
+                    } else {
                         List<double> samples = GetSamples(images, i => { return i.Metadata.Eccentricity; });
                         if (SamplesHaveData(samples)) {
                             TSLogger.Info("image grading: eccentricity ->");
@@ -119,8 +115,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                                 TSLogger.Info("image grading: failed eccentricity grading => NOT accepted");
                                 return (false, REJECT_ECCENTRICITY);
                             }
-                        }
-                        else {
+                        } else {
                             TSLogger.Warning("All comparison samples for eccentricity don't have valid data, skipping eccentricity grading");
                         }
                     }
@@ -128,9 +123,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 TSLogger.Info("image grading: all tests passed => accepted");
                 return (true, "");
-
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 TSLogger.Error("image grading: exception => NOT accepted");
                 TSLogger.Error(e);
                 return (false, "exception");
@@ -170,7 +163,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private bool GradeRMS(ImageSavedEventArgs msg) {
-
             if (msg.MetaData?.Image?.RecordedRMS == null) {
                 TSLogger.Info("image grading: guiding RMS not available");
                 return true;
@@ -192,8 +184,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 TSLogger.Info($"image grading: RMS pixelSize={pixelSize} focalLength={focalLenth} bin={binning} cameraArcSecsPerPixel={cameraArcSecsPerPixel} cameraRMSPerPixel={cameraRMSPerPixel}");
                 return (cameraRMSPerPixel > Preferences.RMSPixelThreshold) ? false : true;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 TSLogger.Warning($"image grading: failed to determine RMS error in main camera pixels: {e.Message}\n{e.StackTrace}");
                 return true;
             }
@@ -287,8 +278,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 return double.Parse(bin.Substring(0, 1));
-            }
-            catch (Exception) {
+            } catch (Exception) {
                 return 1;
             }
         }
@@ -301,7 +291,6 @@ namespace Assistant.NINAPlugin.Sequencer {
     }
 
     public class ImageGraderPreferences {
-
         public int MaxGradingSampleSize { get; private set; }
         public bool AcceptImprovement { get; private set; }
         public bool EnableGradeRMS { get; private set; }

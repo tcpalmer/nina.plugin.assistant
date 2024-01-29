@@ -18,6 +18,5 @@
         /// Wait for all exposures to be saved, then stop watching.
         /// </summary>
         void Stop();
-
     }
 }

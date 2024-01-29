@@ -1,5 +1,4 @@
-﻿using Assistant.NINAPlugin.Database;
-using Assistant.NINAPlugin.Plan;
+﻿using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Sync;
 using NINA.Astrometry;
 using NINA.Core.Model;
@@ -17,7 +16,6 @@ using System.Threading.Tasks;
 namespace Assistant.NINAPlugin.Sequencer {
 
     public class PlanCenterAndRotate : CenterAndRotate {
-
         private IPlanTarget planTarget;
         private InputTarget target;
         private int syncActionTimeout;
@@ -37,7 +35,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                            IDomeFollower domeFollower,
                            IPlateSolverFactory plateSolverFactory,
                            IWindowServiceFactory windowServiceFactory) : base(profileService, telescopeMediator, imagingMediator, rotatorMediator, filterWheelMediator, guiderMediator, domeMediator, domeFollower, plateSolverFactory, windowServiceFactory) {
-
             this.planTarget = planTarget;
             this.target = target;
             this.syncActionTimeout = syncActionTimeout;
@@ -45,7 +42,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-
             // Server has to perform slew/center/rotate first
             TSLogger.Info($"SYNC server performing server slew/center/rotate");
             await base.Execute(progress, token);

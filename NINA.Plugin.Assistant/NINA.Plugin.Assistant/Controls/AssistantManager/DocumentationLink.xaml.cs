@@ -7,7 +7,6 @@ using System.Windows.Controls;
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public partial class DocumentationLink : UserControl {
-
         private static readonly string ROOT_URL = "https://tcpalmer.github.io/nina-scheduler/";
 
         public DocumentationLink() {
@@ -18,8 +17,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private void OpenLink(object sender, RoutedEventArgs e) {
             try {
                 Process.Start(new ProcessStartInfo(URL) { UseShellExecute = true });
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Error($"failed to open HTTP link {URL}: {ex.Message}");
             }
 

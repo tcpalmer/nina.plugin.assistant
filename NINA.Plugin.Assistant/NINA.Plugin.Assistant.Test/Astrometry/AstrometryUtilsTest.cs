@@ -1,7 +1,6 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
 using FluentAssertions;
 using NINA.Astrometry;
-using NINA.Core.Utility.Converters;
 using NUnit.Framework;
 using System;
 
@@ -166,7 +165,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
 
         [Test]
         public void TestBad() {
-
             DateTime dt = DateTime.Now;
 
             var ex = Assert.Throws<ArgumentException>(() => AstrometryUtils.GetHorizontalCoordinates(null, null, dt));
@@ -186,7 +184,5 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
         public void TestEM(double rotation, double expected) {
             AstrometryUtils.ConvertRotation(rotation).Should().BeApproximately(expected, 0.001);
         }
-
     }
-
 }

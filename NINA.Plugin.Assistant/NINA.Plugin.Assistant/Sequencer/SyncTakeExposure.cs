@@ -15,8 +15,7 @@ using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
 
-    class SyncTakeExposure : SchedulerTakeExposure {
-
+    internal class SyncTakeExposure : SchedulerTakeExposure {
         private ISyncImageSaveWatcher syncImageSaveWatcher;
         private SyncedExposure syncedExposure;
         private Action<string> UpdateDisplayTextAction;
@@ -38,7 +37,6 @@ namespace Assistant.NINAPlugin.Sequencer {
             ISyncImageSaveWatcher syncImageSaveWatcher,
             SyncedExposure syncedExposure,
             Action<String> UpdateDisplayTextAction) : base(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM) {
-
             this.exposurePlan = exposurePlan;
             this.exposureTemplate = exposureTemplate;
             this.target = target;
@@ -60,7 +58,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-
             var capture = new CaptureSequence() {
                 ExposureTime = ExposureTime,
                 Binning = Binning,

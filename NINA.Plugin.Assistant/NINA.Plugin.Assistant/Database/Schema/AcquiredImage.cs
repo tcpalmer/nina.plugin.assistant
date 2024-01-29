@@ -10,7 +10,6 @@ using System.Text;
 namespace Assistant.NINAPlugin.Database.Schema {
 
     public class AcquiredImage {
-
         [Key] public int Id { get; set; }
         public string profileId { get; set; }
         [Required] public int ProjectId { get; set; }
@@ -63,7 +62,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
         public virtual List<ImageData> Images { get; set; }
 
-        public AcquiredImage() { }
+        public AcquiredImage() {
+        }
 
         public AcquiredImage(ImageMetadata imageMetadata) {
             this.Metadata = imageMetadata;

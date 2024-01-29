@@ -10,12 +10,10 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Documents;
 
 namespace Assistant.NINAPlugin.Util {
 
     public class Utils {
-
         public static readonly string DateFMT = "yyyy-MM-dd HH:mm:ss";
 
         public static FilterInfo LookupFilter(IProfileService profileService, string filterName) {
@@ -35,7 +33,6 @@ namespace Assistant.NINAPlugin.Util {
         }
 
         public static int HMtoM(string hm) {
-
             if (string.IsNullOrEmpty(hm)) {
                 return 0;
             }
@@ -169,15 +166,13 @@ namespace Assistant.NINAPlugin.Util {
 
                 File.Move(srcFile, Path.Combine(dstDir, Path.GetFileName(srcFile)));
                 return true;
-
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Error($"failed to move file {srcFile} to {dstDir}: {ex.Message}");
                 return false;
             }
         }
 
-        private Utils() { }
+        private Utils() {
+        }
     }
-
 }

@@ -1,7 +1,6 @@
 ﻿namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
 
     public class TargetSwitchPenaltyRule : ScoringRule {
-
         public const string RULE_NAME = "Target Switch Penalty";
         public const double DEFAULT_WEIGHT = .67 * WEIGHT_SCALE;
 
@@ -19,5 +18,4 @@
             return potentialTarget.Equals(scoringEngine.PreviousPlanTarget) ? 1 : 0;
         }
     }
-
 }

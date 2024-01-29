@@ -10,13 +10,11 @@ using System.Text;
 namespace Assistant.NINAPlugin.Controls.Util {
 
     public class ProfileLoader {
-
         private static readonly ProfileLoader Instance = new ProfileLoader();
         private static bool initialized = false;
         private ProfileCache cache;
 
         public static IProfile Load(IProfileService profileService, ProfileMeta profileMeta) {
-
             if (!initialized) {
                 profileService.ProfileChanged += Instance.ProfileService_ProfileChanged;
                 profileService.Profiles.CollectionChanged += Instance.ProfileService_ProfileChanged;
@@ -39,8 +37,7 @@ namespace Assistant.NINAPlugin.Controls.Util {
                 profile = (Profile)serializer.ReadObject(fs);
                 Instance.cache.Put(profile, cacheKey);
                 return profile;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 TSLogger.Error($"failed to read profile at {profileMeta.Location}: {e.Message} {e.StackTrace}");
                 throw;
             }
@@ -61,11 +58,9 @@ namespace Assistant.NINAPlugin.Controls.Util {
         private ProfileLoader() {
             cache = new ProfileCache();
         }
-
     }
 
     internal class ProfileCache {
-
         private static readonly TimeSpan ITEM_TIMEOUT = TimeSpan.FromHours(2);
         private static MemoryCache _cache = new MemoryCache("Scheduler Profile");
 
@@ -85,7 +80,7 @@ namespace Assistant.NINAPlugin.Controls.Util {
             _cache = new MemoryCache("Scheduler Profile");
         }
 
-        internal ProfileCache() { }
+        internal ProfileCache() {
+        }
     }
-
 }

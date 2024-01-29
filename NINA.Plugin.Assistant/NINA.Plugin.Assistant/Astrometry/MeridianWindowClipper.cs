@@ -6,7 +6,8 @@ namespace Assistant.NINAPlugin.Astrometry {
 
     public class MeridianWindowClipper {
 
-        public MeridianWindowClipper() { }
+        public MeridianWindowClipper() {
+        }
 
         public TimeInterval Clip(DateTime riseAboveHorizonTime, DateTime culminationTime, DateTime setBelowHorizonTime, int meridianWindow) {
             DateTime startTime = riseAboveHorizonTime;

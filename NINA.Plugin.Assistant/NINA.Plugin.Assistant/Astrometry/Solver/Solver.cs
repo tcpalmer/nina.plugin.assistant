@@ -5,14 +5,14 @@ using System.Collections.Generic;
 namespace Assistant.NINAPlugin.Astrometry.Solver {
 
     public abstract class Solver {
-
         private static readonly long DEFAULT_MAX_STEP_TIME = 1; // seconds
 
         protected readonly IAltitudeRefiner refiner;
 
         protected readonly long maxFinalStepTime;
 
-        public Solver(IAltitudeRefiner refiner) : this(refiner, DEFAULT_MAX_STEP_TIME) { }
+        public Solver(IAltitudeRefiner refiner) : this(refiner, DEFAULT_MAX_STEP_TIME) {
+        }
 
         public Solver(IAltitudeRefiner refiner, long maxFinalTimeStep) {
             Assert.notNull(refiner, "refiner cannot be null");
@@ -34,7 +34,8 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         }
     }
 
-    interface StepFunction {
+    internal interface StepFunction {
+
         Altitudes determineStep(Altitudes altitudes);
     }
 
@@ -93,7 +94,6 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
     }
 
     public class RiseAboveMinimumFunction : StepFunction {
-
         private readonly HorizonDefinition horizonDefinition;
 
         public RiseAboveMinimumFunction(HorizonDefinition horizonDefinition) {
@@ -127,7 +127,7 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         }
     }
 
-    class TransitFunction : StepFunction {
+    internal class TransitFunction : StepFunction {
 
         public Altitudes determineStep(Altitudes altitudes) {
             Assert.notNull(altitudes, "altitudes cannot be null");
@@ -161,7 +161,6 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
 
             // If the maximum is first, we need to wrap from the last element to the 2nd to encompass the maximum.
             if (maxIndex == 0) {
-
                 AltitudeAtTime first = list[altitudes.AltitudeList.Count - 1];
                 long diff = (long)list[1].AtTime.Subtract(list[0].AtTime).TotalMilliseconds;
                 DateTime revisedTime = list[0].AtTime.AddMilliseconds(-1 * diff);
@@ -176,7 +175,6 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
             // If the maximum is last, we need to wrap from the second to the last element to the first to
             // encompass the maximum.  Time is adjusted for the old first to be new second.
             if (maxIndex == altitudes.AltitudeList.Count - 1) {
-
                 AltitudeAtTime first = list[0];
                 long diff = (long)list[1].AtTime.Subtract(list[0].AtTime).TotalMilliseconds;
                 DateTime revisedTime = list[maxIndex].AtTime.AddMilliseconds(diff);
@@ -195,8 +193,7 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         }
     }
 
-    class SetBelowMinimumFunction : StepFunction {
-
+    internal class SetBelowMinimumFunction : StepFunction {
         private readonly HorizonDefinition horizonDefinition;
 
         public SetBelowMinimumFunction(HorizonDefinition horizonDefinition) {
@@ -235,7 +232,7 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         }
     }
 
-    class SettingFunction : StepFunction {
+    internal class SettingFunction : StepFunction {
 
         public Altitudes determineStep(Altitudes altitudes) {
             Assert.notNull(altitudes, "altitudes cannot be null");

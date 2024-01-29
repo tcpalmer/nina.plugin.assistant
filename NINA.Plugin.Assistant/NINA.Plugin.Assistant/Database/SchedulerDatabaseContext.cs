@@ -1,5 +1,4 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
-using Assistant.NINAPlugin.Controls.AcquiredImages;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan.Scoring.Rules;
 using Assistant.NINAPlugin.Util;
@@ -16,12 +15,10 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Reflection;
 using System.Resources;
-using System.Transactions;
 
 namespace Assistant.NINAPlugin.Database {
 
     public class SchedulerDatabaseContext : DbContext {
-
         public DbSet<ProfilePreference> ProfilePreferenceSet { get; set; }
         public DbSet<Project> ProjectSet { get; set; }
         public DbSet<RuleWeight> RuleWeightSet { get; set; }
@@ -201,8 +198,7 @@ namespace Assistant.NINAPlugin.Database {
                     AcquiredImageSet.RemoveRange(AcquiredImageSet.Where(predicate));
                     SaveChanges();
                     transaction.Commit();
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error deleting acquired images: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                 }
@@ -217,8 +213,7 @@ namespace Assistant.NINAPlugin.Database {
                     AcquiredImageSet.RemoveRange(AcquiredImageSet.Where(predicate));
                     SaveChanges();
                     transaction.Commit();
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error deleting acquired images for target {targetId}: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                 }
@@ -263,8 +258,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return GetProfilePreference(profilePreference.ProfileId);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error persisting project: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
@@ -279,8 +273,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return GetProject(project.Id);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error adding new project: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
@@ -297,8 +290,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return GetProject(project.Id);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error persisting project: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
@@ -314,8 +306,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return GetProject(project.Id);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error pasting project: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
@@ -334,8 +325,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return copy;
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error moving project: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
@@ -356,8 +346,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return true;
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error deleting project: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return false;
@@ -377,8 +366,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return GetTarget(target.Project.Id, target.Id);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error adding new target: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
@@ -400,8 +388,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return GetTarget(target.Project.Id, target.Id);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error persisting target: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
@@ -418,8 +405,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return GetTarget(project.Id, target.Id);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error pasting target: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
@@ -440,8 +426,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return true;
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error deleting target: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return false;
@@ -457,8 +442,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return true;
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error persisting exposure plan: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return false;
@@ -475,8 +459,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return GetTargetByProject(target.ProjectId, target.Id);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error deleting exposure plan: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
@@ -497,8 +480,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return GetTargetByProject(target.ProjectId, target.Id);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error deleting all exposure plans: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
@@ -514,8 +496,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return GetExposureTemplate(exposureTemplate.Id);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error persisting exposure template: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
@@ -531,8 +512,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return GetExposureTemplate(exposureTemplate.Id);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error pasting exposure template: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
@@ -548,8 +528,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return true;
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error deleting exposure template: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return false;
@@ -566,8 +545,7 @@ namespace Assistant.NINAPlugin.Database {
 
                     SaveChanges();
                     transaction.Commit();
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error adding exposure template: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                 }
@@ -585,8 +563,7 @@ namespace Assistant.NINAPlugin.Database {
                     SaveChanges();
                     transaction.Commit();
                     return copy;
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"error moving exposure template: {e.Message} {e.StackTrace}");
                     RollbackTransaction(transaction);
                     return null;
@@ -610,8 +587,7 @@ namespace Assistant.NINAPlugin.Database {
             try {
                 TSLogger.Warning("rolling back database changes");
                 transaction.Rollback();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 TSLogger.Error($"error executing transaction rollback: {e.Message} {e.StackTrace}");
             }
         }
@@ -620,15 +596,13 @@ namespace Assistant.NINAPlugin.Database {
                 IDatabaseInitializer<TContext> where TContext : SchedulerDatabaseContext {
 
             void IDatabaseInitializer<TContext>.InitializeDatabase(TContext context) {
-
                 if (!DatabaseExists(context)) {
                     TSLogger.Debug("creating database schema");
                     using (var transaction = context.Database.BeginTransaction()) {
                         try {
                             context.Database.ExecuteSqlCommand(GetInitialSQL());
                             transaction.Commit();
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             Logger.Error($"error creating or initializing database: {e.Message} {e.StackTrace}");
                             TSLogger.Error($"error creating or initializing database: {e.Message} {e.StackTrace}");
                             RollbackTransaction(transaction);
@@ -640,7 +614,6 @@ namespace Assistant.NINAPlugin.Database {
                 int version = context.Database.SqlQuery<int>("PRAGMA user_version").First();
                 Dictionary<int, string> migrationScripts = GetMigrationSQL();
                 foreach (KeyValuePair<int, string> scriptEntry in migrationScripts.OrderBy(entry => entry.Key)) {
-
                     if (scriptEntry.Key <= version) {
                         continue;
                     }
@@ -650,8 +623,7 @@ namespace Assistant.NINAPlugin.Database {
                         try {
                             context.Database.ExecuteSqlCommand(scriptEntry.Value);
                             transaction.Commit();
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             Logger.Error($"Scheduler: error applying database migration script number {scriptEntry.Key}: {e.Message} {e.StackTrace}");
                             TSLogger.Error($"error applying database migration script number {scriptEntry.Key}: {e.Message} {e.StackTrace}");
                             RollbackTransaction(transaction);
@@ -678,8 +650,7 @@ namespace Assistant.NINAPlugin.Database {
                 try {
                     ResourceManager rm = new ResourceManager("Assistant.NINAPlugin.Database.Initial.SQL", Assembly.GetExecutingAssembly());
                     return (string)rm.GetObject("initial_schema");
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     Logger.Error($"failed to load Scheduler database initial SQL: {ex.Message}");
                     TSLogger.Error($"failed to load database initial SQL: {ex.Message}");
                     throw;
@@ -699,8 +670,7 @@ namespace Assistant.NINAPlugin.Database {
                     }
 
                     return migrateScripts;
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     Logger.Error($"failed to load Scheduler database migration scripts: {ex.Message}");
                     TSLogger.Error($"failed to load database migration scripts: {ex.Message}");
                     throw;
@@ -708,7 +678,6 @@ namespace Assistant.NINAPlugin.Database {
             }
 
             private void RepairAndUpdate(int oldVersion, int newVersion, TContext context) {
-
                 // If a new scoring rule was added, we need to add a rule weight record to projects that don't have it
                 List<Project> projects = context.GetAllProjects();
                 if (projects != null && projects.Count > 0) {
@@ -775,7 +744,6 @@ namespace Assistant.NINAPlugin.Database {
                     }
                 }
             }
-
         }
     }
 }

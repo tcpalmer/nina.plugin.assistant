@@ -20,7 +20,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
     }
 
     public class Project : INotifyPropertyChanged {
-
         public const int FLATS_HANDLING_OFF = 0;
         public const int FLATS_HANDLING_TARGET_COMPLETION = 100;
         public const int FLATS_HANDLING_IMMEDIATE = 200;
@@ -49,7 +48,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public virtual List<RuleWeight> ruleWeights { get; set; }
         public virtual List<Target> Targets { get; set; }
 
-        public Project() { }
+        public Project() {
+        }
 
         public Project(string profileId) {
             ProfileId = profileId;
@@ -273,6 +273,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

@@ -25,6 +25,5 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
             sut.dec.Should().BeApproximately(-10.1722, 0.001);
             sut.Dec.Should().BeApproximately(-10.1722, 0.001);
         }
-
     }
 }

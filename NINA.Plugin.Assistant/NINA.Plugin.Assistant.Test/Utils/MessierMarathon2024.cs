@@ -11,12 +11,11 @@ namespace NINA.Plugin.Assistant.Test.Util {
 
     [TestFixture]
     public class MessierMarathon2024 {
-
         /*
          * Messier source list was from https://astropixels.com/messier/messiercat.html
          * Unfortunately, it only has RA to fractional arcminutes and Dec to just arcminutes so
          * have to expand to cover arcseconds.
-         * 
+         *
          * Massaged into CSV and added a couple of other known common names.  Following converts
          * that to TS CSV format for bulk import.
          */

@@ -11,7 +11,6 @@ using System.Text;
 namespace Assistant.NINAPlugin.Database.Schema {
 
     public class ExposureTemplate : INotifyPropertyChanged {
-
         [Key] public int Id { get; set; }
         [Required] public string profileId { get; set; }
         [Required] public string name { get; set; }
@@ -146,7 +145,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
             }
         }
 
-        public ExposureTemplate() { }
+        public ExposureTemplate() {
+        }
 
         public ExposureTemplate(string profileId, string name, string filterName) {
             ProfileId = profileId;
@@ -219,10 +219,10 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
     }
 
     internal class ExposureTemplateConfiguration : EntityTypeConfiguration<ExposureTemplate> {

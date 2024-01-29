@@ -101,7 +101,6 @@
                         Stretch="Uniform" />
                 </Grid>
             </Button>
-
         </StackPanel>
 
         <StackPanel
@@ -299,11 +298,8 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
-
     </StackPanel>
-
 </UserControl>
