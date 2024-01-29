@@ -406,7 +406,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override bool Validate() {
-            TSLogger.Debug("TargetSchedulerContainer: Validate");
             var issues = new List<string>();
 
             var triggers = GetTriggersSnapshot();

@@ -65,6 +65,11 @@ namespace Assistant.NINAPlugin.Sequencer {
         private bool checkIsActive = true;
         public bool CheckIsActive { get => checkIsActive; set => checkIsActive = value; }
 
+        // If this condition instance ever returned false (completed) then continue to do so until block finished or reset
+        private bool conditionWasCompleted = false;
+
+        public bool ConditionWasCompleted { get => conditionWasCompleted; set => conditionWasCompleted = value; }
+
         /// <summary>
         /// If the main TS container has ended normally (no more targets) then it will call this to force
         /// a full recheck even if the container this condition belongs too hasn't finished an iteration.
@@ -75,35 +80,50 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override bool Check(ISequenceItem previousItem, ISequenceItem nextItem) {
+            TSLogger.Info($"TargetSchedulerCondition Check: CheckIsActive={CheckIsActive}, ConditionWasCompleted={ConditionWasCompleted}");
+
+            if (ConditionWasCompleted) {
+                TSLogger.Info($"TargetSchedulerCondition already completed");
+                return false;
+            }
+
             if (!CheckIsActive) {
                 return true;
             }
 
             TSLogger.Info($"TargetSchedulerCondition starting check: {SelectedMode}");
             CheckIsActive = false;
+            bool canContinue = false;
 
             switch (SelectedMode) {
-                case TARGETS_REMAIN: return HasRemainingTargets();
-                case ACTIVE_PROJECTS_REMAIN: return HasActiveProjects();
-                case FLATS_NEEDED: return NeedsFlats();
+                case TARGETS_REMAIN: canContinue = HasRemainingTargets(); break;
+                case ACTIVE_PROJECTS_REMAIN: canContinue = HasActiveProjects(); break;
+                case FLATS_NEEDED: canContinue = NeedsFlats(); break;
             }
 
-            return false;
+            if (!canContinue) {
+                ConditionWasCompleted = true;
+            }
+
+            return canContinue;
         }
 
         public override void SequenceBlockFinished() {
             TSLogger.Info($"TargetSchedulerCondition: SequenceBlockFinished");
             CheckIsActive = true;
+            ConditionWasCompleted = false;
         }
 
         public override void ResetProgress() {
             TSLogger.Info($"TargetSchedulerCondition: ResetProgress");
             Status = SequenceEntityStatus.CREATED;
             CheckIsActive = true;
+            ConditionWasCompleted = false;
         }
 
         public override void Initialize() {
             TSLogger.Info($"TargetSchedulerCondition: Initialize");
+            ConditionWasCompleted = false;
         }
 
         public override void SequenceBlockInitialize() {

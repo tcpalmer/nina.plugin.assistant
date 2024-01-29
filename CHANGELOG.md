@@ -1,6 +1,7 @@
 # Target Scheduler
 
 ## 4.3.0.1 - 2024-01-XX
+* Another tweak to TS Condition to ensure loop remains completed
 * Code clean up
 
 ## 4.3.0.0 - 2024-01-26
