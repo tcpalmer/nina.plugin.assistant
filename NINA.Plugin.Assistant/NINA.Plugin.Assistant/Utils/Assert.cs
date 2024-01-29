@@ -21,6 +21,5 @@ namespace Assistant.NINAPlugin.Util {
                 throw new ArgumentException(message);
             }
         }
-
     }
 }

@@ -15,7 +15,6 @@ namespace Assistant.NINAPlugin.Plan {
     /// on the current time, nighttime circumstances, etc.
     /// </summary>
     public class PlannerEmulator {
-
         private static int CallNumber = 0; // per NINA invocation
 
         private DateTime atTime;
@@ -31,7 +30,7 @@ namespace Assistant.NINAPlugin.Plan {
             TSLogger.Info($"PlannerEmulator.GetPlan: {CallNumber}");
             SchedulerPlan plan;
 
-            if (CallNumber < 3) {
+            if (CallNumber < 4) {
                 plan = SyncPlan1();
             } else { return null; }
 
@@ -347,11 +346,11 @@ namespace Assistant.NINAPlugin.Plan {
             planTarget.Rotation = 12.345;
             planTarget.ROI = 100;
 
-            IPlanExposure lum = GetExposurePlan("Lum", 20, 139, 21, 3, 50);
+            IPlanExposure lum = GetExposurePlan("Lum", 5, 139, 21, 3, 50);
             lum.ReadoutMode = 0;
             planTarget.ExposurePlans.Add(lum);
 
-            IPlanExposure red = GetExposurePlan("Red", 20, 139, 21, 3, 51);
+            IPlanExposure red = GetExposurePlan("Red", 5, 139, 21, 3, 51);
             red.ReadoutMode = 0;
             planTarget.ExposurePlans.Add(red);
 
@@ -403,8 +402,7 @@ namespace Assistant.NINAPlugin.Plan {
         public static readonly Coordinates Cp1525 = new Coordinates(AstroUtil.HMSToDegrees("15:0:0"), AstroUtil.DMSToDegrees("25:0:0"), Epoch.J2000, Coordinates.RAType.Degrees);
     }
 
-    class PlanProjectEmulator : IPlanProject {
-
+    internal class PlanProjectEmulator : IPlanProject {
         public string PlanId { get; set; }
         public int DatabaseId { get; set; }
         public string Name { get; set; }
@@ -441,7 +439,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
     }
 
-    class PlanTargetEmulator : PlanTarget {
+    internal class PlanTargetEmulator : PlanTarget {
 
         public PlanTargetEmulator() : base() {
             this.PlanId = Guid.NewGuid().ToString();
@@ -449,8 +447,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
     }
 
-    class PlanExposureEmulator : IPlanExposure {
-
+    internal class PlanExposureEmulator : IPlanExposure {
         public string PlanId { get; set; }
         public string FilterName { get; set; }
         public double ExposureLength { get; set; }

@@ -10,15 +10,13 @@ namespace Assistant.NINAPlugin.Controls.ValidationRules {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo) {
             if (value.ToString().Length > 0) {
                 return new ValidationResult(true, null);
-            }
-            else {
+            } else {
                 return new ValidationResult(false, "Required");
             }
         }
     }
 
     public class DoubleMinimumRule : ValidationRule {
-
         private MinimumValue _minimumValue;
 
         public MinimumValue MinimumValue {
@@ -33,8 +31,7 @@ namespace Assistant.NINAPlugin.Controls.ValidationRules {
                 if (("" + value).Length > 0) {
                     parameter = double.Parse("" + value);
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 return new ValidationResult(false, "Illegal characters or " + e.Message);
             }
 
@@ -67,7 +64,6 @@ namespace Assistant.NINAPlugin.Controls.ValidationRules {
         }
 
         public override ValidationResult Validate(object value, CultureInfo cultureInfo) {
-
             if (value == null) {
                 return new ValidationResult(false, "bad date for date validation");
             }
@@ -120,8 +116,7 @@ namespace Assistant.NINAPlugin.Controls.ValidationRules {
                 if (("" + value).Length > 0) {
                     parameter = int.Parse("" + value);
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 return new ValidationResult(false, "Illegal characters or " + e.Message);
             }
 
@@ -168,8 +163,7 @@ namespace Assistant.NINAPlugin.Controls.ValidationRules {
                 if (("" + value).Length > 0) {
                     parameter = double.Parse("" + value);
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 return new ValidationResult(false, "Illegal characters or " + e.Message);
             }
 
@@ -204,7 +198,6 @@ namespace Assistant.NINAPlugin.Controls.ValidationRules {
     public class NullableIntegerRule : ValidationRule {
 
         public override ValidationResult Validate(object value, CultureInfo cultureInfo) {
-
             string s = value as string;
             if (string.IsNullOrEmpty(s)) {
                 return new ValidationResult(true, null);
@@ -215,8 +208,7 @@ namespace Assistant.NINAPlugin.Controls.ValidationRules {
                 if (("" + value).Length > 0) {
                     parameter = int.Parse("" + value);
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 return new ValidationResult(false, "Illegal characters or " + e.Message);
             }
 
@@ -231,7 +223,6 @@ namespace Assistant.NINAPlugin.Controls.ValidationRules {
     public class NullableDoubleRule : ValidationRule {
 
         public override ValidationResult Validate(object value, CultureInfo cultureInfo) {
-
             string s = value as string;
             if (string.IsNullOrEmpty(s)) {
                 return new ValidationResult(true, null);
@@ -242,8 +233,7 @@ namespace Assistant.NINAPlugin.Controls.ValidationRules {
                 if (("" + value).Length > 0) {
                     parameter = Double.Parse("" + value);
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 return new ValidationResult(false, "Illegal characters or " + e.Message);
             }
 

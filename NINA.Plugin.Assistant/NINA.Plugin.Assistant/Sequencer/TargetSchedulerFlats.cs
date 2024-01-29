@@ -1,5 +1,4 @@
-﻿using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.Util;
+﻿using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
 using NINA.Core.Enum;
 using NINA.Core.Model;
@@ -62,7 +61,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-
             try {
                 DisplayText = "Determining needed flats";
                 List<LightSession> neededFlats = flatsExpert.GetNeededFlats(profileService.ActiveProfile, DateTime.Now);
@@ -109,8 +107,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                                 targetTakenFlats.Add(neededFlat.FlatSpec);
                                 allTakenFlats.Add(neededFlat.FlatSpec);
                             }
-                        }
-                        else {
+                        } else {
                             TSLogger.Info($"TS Flats: flat already taken, skipping: {neededFlat}");
                         }
 
@@ -122,16 +119,14 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 await ToggleLight(false, progress, token);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 DisplayText = "";
 
                 if (Utils.IsCancelException(ex)) {
                     TSLogger.Warning("TS Flats: sequence was canceled/interrupted");
                     Status = SequenceEntityStatus.CREATED;
                     token.ThrowIfCancellationRequested();
-                }
-                else {
+                } else {
                     TSLogger.Error($"Exception taking flats: {ex.Message}:\n{ex.StackTrace}");
                 }
 
@@ -140,8 +135,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 throw new SequenceEntityFailedException($"exception taking flats: {ex.Message}", ex);
-            }
-            finally {
+            } finally {
                 DisplayText = "";
                 TotalFlatSets = 0;
                 CompletedFlatSets = 0;

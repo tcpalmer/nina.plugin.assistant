@@ -14,7 +14,6 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             sut.Duration.Should().Be(1);
         }
 
-
         [Test]
         public void TestOverlap() {
             DateTime t1 = DateTime.Now.Date.AddMinutes(1);

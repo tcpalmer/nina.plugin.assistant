@@ -3,7 +3,6 @@
 namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
 
     public class ProjectPriorityRule : ScoringRule {
-
         public const string RULE_NAME = "Project Priority";
         public const double DEFAULT_WEIGHT = .5 * WEIGHT_SCALE;
 
@@ -22,13 +21,15 @@ namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
             switch (project.Priority) {
                 case ProjectPriority.Low:
                     return 0;
+
                 case ProjectPriority.Normal:
                     return 0.5;
+
                 case ProjectPriority.High:
                     return 1.0;
+
                 default: return 0;
             }
         }
-
     }
 }

@@ -10,7 +10,6 @@ using System.Text;
 namespace Assistant.NINAPlugin.Astrometry {
 
     public class TargetCircumstances {
-
         public DateTime RiseAboveHorizonTime { get; private set; }
         public DateTime SetBelowHorizonTime { get; private set; }
         public DateTime CulminationTime { get; private set; }
@@ -36,8 +35,7 @@ namespace Assistant.NINAPlugin.Astrometry {
             if (targetCircumstances == null) {
                 Calculate();
                 TargetCircumstancesCache.PutTargetCircumstances(this, cacheKey);
-            }
-            else {
+            } else {
                 this.RiseAboveHorizonTime = targetCircumstances.RiseAboveHorizonTime;
                 this.SetBelowHorizonTime = targetCircumstances.SetBelowHorizonTime;
                 this.CulminationTime = targetCircumstances.CulminationTime;
@@ -82,8 +80,7 @@ namespace Assistant.NINAPlugin.Astrometry {
         }
     }
 
-    class TargetCircumstancesCache {
-
+    internal class TargetCircumstancesCache {
         private static readonly TimeSpan ITEM_TIMEOUT = TimeSpan.FromHours(12);
         private static readonly MemoryCache _cache = new MemoryCache("Scheduler TargetCircumstances");
 
@@ -95,7 +92,7 @@ namespace Assistant.NINAPlugin.Astrometry {
             _cache.Add(cacheKey, targetCircumstances, DateTime.Now.Add(ITEM_TIMEOUT));
         }
 
-        private TargetCircumstancesCache() { }
+        private TargetCircumstancesCache() {
+        }
     }
-
 }

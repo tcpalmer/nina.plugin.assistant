@@ -18,7 +18,6 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
     }
 
     public class ScoringEngine : IScoringEngine {
-
         public IProfile ActiveProfile { get; }
         public ProfilePreference ProfilePreference { get; set; }
         public DateTime AtTime { get; }
@@ -65,5 +64,4 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
             return activeRules;
         }
     }
-
 }

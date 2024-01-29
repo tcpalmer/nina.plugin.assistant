@@ -153,7 +153,5 @@
                 </Grid>
             </Button>
         </Grid>
-
     </StackPanel>
-
 </UserControl>

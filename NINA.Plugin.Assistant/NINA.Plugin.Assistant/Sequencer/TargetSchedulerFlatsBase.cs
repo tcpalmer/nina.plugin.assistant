@@ -39,7 +39,6 @@ using System.Threading.Tasks;
 namespace Assistant.NINAPlugin.Sequencer {
 
     public abstract class TargetSchedulerFlatsBase : SequenceItem, IValidatable {
-
         protected IProfileService profileService;
         protected ICameraMediator cameraMediator;
         protected IImagingMediator imagingMediator;
@@ -92,6 +91,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private string displayText = "";
+
         public string DisplayText {
             get => displayText;
             set {
@@ -101,6 +101,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private int totalFlatSets = 0;
+
         public int TotalFlatSets {
             get => totalFlatSets;
             set {
@@ -110,6 +111,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private int completedFlatSets = 0;
+
         public int CompletedFlatSets {
             get => completedFlatSets;
             set {
@@ -119,6 +121,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private int iterations = 0;
+
         public int Iterations {
             get => iterations;
             set {
@@ -128,6 +131,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private int completedIterations = 0;
+
         public int CompletedIterations {
             get => completedIterations;
             set {
@@ -195,8 +199,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 await container.Execute(progress, token);
 
                 return true;
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Error($"Exception taking automated flat: {ex.Message}\n{ex}");
                 return false;
             }
@@ -263,7 +266,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         protected async Task CloseCover(IProgress<ApplicationStatus> progress, CancellationToken token) {
-
             if (!flatDeviceMediator.GetInfo().SupportsOpenClose) {
                 return;
             }
@@ -290,7 +292,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         protected async Task OpenCover(IProgress<ApplicationStatus> progress, CancellationToken token) {
-
             if (!flatDeviceMediator.GetInfo().SupportsOpenClose) {
                 return;
             }
@@ -345,8 +346,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             FlatDeviceInfo flatDeviceInfo = flatDeviceMediator.GetInfo();
             if (!flatDeviceInfo.Connected) {
                 i.Add(Loc.Instance["LblFlatDeviceNotConnected"]);
-            }
-            else {
+            } else {
                 if (!flatDeviceInfo.SupportsOnOff) {
                     i.Add(Loc.Instance["LblFlatDeviceCannotControlBrightness"]);
                 }
@@ -357,7 +357,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         protected TrainedFlatExposureSetting GetTrainedFlatExposureSetting(FlatSpec flatSpec) {
-
             int filterPosition = GetFilterPosition(flatSpec.FilterName);
             if (filterPosition == -1) { return null; }
 
@@ -466,6 +465,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private IList<string> issues = new List<string>();
+
         public IList<string> Issues {
             get => issues;
             set {
@@ -478,12 +478,11 @@ namespace Assistant.NINAPlugin.Sequencer {
     /// <summary>
     /// FlatTargetContainer provides the means to get target name and session ID saved such that
     /// they can be picked up as the images come through the pipeline.
-    /// 
+    ///
     /// A bit squirrelly with the overload but it's necessary to get the details into image metadata
     /// so that images get the right target name and session ID.
     /// </summary>
     public class FlatTargetContainer : SequentialContainer, IDeepSkyObjectContainer {
-
         private TargetSchedulerFlatsBase parent;
         private InputTarget inputTarget;
         private LoopCondition loopCondition;

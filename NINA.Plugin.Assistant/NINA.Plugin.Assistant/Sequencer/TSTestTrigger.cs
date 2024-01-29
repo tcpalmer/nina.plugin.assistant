@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Assistant.NINAPlugin.Sequencer {
-
     /*
     [ExportMetadata("Name", "Target Scheduler Test Trigger")]
     [ExportMetadata("Description", "Test Trigger")]
@@ -18,6 +17,7 @@ namespace Assistant.NINAPlugin.Sequencer {
     [Export(typeof(ISequenceTrigger))]
     [JsonObject(MemberSerialization.OptIn)]
     */
+
     public class TSTestTrigger : SequenceTrigger {
 
         //[ImportingConstructor]

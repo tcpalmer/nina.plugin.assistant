@@ -166,7 +166,6 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
             exposurePlanMock.SetupProperty(m => m.Acquired, 14);
             PlanMocks.AddMockPlanFilter(targetMock1, exposurePlanMock);
 
-
             Mock<IPlanTarget> targetMock2 = PlanMocks.GetMockPlanTarget("", TestUtil.SPICA);
             targetMock2.SetupProperty(m => m.Project, projectMock.Object);
             targetMock2.SetupProperty(m => m.DatabaseId, 1);
@@ -183,7 +182,6 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
             exposurePlanMock = PlanMocks.GetMockPlanExposure("", 10, 0);
             exposurePlanMock.SetupProperty(m => m.Acquired, 10);
             PlanMocks.AddMockPlanFilter(targetMock2, exposurePlanMock);
-
 
             Mock<IPlanTarget> targetMock3 = PlanMocks.GetMockPlanTarget("", TestUtil.SPICA);
             targetMock3.SetupProperty(m => m.Project, projectMock.Object);
@@ -218,5 +216,4 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
             sut.Score(scoringEngineMock.Object, targetMock4.Object).Should().BeApproximately(0.322222, 0.00001);
         }
     }
-
 }

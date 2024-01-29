@@ -16,7 +16,6 @@ namespace Assistant.NINAPlugin.Controls.Util {
         /// </summary>
         /// <param name="profileService"></param>
         public static void ReconcileProfileExposureTemplate(IProfileService profileService) {
-
             /* NOTE - not currently used
              * - It was causing problems to automatically keep running this.
              * - For now, user is forced to create ETs before EPs can be added.
@@ -41,8 +40,7 @@ namespace Assistant.NINAPlugin.Controls.Util {
                             List<string> list;
                             if (missing.ContainsKey(profileId)) {
                                 list = missing[profileId];
-                            }
-                            else {
+                            } else {
                                 list = new List<string>();
                                 missing[profileId] = list;
                             }
@@ -70,7 +68,7 @@ namespace Assistant.NINAPlugin.Controls.Util {
             }
         }
 
-        private ExposureTemplatesReconciliation() { }
+        private ExposureTemplatesReconciliation() {
+        }
     }
-
 }

@@ -8,17 +8,16 @@ using NINA.Sequencer.SequenceItem.Telescope;
 namespace Assistant.NINAPlugin.Sequencer {
 
     public class CoordinatesInjector {
-
         private InputTarget target;
 
-        public CoordinatesInjector(InputTarget target) { this.target = target; }
+        public CoordinatesInjector(InputTarget target) {
+            this.target = target;
+        }
 
         public void Inject(ISequenceContainer container) {
-
             if (container == null || container.Items.Count == 0) { return; }
 
             foreach (ISequenceItem item in container.Items) {
-
                 SlewScopeToRaDec slewScopeToRaDec = item as SlewScopeToRaDec;
                 if (slewScopeToRaDec != null) {
                     Log("SlewScopeToRaDec");

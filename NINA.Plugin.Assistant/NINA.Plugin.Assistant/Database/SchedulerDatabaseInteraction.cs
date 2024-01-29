@@ -9,7 +9,6 @@ using System.Linq;
 namespace Assistant.NINAPlugin.Database {
 
     public class SchedulerDatabaseInteraction {
-
         private static readonly string DATABASE_BASENAME = "schedulerdb";
         private static readonly string DATABASE_SUFFIX = "sqlite";
         private static readonly string DATABASE_FILENAME = $"{DATABASE_BASENAME}.{DATABASE_SUFFIX}";
@@ -59,13 +58,10 @@ namespace Assistant.NINAPlugin.Database {
                     TSLogger.Debug($"removing older backup database file: {filename}");
                     File.Delete(filename);
                 }
-
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 TSLogger.Error($"failed to backup database: {e.Message}:{Environment.NewLine}{e.StackTrace}");
                 Notification.ShowWarning($"Failed to backup Target Scheduler database, see log for errors");
             }
         }
     }
-
 }

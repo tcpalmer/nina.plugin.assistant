@@ -178,9 +178,7 @@
                     <Style TargetType="{x:Type TreeViewItem}">
                         <Setter Property="Margin" Value="0,3,0,3" />
                     </Style>
-
                 </TreeView.Resources>
-
             </TreeView>
         </Border>
         <Border
@@ -192,5 +190,4 @@
             </ScrollViewer>
         </Border>
     </StackPanel>
-
 </UserControl>

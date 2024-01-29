@@ -12,13 +12,13 @@ using System.Text;
 namespace Assistant.NINAPlugin.Sequencer {
 
     public class FlatsExpert {
-
         public static readonly double ACQUIRED_IMAGES_CUTOFF_DAYS = -45;
 
         private SchedulerDatabaseInteraction _database = null;
         public bool VerboseLogging = true;
 
-        public FlatsExpert() { }
+        public FlatsExpert() {
+        }
 
         /// <summary>
         /// Get all needed flats across all targets that are either cadence type or target completed
@@ -28,7 +28,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         /// <param name="checkDateTime"></param>
         /// <returns></returns>
         public List<LightSession> GetNeededFlats(IProfile activeProfile, DateTime checkDateTime) {
-
             List<LightSession> neededFlats = new List<LightSession>();
             List<AcquiredImage> allAcquiredImages = GetAcquiredImages(activeProfile);
 
@@ -73,7 +72,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         /// <summary>
         /// Aggregate the acquired images into a set of unique light sessions for the target.
-        /// 
+        ///
         /// The provided acquired images are assumed to have been prefiltered to only those for
         /// the provided target.
         /// </summary>
@@ -102,7 +101,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         /// <summary>
         /// Remove light sessions that are in the 'current' cadence period for the target
         /// and therefore not yet ready to have flats taken.
-        /// 
+        ///
         /// The provided light sessions have been prefiltered to only those for the provided
         /// target.
         /// </summary>
@@ -111,7 +110,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         /// <param name="checkDateTime"></param>
         /// <returns></returns>
         public List<LightSession> CullByCadencePeriod(Target target, List<LightSession> targetLightSessions, DateTime checkDateTime) {
-
             // If the cadence period is 1, nothing is culled: all light sessions are due flats
             if (target.Project.FlatsHandling == 1) {
                 return targetLightSessions;
@@ -156,7 +154,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         /// <summary>
         /// Determine whether we need to take this flat set or not.
-        /// 
+        ///
         /// We never want to repeat a flat set for the same (current) target, so targetTakenFlats maintains the list of flats
         /// that have already been taken for the current target.
         /// </summary>
@@ -166,7 +164,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         /// <param name="allTakenFlats"></param>
         /// <returns></returns>
         public bool IsRequiredFlat(bool alwaysRepeatFlatSet, LightSession neededFlat, List<FlatSpec> targetTakenFlats, List<FlatSpec> allTakenFlats) {
-
             // Never repeat a flat set for the same target
             if (targetTakenFlats.Contains(neededFlat.FlatSpec)) {
                 return false;
@@ -274,7 +271,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         /// <param name="checkDateTime"></param>
         /// <returns></returns>
         public int GetCurrentSessionId(Project project, DateTime checkDateTime) {
-
             if (project == null) {
                 return 1;
             }
@@ -284,8 +280,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 || project.FlatsHandling == Project.FLATS_HANDLING_TARGET_COMPLETION
                 || project.FlatsHandling == Project.FLATS_HANDLING_IMMEDIATE) {
                 flatsHandling = 1;
-            }
-            else {
+            } else {
                 flatsHandling = project.FlatsHandling;
             }
 
@@ -393,7 +388,6 @@ namespace Assistant.NINAPlugin.Sequencer {
     }
 
     public class FlatSpec : IEquatable<FlatSpec> {
-
         public string FilterName { get; private set; }
         public int Gain { get; private set; }
         public int Offset { get; private set; }
@@ -458,7 +452,6 @@ namespace Assistant.NINAPlugin.Sequencer {
     }
 
     public class LightSession : IComparable, IEquatable<LightSession> {
-
         public int TargetId { get; private set; }
         public DateTime SessionDate { get; private set; }
         public int SessionId { get; private set; }

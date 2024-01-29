@@ -5,10 +5,9 @@ using System;
 namespace Assistant.NINAPlugin.Astrometry.Solver {
 
     public class TargetImagingCircumstances {
-
-        public readonly static int STATUS_POTENTIALLY_VISIBLE = 1;
-        public readonly static int STATUS_NEVER_VISIBLE = 2;
-        public readonly static int STATUS_NEVER_ABOVE_MINIMUM_ALTITUDE = 3;
+        public static readonly int STATUS_POTENTIALLY_VISIBLE = 1;
+        public static readonly int STATUS_NEVER_VISIBLE = 2;
+        public static readonly int STATUS_NEVER_ABOVE_MINIMUM_ALTITUDE = 3;
 
         private readonly ObserverInfo location;
         private readonly Coordinates target;
@@ -24,7 +23,6 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         public DateTime SetBelowMinimumTimeClipped { get => SetBelowMinimumTime == DateTime.MinValue ? endTime : SetBelowMinimumTime; }
 
         public TargetImagingCircumstances(ObserverInfo location, Coordinates target, DateTime startTime, DateTime endTime, HorizonDefinition horizonDefinition) {
-
             Assert.notNull(location, "location cannot be null");
             Assert.notNull(target, "target cannot be null");
             Assert.isTrue(startTime < endTime, "startTime must be before endTime");
@@ -37,7 +35,6 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         }
 
         public int Analyze() {
-
             // If the target never rises at this location, stop
             if (!AstrometryUtils.RisesAtLocation(location, target)) {
                 return STATUS_NEVER_VISIBLE;
@@ -58,5 +55,4 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
             return STATUS_POTENTIALLY_VISIBLE;
         }
     }
-
 }

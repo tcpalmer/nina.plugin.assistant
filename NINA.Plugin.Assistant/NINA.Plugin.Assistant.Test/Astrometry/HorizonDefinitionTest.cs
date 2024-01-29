@@ -6,9 +6,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace NINA.Plugin.Assistant.Test.Astrometry {
 
@@ -138,6 +136,5 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
                 return CustomHorizon.FromReader_Standard(sr);
             }
         }
-
     }
 }

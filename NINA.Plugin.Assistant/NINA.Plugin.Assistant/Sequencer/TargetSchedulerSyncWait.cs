@@ -23,7 +23,6 @@ namespace Assistant.NINAPlugin.Sequencer {
     [Export(typeof(ISequenceItem))]
     [JsonObject(MemberSerialization.OptIn)]
     public class TargetSchedulerSyncWait : SequenceItem {
-
         private readonly IProfileService profileService;
 
         [ImportingConstructor]
@@ -40,7 +39,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-
             if (!AssistantPlugin.SyncEnabled(profileService)) {
                 TSLogger.Info("TargetSchedulerSyncWait execute but sync is not enabled on profile");
                 return;

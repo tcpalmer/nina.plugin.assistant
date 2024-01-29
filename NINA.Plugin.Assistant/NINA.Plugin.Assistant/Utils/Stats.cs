@@ -24,5 +24,4 @@ namespace Assistant.NINAPlugin.Util {
             return (mean, stddev);
         }
     }
-
 }

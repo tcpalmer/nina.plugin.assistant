@@ -20,7 +20,6 @@ using System.Threading.Tasks;
 namespace Assistant.NINAPlugin.Sequencer {
 
     public class SyncTakeExposureContainer : SequenceContainer {
-
         private IProfileService profileService;
         private ICameraMediator cameraMediator;
         private IImagingMediator imagingMediator;
@@ -44,7 +43,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                                          ISyncImageSaveWatcher syncImageSaveWatcher,
                                          SyncedExposure syncedExposure,
                                          Action<String> UpdateDisplayTextAction) : base(new SequentialStrategy()) {
-
             this.profileService = profileService;
             this.cameraMediator = cameraMediator;
             this.imagingMediator = imagingMediator;
@@ -81,7 +79,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private ExposureTemplate GetExposureTemplate(SchedulerDatabaseContext context, ExposurePlan exposurePlan) {
-
             // Get the template being used by the server instance
             ExposureTemplate serverExposureTemplate = context.GetExposureTemplate(exposurePlan.ExposureTemplateId);
 

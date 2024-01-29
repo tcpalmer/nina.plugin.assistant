@@ -12,5 +12,4 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
 
         bool CircumpolarAtLocation();
     }
-
 }

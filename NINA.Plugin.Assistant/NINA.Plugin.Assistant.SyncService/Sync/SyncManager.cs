@@ -11,7 +11,6 @@ using System.Security.Principal;
 namespace NINA.Plugin.Assistant.SyncService.Sync {
 
     public class SyncManager {
-
         private static readonly Lazy<SyncManager> lazy = new Lazy<SyncManager>(() => new SyncManager());
         public static SyncManager Instance { get => lazy.Value; }
 
@@ -44,7 +43,8 @@ namespace NINA.Plugin.Assistant.SyncService.Sync {
         public bool RunningServer { get => isRunning && isServer; }
         public bool RunningClient { get => isRunning && !isServer; }
 
-        private SyncManager() { }
+        private SyncManager() {
+        }
 
         public void Start(IProfileService profileService) {
             string profileId = profileService.ActiveProfile.Id.ToString();
@@ -53,18 +53,15 @@ namespace NINA.Plugin.Assistant.SyncService.Sync {
 
                 if (IsServer) {
                     SyncServer.Instance.ProfileId = profileId;
-                }
-                else {
+                } else {
                     SyncClient.Instance.Register(profileId);
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Error("SYNC failed to start synchronization server ", ex);
             }
         }
 
         public void Shutdown() {
-
             if (isServer) {
                 SyncServer.Instance.Shutdown();
             }
@@ -83,14 +80,12 @@ namespace NINA.Plugin.Assistant.SyncService.Sync {
                     IsRunning = false;
                     IsServer = false;
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Error("SYNC failed to shutdown pipe", ex);
             }
         }
 
         private void TryStartServer() {
-
             TSLogger.Info($"SYNC trying to start server for PID {Environment.ProcessId}");
 
             var allowEveryoneRule = new MutexAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), MutexRights.FullControl, AccessControlType.Allow);
@@ -128,22 +123,18 @@ namespace NINA.Plugin.Assistant.SyncService.Sync {
 
                                 TSLogger.Info($"SYNC started synchronization server on pipe {pipeName}");
                                 TSLogger.Info("SYNC running as sync server");
-                            }
-                            else {
+                            } else {
                                 IsRunning = true;
                                 TSLogger.Info($"SYNC named pipe already exists: {pipeName}");
                                 TSLogger.Info("SYNC running as sync client");
                             }
-                        }
-                        catch (Exception ex) {
+                        } catch (Exception ex) {
                             TSLogger.Error("SYNC failed to start synchronization server ", ex);
                         }
-                    }
-                    catch (AbandonedMutexException) {
+                    } catch (AbandonedMutexException) {
                         hasHandle = true;
                     }
-                }
-                finally {
+                } finally {
                     if (hasHandle) {
                         mutex.ReleaseMutex();
                     }
@@ -164,16 +155,14 @@ namespace NINA.Plugin.Assistant.SyncService.Sync {
                     int error = Marshal.GetLastWin32Error();
                     if (error == 0) {
                         return false; // pipe does not exist
-                    }
-                    else if (error == 2) {
+                    } else if (error == 2) {
                         return false; // win32 error code for file not found
                                       // all other errors indicate other issues
                     }
                 }
 
                 return true;
-            }
-            catch (Exception) {
+            } catch (Exception) {
                 return false; // assume it doesn't exist
             }
         }

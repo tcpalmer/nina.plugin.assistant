@@ -12,7 +12,6 @@ using System.Text;
 namespace Assistant.NINAPlugin.Database.Schema {
 
     public class Target : INotifyPropertyChanged {
-
         [Key] public int Id { get; set; }
 
         [Required] public string name { get; set; }
@@ -101,6 +100,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped] private Coordinates coordinates = null;
+
         [NotMapped]
         public Coordinates Coordinates {
             get {
@@ -169,6 +169,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public string RAString { get => Utils.GetRAString(Coordinates.RADegrees); }
 
         [NotMapped] private bool negativeDec;
+
         [NotMapped]
         public bool NegativeDec {
             get => negativeDec;
@@ -186,8 +187,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 if (NegativeDec) {
                     Coordinates.Dec = value - DecMinutes / 60.0d - DecSeconds / (60.0d * 60.0d);
-                }
-                else {
+                } else {
                     Coordinates.Dec = value + DecMinutes / 60.0d + DecSeconds / (60.0d * 60.0d);
                 }
                 RaiseCoordinatesChanged();
@@ -208,8 +208,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 if (NegativeDec) {
                     Coordinates.Dec = Coordinates.Dec + DecMinutes / 60.0d - value / 60.0d;
-                }
-                else {
+                } else {
                     Coordinates.Dec = Coordinates.Dec - DecMinutes / 60.0d + value / 60.0d;
                 }
 
@@ -229,8 +228,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 if (NegativeDec) {
                     Coordinates.Dec = Coordinates.Dec + DecSeconds / (60.0d * 60.0d) - value / (60.0d * 60.0d);
-                }
-                else {
+                } else {
                     Coordinates.Dec = Coordinates.Dec - DecSeconds / (60.0d * 60.0d) + value / (60.0d * 60.0d);
                 }
 
@@ -278,6 +276,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

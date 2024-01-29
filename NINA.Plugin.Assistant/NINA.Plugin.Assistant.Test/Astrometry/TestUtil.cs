@@ -9,7 +9,6 @@ using System.IO;
 namespace NINA.Plugin.Assistant.Test.Astrometry {
 
     public class TestUtil {
-
         public static readonly ObserverInfo TEST_LOCATION_1, TEST_LOCATION_2, TEST_LOCATION_3, TEST_LOCATION_4, TEST_LOCATION_5, TEST_LOCATION_6, TEST_LOCATION_7;
 
         public static readonly Coordinates BETELGEUSE = new Coordinates(AstroUtil.HMSToDegrees("5:55:11"), AstroUtil.DMSToDegrees("7:24:30"), Epoch.J2000, Coordinates.RAType.Degrees);
@@ -33,7 +32,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
         public static readonly Coordinates C90 = new Coordinates(AstroUtil.HMSToDegrees("9:0:0"), AstroUtil.DMSToDegrees("0:0:0"), Epoch.J2000, Coordinates.RAType.Degrees);
 
         static TestUtil() {
-
             // Northern hemisphere
             TEST_LOCATION_1 = new ObserverInfo();
             TEST_LOCATION_1.Latitude = 35;
@@ -59,7 +57,7 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
             TEST_LOCATION_4.Elevation = 0;
 
             // Northern hemisphere, high latitude (Waskaganish, Que, ET)
-            // 
+            //
             TEST_LOCATION_5 = new ObserverInfo();
             TEST_LOCATION_5.Latitude = 51.48;
             TEST_LOCATION_5.Longitude = -78.75;
@@ -89,12 +87,14 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
                         + "180 20" + Environment.NewLine
                         + "270 20";
                     break;
+
                 case 2: // up and down
                     horizonDefinition = $"0 20" + Environment.NewLine
                         + "90 30" + Environment.NewLine
                         + "180 40" + Environment.NewLine
                         + "270 30";
                     break;
+
                 case 3: // mine
                     horizonDefinition = $"0 22" + Environment.NewLine
                         + "10 50" + Environment.NewLine
@@ -133,6 +133,7 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
                         + "340 23" + Environment.NewLine
                         + "350 24";
                     break;
+
                 case 4: // @growers
                     horizonDefinition = "076.33      07.84" + Environment.NewLine
                         + "081.39      07.99" + Environment.NewLine
@@ -210,7 +211,5 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
 
             cond.Should().BeTrue();
         }
-
     }
-
 }

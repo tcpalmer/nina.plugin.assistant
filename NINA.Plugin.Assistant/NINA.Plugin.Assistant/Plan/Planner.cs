@@ -9,14 +9,12 @@ using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
-using Serilog.Events;
 using System;
 using System.Collections.Generic;
 
 namespace Assistant.NINAPlugin.Plan {
 
     public class Planner {
-
         private bool checkCondition = false;
         private DateTime atTime;
         private IProfile activeProfile;
@@ -82,21 +80,18 @@ namespace Assistant.NINAPlugin.Plan {
                         List<IPlanInstruction> planInstructions = PlanInstructions(planTarget, previousPlanTarget, targetWindow);
 
                         return new SchedulerPlan(atTime, projects, planTarget, targetWindow, planInstructions, !checkCondition);
-                    }
-                    else {
+                    } else {
                         TSLogger.Debug("Scheduler Planner: no target selected");
                         return null;
                     }
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     if (ex is SequenceEntityFailedException) {
                         throw;
                     }
 
                     TSLogger.Error($"exception generating plan: {ex.StackTrace}");
                     throw new SequenceEntityFailedException($"Scheduler: exception generating plan: {ex.Message}", ex);
-                }
-                finally {
+                } finally {
                     TSLogger.Info($"-- END {title} -----------------------------------------------------");
                 }
             }
@@ -110,7 +105,7 @@ namespace Assistant.NINAPlugin.Plan {
         /// are unlikely to get the number of exposures it schedules.  And two, all images are assumed to be acceptable and will
         /// increment the accepted count for the target/filter.  The net result is that acceptable images will be acquired
         /// (and projects completed) significantly faster than in actual usage.
-        /// 
+        ///
         /// Nevertheless, a perfect plan provides some idea of what the planner will do on a given night which is useful
         /// for previewing and troubleshooting.
         /// </summary>
@@ -119,7 +114,6 @@ namespace Assistant.NINAPlugin.Plan {
         /// <param name="projects"></param>
         /// <returns>list</returns>
         public static List<SchedulerPlan> GetPerfectPlan(DateTime atTime, IProfileService profileService, ProfilePreference profilePreferences, List<IPlanProject> projects) {
-
             TSLogger.Info("-- BEGIN PLAN PREVIEW ----------------------------------------------------------");
 
             List<SchedulerPlan> plans = new List<SchedulerPlan>();
@@ -136,18 +130,15 @@ namespace Assistant.NINAPlugin.Plan {
                 }
 
                 return plans;
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Error($"exception during plan preview: {ex.Message}\n{ex.StackTrace}");
                 return plans;
-            }
-            finally {
+            } finally {
                 TSLogger.Info("-- END PLAN PREVIEW ------------------------------------------------------------");
             }
         }
 
         private static void PrepForNextRun(List<IPlanProject> projects, SchedulerPlan plan) {
-
             foreach (IPlanProject planProject in projects) {
                 planProject.Rejected = false;
                 planProject.RejectedReason = null;
@@ -158,8 +149,7 @@ namespace Assistant.NINAPlugin.Plan {
                     foreach (IPlanExposure planExposure in planTarget.ExposurePlans) {
                         if (planProject.EnableGrader) {
                             planExposure.Accepted += planExposure.PlannedExposures;
-                        }
-                        else {
+                        } else {
                             planExposure.Acquired += planExposure.PlannedExposures;
                         }
 
@@ -337,7 +327,6 @@ namespace Assistant.NINAPlugin.Plan {
         /// <param name="scoringEngine"></param>
         /// <returns></returns>
         public IPlanTarget SelectTargetByScore(List<IPlanProject> projects, IScoringEngine scoringEngine) {
-
             // If no active projects or targets, we're done
             List<IPlanTarget> targets = GetActiveTargets(projects);
             if (targets.Count == 0) {
@@ -386,7 +375,6 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         public TimeInterval GetTargetTimeWindow(bool useSmartPlanWindow, DateTime atTime, IPlanTarget planTarget, List<IPlanProject> projects) {
-
             DateTime planStartTime = planTarget.StartTime < atTime ? atTime : planTarget.StartTime;
             DateTime planStopTime = new PlanStopTimeExpert().GetStopTime(useSmartPlanWindow, planStartTime, planTarget, projects);
 
@@ -508,8 +496,7 @@ namespace Assistant.NINAPlugin.Plan {
                     double exposureThrottle = planProject.EnableGrader ? -1 : profilePreferences.ExposureThrottle;
                     if (planExposure.NeededExposures(exposureThrottle) > 0) {
                         incomplete = true;
-                    }
-                    else {
+                    } else {
                         SetRejected(planExposure, Reasons.FilterComplete);
                     }
                 }
@@ -562,17 +549,14 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         private List<IPlanProject> GetProjects() {
-
             try {
                 SchedulerDatabaseInteraction database = new SchedulerDatabaseInteraction();
                 SchedulerPlanLoader loader = new SchedulerPlanLoader(activeProfile);
                 return loader.LoadActiveProjects(database.GetContext());
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Error($"exception reading database: {ex.StackTrace}");
                 throw new SequenceEntityFailedException($"Scheduler: exception reading database: {ex.Message}", ex);
             }
         }
     }
-
 }

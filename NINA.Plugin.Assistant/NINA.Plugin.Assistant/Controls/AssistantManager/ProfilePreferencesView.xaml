@@ -190,7 +190,6 @@
                                 Margin="3,3,0,0"
                                 Text="{Binding ProfilePreferenceProxy.ProfilePreference.EnableDeleteAcquiredImagesWithTarget}"
                                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
                         </UniformGrid>
 
                         <Label
@@ -462,7 +461,6 @@
                                 Margin="3,3,0,0"
                                 Text="{Binding ProfilePreferenceProxy.ProfilePreference.EccentricitySigmaFactor}"
                                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
                         </UniformGrid>
 
                         <Label
@@ -566,13 +564,10 @@
                                 Margin="3,3,0,0"
                                 Text="{Binding ProfilePreferenceProxy.ProfilePreference.SyncSolveRotateTimeout}"
                                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
-
                         </UniformGrid>
                     </StackPanel>
                 </DockPanel>
             </ScrollViewer>
-
         </StackPanel>
     </StackPanel>
-
 </UserControl>

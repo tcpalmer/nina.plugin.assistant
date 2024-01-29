@@ -2,7 +2,6 @@
 using Assistant.NINAPlugin.Database.Schema;
 using FluentAssertions;
 using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 
 namespace NINA.Plugin.Assistant.Test.Controls.AssistantManager {

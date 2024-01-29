@@ -8,11 +8,11 @@ namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
     public interface IScoringRule {
         string Name { get; }
         double DefaultWeight { get; }
+
         double Score(IScoringEngine scoringEngine, IPlanTarget potentialTarget);
     }
 
     public abstract class ScoringRule : IScoringRule {
-
         public const double WEIGHT_SCALE = 100;
 
         public abstract string Name { get; }
@@ -36,7 +36,6 @@ namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
          */
 
         public static Dictionary<string, IScoringRule> GetAllScoringRules() {
-
             IEnumerable<Type> ruleTypes = Assembly.GetAssembly(typeof(ScoringRule)).GetTypes().
                     Where(ruleType => ruleType.IsClass && !ruleType.IsAbstract && ruleType.IsSubclassOf(typeof(ScoringRule)));
 

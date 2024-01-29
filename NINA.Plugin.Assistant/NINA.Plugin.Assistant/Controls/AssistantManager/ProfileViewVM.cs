@@ -1,6 +1,5 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using NINA.Core.Utility;
-using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;
@@ -10,7 +9,6 @@ using System.Windows.Input;
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class ProfileViewVM : BaseVM {
-
         private AssistantManagerVM managerVM;
         private ProfileMeta profile;
         private TreeDataItem parentItem;
@@ -60,6 +58,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private bool showProfileImportView = false;
+
         public bool ShowProfileImportView {
             get => showProfileImportView;
             set {
@@ -69,6 +68,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private ProfileImportViewVM profileImportVM;
+
         public ProfileImportViewVM ProfileImportVM {
             get => profileImportVM;
             set {

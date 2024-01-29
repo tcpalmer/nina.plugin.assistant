@@ -9,7 +9,6 @@ using System.Web;
 namespace NINA.Plugin.Assistant.Shared.Utility {
 
     public class ImageMetadata {
-
         public static readonly double NO_ROTATOR_ANGLE = double.MinValue;
 
         public string FileName { get; set; }
@@ -54,7 +53,8 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
         public double CameraTargetTemp { get; set; }
         public double Airmass { get; set; }
 
-        public ImageMetadata() { }
+        public ImageMetadata() {
+        }
 
         public ImageMetadata(ImageSavedEventArgs msg, int sessionId, double roi, int? readoutMode) {
             if (msg == null) {

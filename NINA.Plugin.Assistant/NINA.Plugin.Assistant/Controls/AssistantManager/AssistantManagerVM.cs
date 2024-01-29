@@ -1,5 +1,4 @@
-﻿using ASCOM.Com;
-using Assistant.NINAPlugin.Controls.Util;
+﻿using Assistant.NINAPlugin.Controls.Util;
 using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using LinqKit;
@@ -24,7 +23,6 @@ using System.Windows.Input;
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class AssistantManagerVM : BaseVM {
-
         private IApplicationMediator applicationMediator;
         private IFramingAssistantVM framingAssistantVM;
         private IDeepSkyObjectSearchVM deepSkyObjectSearchVM;
@@ -40,7 +38,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             IDeepSkyObjectSearchVM deepSkyObjectSearchVM,
             IPlanetariumFactory planetariumFactory)
             : base(profileService) {
-
             this.applicationMediator = applicationMediator;
             this.framingAssistantVM = framingAssistantVM;
             this.deepSkyObjectSearchVM = deepSkyObjectSearchVM;
@@ -60,6 +57,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private Visibility showProfilePreferencesView = Visibility.Hidden;
+
         public Visibility ShowProfilePreferencesView {
             get => showProfilePreferencesView;
             set {
@@ -69,6 +67,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private ProfilePreferencesViewVM profilePreferencesViewVM;
+
         public ProfilePreferencesViewVM ProfilePreferencesViewVM {
             get => profilePreferencesViewVM;
             set {
@@ -78,6 +77,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private Visibility showProfileView = Visibility.Hidden;
+
         public Visibility ShowProfileView {
             get => showProfileView;
             set {
@@ -87,6 +87,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private ProfileViewVM profileViewVM;
+
         public ProfileViewVM ProfileViewVM {
             get => profileViewVM;
             set {
@@ -96,6 +97,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private Visibility showOrphanedProjectsView = Visibility.Hidden;
+
         public Visibility ShowOrphanedProjectsView {
             get => showOrphanedProjectsView;
             set {
@@ -105,6 +107,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private OrphanedProjectsViewVM orphanedProjectsViewVM;
+
         public OrphanedProjectsViewVM OrphanedProjectsViewVM {
             get => orphanedProjectsViewVM;
             set {
@@ -114,6 +117,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private List<Project> orphanedProjects;
+
         public List<Project> OrphanedProjects {
             get => orphanedProjects;
             set {
@@ -123,6 +127,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private Visibility showProjectView = Visibility.Hidden;
+
         public Visibility ShowProjectView {
             get => showProjectView;
             set {
@@ -132,6 +137,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private ProjectViewVM projectViewVM;
+
         public ProjectViewVM ProjectViewVM {
             get => projectViewVM;
             set {
@@ -141,6 +147,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private Visibility showTargetView = Visibility.Hidden;
+
         public Visibility ShowTargetView {
             get => showTargetView;
             set {
@@ -150,6 +157,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private TargetViewVM targetViewVM;
+
         public TargetViewVM TargetViewVM {
             get => targetViewVM;
             set {
@@ -159,6 +167,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private Visibility showExposureTemplateProfileView = Visibility.Hidden;
+
         public Visibility ShowExposureTemplateProfileView {
             get => showExposureTemplateProfileView;
             set {
@@ -168,6 +177,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private ExposureTemplateProfileViewVM exposureTemplateProfileViewVM;
+
         public ExposureTemplateProfileViewVM ExposureTemplateProfileViewVM {
             get => exposureTemplateProfileViewVM;
             set {
@@ -177,6 +187,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private Visibility showExposureTemplateView = Visibility.Hidden;
+
         public Visibility ShowExposureTemplateView {
             get => showExposureTemplateView;
             set {
@@ -186,6 +197,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private ExposureTemplateViewVM exposureTemplateViewVM;
+
         public ExposureTemplateViewVM ExposureTemplateViewVM {
             get => exposureTemplateViewVM;
             set {
@@ -195,6 +207,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private Visibility showOrphanedExposureTemplatesView = Visibility.Hidden;
+
         public Visibility ShowOrphanedExposureTemplatesView {
             get => showOrphanedExposureTemplatesView;
             set {
@@ -204,6 +217,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private OrphanedExposureTemplatesViewVM orphanedExposureTemplatesViewVM;
+
         public OrphanedExposureTemplatesViewVM OrphanedExposureTemplatesViewVM {
             get => orphanedExposureTemplatesViewVM;
             set {
@@ -213,6 +227,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private List<ExposureTemplate> orphanedExposureTemplates;
+
         public List<ExposureTemplate> OrphanedExposureTemplates {
             get => orphanedExposureTemplates;
             set {
@@ -226,7 +241,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private void SelectedItemChanged(object obj) {
             TreeDataItem item = obj as TreeDataItem;
             if (item != null) {
-
                 try {
                     DeselectOppositeTree(selectedTreeDataItem, item);
                     selectedTreeDataItem = item;
@@ -290,8 +304,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                             CollapseAllViews();
                             break;
                     }
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     CollapseAllViews();
                     TSLogger.Error($"Error while changing selected item in nav tree: {e.Message}");
                     MyMessageBox.Show("An error occured trying to select an item.  Is it possible you have another instance of NINA running that was locked the associated profile?", "Oops");
@@ -341,7 +354,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             return null;
         }
 
-        List<TreeDataItem> rootProjectsList;
+        private List<TreeDataItem> rootProjectsList;
+
         public List<TreeDataItem> RootProjectsList {
             get {
                 if (rootProjectsList == null) {
@@ -355,7 +369,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        List<TreeDataItem> rootExposureTemplateList;
+        private List<TreeDataItem> rootExposureTemplateList;
+
         public List<TreeDataItem> RootExposureTemplateList {
             get {
                 if (rootExposureTemplateList == null) {
@@ -369,7 +384,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        bool treeViewEabled = true;
+        private bool treeViewEabled = true;
+
         public bool TreeViewEabled {
             get => treeViewEabled;
             set {
@@ -379,13 +395,11 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private List<TreeDataItem> LoadProjectsTree() {
-
             List<TreeDataItem> rootList = new List<TreeDataItem>();
             TreeDataItem profilesFolder = new TreeDataItem(TreeDataType.ProjectRoot, "Profiles", null);
             rootList.Add(profilesFolder);
 
             using (var context = database.GetContext()) {
-
                 foreach (ProfileMeta profile in profileService.Profiles) {
                     TreeDataItem profileItem = new TreeDataItem(TreeDataType.ProjectProfile, profile.Name, profile, profilesFolder);
                     profilesFolder.Items.Add(profileItem);
@@ -428,7 +442,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private List<TreeDataItem> LoadExposureTemplateTree() {
-
             List<TreeDataItem> rootList = new List<TreeDataItem>();
             TreeDataItem profilesFolder = new TreeDataItem(TreeDataType.ExposureTemplateRoot, "Profiles", null);
             rootList.Add(profilesFolder);
@@ -523,8 +536,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     projectItem.IsSelected = true;
                     parentItem.IsExpanded = true;
                     return newProject;
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to save new Scheduler Project (see log for details)");
                     return null;
                 }
@@ -539,8 +551,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         activeTreeDataItem.Header = project.Name;
                         activeTreeDataItem.SortName = project.Name;
                     }
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to save Scheduler Project (see log for details)");
                 }
             }
@@ -567,8 +578,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         TreeDataItem targetItem = new TreeDataItem(TreeDataType.Target, target.Name, target, newProjectItem);
                         newProjectItem.Items.Add(targetItem);
                     });
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to paste new Scheduler Project (see log for details)");
                 }
             }
@@ -583,8 +593,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     TreeDataItem parentItem = activeTreeDataItem.TreeParent;
                     parentItem.Items.Remove(activeTreeDataItem);
                     parentItem.IsSelected = true;
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to delete Scheduler Project (see log for details)");
                 }
             }
@@ -603,8 +612,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         newProjectItem.Items.Add(targetItem);
                     });
                     return true;
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to move Scheduler orphaned Project (see log for details)");
                     return false;
                 }
@@ -618,8 +626,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 if (context.DeleteProject(project, deleteAcquiredImagesWithTarget)) {
                     return true;
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to delete Scheduler orphaned Project (see log for details)");
                     return false;
                 }
@@ -638,8 +645,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     parentItem.Items.Add(targetItem);
                     targetItem.IsSelected = true;
                     parentItem.IsExpanded = true;
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to add new Scheduler Target (see log for details)");
                 }
             }
@@ -654,8 +660,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         TreeDataItem targetItem = new TreeDataItem(TreeDataType.Target, target.Name, target, parentItem);
                         parentItem.Items.Add(targetItem);
                         parentItem.IsExpanded = true;
-                    }
-                    else {
+                    } else {
                         Notification.ShowError("Failed to add new Scheduler Target (see log for details)");
                     }
                 }
@@ -674,8 +679,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     // Refresh the parent project
                     TreeDataItem parentItem = activeTreeDataItem.TreeParent;
                     parentItem.Data = context.GetProject(target.ProjectId);
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to save Scheduler Target (see log for details)");
                 }
             }
@@ -697,8 +701,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     parentItem.Items.Add(newTargetItem);
                     newTargetItem.IsSelected = true;
                     parentItem.IsExpanded = true;
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to paste new Scheduler Project (see log for details)");
                 }
             }
@@ -714,8 +717,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     TreeDataItem parentItem = activeTreeDataItem.TreeParent;
                     parentItem.Items.Remove(activeTreeDataItem);
                     parentItem.IsSelected = true;
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to delete Scheduler Target (see log for details)");
                 }
             }
@@ -726,8 +728,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 Target updatedTarget = context.DeleteExposurePlan(target, exposurePlan);
                 if (updatedTarget != null) {
                     activeTreeDataItem.Data = updatedTarget;
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to delete Scheduler Exposure Plan (see log for details)");
                 }
 
@@ -740,8 +741,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 Target updatedTarget = context.DeleteAllExposurePlans(target);
                 if (updatedTarget != null) {
                     activeTreeDataItem.Data = updatedTarget;
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to delete all Scheduler Exposure Plans (see log for details)");
                 }
 
@@ -754,8 +754,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 Target reloadedTarget = context.GetTargetByProject(reference.ProjectId, reference.Id);
                 if (reloadedTarget != null) {
                     activeTreeDataItem.Data = reloadedTarget;
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to reload target (see log for details)");
                 }
 
@@ -783,8 +782,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     parentItem.Items.Add(exposureTemplateItem);
                     exposureTemplateItem.IsSelected = true;
                     parentItem.IsExpanded = true;
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to save new Scheduler Exposure Template (see log for details)");
                 }
             }
@@ -806,9 +804,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     parentItem.Items.Add(newExposureTemplateItem);
                     newExposureTemplateItem.IsSelected = true;
                     parentItem.IsExpanded = true;
-
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to paste new Scheduler Exposure Template (see log for details)");
                 }
             }
@@ -819,8 +815,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 if (context.SaveExposureTemplate(exposureTemplate) != null) {
                     activeTreeDataItem.Data = exposureTemplate;
                     activeTreeDataItem.Header = exposureTemplate.Name;
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to save Scheduler Exposure Template (see log for details)");
                 }
             }
@@ -832,8 +827,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     TreeDataItem parentItem = activeTreeDataItem.TreeParent;
                     parentItem.Items.Remove(activeTreeDataItem);
                     parentItem.IsSelected = true;
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to delete Scheduler Exposure Template (see log for details)");
                 }
             }
@@ -847,8 +841,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     TreeDataItem newProjectItem = new TreeDataItem(TreeDataType.ExposureTemplate, newExposureTemplate.Name, newExposureTemplate, parentItem);
                     parentItem.Items.Add(newProjectItem);
                     return true;
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to move Scheduler orphaned Exposure Template (see log for details)");
                     return false;
                 }
@@ -859,8 +852,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 if (context.DeleteExposureTemplate(exposureTemplate)) {
                     return true;
-                }
-                else {
+                } else {
                     Notification.ShowError("Failed to delete Scheduler orphaned Exposure Template (see log for details)");
                     return false;
                 }
@@ -925,13 +917,13 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
     }
 
     public class TreeDataItem : TreeViewItem, IComparable {
-
         public TreeDataType Type { get; }
         public TreeDataItem TreeParent { get; }
         public string SortName { get; set; }
         public object Data { get; set; }
 
-        public TreeDataItem(TreeDataType type, string name, TreeDataItem parent) : this(type, name, null, parent) { }
+        public TreeDataItem(TreeDataType type, string name, TreeDataItem parent) : this(type, name, null, parent) {
+        }
 
         public TreeDataItem(TreeDataType type, string name, object data, TreeDataItem parent) {
             Type = type;
@@ -988,7 +980,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
     }
 
     public class Clipboard {
-
         private static readonly Clipboard Instance = new Clipboard();
         private TreeDataItem item { get; set; }
 
@@ -1006,11 +997,11 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             return item;
         }
 
-        private Clipboard() { }
+        private Clipboard() {
+        }
     }
 
     public class ExposurePlansClipboard {
-
         private static readonly ExposurePlansClipboard Instance = new ExposurePlansClipboard();
         private ExposurePlansSpec item { get; set; }
 
@@ -1032,7 +1023,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             Instance.item = null;
         }
 
-        private ExposurePlansClipboard() { }
+        private ExposurePlansClipboard() {
+        }
     }
 
     public class ExposurePlansSpec {
@@ -1045,4 +1037,3 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
     }
 }
-

@@ -29,12 +29,10 @@ using System.Windows.Threading;
 namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
     public class AcquiredImagesManagerViewVM : BaseVM {
-
         private IProfileService profileService;
         private SchedulerDatabaseInteraction database;
 
         public AcquiredImagesManagerViewVM(IProfileService profileService) : base(profileService) {
-
             this.profileService = profileService;
             database = new SchedulerDatabaseInteraction();
 
@@ -57,7 +55,6 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         private static readonly int FIXED_DATE_RANGE_DEFAULT = 2;
 
         private void InitializeCriteria() {
-
             FixedDateRangeChoices = new AsyncObservableCollection<KeyValuePair<int, string>> {
                 new KeyValuePair<int, string>(FIXED_DATE_RANGE_OFF, ""),
                 new KeyValuePair<int, string>(1, "Today"),
@@ -89,6 +86,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private bool tableLoading = false;
+
         public bool TableLoading {
             get => tableLoading;
             set {
@@ -98,6 +96,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private ICollectionView itemsView;
+
         public ICollectionView ItemsView {
             get => itemsView;
             set {
@@ -106,6 +105,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private DateTime fromDate = DateTime.MinValue;
+
         public DateTime FromDate {
             get => fromDate;
             set {
@@ -117,6 +117,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private DateTime toDate = DateTime.MinValue;
+
         public DateTime ToDate {
             get => toDate;
             set {
@@ -128,6 +129,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private int selectedFixedDateRange;
+
         public int SelectedFixedDateRange {
             get => selectedFixedDateRange;
             set {
@@ -145,6 +147,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private AsyncObservableCollection<KeyValuePair<int, string>> fixedDateRangeChoices;
+
         public AsyncObservableCollection<KeyValuePair<int, string>> FixedDateRangeChoices {
             get {
                 return fixedDateRangeChoices;
@@ -156,6 +159,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private AsyncObservableCollection<KeyValuePair<int, string>> projectChoices;
+
         public AsyncObservableCollection<KeyValuePair<int, string>> ProjectChoices {
             get {
                 return projectChoices;
@@ -167,6 +171,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private int selectedProjectId = 0;
+
         public int SelectedProjectId {
             get => selectedProjectId;
             set {
@@ -202,6 +207,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private AsyncObservableCollection<KeyValuePair<int, string>> targetChoices;
+
         public AsyncObservableCollection<KeyValuePair<int, string>> TargetChoices {
             get {
                 return targetChoices;
@@ -213,6 +219,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private int selectedTargetId = 0;
+
         public int SelectedTargetId {
             get => selectedTargetId;
             set {
@@ -252,6 +259,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private AsyncObservableCollection<KeyValuePair<int, string>> filterChoices;
+
         public AsyncObservableCollection<KeyValuePair<int, string>> FilterChoices {
             get {
                 return filterChoices;
@@ -263,6 +271,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private int selectedFilterId = 0;
+
         public int SelectedFilterId {
             get => selectedFilterId;
             set {
@@ -273,6 +282,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private DateTime purgeOlderThanDate = DateTime.Now.AddMonths(-9);
+
         public DateTime PurgeOlderThanDate {
             get => purgeOlderThanDate;
             set {
@@ -300,6 +310,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private AsyncObservableCollection<KeyValuePair<int, string>> purgeTargetChoices;
+
         public AsyncObservableCollection<KeyValuePair<int, string>> PurgeTargetChoices {
             get {
                 return purgeTargetChoices;
@@ -311,6 +322,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private int purgeSelectedTargetId = 0;
+
         public int PurgeSelectedTargetId {
             get => purgeSelectedTargetId;
             set {
@@ -331,7 +343,6 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         public ICommand CsvOutputCommand { get; private set; }
 
         private async Task<bool> CsvOutput() {
-
             if (AcquiredImageCollection.Count == 0) {
                 MyMessageBox.Show("No records selected for CSV output");
                 return true;
@@ -350,13 +361,11 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
 
                 if (File.Exists(fileName)) {
                     if (MyMessageBox.Show($"File {fileName} exists, overwrite?", "Overwrite?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
-                        try { File.Delete(fileName); }
-                        catch (Exception e) {
+                        try { File.Delete(fileName); } catch (Exception e) {
                             TSLogger.Error($"failed to remove existing CSV file {fileName}: {e.Message}");
                             return false;
                         }
-                    }
-                    else {
+                    } else {
                         return true;
                     }
                 }
@@ -371,8 +380,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
                             csv.NextRecord();
                         }
                     }
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"failed to write CSV file {fileName}: {e.Message}");
                     return false;
                 }
@@ -405,6 +413,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private AcquiredImageCollection acquiredImageCollection;
+
         public AcquiredImageCollection AcquiredImageCollection {
             get => acquiredImageCollection;
             set {
@@ -417,9 +426,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         private object lockObj = new object();
 
         private async Task<bool> LoadRecords() {
-
             return await Task.Run(() => {
-
                 if (AcquiredImageCollection == null || FromDate == DateTime.MinValue || ToDate == DateTime.MinValue) {
                     return true;
                 }
@@ -470,12 +477,9 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
                         AcquiredImageCollection.Clear();
                         AcquiredImageCollection.AddRange(acquiredImageVMs);
                     }));
-
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     TSLogger.Error($"exception loading acquired images: {ex.Message} {ex.StackTrace}");
-                }
-                finally {
+                } finally {
                     RaisePropertyChanged(nameof(AcquiredImageCollection));
                     RaisePropertyChanged(nameof(ItemsView));
                     TableLoading = false;
@@ -495,7 +499,6 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
 
         private Dictionary<Project, string> GetProjectsDictionary() {
-
             List<Project> projects;
             using (var context = database.GetContext()) {
                 projects = context.ProjectSet.AsNoTracking().OrderBy(p => p.name).ToList();
@@ -548,10 +551,10 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
     public class AcquiredImageCollection : RangeObservableCollection<AcquiredImageVM> { }
 
     public class AcquiredImageVM : BaseINPC {
-
         private AcquiredImage acquiredImage;
 
-        public AcquiredImageVM() { }
+        public AcquiredImageVM() {
+        }
 
         public AcquiredImageVM(AcquiredImage acquiredImage, IProfileService profileService) {
             this.acquiredImage = acquiredImage;
@@ -572,8 +575,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
                 }
 
                 ProjectTargetNameCache.PutNames(acquiredImage.ProjectId, acquiredImage.TargetId, projectName, targetName);
-            }
-            else {
+            } else {
                 projectName = names.ProjectName;
                 targetName = names.TargetName;
             }
@@ -651,8 +653,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         }
     }
 
-    class CsvAcquiredImage {
-
+    internal class CsvAcquiredImage {
         private AcquiredImageVM record;
 
         public CsvAcquiredImage(AcquiredImageVM record) {
@@ -703,8 +704,7 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
         public string Airmass { get => record.Airmass; }
     }
 
-    class ProjectTargetNameCache {
-
+    internal class ProjectTargetNameCache {
         private static readonly TimeSpan ITEM_TIMEOUT = TimeSpan.FromHours(12);
         private static readonly MemoryCache _cache = new MemoryCache("Scheduler AcquiredImages Names");
 
@@ -720,10 +720,11 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
             return $"{projectId}-{targetId}";
         }
 
-        private ProjectTargetNameCache() { }
+        private ProjectTargetNameCache() {
+        }
     }
 
-    class NamesItem {
+    internal class NamesItem {
         public string ProjectName;
         public string TargetName;
 
@@ -734,7 +735,6 @@ namespace Assistant.NINAPlugin.Controls.AcquiredImages {
     }
 
     internal class ProfileNameCache {
-
         private static readonly TimeSpan ITEM_TIMEOUT = TimeSpan.FromHours(12);
         private static readonly MemoryCache _cache = new MemoryCache("Scheduler AcquiredImages Profile Names");
 

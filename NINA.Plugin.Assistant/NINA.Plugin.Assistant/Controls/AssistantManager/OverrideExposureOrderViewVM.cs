@@ -7,7 +7,6 @@ using System.Windows.Input;
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class OverrideExposureOrderViewVM : BaseVM {
-
         private static object lockObj = new object();
         private TargetViewVM targetViewVM;
 
@@ -34,6 +33,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand CancelCommand { get; private set; }
 
         private OverrideExposureOrder overrideExposureOrder;
+
         public OverrideExposureOrder OverrideExposureOrder {
             get => overrideExposureOrder;
             set {
@@ -44,6 +44,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private ObservableCollection<OverrideItem> displayOverrideExposureOrder;
+
         public ObservableCollection<OverrideItem> DisplayOverrideExposureOrder {
             get => displayOverrideExposureOrder;
             set {
@@ -60,8 +61,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
                 if (idx == 0) {
                     OverrideExposureOrder.OverrideItems.Add(item);
-                }
-                else {
+                } else {
                     OverrideExposureOrder.OverrideItems.Insert(idx - 1, item);
                 }
 
@@ -77,8 +77,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 if (idx == OverrideExposureOrder.OverrideItems.Count - 1) {
                     OverrideExposureOrder.OverrideItems.RemoveAt(idx);
                     OverrideExposureOrder.OverrideItems.Insert(0, item);
-                }
-                else {
+                } else {
                     OverrideExposureOrder.OverrideItems.RemoveAt(idx);
                     OverrideExposureOrder.OverrideItems.Insert(idx + 1, item);
                 }
@@ -110,8 +109,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     OverrideExposureOrder.OverrideItems.Insert(GetItemIndex(current) + 1, new OverrideItem());
                     DisplayOverrideExposureOrder = OverrideExposureOrder.GetDisplayList();
                 }
-            }
-            else {
+            } else {
                 lock (lockObj) {
                     OverrideExposureOrder.OverrideItems.Add(new OverrideItem());
                     DisplayOverrideExposureOrder = OverrideExposureOrder.GetDisplayList();
@@ -131,6 +129,5 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private void Cancel() {
             targetViewVM.ShowOverrideExposureOrderPopup = false;
         }
-
     }
 }

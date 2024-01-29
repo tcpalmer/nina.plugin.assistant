@@ -8,7 +8,6 @@ using System.Collections.Generic;
 namespace Assistant.NINAPlugin.Database {
 
     public class SchedulerPlanLoader {
-
         private IProfile activeProfile;
         private string profileId;
 
@@ -38,8 +37,7 @@ namespace Assistant.NINAPlugin.Database {
             using (context) {
                 try {
                     projects = context.GetActiveProjects(profileId);
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     throw ex; // let the caller decide how to handle
                 }
             }
@@ -79,6 +77,5 @@ namespace Assistant.NINAPlugin.Database {
 
             return planProjects;
         }
-
     }
 }

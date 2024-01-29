@@ -26,5 +26,4 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
             map[SettingSoonestRule.RULE_NAME].Name.Should().Be(SettingSoonestRule.RULE_NAME);
         }
     }
-
 }

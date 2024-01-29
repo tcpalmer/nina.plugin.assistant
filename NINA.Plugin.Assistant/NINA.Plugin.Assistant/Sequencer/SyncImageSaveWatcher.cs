@@ -7,7 +7,6 @@ using NINA.Core.Model;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.Interfaces.Mediator;
-using Scheduler.SyncService;
 using System;
 using System.Collections.Concurrent;
 using System.Data.Entity.Migrations;
@@ -19,7 +18,6 @@ using System.Threading.Tasks;
 namespace Assistant.NINAPlugin.Sequencer {
 
     public class SyncImageSaveWatcher : ISyncImageSaveWatcher {
-
         private IProfile profile;
         private ProfilePreference profilePreference;
         private IImageSaveMediator imageSaveMediator;
@@ -111,7 +109,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private void UpdateDatabase(IPlanTarget planTarget, string filterName, bool accepted, string rejectReason, ImageSavedEventArgs msg, int? imageId, int exposureDatabaseId) {
-
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 using (var transaction = context.Database.BeginTransaction()) {
                     try {
@@ -124,8 +121,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                             if (accepted) { exposurePlan.Accepted++; }
                             context.ExposurePlanSet.AddOrUpdate(exposurePlan);
-                        }
-                        else {
+                        } else {
                             TSLogger.Warning($"SYNC client failed to get exposure plan for id={exposureDatabaseId}, image id={imageId}");
                         }
 
@@ -143,8 +139,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                         context.SaveChanges();
                         transaction.Commit();
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         TSLogger.Error($"SYNC client exception updating database for saved image: {e.Message}\n{e.StackTrace}");
                     }
                 }
@@ -167,11 +162,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             return sb.ToString();
         }
-
     }
 
-    class ExposureDetails {
-
+    internal class ExposureDetails {
         public int imageId { get; private set; }
         public string exposureId { get; private set; }
         public int targetDatabaseId { get; private set; }

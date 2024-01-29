@@ -6,7 +6,6 @@ using System.Collections.Generic;
 namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
 
     public class TestAltitudeRefiner : IAltitudeRefiner {
-
         private readonly bool risesAtlocation;
 
         private readonly bool circumpolar;
@@ -86,5 +85,4 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
             return -15;
         }
     }
-
 }

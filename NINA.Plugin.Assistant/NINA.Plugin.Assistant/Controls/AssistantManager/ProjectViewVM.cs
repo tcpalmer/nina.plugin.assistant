@@ -15,7 +15,6 @@ using System.Windows.Input;
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class ProjectViewVM : BaseVM {
-
         private AssistantManagerVM managerVM;
         private IFramingAssistantVM framingAssistantVM;
         private ProjectProxy projectProxy;
@@ -64,14 +63,14 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private void ProjectProxy_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             if (e?.PropertyName != nameof(ProjectProxy.Proxy)) {
                 ItemEdited = true;
-            }
-            else {
+            } else {
                 ProjectActive = ProjectProxy.Project.ActiveNowWithActiveTargets;
                 RaisePropertyChanged(nameof(ProjectProxy));
             }
         }
 
         private bool projectActive;
+
         public bool ProjectActive {
             get {
                 return projectActive;
@@ -83,7 +82,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private void InitializeCombos() {
-
             MinimumTimeChoices = new List<string>();
             MinimumTimeChoices.Add(Utils.MtoHM(5));
             MinimumTimeChoices.Add(Utils.MtoHM(10));
@@ -106,6 +104,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private List<RuleWeight> ruleWeights = new List<RuleWeight>();
+
         public List<RuleWeight> RuleWeights {
             get => ruleWeights;
             set {
@@ -115,6 +114,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private List<string> _minimumTimeChoices;
+
         public List<string> MinimumTimeChoices {
             get => _minimumTimeChoices;
             set {
@@ -124,6 +124,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private List<string> _minimumAltitudeChoices;
+
         public List<string> MinimumAltitudeChoices {
             get {
                 return _minimumAltitudeChoices;
@@ -135,6 +136,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private List<string> _flatsHandlingChoices;
+
         public List<string> FlatsHandlingChoices {
             get {
                 return _flatsHandlingChoices;
@@ -146,6 +148,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private bool showEditView = false;
+
         public bool ShowEditView {
             get => showEditView;
             set {
@@ -155,6 +158,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private bool itemEdited = false;
+
         public bool ItemEdited {
             get => itemEdited;
             set {
@@ -188,7 +192,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private void Save(object obj) {
-
             // Prevent save if minimum time setting is such that it would never allow a meridian window to work properly
             if (ProjectProxy.Proxy.MeridianWindow > 0 && ProjectProxy.Proxy.MinimumTime > (ProjectProxy.Proxy.MeridianWindow * 2)) {
                 string message = $"Minimum Time must be less than twice the Meridian Window or the project will never be selected for imaging.";

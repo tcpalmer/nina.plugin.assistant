@@ -12,18 +12,17 @@ namespace Assistant.NINAPlugin.Plan {
 
     /// <summary>
     /// Plan the exposures for a target.
-    /// 
+    ///
     /// The planInterval is the actual interval we want to image for.  So it already takes into account
     /// a potential delay at the start as well as an end time that reflects when we either must stop
     /// (due to horizon, meridian or twilight) or we want to stop to let the full planner run again.
     /// Although it may cover periods of twilight, we're guaranteed that the window is appropriate for
     /// some planExposure in the planTarget.
-    /// 
+    ///
     /// At high latitudes near the summer solstice, you can lose true nighttime, astronomical twilight,
     /// and perhaps even nautical twilight.  We handle all cases for locations below the polar circle -
     /// even allowing imaging during civil twilight on the solstice if that's your thing.
     public class ExposurePlanner {
-
         private ProfilePreference profilePreferences;
         private IPlanTarget planTarget;
         private TimeInterval planInterval;
@@ -44,14 +43,12 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         private List<PlanOverrideItem> GetPlanOverrideList() {
-
             List<PlanOverrideItem> list = new List<PlanOverrideItem>();
             string[] items = planTarget.OverrideExposureOrder.Split(OverrideExposureOrder.SEP);
             foreach (string item in items) {
                 if (item == OverrideExposureOrder.DITHER) {
                     list.Add(new PlanOverrideItem());
-                }
-                else {
+                } else {
                     int databaseId = 0;
                     Int32.TryParse(item, out databaseId);
 
@@ -109,14 +106,12 @@ namespace Assistant.NINAPlugin.Plan {
 
             if (planOverrideItems == null) {
                 return new DitherInjector(Cleanup(instructions), planTarget.Project.DitherEvery).Inject();
-            }
-            else {
+            } else {
                 return Cleanup(instructions);
             }
         }
 
         public static List<IPlanInstruction> Cleanup(List<IPlanInstruction> instructions) {
-
             if (instructions is null || instructions.Count == 0) {
                 return instructions;
             }
@@ -170,8 +165,7 @@ namespace Assistant.NINAPlugin.Plan {
                         if (HasActionableInstructions(added)) {
                             instructions.AddRange(added);
                         }
-                    }
-                    else {
+                    } else {
                         List<IPlanInstruction> added = GetOverridePlanInstructions(overlap, twilightLevel);
 
                         if (HasActionableInstructions(added)) {
@@ -199,7 +193,6 @@ namespace Assistant.NINAPlugin.Plan {
                 if (AllPlanExposuresAreComplete(planExposures)) { break; }
 
                 foreach (IPlanExposure planExposure in planExposures) {
-
                     if (IsPlanExposureComplete(planExposure)) { continue; }
 
                     if (planExposure.FilterName != lastFilter) {
@@ -219,8 +212,7 @@ namespace Assistant.NINAPlugin.Plan {
                             planExposure.PlannedExposures++;
                             exposuresAdded = true;
                         }
-                    }
-                    else {
+                    } else {
                         // otherwise, take filterSwitchFrequency of this filter before switching
                         for (int i = 0; i < filterSwitchFrequency; i++) {
                             timeRemaining -= (long)planExposure.ExposureLength;
@@ -329,7 +321,6 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         private List<IPlanExposure> NightPrioritize(List<IPlanExposure> planExposures, TwilightLevel twilightLevel) {
-
             // If the twilight level is nighttime, order the filters to prioritize those for nighttime only.
             // Assuming there are also filters for brighter twilights, the nighttime only should be done first,
             // allowing the others to be done during (presumed future) brighter twilight levels.
@@ -363,8 +354,7 @@ namespace Assistant.NINAPlugin.Plan {
                     order.Append(filterName);
                     if (exposures.ContainsKey(filterName)) {
                         exposures[filterName]++;
-                    }
-                    else {
+                    } else {
                         exposures.Add(filterName, 1);
                     }
                 }
@@ -411,7 +401,9 @@ namespace Assistant.NINAPlugin.Plan {
     }
 
     public class PlanSwitchFilter : PlanInstruction {
-        public PlanSwitchFilter(IPlanExposure planExposure) : base(planExposure) { }
+
+        public PlanSwitchFilter(IPlanExposure planExposure) : base(planExposure) {
+        }
 
         public override string ToString() {
             return $"SwitchFilter: {planExposure.FilterName}";
@@ -419,7 +411,9 @@ namespace Assistant.NINAPlugin.Plan {
     }
 
     public class PlanSetReadoutMode : PlanInstruction {
-        public PlanSetReadoutMode(IPlanExposure planExposure) : base(planExposure) { }
+
+        public PlanSetReadoutMode(IPlanExposure planExposure) : base(planExposure) {
+        }
 
         public override string ToString() {
             return $"Set readoutmode: mode={planExposure.ReadoutMode}";
@@ -427,7 +421,9 @@ namespace Assistant.NINAPlugin.Plan {
     }
 
     public class PlanTakeExposure : PlanInstruction {
-        public PlanTakeExposure(IPlanExposure planExposure) : base(planExposure) { }
+
+        public PlanTakeExposure(IPlanExposure planExposure) : base(planExposure) {
+        }
 
         public override string ToString() {
             return $"TakeExposure: {planExposure.FilterName} {planExposure.ExposureLength}";
@@ -435,7 +431,9 @@ namespace Assistant.NINAPlugin.Plan {
     }
 
     public class PlanDither : PlanInstruction {
-        public PlanDither() : base(null) { }
+
+        public PlanDither() : base(null) {
+        }
 
         public override string ToString() {
             return "Dither";
@@ -444,7 +442,8 @@ namespace Assistant.NINAPlugin.Plan {
 
     public class PlanBeforeNewTargetContainer : PlanInstruction {
 
-        public PlanBeforeNewTargetContainer() : base(null) { }
+        public PlanBeforeNewTargetContainer() : base(null) {
+        }
 
         public override string ToString() {
             return "BeforeNewTargetContainer";

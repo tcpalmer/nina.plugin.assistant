@@ -11,7 +11,6 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
     /// solar system object.
     /// </summary>
     public class DSORefiner : IAltitudeRefiner {
-
         private ObserverInfo location;
         private Coordinates target;
 
@@ -30,7 +29,6 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
         /// <param name="numPoints"></param>
         /// <returns></returns>
         public Altitudes Refine(Altitudes altitudes, int numPoints) {
-
             Assert.notNull(altitudes, "altitudes cannot be null");
             Assert.isTrue(altitudes.AltitudeList.Count == 2, "altitudes must have exactly two elements");
             Assert.isTrue(numPoints > 0, "numPoints must be >= 1");
@@ -95,5 +93,4 @@ namespace Assistant.NINAPlugin.Astrometry.Solver {
             throw new NotImplementedException();
         }
     }
-
 }

@@ -88,5 +88,4 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
             ex.Message.Should().Be("startTime must be before endTime");
         }
     }
-
 }

@@ -10,14 +10,13 @@
         <nina:SequenceBlockView DataContext="{Binding}">
             <nina:SequenceBlockView.SequenceItemContent>
                 <WrapPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding DisplayText}"/>
+                    <TextBlock Text="{Binding DisplayText}" />
                 </WrapPanel>
             </nina:SequenceBlockView.SequenceItemContent>
         </nina:SequenceBlockView>
     </DataTemplate>
 
     <DataTemplate x:Key="Assistant.NINAPlugin.Sequencer.TargetSchedulerSyncContainer_Mini">
-        <mini:MiniSequenceItem/>
+        <mini:MiniSequenceItem />
     </DataTemplate>
-
 </ResourceDictionary>

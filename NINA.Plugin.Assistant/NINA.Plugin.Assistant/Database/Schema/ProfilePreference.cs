@@ -7,7 +7,6 @@ using System.Runtime.CompilerServices;
 namespace Assistant.NINAPlugin.Database.Schema {
 
     public class ProfilePreference : INotifyPropertyChanged {
-
         [Key] public int Id { get; set; }
         [Required] public string ProfileId { get; set; }
 
@@ -36,7 +35,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public double fwhmSigmaFactor { get; set; }
         public double eccentricitySigmaFactor { get; set; }
 
-        public ProfilePreference() { }
+        public ProfilePreference() {
+        }
 
         public ProfilePreference(string profileId) {
             ProfileId = profileId;
@@ -255,6 +255,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

@@ -6,7 +6,6 @@ using System;
 namespace Assistant.NINAPlugin.Astrometry {
 
     public class AstrometryUtils {
-
         private const double DAYS_IN_LUNAR_CYCLE = 29.53059;
 
         /// <summary>
@@ -51,7 +50,6 @@ namespace Assistant.NINAPlugin.Astrometry {
         /// <param name="atTime"></param>
         /// <returns></returns>
         public static double GetMoonIllumination(DateTime atTime) {
-
             var jd = AstroUtil.GetJulianDate(atTime);
             var tuple = AstroUtil.GetMoonAndSunPosition(atTime, jd);
             var moonPosition = tuple.Item1;
@@ -85,7 +83,6 @@ namespace Assistant.NINAPlugin.Astrometry {
         /// <param name="target"></param>
         /// <returns></returns>
         public static double GetMoonSeparationAngle(ObserverInfo location, DateTime atTime, Coordinates target) {
-
             NOVAS.SkyPosition pos = AstroUtil.GetMoonPosition(atTime, AstroUtil.GetJulianDate(atTime), location);
             var moonRaRadians = AstroUtil.ToRadians(AstroUtil.HoursToDegrees(pos.RA));
             var moonDecRadians = AstroUtil.ToRadians(pos.Dec);
@@ -100,10 +97,10 @@ namespace Assistant.NINAPlugin.Astrometry {
 
         /// <summary>
         /// Determine the moon avoidance separation for the moon age and separation angle (distance) to the target.
-        /// 
+        ///
         /// Basically, distance is selected to be the minimum acceptable separation at full moon.  Width is then the
         /// number of days (before or after full) for the acceptable separation to drop to distance/2.
-        /// 
+        ///
         /// The Moon Avoidance Lorentzian concept is from the Berkeley Automated Imaging Telescope (BAIT) team.  See
         /// http://astron.berkeley.edu/~bait/.  This formulation is from ACP, see
         /// http://bobdenny.com/ar/RefDocs/HelpFiles/ACPScheduler81Help/Constraints.htm.
@@ -157,7 +154,7 @@ namespace Assistant.NINAPlugin.Astrometry {
         /// Return true if the target object can ever rise above the horizon at the location when a minimum viewing altitude
         /// is considered.  Note that this doesn't necessarily mean that the target has a rising event (which a circumpolar
         /// target would not), just that it can be above the horizon at some point.
-        /// 
+        ///
         /// </summary>
         /// <param name="location"></param>
         /// <param name="coordinates"></param>
@@ -223,11 +220,11 @@ namespace Assistant.NINAPlugin.Astrometry {
 
         /// <summary>
         /// Convert NINA 2.x rotation to NINA 3.x position angle.  From the NINA 3 release notes:
-        /// 
+        ///
         /// Rotation values in N.I.N.A. are now displayed in counter clockwise notation to follow the standard of
         /// "East of North of North Celestial Pole" that is used in most astro applications. Templates, Targets and
         /// other saved items in previous versions will be auto migrated to this adjusted approach.
-        /// 
+        ///
         /// </summary>
         /// <param name="rotation"></param>
         /// <returns></returns>
@@ -235,7 +232,7 @@ namespace Assistant.NINAPlugin.Astrometry {
             return AstroUtil.EuclidianModulus(360 - rotation, 360);
         }
 
-        private AstrometryUtils() { }
+        private AstrometryUtils() {
+        }
     }
-
 }

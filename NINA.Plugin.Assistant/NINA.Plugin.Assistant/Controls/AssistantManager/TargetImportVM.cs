@@ -17,7 +17,6 @@ using System.Windows.Input;
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class TargetImportVM : BaseINPC {
-
         private IFramingAssistantVM framingAssistantVM;
         private IPlanetariumFactory planetariumFactory;
 
@@ -38,6 +37,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public IDeepSkyObjectSearchVM DeepSkyObjectSearchVM { get => deepSkyObjectSearchVM; set => deepSkyObjectSearchVM = value; }
 
         private Target target;
+
         public Target Target {
             get { return target; }
             set {
@@ -58,7 +58,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand FramingAssistantImportCommand { get; private set; }
 
         private void FramingAssistantImport(object obj) {
-
             Target target = new Target();
             target.Coordinates = GetFramingAssistantCoordinates();
             target.Name = framingAssistantVM.DSO.Name;
@@ -85,7 +84,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand SequenceTargetImportCommand { get; private set; }
 
         private void SequenceTargetImport(object obj) {
-
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
             dialog.Title = "Import Sequence Target";
             dialog.IsFolderPicker = false;
@@ -104,8 +102,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     target.Name = sequenceTarget.TargetName;
                     target.Rotation = sequenceTarget.Rotation;
                     Target = target;
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     TSLogger.Error($"failed to read sequence target at {pathToFile}: {e.Message} {e.StackTrace}");
                     Notification.ShowError($"Failed to import target from {pathToFile}");
                     return;
@@ -141,8 +138,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 }
 
                 return null;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 TSLogger.Error($"failed to get coordinates from planetarium: {e.Message}");
                 Notification.ShowError($"Failed to get coordinates from planetarium: {e.Message}");
                 return null;

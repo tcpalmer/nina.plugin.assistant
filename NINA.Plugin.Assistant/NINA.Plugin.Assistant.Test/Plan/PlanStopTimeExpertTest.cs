@@ -175,5 +175,4 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             stopTime.Should().BeCloseTo(selected.Object.EndTime, precision);
         }
     }
-
 }

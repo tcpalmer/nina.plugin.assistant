@@ -11,7 +11,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
 
         [Test]
         public void testLocal() {
-
             var sut = new NighttimeCircumstances(TestUtil.TEST_LOCATION_4, new DateTime(2023, 1, 11, 1, 2, 3));
             Assert.That(sut.CivilTwilightStart, Is.EqualTo(new DateTime(2023, 1, 11, 17, 22, 38)).Within(1).Seconds);
             Assert.That(sut.NauticalTwilightStart, Is.EqualTo(new DateTime(2023, 1, 11, 17, 50, 38)).Within(1).Seconds);
@@ -46,7 +45,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
 
         [Test]
         public void testHighLatitude() {
-
             // TEST_LOCATION_5 is Waskaganish, Quebec at lat=51.48.  See https://www.timeanddate.com/sun/@6176565
 
             DateTime dt = new DateTime(2023, 1, 11);
@@ -164,7 +162,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
 
         [Test]
         public void testGetTwilightWindowHighLatitude() {
-
             // TEST_LOCATION_6 is Sanikiluaq, Nunavut at lat=56.54.  See https://www.timeanddate.com/sun/canada/sanikiluaq
 
             DateTime dt = new DateTime(2023, 5, 1);

@@ -1,5 +1,4 @@
-﻿
-namespace Assistant.NINAPlugin.Sequencer {
+﻿namespace Assistant.NINAPlugin.Sequencer {
 
     public interface ISyncImageSaveWatcher {
 

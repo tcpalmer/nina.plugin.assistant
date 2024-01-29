@@ -7,11 +7,11 @@ using System.Text;
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class OverrideExposureOrder {
-
         public static readonly string DITHER = "Dither";
         public static readonly char SEP = '|';
 
         private List<OverrideItem> overrideItems = new List<OverrideItem>();
+
         public List<OverrideItem> OverrideItems {
             get => overrideItems; set => overrideItems = value;
         }
@@ -23,7 +23,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public OverrideExposureOrder(string serialized, List<ExposurePlan> exposurePlans) {
-
             if (String.IsNullOrEmpty(serialized)) {
                 return;
             }
@@ -32,8 +31,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             foreach (string item in items) {
                 if (item == DITHER) {
                     OverrideItems.Add(new OverrideItem());
-                }
-                else {
+                } else {
                     int databaseId = 0;
                     Int32.TryParse(item, out databaseId);
                     ExposurePlan ep = exposurePlans.Find(e => e.Id == databaseId);
@@ -63,7 +61,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
     }
 
     public class OverrideItem {
-
         public int ExposurePlanDatabaseId { get; private set; }
         public bool IsDither { get; private set; }
         public string Name { get; private set; }

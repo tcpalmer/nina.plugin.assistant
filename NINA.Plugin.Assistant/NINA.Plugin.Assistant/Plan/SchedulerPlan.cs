@@ -148,8 +148,7 @@ namespace Assistant.NINAPlugin.Plan {
             StringBuilder sb = new StringBuilder();
             if (WaitForNextTargetTime != null) {
                 sb.AppendLine($"Waiting until {Utils.FormatDateTimeFull(WaitForNextTargetTime)}");
-            }
-            else {
+            } else {
                 sb.AppendLine($"Target:         {PlanTarget.Name} at {PlanTarget.Coordinates.RAString} {PlanTarget.Coordinates.DecString}");
                 sb.AppendLine($"Imaging window: {TimeInterval}");
                 sb.Append($"Instructions:   {PlanInstruction.InstructionsSummary(PlanInstructions)}");
@@ -208,7 +207,6 @@ namespace Assistant.NINAPlugin.Plan {
     }
 
     public class PlanProject : IPlanProject {
-
         public string PlanId { get; set; }
         public int DatabaseId { get; set; }
         public string Name { get; set; }
@@ -238,7 +236,6 @@ namespace Assistant.NINAPlugin.Plan {
         public string RejectedReason { get; set; }
 
         public PlanProject(IProfile profile, Project project) {
-
             this.PlanId = Guid.NewGuid().ToString();
             this.DatabaseId = project.Id;
             this.Name = project.Name;
@@ -333,7 +330,6 @@ namespace Assistant.NINAPlugin.Plan {
 
         private HorizonDefinition DetermineHorizon(IProfile profile, Project project) {
             if (project.UseCustomHorizon) {
-
                 if (profile.AstrometrySettings.Horizon == null) {
                     TSLogger.Warning("project 'Use Custom Horizon' is enabled but no custom horizon was found in the profile, defaulting to Minimum Altitude");
                     return new HorizonDefinition(project.MinimumAltitude);
@@ -366,11 +362,11 @@ namespace Assistant.NINAPlugin.Plan {
         TimeInterval MeridianWindow { get; set; }
 
         void SetCircumstances(bool isVisible, DateTime startTime, DateTime culminationTime, DateTime endTime);
+
         string ToString();
     }
 
     public class PlanTarget : IPlanTarget {
-
         public string PlanId { get; set; }
         public int DatabaseId { get; set; }
         public string Name { get; set; }
@@ -413,7 +409,8 @@ namespace Assistant.NINAPlugin.Plan {
             }
         }
 
-        public PlanTarget() { } // for PlanTargetEmulator only
+        public PlanTarget() {
+        } // for PlanTargetEmulator only
 
         private List<ExposurePlan> GetActiveExposurePlans(Target target) {
             if (string.IsNullOrEmpty(target.OverrideExposureOrder)) {
@@ -425,8 +422,7 @@ namespace Assistant.NINAPlugin.Plan {
             foreach (string item in items) {
                 if (item == Controls.AssistantManager.OverrideExposureOrder.DITHER) {
                     continue;
-                }
-                else {
+                } else {
                     int databaseId = 0;
                     Int32.TryParse(item, out databaseId);
 
@@ -547,12 +543,13 @@ namespace Assistant.NINAPlugin.Plan {
         int PlannedExposures { get; set; }
 
         int NeededExposures(double exposureThrottlePercentage);
+
         bool IsIncomplete();
+
         string ToString();
     }
 
     public class PlanExposure : IPlanExposure {
-
         public string PlanId { get; set; }
         public int DatabaseId { get; set; }
         public string FilterName { get; set; }
@@ -605,13 +602,14 @@ namespace Assistant.NINAPlugin.Plan {
             if (exposureThrottlePercentage > 0) {
                 int throttleAt = (int)((exposureThrottlePercentage / 100) * Desired);
                 return Acquired > throttleAt ? 0 : throttleAt - Acquired;
-            }
-            else {
+            } else {
                 return Accepted > Desired ? 0 : Desired - Accepted;
             }
         }
 
-        public bool IsIncomplete() { return Accepted < Desired; }
+        public bool IsIncomplete() {
+            return Accepted < Desired;
+        }
 
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
@@ -641,7 +639,6 @@ namespace Assistant.NINAPlugin.Plan {
     }
 
     public class Reasons {
-
         public const string ProjectComplete = "complete";
         public const string ProjectNoVisibleTargets = "no visible targets";
         public const string ProjectMoonAvoidance = "moon avoidance";
@@ -661,7 +658,7 @@ namespace Assistant.NINAPlugin.Plan {
         public const string FilterMoonAvoidance = "moon avoidance";
         public const string FilterNoExposuresPlanned = "no exposures planned";
 
-        private Reasons() { }
-
+        private Reasons() {
+        }
     }
 }

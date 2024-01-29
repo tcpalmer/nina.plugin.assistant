@@ -9,7 +9,6 @@ using System.Text;
 namespace Assistant.NINAPlugin.Database.Schema {
 
     public class RuleWeight : INotifyPropertyChanged, IComparable<RuleWeight> {
-
         [Key] public int Id { get; set; }
         [Required] public string name { get; set; }
         [Required] public double weight { get; set; }
@@ -35,7 +34,8 @@ namespace Assistant.NINAPlugin.Database.Schema {
         [ForeignKey("Project")] public int ProjectId { get; set; }
         public virtual Project Project { get; set; }
 
-        public RuleWeight() { }
+        public RuleWeight() {
+        }
 
         public RuleWeight(string name, double weight) {
             Assert.isTrue(weight >= 0 && weight <= 100, "weight must be 0-100");
@@ -45,6 +45,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -74,5 +75,4 @@ namespace Assistant.NINAPlugin.Database.Schema {
             return sb.ToString();
         }
     }
-
 }

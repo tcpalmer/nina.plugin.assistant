@@ -22,6 +22,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public AssistantManagerVM ParentVM { get; private set; }
 
         private List<TreeDataItem> rootList;
+
         public List<TreeDataItem> RootList {
             get => rootList;
             set {

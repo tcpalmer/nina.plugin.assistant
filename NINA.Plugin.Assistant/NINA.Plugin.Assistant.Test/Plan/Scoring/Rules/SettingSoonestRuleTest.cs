@@ -32,6 +32,5 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
             SettingSoonestRule sut = new SettingSoonestRule();
             sut.Score(scoringEngineMock.Object, targetMock.Object).Should().BeApproximately(expected, 0.01);
         }
-
     }
 }

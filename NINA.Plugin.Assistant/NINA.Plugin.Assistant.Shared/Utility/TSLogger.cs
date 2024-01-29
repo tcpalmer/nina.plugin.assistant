@@ -4,10 +4,8 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.File;
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Security.Policy;
 using System.Text;
 
 namespace NINA.Plugin.Assistant.Shared.Utility {
@@ -16,7 +14,6 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
     /// Cribbed from NINA.Core.Logger
     /// </summary>
     public static class TSLogger {
-
         private static ILogger TSLog;
         private static LoggingLevelSwitch levelSwitch;
 
@@ -31,8 +28,7 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
 
             if (!Directory.Exists(logDir)) {
                 Directory.CreateDirectory(logDir);
-            }
-            else {
+            } else {
                 CoreUtil.DirectoryCleanup(logDir, TimeSpan.FromDays(-90));
             }
 
@@ -234,5 +230,4 @@ namespace NINA.Plugin.Assistant.Shared.Utility {
             }
         }
     }
-
 }

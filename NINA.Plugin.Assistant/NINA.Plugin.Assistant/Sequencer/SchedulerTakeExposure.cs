@@ -10,7 +10,6 @@ using NINA.WPF.Base.Interfaces.ViewModel;
 namespace Assistant.NINAPlugin.Sequencer {
 
     public abstract class SchedulerTakeExposure : TakeExposure {
-
         protected IProfileService profileService { get; private set; }
         protected ICameraMediator cameraMediator { get; private set; }
         protected IImagingMediator imagingMediator { get; private set; }
@@ -18,6 +17,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         protected IImageHistoryVM imageHistoryVM { get; private set; }
 
         private double roi;
+
         public double ROI {
             get => roi;
             set {
@@ -69,6 +69,5 @@ namespace Assistant.NINAPlugin.Sequencer {
         protected bool IsLightSequence() {
             return ImageType == CaptureSequence.ImageTypes.SNAPSHOT || ImageType == CaptureSequence.ImageTypes.LIGHT;
         }
-
     }
 }

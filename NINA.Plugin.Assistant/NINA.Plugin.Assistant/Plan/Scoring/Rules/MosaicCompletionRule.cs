@@ -1,9 +1,6 @@
-﻿using NINA.Plugin.Assistant.Shared.Utility;
-
-namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
+﻿namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
 
     public class MosaicCompletionRule : ScoringRule {
-
         public const string RULE_NAME = "Mosaic Completion";
         public const double DEFAULT_WEIGHT = 0 * WEIGHT_SCALE;
 
@@ -17,7 +14,6 @@ namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
         /// <param name="potentialTarget"></param>
         /// <returns></returns>
         public override double Score(IScoringEngine scoringEngine, IPlanTarget potentialTarget) {
-
             IPlanProject planProject = potentialTarget.Project;
 
             if (!planProject.IsMosaic) {

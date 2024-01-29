@@ -25,7 +25,6 @@ namespace Assistant.NINAPlugin {
 
     [Export(typeof(IPluginManifest))]
     public class AssistantPlugin : PluginBase, INotifyPropertyChanged {
-
         private IPluginOptionsAccessor pluginSettings;
         private IProfileService profileService;
         private IApplicationMediator applicationMediator;
@@ -43,7 +42,6 @@ namespace Assistant.NINAPlugin {
             IFramingAssistantVM framingAssistantVM,
             IDeepSkyObjectSearchVM deepSkyObjectSearchVM,
             IPlanetariumFactory planetariumFactory) {
-
             if (Properties.Settings.Default.UpdateSettings) {
                 Properties.Settings.Default.Upgrade();
                 Properties.Settings.Default.UpdateSettings = false;
@@ -86,6 +84,7 @@ namespace Assistant.NINAPlugin {
         }
 
         private AssistantManagerVM assistantManagerVM;
+
         public AssistantManagerVM AssistantManagerVM {
             get => assistantManagerVM;
             set {
@@ -95,6 +94,7 @@ namespace Assistant.NINAPlugin {
         }
 
         private PlanPreviewerViewVM planPreviewerViewVM;
+
         public PlanPreviewerViewVM PlanPreviewerViewVM {
             get => planPreviewerViewVM;
             set {
@@ -104,6 +104,7 @@ namespace Assistant.NINAPlugin {
         }
 
         private AcquiredImagesManagerViewVM acquiredImagesManagerViewVM;
+
         public AcquiredImagesManagerViewVM AcquiredImagesManagerViewVM {
             get => acquiredImagesManagerViewVM;
             set {
@@ -113,6 +114,7 @@ namespace Assistant.NINAPlugin {
         }
 
         private bool assistantManagerIsExpanded = false;
+
         public bool AssistantManagerIsExpanded {
             get { return assistantManagerIsExpanded; }
             set {
@@ -124,6 +126,7 @@ namespace Assistant.NINAPlugin {
         }
 
         private bool planPreviewIsExpanded = false;
+
         public bool PlanPreviewIsExpanded {
             get { return planPreviewIsExpanded; }
             set {
@@ -135,6 +138,7 @@ namespace Assistant.NINAPlugin {
         }
 
         private bool acquiredImagesManagerIsExpanded = false;
+
         public bool AcquiredImagesManagerIsExpanded {
             get { return acquiredImagesManagerIsExpanded; }
             set {
@@ -150,7 +154,6 @@ namespace Assistant.NINAPlugin {
         }
 
         public override Task Teardown() {
-
             if (SyncManager.Instance.IsRunning) {
                 SyncManager.Instance.Shutdown();
             }
@@ -189,5 +192,4 @@ namespace Assistant.NINAPlugin {
             }
         }
     }
-
 }

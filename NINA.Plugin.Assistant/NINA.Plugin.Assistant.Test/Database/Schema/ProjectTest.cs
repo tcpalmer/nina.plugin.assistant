@@ -58,6 +58,5 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
             p1.RuleWeights[0].Weight.Should().Be(.3);
             p1.RuleWeights[1].Weight.Should().Be(.4);
         }
-
     }
 }

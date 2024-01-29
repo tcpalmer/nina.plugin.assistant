@@ -9,7 +9,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
 
     public class CircumstanceSolverTest {
 
-
         [Test]
         [TestCase(-10, -5, 60, double.MinValue)] // No rising
         [TestCase(1, 10, 60, double.MinValue)] // No rising
@@ -25,15 +24,13 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
 
             if (expectedAlt == double.MinValue) {
                 aat.Should().BeNull();
-            }
-            else {
+            } else {
                 aat.Altitude.Should().BeApproximately(expectedAlt, 0.001);
             }
         }
 
         [Test]
         public void TestFindRiseAboveMinimum() {
-
             CircumstanceSolver cs = new CircumstanceSolver(new TestAltitudeRefiner());
             HorizonDefinition hd = TestUtil.getHD(0);
 
@@ -70,7 +67,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
 
         [Test]
         public void TestFindTransit1() {
-
             // Note that you can't test transit with the test refiner since it can't refine a wrapped interval properly
 
             DSORefiner refiner = new DSORefiner(TestUtil.TEST_LOCATION_1, TestUtil.BETELGEUSE);
@@ -91,7 +87,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
 
         [Test]
         public void TestFindTransit2() {
-
             // Note that you can't test transit with the test refiner since it can't refine a wrapped interval properly
 
             DSORefiner refiner = new DSORefiner(TestUtil.TEST_LOCATION_4, TestUtil.IC1805);
@@ -112,7 +107,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
 
         [Test]
         public void TestFindSetBelowMinimum() {
-
             CircumstanceSolver cs = new CircumstanceSolver(new TestAltitudeRefiner());
 
             var ex = Assert.Throws<ArgumentException>(() => cs.FindSetBelowMinimum(null, TestUtil.getHD(0)));
@@ -196,7 +190,6 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
 
         [Test]
         public void TestBad() {
-
             var ex = Assert.Throws<ArgumentException>(() => new CircumstanceSolver(null, 0));
             ex.Message.Should().Be("refiner cannot be null");
 
@@ -207,6 +200,4 @@ namespace NINA.Plugin.Assistant.Test.Astrometry.Solver {
             ex.Message.Should().Be("max final time step must be >= 1");
         }
     }
-
 }
-

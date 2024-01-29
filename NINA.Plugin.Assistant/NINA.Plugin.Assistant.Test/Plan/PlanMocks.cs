@@ -16,7 +16,7 @@ using System.Linq;
 
 namespace NINA.Plugin.Assistant.Test.Plan {
 
-    class PlanMocks {
+    internal class PlanMocks {
 
         public static List<IPlanProject> ProjectsList(params IPlanProject[] array) {
             return array.ToList();

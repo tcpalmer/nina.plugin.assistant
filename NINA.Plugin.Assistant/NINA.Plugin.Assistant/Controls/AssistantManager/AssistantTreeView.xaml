@@ -109,7 +109,6 @@
                 <Style TargetType="{x:Type local:TreeDataItem}">
                     <Setter Property="Margin" Value="0,3,0,3" />
                 </Style>
-
             </TreeView.Resources>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectedItemChanged">

@@ -26,5 +26,4 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
             TestContext.WriteLine($"SET:  {rs.Set}");
         }
     }
-
 }

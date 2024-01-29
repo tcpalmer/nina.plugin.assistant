@@ -19,7 +19,6 @@ using System.Windows.Input;
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
     public class ProfileImportViewVM : BaseVM {
-
         private const string DEFAULT_TYPE_FILTER = "<any>";
 
         private AssistantManagerVM managerVM;
@@ -92,6 +91,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private string importFilePath;
+
         public string ImportFilePath {
             get => importFilePath;
             set {
@@ -103,6 +103,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private List<string> typeFilterChoices;
+
         public List<string> TypeFilterChoices {
             get {
                 return typeFilterChoices;
@@ -114,6 +115,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private string selectedTypeFilter = DEFAULT_TYPE_FILTER;
+
         public string SelectedTypeFilter {
             get => selectedTypeFilter;
             set {
@@ -123,6 +125,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private AsyncObservableCollection<KeyValuePair<int, string>> projectChoices;
+
         public AsyncObservableCollection<KeyValuePair<int, string>> ProjectChoices {
             get => projectChoices;
             set {
@@ -132,6 +135,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private int selectedProjectId = -1;
+
         public int SelectedProjectId {
             get => selectedProjectId;
             set {
@@ -141,6 +145,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private AsyncObservableCollection<KeyValuePair<int, string>> targetChoices;
+
         public AsyncObservableCollection<KeyValuePair<int, string>> TargetChoices {
             get => targetChoices;
             set {
@@ -150,6 +155,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private int selectedTargetId = -1;
+
         public int SelectedTargetId {
             get => selectedTargetId;
             set {
@@ -186,7 +192,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private Task<bool> Import() {
-
             TSLogger.Info($"importing targets from {importFilePath}");
             CsvTargetLoader loader = new CsvTargetLoader();
 
@@ -217,8 +222,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 if (SelectedProjectId == -1) {
                     Project project = managerVM.AddNewProject(profileItem);
                     managerVM.AddTargets(project, targets);
-                }
-                else {
+                } else {
                     foreach (TreeDataItem item in profileItem.Items) {
                         if (item.Type == TreeDataType.Project) {
                             Project project = item.Data as Project;
@@ -229,8 +233,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         }
                     }
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 TSLogger.Error($"Failed to read CSV file for target import: {e.Message}\n{e.StackTrace}");
                 MyMessageBox.Show($"Import file cannot be read:\n{e.Message}", "Oops");
                 return Task.FromResult(false);
@@ -248,8 +251,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 CsvTargetLoader loader = new CsvTargetLoader();
                 List<string> types = loader.GetUniqueTypes(importFilePath);
                 return [DEFAULT_TYPE_FILTER, .. types.OrderBy(s => s).ToList()];
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 TSLogger.Error($"Failed to read CSV file for target import: {e.Message}\n{e.StackTrace}");
                 MyMessageBox.Show($"Import file cannot be read:\n{e.Message}", "Oops");
                 return new List<string>() { DEFAULT_TYPE_FILTER };

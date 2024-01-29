@@ -75,5 +75,4 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
             sut.IsTwilightCivil().Should().BeTrue();
         }
     }
-
 }

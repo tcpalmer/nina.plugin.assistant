@@ -20,7 +20,6 @@ namespace Assistant.NINAPlugin.Sync {
     }
 
     public class SyncServer : SchedulerSync.SchedulerSyncBase {
-
         private object lockObj = new object();
 
         private static readonly Lazy<SyncServer> lazy = new Lazy<SyncServer>(() => new SyncServer());
@@ -56,8 +55,7 @@ namespace Assistant.NINAPlugin.Sync {
                 if (registeredClients.ContainsKey(request.Guid)) {
                     TSLogger.Warning($"SYNC warning: client {request.Guid} is already registered");
                     return Task.FromResult(new RegistrationResponse { Success = false, Message = "client is already registered" });
-                }
-                else {
+                } else {
                     TSLogger.Info($"SYNC registering client: {request.Guid}");
                     registeredClients[request.Guid] = new SyncClientInstance(request);
                     LogRegisteredClients();
@@ -75,8 +73,7 @@ namespace Assistant.NINAPlugin.Sync {
                     registeredClients.Remove(request.Guid);
                     LogRegisteredClients();
                     return Task.FromResult(new StatusResponse { Success = true, Message = "" });
-                }
-                else {
+                } else {
                     TSLogger.Warning($"SYNC client does not exist: {request.Guid}");
                     return Task.FromResult(new StatusResponse { Success = false, Message = "client is not registered" });
                 }
@@ -84,7 +81,6 @@ namespace Assistant.NINAPlugin.Sync {
         }
 
         public override Task<SyncWaitResponse> SyncWait(ClientIdRequest request, ServerCallContext context) {
-
             lock (lockObj) {
                 if (registeredClients.ContainsKey(request.Guid)) {
                     TSLogger.Info($"SYNC client sync wait: {request.Guid}");
@@ -93,9 +89,7 @@ namespace Assistant.NINAPlugin.Sync {
 
                     LogRegisteredClients();
                     return Task.FromResult(new SyncWaitResponse { Success = true, Continue = willContinue });
-
-                }
-                else {
+                } else {
                     TSLogger.Warning($"SYNC client does not exist: {request.Guid}");
                     return Task.FromResult(new SyncWaitResponse { Success = false, Continue = false });
                 }
@@ -116,8 +110,7 @@ namespace Assistant.NINAPlugin.Sync {
 
                     LogRegisteredClients();
                     return Task.FromResult(response);
-                }
-                else {
+                } else {
                     TSLogger.Warning($"SYNC client does not exist: {request.Guid}");
                     return Task.FromResult(new ActionResponse { Success = false, Terminate = true });
                 }
@@ -133,8 +126,7 @@ namespace Assistant.NINAPlugin.Sync {
                     registeredClients[request.Guid].SetLastAliveDate(request);
                     //LogRegisteredClients();
                     return Task.FromResult(new StatusResponse { Success = true, Message = "" });
-                }
-                else {
+                } else {
                     TSLogger.Warning($"keepalive: client not registered {request.Guid}");
                     return Task.FromResult(new StatusResponse { Success = false, Message = "client is not registered" });
                 }
@@ -189,8 +181,7 @@ namespace Assistant.NINAPlugin.Sync {
             if (RemoveClientFromActiveExposureList(request.Guid, request.ExposureId)) {
                 registeredClients[request.Guid].SetState(ClientState.Actionready);
                 return Task.FromResult(new StatusResponse { Success = true, Message = "" });
-            }
-            else {
+            } else {
                 TSLogger.Warning($"SYNC server client not found in active exposure list: {request.Guid}");
                 return Task.FromResult(new StatusResponse { Success = false, Message = "client not found in active exposure list" });
             }
@@ -244,8 +235,7 @@ namespace Assistant.NINAPlugin.Sync {
             if (RemoveClientFromActiveSolveRotateList(request.Guid, request.SolveRotateId)) {
                 registeredClients[request.Guid].SetState(ClientState.Actionready);
                 return Task.FromResult(new StatusResponse { Success = true, Message = "" });
-            }
-            else {
+            } else {
                 TSLogger.Warning($"SYNC server client not found in active solve/rotate list: {request.Guid}");
                 return Task.FromResult(new StatusResponse { Success = false, Message = "client not found in active solve/rotate list" });
             }
@@ -262,7 +252,6 @@ namespace Assistant.NINAPlugin.Sync {
         }
 
         public async Task WaitForClientExposureCompletion(string exposureId, CancellationToken token) {
-
             if (clientActiveExposures.IsEmpty()) {
                 TSLogger.Warning("SYNC server not waiting on any clients for completed exposures");
                 return;
@@ -315,7 +304,6 @@ namespace Assistant.NINAPlugin.Sync {
         }
 
         public async Task WaitForClientSolveRotateCompletion(string solveRotateId, int syncSolveRotateTimeout, CancellationToken token) {
-
             if (clientActiveSolveRotates.IsEmpty()) {
                 TSLogger.Warning("SYNC server not waiting on any clients for completed solve/rotates");
                 return;
@@ -395,8 +383,7 @@ namespace Assistant.NINAPlugin.Sync {
         public void Shutdown() {
             try {
                 staleClientPurgeCts?.Cancel();
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 TSLogger.Error("exception stopping stale client purge thread", ex);
             }
         }
@@ -425,11 +412,9 @@ namespace Assistant.NINAPlugin.Sync {
                                     registeredClients.Remove(purgeList[i]);
                                 }
                             }
-                        }
-                        catch (OperationCanceledException) {
+                        } catch (OperationCanceledException) {
                             TSLogger.Info($"SYNC stopping stale client purge thread");
-                        }
-                        catch (Exception ex) {
+                        } catch (Exception ex) {
                             TSLogger.Error($"SYNC an error occurred during stale client purge", ex);
                         }
                     }
@@ -439,7 +424,6 @@ namespace Assistant.NINAPlugin.Sync {
     }
 
     public class ClientActiveState {
-
         private ConcurrentDictionary<string, string> dictionary;
 
         public ClientActiveState() {
@@ -484,7 +468,6 @@ namespace Assistant.NINAPlugin.Sync {
     }
 
     public class SyncClientExposureResults {
-
         public readonly string ClientId;
         public readonly string ExposureId;
 

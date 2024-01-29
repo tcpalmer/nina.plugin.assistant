@@ -15,13 +15,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows.Media.Imaging;
 
 namespace NINA.Plugin.Assistant.Test.Sequencer {
 
     [TestFixture]
     public class ImageGraderTest {
-
         private static readonly Guid DefaultProfileId = new Guid("01234567-0000-0000-0000-000000000000");
         private static readonly double[] Samples = new double[] { 483, 500, 545 };
         private static readonly double[] StarSamples = new double[] { 868, 890, 988, 948, 1013, 1094, 1120, 954, 1036, 1056, 1032, 1026, 875, 902, 941, 936, 963, 952, 972, 973, 892, 934, 1029, 1021, 841, 895, 909, 907, 893, 863, 938, 1024, 1083, 1054, 1047, 1076 };
@@ -445,7 +443,6 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         }
 
         private List<AcquiredImage> GetTestImages(int count, int targetId, string filterName, double duration = 60, int gain = 10, int offset = 20, string binning = "1x1", double roi = 100, double rotatorPosition = 0) {
-
             DateTime dateTime = DateTime.Now.Date;
             List<AcquiredImage> images = new List<AcquiredImage>();
 
@@ -494,7 +491,6 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
             TestContext.WriteLine("Ha HFR:");
             HaHFR.ForEach(v => TestContext.Write($"{v},"));
-
         }
 
         private List<double> GetSamples(List<AcquiredImage> images, Func<AcquiredImage, double> Sample) {
@@ -508,7 +504,5 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             TestContext.WriteLine($"DB PATH: {testDbPath}");
             return new SchedulerDatabaseInteraction(string.Format(@"Data Source={0};", testDbPath));
         }
-
-
     }
 }

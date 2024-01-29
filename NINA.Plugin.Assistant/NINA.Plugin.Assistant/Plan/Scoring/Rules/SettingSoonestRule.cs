@@ -3,7 +3,6 @@
 namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
 
     public class SettingSoonestRule : ScoringRule {
-
         public const string RULE_NAME = "Setting Soonest";
         public const double DEFAULT_WEIGHT = .5 * WEIGHT_SCALE;
 

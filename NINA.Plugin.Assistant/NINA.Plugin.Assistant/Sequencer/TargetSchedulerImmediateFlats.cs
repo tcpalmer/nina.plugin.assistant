@@ -65,7 +65,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-
             try {
                 DisplayText = "Determining needed flats";
                 List<LightSession> neededFlats = GetNeededFlats();
@@ -96,8 +95,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         if (success) {
                             takenFlats.Add(neededFlat.FlatSpec);
                         }
-                    }
-                    else {
+                    } else {
                         TSLogger.Info($"TS Immediate Flats: flat already taken, skipping: {neededFlat}");
                     }
 
@@ -113,16 +111,14 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 await ToggleLight(false, progress, token);
                 await OpenCover(progress, token);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 DisplayText = "";
 
                 if (Utils.IsCancelException(ex)) {
                     TSLogger.Warning("TS Immediate Flats: sequence was canceled/interrupted");
                     Status = SequenceEntityStatus.CREATED;
                     token.ThrowIfCancellationRequested();
-                }
-                else {
+                } else {
                     TSLogger.Error($"Exception taking immediate flats: {ex.Message}:\n{ex.StackTrace}");
                 }
 
@@ -131,8 +127,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 throw new SequenceEntityFailedException($"exception taking immediate flats: {ex.Message}", ex);
-            }
-            finally {
+            } finally {
                 DisplayText = "";
                 TotalFlatSets = 0;
                 CompletedFlatSets = 0;
@@ -148,7 +143,6 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private List<LightSession> GetNeededFlats() {
-
             // Find parent TargetSchedulerContainer which should have the scheduler plan we need
             ISequenceContainer parent = Parent;
             while (parent != null) {
@@ -251,6 +245,5 @@ namespace Assistant.NINAPlugin.Sequencer {
         private int GetReadoutMode(int? readoutMode) {
             return (int)((int)(readoutMode == null ? cameraMediator.GetInfo().ReadoutMode : readoutMode));
         }
-
     }
 }

@@ -1,7 +1,6 @@
 ﻿namespace Assistant.NINAPlugin.Astrometry {
 
     public class HorizontalCoordinate {
-
         public double Altitude { get; private set; }
         public double Azimuth { get; private set; }
 
@@ -10,5 +9,4 @@
             this.Azimuth = azimuth;
         }
     }
-
 }

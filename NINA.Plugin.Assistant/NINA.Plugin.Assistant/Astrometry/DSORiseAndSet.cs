@@ -9,7 +9,6 @@ namespace Assistant.NINAPlugin.Astrometry {
     /// DSOs instead of solar system bodies.
     /// </summary>
     public class DSORiseAndSet {
-
         public DateTime Date { get; private set; }
         public ObserverInfo ObserverInfo { get; private set; }
         public Coordinates Coordinates { get; private set; }
@@ -59,8 +58,7 @@ namespace Assistant.NINAPlugin.Astrometry {
                         if (zeroPoint1 >= 0 && zeroPoint1 <= 2) {
                             events++;
                         }
-                    }
-                    else if (discriminant > 1) {
+                    } else if (discriminant > 1) {
                         zeroPoint1 = (-b + Math.Sqrt(discriminant)) / (2 * a);
                         zeroPoint2 = (-b - Math.Sqrt(discriminant)) / (2 * a);
 
@@ -83,19 +81,16 @@ namespace Assistant.NINAPlugin.Astrometry {
                         if (gradient > 0) {
                             // rise
                             this.Rise = offsetDate.AddHours(zeroPoint1);
-                        }
-                        else {
+                        } else {
                             // set
                             this.Set = offsetDate.AddHours(zeroPoint1);
                         }
-                    }
-                    else if (events == 2) {
+                    } else if (events == 2) {
                         if (gradient > 0) {
                             // rise and set
                             this.Rise = offsetDate.AddHours(zeroPoint1);
                             this.Set = offsetDate.AddHours(zeroPoint2);
-                        }
-                        else {
+                        } else {
                             // set and rise
                             this.Rise = offsetDate.AddHours(zeroPoint2);
                             this.Set = offsetDate.AddHours(zeroPoint1);
@@ -110,5 +105,4 @@ namespace Assistant.NINAPlugin.Astrometry {
             });
         }
     }
-
 }
