@@ -219,6 +219,10 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public TargetImportVM TargetImportVM { get => targetImportVM; set => targetImportVM = value; }
 
         private void ImportTarget_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+            if (!ShowEditView) {
+                return;
+            }
+
             if (TargetImportVM.Target.Name != null) {
                 TargetProxy.Proxy.Name = TargetImportVM.Target.Name;
             }
