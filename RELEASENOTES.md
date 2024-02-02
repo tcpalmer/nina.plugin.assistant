@@ -1,7 +1,8 @@
 # Release Notes
 
-## 4.3.0.1 - 2024-01-XX
+## 4.3.1.0 - 2024-02-02
 * Another tweak to TS Condition to ensure loop remains completed
+* Fixed bug where target from Framing Wizard would appear to replace target in TS target management panel
 * Code clean up
 
 ## 4.3.0.0 - 2024-01-26
