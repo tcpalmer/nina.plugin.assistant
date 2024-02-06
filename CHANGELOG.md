@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 4.3.2.0 - 2024-02-06
+* Fixed bug in percent complete scoring rule for completed exposure plans
+
 ## 4.3.1.0 - 2024-02-02
 * Another tweak to TS Condition to ensure loop remains completed
 * Fixed bug where target from Framing Wizard would appear to replace target in TS target management panel
