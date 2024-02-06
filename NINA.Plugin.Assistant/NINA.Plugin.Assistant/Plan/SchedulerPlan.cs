@@ -402,10 +402,12 @@ namespace Assistant.NINAPlugin.Plan {
             foreach (ExposurePlan plan in GetActiveExposurePlans(target)) {
                 PlanExposure planExposure = new PlanExposure(this, plan, plan.ExposureTemplate);
 
-                // add only if the plan is incomplete
-                if (planExposure.IsIncomplete()) {
-                    this.ExposurePlans.Add(planExposure);
+                if (!planExposure.IsIncomplete()) {
+                    planExposure.Rejected = true;
+                    planExposure.RejectedReason = Reasons.FilterComplete;
                 }
+
+                this.ExposurePlans.Add(planExposure);
             }
         }
 
