@@ -1,4 +1,6 @@
-﻿namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
+﻿using System.Collections.Generic;
+
+namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
 
     public class PercentCompleteRule : ScoringRule {
         public const string RULE_NAME = "Percent Complete";
@@ -19,7 +21,7 @@
             bool imageGradingEnabled = potentialTarget.Project.EnableGrader;
 
             if (imageGradingEnabled) {
-                foreach (IPlanExposure planFilter in potentialTarget.ExposurePlans) {
+                foreach (IPlanExposure planFilter in GetAllExposurePlans(potentialTarget)) {
                     desired += planFilter.Desired;
                     accepted += planFilter.Accepted;
                 }
@@ -36,7 +38,7 @@
             double completionTotal = 0;
             int count = 0;
 
-            foreach (IPlanExposure planFilter in potentialTarget.ExposurePlans) {
+            foreach (IPlanExposure planFilter in GetAllExposurePlans(potentialTarget)) {
                 if (planFilter.Desired > 0) {
                     double completion = planFilter.Acquired / (planFilter.Desired * throttle);
                     completionTotal += completion < 1 ? completion : 1;
@@ -45,6 +47,13 @@
             }
 
             return completionTotal / count;
+        }
+
+        private List<IPlanExposure> GetAllExposurePlans(IPlanTarget planTarget) {
+            List<IPlanExposure> exposurePlans = new List<IPlanExposure>();
+            exposurePlans.AddRange(planTarget.ExposurePlans);
+            exposurePlans.AddRange(planTarget.CompletedExposurePlans);
+            return exposurePlans;
         }
     }
 }

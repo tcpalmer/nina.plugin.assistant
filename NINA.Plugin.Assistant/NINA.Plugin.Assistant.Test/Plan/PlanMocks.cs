@@ -66,6 +66,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pt.SetupProperty(m => m.Name, name);
             pt.SetupProperty(m => m.Coordinates, coordinates);
             pt.SetupProperty(m => m.ExposurePlans, new List<IPlanExposure>());
+            pt.SetupProperty(m => m.CompletedExposurePlans, new List<IPlanExposure>());
 
             return pt;
         }
@@ -90,6 +91,11 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         public static void AddMockPlanFilter(Mock<IPlanTarget> pt, Mock<IPlanExposure> pf) {
             pf.SetupProperty(m => m.PlanTarget, pt.Object);
             pt.Object.ExposurePlans.Add(pf.Object);
+        }
+
+        public static void AddMockPlanFilterToCompleted(Mock<IPlanTarget> pt, Mock<IPlanExposure> pf) {
+            pf.SetupProperty(m => m.PlanTarget, pt.Object);
+            pt.Object.CompletedExposurePlans.Add(pf.Object);
         }
 
         public static void AddMockPlanTarget(Mock<IPlanProject> pp, Mock<IPlanTarget> pt) {
