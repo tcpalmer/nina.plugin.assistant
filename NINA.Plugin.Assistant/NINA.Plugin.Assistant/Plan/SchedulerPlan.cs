@@ -352,6 +352,7 @@ namespace Assistant.NINAPlugin.Plan {
         double ROI { get; set; }
         string OverrideExposureOrder { get; set; }
         List<IPlanExposure> ExposurePlans { get; set; }
+        List<IPlanExposure> CompletedExposurePlans { get; set; }
         IPlanProject Project { get; set; }
         bool Rejected { get; set; }
         string RejectedReason { get; set; }
@@ -376,6 +377,7 @@ namespace Assistant.NINAPlugin.Plan {
         public double ROI { get; set; }
         public string OverrideExposureOrder { get; set; }
         public List<IPlanExposure> ExposurePlans { get; set; }
+        public List<IPlanExposure> CompletedExposurePlans { get; set; }
         public IPlanProject Project { get; set; }
         public bool Rejected { get; set; }
         public string RejectedReason { get; set; }
@@ -399,15 +401,16 @@ namespace Assistant.NINAPlugin.Plan {
             this.Rejected = false;
 
             this.ExposurePlans = new List<IPlanExposure>();
+            this.CompletedExposurePlans = new List<IPlanExposure>();
+
             foreach (ExposurePlan plan in GetActiveExposurePlans(target)) {
                 PlanExposure planExposure = new PlanExposure(this, plan, plan.ExposureTemplate);
 
-                if (!planExposure.IsIncomplete()) {
-                    planExposure.Rejected = true;
-                    planExposure.RejectedReason = Reasons.FilterComplete;
+                if (planExposure.IsIncomplete()) {
+                    this.ExposurePlans.Add(planExposure);
+                } else {
+                    this.CompletedExposurePlans.Add(planExposure);
                 }
-
-                this.ExposurePlans.Add(planExposure);
             }
         }
 
