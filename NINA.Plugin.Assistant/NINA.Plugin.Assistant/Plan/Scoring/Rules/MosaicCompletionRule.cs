@@ -1,4 +1,6 @@
-﻿namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
+﻿using System.Collections.Generic;
+
+namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
 
     public class MosaicCompletionRule : ScoringRule {
         public const string RULE_NAME = "Mosaic Completion";
@@ -49,7 +51,7 @@
             int accepted = 0;
 
             if (imageGradingEnabled) {
-                foreach (IPlanExposure planFilter in planTarget.ExposurePlans) {
+                foreach (IPlanExposure planFilter in GetAllExposurePlans(planTarget)) {
                     desired += planFilter.Desired;
                     accepted += planFilter.Accepted;
                 }
@@ -66,7 +68,7 @@
             double throttle = exposureThrottle / 100;
             int count = 0;
 
-            foreach (IPlanExposure planFilter in planTarget.ExposurePlans) {
+            foreach (IPlanExposure planFilter in GetAllExposurePlans(planTarget)) {
                 if (planFilter.Desired > 0) {
                     double completion = planFilter.Acquired / (planFilter.Desired * throttle);
                     completionTotal += completion < 1 ? completion : 1;
@@ -75,6 +77,13 @@
             }
 
             return completionTotal / count;
+        }
+
+        private List<IPlanExposure> GetAllExposurePlans(IPlanTarget planTarget) {
+            List<IPlanExposure> exposurePlans = new List<IPlanExposure>();
+            exposurePlans.AddRange(planTarget.ExposurePlans);
+            exposurePlans.AddRange(planTarget.CompletedExposurePlans);
+            return exposurePlans;
         }
     }
 }

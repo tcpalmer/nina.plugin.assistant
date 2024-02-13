@@ -22,8 +22,14 @@ namespace Assistant.NINAPlugin.Plan.Scoring {
         public ProfilePreference ProfilePreference { get; set; }
         public DateTime AtTime { get; }
         public IPlanTarget PreviousPlanTarget { get; }
-        public Dictionary<string, double> RuleWeights { get; set; }
         public List<IScoringRule> Rules { get; set; }
+
+        private Dictionary<string, double> ruleWeights;
+
+        public Dictionary<string, double> RuleWeights {
+            get { return ruleWeights; }
+            set { ruleWeights = value; Rules = null; }
+        }
 
         public ScoringEngine(IProfile activeProfile, ProfilePreference ProfilePreference, DateTime atTime, IPlanTarget previousPlanTarget) {
             this.ActiveProfile = activeProfile;
