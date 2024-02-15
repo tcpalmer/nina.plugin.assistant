@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 4.3.3.0 - 2024-02-15
+* Refactored target and exposure planning percent complete handling
+
 ## 4.3.2.1 - 2024-02-12
 * Fixed exposure completion reversion caused by previous percent complete rule fix
 
