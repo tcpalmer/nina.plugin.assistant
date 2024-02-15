@@ -433,6 +433,7 @@ namespace Assistant.NINAPlugin.Plan {
         public int MeridianWindow { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public int FilterSwitchFrequency { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public Dictionary<string, double> RuleWeights { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public ExposureCompletionHelper ExposureCompletionHelper { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public PlanProjectEmulator() {
             this.PlanId = Guid.NewGuid().ToString();
@@ -478,7 +479,7 @@ namespace Assistant.NINAPlugin.Plan {
             throw new NotImplementedException();
         }
 
-        public int NeededExposures(double exposureThrottlePercentage) {
+        public int NeededExposures() {
             throw new NotImplementedException();
         }
     }

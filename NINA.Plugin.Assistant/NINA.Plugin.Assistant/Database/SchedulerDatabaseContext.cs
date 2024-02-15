@@ -47,8 +47,13 @@ namespace Assistant.NINAPlugin.Database {
             System.Data.Entity.Database.SetInitializer(sqi);
         }
 
-        public ProfilePreference GetProfilePreference(string profileId) {
-            return ProfilePreferenceSet.Where(p => p.ProfileId.Equals(profileId)).FirstOrDefault();
+        public ProfilePreference GetProfilePreference(string profileId, bool createDefault = false) {
+            ProfilePreference profilePreference = ProfilePreferenceSet.Where(p => p.ProfileId.Equals(profileId)).FirstOrDefault();
+            if (profilePreference == null && createDefault) {
+                profilePreference = new ProfilePreference(profileId);
+            }
+
+            return profilePreference;
         }
 
         public List<Project> GetAllProjects() {

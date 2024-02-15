@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Plan.Scoring;
 using NINA.Astrometry;
 using NINA.Core.Enum;
@@ -25,6 +26,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private Project project;
         private IProfile profile;
         private string profileId;
+        private ExposureCompletionHelper exposureCompletionHelper;
         public List<ExposureTemplate> exposureTemplates;
 
         public TargetViewVM(AssistantManagerVM managerVM,
@@ -37,10 +39,11 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             Project project) : base(profileService) {
             this.managerVM = managerVM;
             this.project = project;
+            exposureCompletionHelper = GetExposureCompletionHelper(project);
 
             profileId = project.ProfileId;
             TargetProxy = new TargetProxy(target);
-            TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
+            TargetActive = ActiveWithActiveExposurePlans(TargetProxy.Target);
 
             profile = managerVM.GetProfile(profileId);
             profileService.ProfileChanged += ProfileService_ProfileChanged;
@@ -81,6 +84,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             TargetImportVM.PropertyChanged += ImportTarget_PropertyChanged;
         }
 
+        private ExposureCompletionHelper GetExposureCompletionHelper(Project project) {
+            ProfilePreference profilePreference = managerVM.Database.GetContext().GetProfilePreference(project.ProfileId, true);
+            return new ExposureCompletionHelper(project.EnableGrader, profilePreference.ExposureThrottle);
+        }
+
+        private bool ActiveWithActiveExposurePlans(Target target) {
+            return target.Enabled && target.ExposurePlans.Count > 0 && exposureCompletionHelper.PercentComplete(target) < 100;
+        }
+
         private TargetProxy targetProxy;
 
         public TargetProxy TargetProxy {
@@ -95,7 +107,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             if (e?.PropertyName != nameof(TargetProxy.Proxy)) {
                 ItemEdited = true;
             } else {
-                TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
+                TargetActive = ActiveWithActiveExposurePlans(TargetProxy.Target);
                 RaisePropertyChanged(nameof(TargetProxy));
             }
         }
@@ -126,6 +138,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             List<ExposurePlan> exposurePlans = new List<ExposurePlan>();
 
             target.ExposurePlans.ForEach((plan) => {
+                plan.PercentComplete = exposureCompletionHelper.PercentComplete(plan);
                 plan.PropertyChanged -= TargetProxy_PropertyChanged;
                 plan.PropertyChanged += TargetProxy_PropertyChanged;
                 exposurePlans.Add(plan);
@@ -317,7 +330,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             Target target = managerVM.ReloadTarget(TargetProxy.Proxy);
             if (target != null) {
                 TargetProxy = new TargetProxy(target);
-                TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
+                TargetActive = ActiveWithActiveExposurePlans(TargetProxy.Target);
                 InitializeExposurePlans(TargetProxy.Proxy);
             }
         }
@@ -413,7 +426,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             RaisePropertyChanged(nameof(ExposurePlansCopyEnabled));
             RaisePropertyChanged(nameof(ExposurePlansDeleteEnabled));
 
-            TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
+            TargetActive = ActiveWithActiveExposurePlans(TargetProxy.Target);
         }
 
         private void DeleteAllExposurePlans(object obj) {
@@ -429,7 +442,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         InitializeExposurePlans(TargetProxy.Proxy);
                         RaisePropertyChanged(nameof(ExposurePlansCopyEnabled));
                         RaisePropertyChanged(nameof(ExposurePlansDeleteEnabled));
-                        TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
+                        TargetActive = ActiveWithActiveExposurePlans(TargetProxy.Target);
 
                         OverrideExposureOrder = null;
                         DefaultExposureOrder = GetDefaultExposureOrder();
@@ -452,7 +465,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         TargetProxy = new TargetProxy(updatedTarget);
                         InitializeExposurePlans(TargetProxy.Proxy);
                         RaisePropertyChanged(nameof(ExposurePlansDeleteEnabled));
-                        TargetActive = TargetProxy.Target.ActiveWithActiveExposurePlans;
+                        TargetActive = ActiveWithActiveExposurePlans(TargetProxy.Target);
 
                         OverrideExposureOrder = null;
                         DefaultExposureOrder = GetDefaultExposureOrder();

@@ -48,6 +48,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             SelectedItemChangedCommand = new RelayCommand(SelectedItemChanged);
         }
 
+        public SchedulerDatabaseInteraction Database { get { return database; } }
+
         public AssistantTreeViewVM ProjectsTreeViewVM {
             get => new AssistantTreeViewVM(this, profileService, "Projects", RootProjectsList, 350);
         }
@@ -496,11 +498,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         public void ViewProfilePreferences(ProfileMeta profile) {
             ProfilePreference profilePreference;
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
-                profilePreference = context.GetProfilePreference(profile.Id.ToString());
-                if (profilePreference == null) {
-                    profilePreference = new ProfilePreference(profile.Id.ToString());
-                }
+            using (var context = database.GetContext()) {
+                profilePreference = context.GetProfilePreference(profile.Id.ToString(), true);
             }
 
             ProfilePreferencesViewVM = new ProfilePreferencesViewVM(this, profileService, profilePreference, profile.Name);
@@ -509,14 +508,14 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public ProfilePreference GetProfilePreference(string profileId) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 ProfilePreference profilePreference = context.GetProfilePreference(profileId);
                 return profilePreference != null ? profilePreference : new ProfilePreference(profileId);
             }
         }
 
         public void SaveProfilePreference(ProfilePreference profilePreference) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 if (context.SaveProfilePreference(profilePreference) == null) {
                     Notification.ShowError("Failed to save Scheduler Profile Preference (see log for details)");
                 }
@@ -528,7 +527,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             Project project = new Project(profile.Id.ToString());
             project.Name = "<new project>";
 
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 Project newProject = context.SaveProject(project);
                 if (newProject != null) {
                     TreeDataItem projectItem = new TreeDataItem(TreeDataType.Project, project.Name, project, parentItem);
@@ -544,7 +543,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public void SaveProject(Project project) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 if (context.SaveProject(project) != null) {
                     activeTreeDataItem.Data = project;
                     if (activeTreeDataItem.Header.ToString() != project.Name) {
@@ -566,7 +565,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
 
             Project source = Clipboard.GetItem().Data as Project;
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 Project newProject = context.PasteProject(profile.Id.ToString(), source);
                 if (newProject != null) {
                     TreeDataItem newProjectItem = new TreeDataItem(TreeDataType.Project, newProject.Name, newProject, parentItem);
@@ -588,7 +587,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             string profileId = profileService.ActiveProfile.Id.ToString();
             bool deleteAcquiredImagesWithTarget = GetProfilePreference(profileId).EnableDeleteAcquiredImagesWithTarget;
 
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 if (context.DeleteProject(project, deleteAcquiredImagesWithTarget)) {
                     TreeDataItem parentItem = activeTreeDataItem.TreeParent;
                     parentItem.Items.Remove(activeTreeDataItem);
@@ -600,7 +599,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public bool MoveOrphanedProject(Project project, string profileId) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 Project newProject = context.MoveProject(project, profileId);
                 if (newProject != null) {
                     TreeDataItem parentItem = GetProfileItem(RootProjectsList, profileId);
@@ -623,7 +622,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             string profileId = profileService.ActiveProfile.Id.ToString();
             bool deleteAcquiredImagesWithTarget = GetProfilePreference(profileId).EnableDeleteAcquiredImagesWithTarget;
 
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 if (context.DeleteProject(project, deleteAcquiredImagesWithTarget)) {
                     return true;
                 } else {
@@ -638,7 +637,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             target.Name = "<new target>";
             TreeDataItem parentItem = activeTreeDataItem;
 
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 Target newTarget = context.AddNewTarget(project, target);
                 if (newTarget != null) {
                     TreeDataItem targetItem = new TreeDataItem(TreeDataType.Target, target.Name, target, parentItem);
@@ -653,7 +652,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         public void AddTargets(Project project, List<Target> targets, TreeDataItem parentItem = null) {
             parentItem = parentItem == null ? activeTreeDataItem : parentItem;
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 foreach (Target target in targets) {
                     Target newTarget = context.AddNewTarget(project, target);
                     if (newTarget != null) {
@@ -668,7 +667,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public void SaveTarget(Target target) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 if (context.SaveTarget(target) != null) {
                     activeTreeDataItem.Data = target;
                     if (activeTreeDataItem.Header.ToString() != target.Name) {
@@ -694,7 +693,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             Target source = Clipboard.GetItem().Data as Target;
             TreeDataItem parentItem = activeTreeDataItem;
 
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 Target newTarget = context.PasteTarget(project, source);
                 if (newTarget != null) {
                     TreeDataItem newTargetItem = new TreeDataItem(TreeDataType.Target, newTarget.Name, newTarget, parentItem);
@@ -708,7 +707,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public void DeleteTarget(Target target, bool deleteAcquiredImagesWithTarget) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 if (deleteAcquiredImagesWithTarget) {
                     context.DeleteAcquiredImages(target.Id);
                 }
@@ -724,7 +723,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public Target DeleteExposurePlan(Target target, ExposurePlan exposurePlan) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 Target updatedTarget = context.DeleteExposurePlan(target, exposurePlan);
                 if (updatedTarget != null) {
                     activeTreeDataItem.Data = updatedTarget;
@@ -737,7 +736,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public Target DeleteAllExposurePlans(Target target) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 Target updatedTarget = context.DeleteAllExposurePlans(target);
                 if (updatedTarget != null) {
                     activeTreeDataItem.Data = updatedTarget;
@@ -750,7 +749,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public Target ReloadTarget(Target reference) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 Target reloadedTarget = context.GetTargetByProject(reference.ProjectId, reference.Id);
                 if (reloadedTarget != null) {
                     activeTreeDataItem.Data = reloadedTarget;
@@ -775,7 +774,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
             ExposureTemplate exposureTemplate = new ExposureTemplate(profileMeta.Id.ToString(), "<new template>", filterInfo.Name);
 
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 ExposureTemplate newExposureTemplate = context.SaveExposureTemplate(exposureTemplate);
                 if (newExposureTemplate != null) {
                     TreeDataItem exposureTemplateItem = new TreeDataItem(TreeDataType.ExposureTemplate, exposureTemplate.Name, exposureTemplate, parentItem);
@@ -797,7 +796,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
 
             ExposureTemplate source = Clipboard.GetItem().Data as ExposureTemplate;
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 ExposureTemplate newExposureTemplate = context.PasteExposureTemplate(profile.Id.ToString(), source);
                 if (newExposureTemplate != null) {
                     TreeDataItem newExposureTemplateItem = new TreeDataItem(TreeDataType.ExposureTemplate, newExposureTemplate.Name, newExposureTemplate, parentItem);
@@ -811,7 +810,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public void SaveExposureTemplate(ExposureTemplate exposureTemplate) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 if (context.SaveExposureTemplate(exposureTemplate) != null) {
                     activeTreeDataItem.Data = exposureTemplate;
                     activeTreeDataItem.Header = exposureTemplate.Name;
@@ -822,7 +821,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public void DeleteExposureTemplate(ExposureTemplate exposureTemplate) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 if (context.DeleteExposureTemplate(exposureTemplate)) {
                     TreeDataItem parentItem = activeTreeDataItem.TreeParent;
                     parentItem.Items.Remove(activeTreeDataItem);
@@ -834,7 +833,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public bool MoveOrphanedExposureTemplate(ExposureTemplate exposureTemplate, string profileId) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 ExposureTemplate newExposureTemplate = context.MoveExposureTemplate(exposureTemplate, profileId);
                 if (newExposureTemplate != null) {
                     TreeDataItem parentItem = GetProfileItem(RootExposureTemplateList, profileId);
@@ -849,7 +848,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public bool DeleteOrphanedExposureTemplate(ExposureTemplate exposureTemplate) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 if (context.DeleteExposureTemplate(exposureTemplate)) {
                     return true;
                 } else {
@@ -860,7 +859,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public int ExposureTemplateUsage(int exposureTemplateId) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 return context.ExposurePlanSet.Where(ep => ep.ExposureTemplateId == exposureTemplateId).ToList().Count;
             }
         }
@@ -880,13 +879,13 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public List<ExposureTemplate> GetExposureTemplates(IProfile profile) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 return context.GetExposureTemplates(profile.Id.ToString());
             }
         }
 
         public ExposureTemplate GetDefaultExposureTemplate(IProfile profile) {
-            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+            using (var context = database.GetContext()) {
                 return context.GetExposureTemplates(profile.Id.ToString()).FirstOrDefault();
             }
         }

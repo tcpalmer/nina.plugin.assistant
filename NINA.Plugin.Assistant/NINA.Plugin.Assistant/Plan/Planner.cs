@@ -278,7 +278,6 @@ namespace Assistant.NINAPlugin.Plan {
                 if (planProject.Rejected) { continue; }
 
                 foreach (IPlanTarget planTarget in planProject.Targets) {
-                    //if (planTarget.Rejected) { continue; }
                     if (planTarget.Rejected && planTarget.RejectedReason != Reasons.TargetNotYetVisible) { continue; }
 
                     foreach (IPlanExposure planExposure in planTarget.ExposurePlans) {
@@ -493,8 +492,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             foreach (IPlanTarget target in planProject.Targets) {
                 foreach (IPlanExposure planExposure in target.ExposurePlans) {
-                    double exposureThrottle = planProject.EnableGrader ? -1 : profilePreferences.ExposureThrottle;
-                    if (planExposure.NeededExposures(exposureThrottle) > 0) {
+                    if (planExposure.NeededExposures() > 0) {
                         incomplete = true;
                     } else {
                         SetRejected(planExposure, Reasons.FilterComplete);
@@ -509,7 +507,7 @@ namespace Assistant.NINAPlugin.Plan {
             TwilightLevel twilightLevel = TwilightLevel.Nighttime;
             foreach (IPlanExposure planExposure in planTarget.ExposurePlans) {
                 // find most permissive (brightest) twilight over all incomplete plans
-                if (planExposure.IsIncomplete() && planExposure.TwilightLevel > twilightLevel) {
+                if (planExposure.TwilightLevel > twilightLevel && planExposure.IsIncomplete()) {
                     twilightLevel = planExposure.TwilightLevel;
                 }
             }

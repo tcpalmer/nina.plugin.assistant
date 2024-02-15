@@ -198,6 +198,7 @@ namespace Assistant.NINAPlugin.Plan {
         int FlatsHandling { get; set; }
         Dictionary<string, double> RuleWeights { get; set; }
 
+        ExposureCompletionHelper ExposureCompletionHelper { get; set; }
         List<IPlanTarget> Targets { get; set; }
         HorizonDefinition HorizonDefinition { get; set; }
         bool Rejected { get; set; }
@@ -230,12 +231,13 @@ namespace Assistant.NINAPlugin.Plan {
         public int FlatsHandling { get; set; }
         public Dictionary<string, double> RuleWeights { get; set; }
 
+        public ExposureCompletionHelper ExposureCompletionHelper { get; set; }
         public List<IPlanTarget> Targets { get; set; }
         public HorizonDefinition HorizonDefinition { get; set; }
         public bool Rejected { get; set; }
         public string RejectedReason { get; set; }
 
-        public PlanProject(IProfile profile, Project project) {
+        public PlanProject(IProfile profile, Project project, ExposureCompletionHelper exposureCompletionHelper) {
             this.PlanId = Guid.NewGuid().ToString();
             this.DatabaseId = project.Id;
             this.Name = project.Name;
@@ -261,6 +263,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             this.HorizonDefinition = DetermineHorizon(profile, project);
             this.Rejected = false;
+            this.ExposureCompletionHelper = exposureCompletionHelper;
 
             Targets = new List<IPlanTarget>();
             foreach (Target target in project.Targets) {
@@ -402,11 +405,12 @@ namespace Assistant.NINAPlugin.Plan {
 
             this.ExposurePlans = new List<IPlanExposure>();
             this.CompletedExposurePlans = new List<IPlanExposure>();
+            ExposureCompletionHelper helper = planProject.ExposureCompletionHelper;
 
             foreach (ExposurePlan plan in GetActiveExposurePlans(target)) {
                 PlanExposure planExposure = new PlanExposure(this, plan, plan.ExposureTemplate);
 
-                if (planExposure.IsIncomplete()) {
+                if (helper.IsIncomplete(planExposure)) {
                     this.ExposurePlans.Add(planExposure);
                 } else {
                     this.CompletedExposurePlans.Add(planExposure);
@@ -523,7 +527,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
     }
 
-    public interface IPlanExposure {
+    public interface IPlanExposure : IExposureCounts {
         string PlanId { get; set; }
         int DatabaseId { get; set; }
         string FilterName { get; set; }
@@ -532,9 +536,6 @@ namespace Assistant.NINAPlugin.Plan {
         int? Offset { get; set; }
         BinningMode BinningMode { get; set; }
         int? ReadoutMode { get; set; }
-        int Desired { get; set; }
-        int Acquired { get; set; }
-        int Accepted { get; set; }
         IPlanTarget PlanTarget { get; set; }
 
         TwilightLevel TwilightLevel { get; set; }
@@ -547,7 +548,7 @@ namespace Assistant.NINAPlugin.Plan {
         string RejectedReason { get; set; }
         int PlannedExposures { get; set; }
 
-        int NeededExposures(double exposureThrottlePercentage);
+        int NeededExposures();
 
         bool IsIncomplete();
 
@@ -603,17 +604,12 @@ namespace Assistant.NINAPlugin.Plan {
             this.PlannedExposures = 0;
         }
 
-        public int NeededExposures(double exposureThrottlePercentage) {
-            if (exposureThrottlePercentage > 0) {
-                int throttleAt = (int)((exposureThrottlePercentage / 100) * Desired);
-                return Acquired > throttleAt ? 0 : throttleAt - Acquired;
-            } else {
-                return Accepted > Desired ? 0 : Desired - Accepted;
-            }
+        public int NeededExposures() {
+            return PlanTarget.Project.ExposureCompletionHelper.RemainingExposures(this);
         }
 
         public bool IsIncomplete() {
-            return Accepted < Desired;
+            return PlanTarget.Project.ExposureCompletionHelper.IsIncomplete(this);
         }
 
         public override string ToString() {

@@ -59,35 +59,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
-        public bool ActiveWithActiveExposurePlans {
-            get {
-                if (Enabled) {
-                    foreach (ExposurePlan plan in ExposurePlans) {
-                        if (plan.Desired > plan.Accepted) {
-                            return true;
-                        }
-                    }
-                }
-
-                return false;
-            }
-        }
-
-        [NotMapped]
-        public double PercentComplete {
-            get {
-                double totalDesired = 0;
-                double totalAccepted = 0;
-                foreach (ExposurePlan plan in ExposurePlans) {
-                    totalDesired += plan.Desired;
-                    totalAccepted += plan.Accepted;
-                }
-
-                return totalDesired == 0 ? 0 : (totalAccepted / totalDesired) * 100;
-            }
-        }
-
-        [NotMapped]
         public double RA {
             get => ra;
             private set { }

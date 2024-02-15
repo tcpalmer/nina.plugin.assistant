@@ -312,8 +312,7 @@ namespace Assistant.NINAPlugin.Plan {
         }
 
         private bool IsPlanExposureComplete(IPlanExposure planExposure) {
-            double exposureThrottlePercentage = planTarget.Project.EnableGrader ? -1 : profilePreferences.ExposureThrottle;
-            return planExposure.NeededExposures(exposureThrottlePercentage) <= planExposure.PlannedExposures;
+            return planExposure.NeededExposures() <= planExposure.PlannedExposures;
         }
 
         private List<IPlanExposure> GetPlanExposuresForTwilightLevel(TwilightLevel twilightLevel) {

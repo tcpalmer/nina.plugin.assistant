@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using NINA.Core.Model.Equipment;
 using NINA.Plugin.Assistant.Shared.Utility;
@@ -186,7 +187,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         public virtual List<Target> GetTargetsForPeriodicFlats(IProfile activeProfile) {
             string profileId = activeProfile.Id.ToString();
 
-            using (var context = GetDatabaseContext().GetContext()) {
+            using (var context = GetDatabase().GetContext()) {
                 List<Project> activeProjects = context.GetActiveProjects(profileId);
                 List<Target> targets = new List<Target>();
                 foreach (Project project in activeProjects) {
@@ -210,12 +211,13 @@ namespace Assistant.NINAPlugin.Sequencer {
         public virtual List<Target> GetTargetsForCompletionFlats(IProfile activeProfile) {
             string profileId = activeProfile.Id.ToString();
 
-            using (var context = GetDatabaseContext().GetContext()) {
+            using (var context = GetDatabase().GetContext()) {
                 List<Project> activeProjects = context.GetActiveProjects(profileId);
                 List<Target> targets = new List<Target>();
                 foreach (Project project in activeProjects) {
+                    ExposureCompletionHelper helper = GetExposureCompletionHelper(project);
                     if (project.FlatsHandling == Project.FLATS_HANDLING_TARGET_COMPLETION) {
-                        targets.AddRange(project.Targets.Where(t => t.Enabled == true && t.PercentComplete >= 100));
+                        targets.AddRange(project.Targets.Where(t => t.Enabled == true && helper.PercentComplete(t) >= 100));
                     }
                 }
 
@@ -234,7 +236,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             string profileId = activeProfile.Id.ToString();
             DateTime cutoff = DateTime.Now.Date.AddDays(FlatsExpert.ACQUIRED_IMAGES_CUTOFF_DAYS);
 
-            using (var context = GetDatabaseContext().GetContext()) {
+            using (var context = GetDatabase().GetContext()) {
                 return context.GetAcquiredImages(profileId, cutoff).Where(ai => ai.Metadata.SessionId != 0).ToList();
             }
         }
@@ -245,7 +247,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         /// <param name="target"></param>
         /// <returns></returns>
         public virtual List<FlatHistory> GetFlatHistory(Target target) {
-            using (var context = GetDatabaseContext().GetContext()) {
+            using (var context = GetDatabase().GetContext()) {
                 return context.GetFlatsHistory(target.Id);
             }
         }
@@ -337,7 +339,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public Target GetTarget(int projectId, int targetId) {
-            using (var context = GetDatabaseContext().GetContext()) {
+            using (var context = GetDatabase().GetContext()) {
                 return context.GetTargetByProject(projectId, targetId);
             }
         }
@@ -378,7 +380,12 @@ namespace Assistant.NINAPlugin.Sequencer {
                 && lightSession.FlatSpec.Equals(new FlatSpec(flatHistory));
         }
 
-        private SchedulerDatabaseInteraction GetDatabaseContext() {
+        private ExposureCompletionHelper GetExposureCompletionHelper(Project project) {
+            ProfilePreference profilePreference = GetDatabase().GetContext().GetProfilePreference(project.ProfileId, true);
+            return new ExposureCompletionHelper(project.EnableGrader, profilePreference.ExposureThrottle);
+        }
+
+        private SchedulerDatabaseInteraction GetDatabase() {
             if (_database == null) {
                 _database = new SchedulerDatabaseInteraction();
             }
