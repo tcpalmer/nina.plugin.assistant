@@ -81,6 +81,7 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
             Mock<IPlanProject> projectMock = PlanMocks.GetMockPlanProject("p1", ProjectState.Active);
             projectMock.SetupProperty(m => m.IsMosaic, true);
             projectMock.SetupProperty(m => m.EnableGrader, true);
+            projectMock.SetupProperty(m => m.ExposureCompletionHelper, new ExposureCompletionHelper(true, 125));
 
             Mock<IPlanTarget> targetMock1 = PlanMocks.GetMockPlanTarget("", TestUtil.SPICA);
             targetMock1.SetupProperty(m => m.Project, projectMock.Object);
@@ -109,6 +110,7 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
             Mock<IPlanProject> projectMock = PlanMocks.GetMockPlanProject("p1", ProjectState.Active);
             projectMock.SetupProperty(m => m.IsMosaic, true);
             projectMock.SetupProperty(m => m.EnableGrader, true);
+            projectMock.SetupProperty(m => m.ExposureCompletionHelper, new ExposureCompletionHelper(true, 125));
 
             Mock<IPlanTarget> targetMock1 = PlanMocks.GetMockPlanTarget("", TestUtil.SPICA);
             targetMock1.SetupProperty(m => m.Project, projectMock.Object);
@@ -152,6 +154,7 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
             Mock<IPlanProject> projectMock = PlanMocks.GetMockPlanProject("p1", ProjectState.Active);
             projectMock.SetupProperty(m => m.IsMosaic, true);
             projectMock.SetupProperty(m => m.EnableGrader, false);
+            projectMock.SetupProperty(m => m.ExposureCompletionHelper, new ExposureCompletionHelper(false, 125));
 
             Mock<IPlanTarget> targetMock1 = PlanMocks.GetMockPlanTarget("", TestUtil.SPICA);
             targetMock1.SetupProperty(m => m.Project, projectMock.Object);
@@ -213,7 +216,7 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
             PlanMocks.AddMockPlanFilter(targetMock4, exposurePlanMock);
 
             // Potential (targetMock4) completion < average of the others
-            sut.Score(scoringEngineMock.Object, targetMock4.Object).Should().BeApproximately(0.322222, 0.00001);
+            sut.Score(scoringEngineMock.Object, targetMock4.Object).Should().BeApproximately(0.33407, 0.00001);
         }
     }
 }

@@ -531,7 +531,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
             List<IPlanProject> planProjects = new List<IPlanProject>();
 
             foreach (Project project in projects) {
-                PlanProject planProject = new PlanProject(profileMock.Object.ActiveProfile, project);
+                PlanProject planProject = new PlanProject(profileMock.Object.ActiveProfile, project, null);
                 planProjects.Add(planProject);
                 TestContext.WriteLine($"PROJECT:\n{planProject}");
             }

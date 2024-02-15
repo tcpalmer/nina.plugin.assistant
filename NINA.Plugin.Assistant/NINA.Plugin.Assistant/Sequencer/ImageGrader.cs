@@ -261,11 +261,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private ImageGraderPreferences GetPreferences(IProfile profile) {
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
-                ProfilePreference profilePreference = context.GetProfilePreference(profile.Id.ToString());
-                if (profilePreference == null) {
-                    profilePreference = new ProfilePreference(profile.Id.ToString());
-                }
-
+                ProfilePreference profilePreference = context.GetProfilePreference(profile.Id.ToString(), true);
                 return new ImageGraderPreferences(profilePreference);
             }
         }

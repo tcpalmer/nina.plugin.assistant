@@ -40,6 +40,7 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
 
             Mock<IPlanProject> projectMock = PlanMocks.GetMockPlanProject("p1", ProjectState.Active);
             projectMock.SetupProperty(m => m.EnableGrader, true);
+            projectMock.SetupProperty(m => m.ExposureCompletionHelper, new ExposureCompletionHelper(true, 125));
 
             Mock<IPlanTarget> targetMock = PlanMocks.GetMockPlanTarget("", TestUtil.SPICA);
             targetMock.SetupProperty(m => m.Project, projectMock.Object);
@@ -60,6 +61,7 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
 
             Mock<IPlanProject> projectMock = PlanMocks.GetMockPlanProject("p1", ProjectState.Active);
             projectMock.SetupProperty(m => m.EnableGrader, true);
+            projectMock.SetupProperty(m => m.ExposureCompletionHelper, new ExposureCompletionHelper(true, 125));
 
             Mock<IPlanTarget> targetMock = PlanMocks.GetMockPlanTarget("", TestUtil.SPICA);
             targetMock.SetupProperty(m => m.Project, projectMock.Object);
@@ -80,6 +82,7 @@ namespace NINA.Plugin.Assistant.Test.Plan.Scoring.Rules {
 
             Mock<IPlanProject> projectMock = PlanMocks.GetMockPlanProject("p1", ProjectState.Active);
             projectMock.SetupProperty(m => m.EnableGrader, true);
+            projectMock.SetupProperty(m => m.ExposureCompletionHelper, new ExposureCompletionHelper(true, 125));
 
             Mock<IPlanTarget> targetMock = PlanMocks.GetMockPlanTarget("", TestUtil.SPICA);
             targetMock.SetupProperty(m => m.Project, projectMock.Object);

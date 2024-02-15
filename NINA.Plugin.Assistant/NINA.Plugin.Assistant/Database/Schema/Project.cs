@@ -161,21 +161,6 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
-        public bool ActiveNowWithActiveTargets {
-            get {
-                if (!ActiveNow || Targets == null || Targets.Count == 0) {
-                    return false;
-                }
-
-                foreach (Target target in Targets) {
-                    if (target.ActiveWithActiveExposurePlans) { return true; }
-                }
-
-                return false;
-            }
-        }
-
-        [NotMapped]
         public int MinimumTime {
             get => minimumTime;
             set {

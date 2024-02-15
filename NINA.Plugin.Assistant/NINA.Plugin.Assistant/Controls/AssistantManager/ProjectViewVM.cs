@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.MyMessageBox;
@@ -18,6 +19,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private AssistantManagerVM managerVM;
         private IFramingAssistantVM framingAssistantVM;
         private ProjectProxy projectProxy;
+        private ExposureCompletionHelper exposureCompletionHelper;
 
         public ProjectProxy ProjectProxy {
             get => projectProxy;
@@ -30,10 +32,11 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ProjectViewVM(AssistantManagerVM managerVM, IFramingAssistantVM framingAssistantVM, IProfileService profileService, Project project) : base(profileService) {
             this.managerVM = managerVM;
             this.framingAssistantVM = framingAssistantVM;
+            exposureCompletionHelper = GetExposureCompletionHelper(project);
 
             project.RuleWeights.Sort();
             ProjectProxy = new ProjectProxy(project);
-            ProjectActive = ProjectProxy.Project.ActiveNowWithActiveTargets;
+            ProjectActive = ActiveNowWithActiveTargets(ProjectProxy.Project);
 
             InitializeRuleWeights(ProjectProxy.Proxy);
             InitializeCombos();
@@ -46,6 +49,25 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             AddTargetCommand = new RelayCommand(AddTarget);
             PasteTargetCommand = new RelayCommand(PasteTarget);
             ImportMosaicPanelsCommand = new RelayCommand(ImportMosaicPanels);
+        }
+
+        private ExposureCompletionHelper GetExposureCompletionHelper(Project project) {
+            ProfilePreference profilePreference = managerVM.Database.GetContext().GetProfilePreference(project.ProfileId, true);
+            return new ExposureCompletionHelper(project.EnableGrader, profilePreference.ExposureThrottle);
+        }
+
+        private bool ActiveNowWithActiveTargets(Project project) {
+            if (!project.ActiveNow || project.Targets == null || project.Targets.Count == 0) {
+                return false;
+            }
+
+            foreach (Target target in project.Targets) {
+                if (target.Enabled && exposureCompletionHelper.PercentComplete(target) < 100) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void InitializeRuleWeights(Project project) {
@@ -64,7 +86,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             if (e?.PropertyName != nameof(ProjectProxy.Proxy)) {
                 ItemEdited = true;
             } else {
-                ProjectActive = ProjectProxy.Project.ActiveNowWithActiveTargets;
+                ProjectActive = ActiveNowWithActiveTargets(ProjectProxy.Project);
                 RaisePropertyChanged(nameof(ProjectProxy));
             }
         }
@@ -235,7 +257,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private void PasteTarget(object obj) {
             managerVM.PasteTarget(ProjectProxy.Proxy);
-            ProjectActive = ProjectProxy.Project.ActiveNowWithActiveTargets;
+            ProjectActive = ActiveNowWithActiveTargets(ProjectProxy.Project);
         }
 
         private void ImportMosaicPanels(object obj) {

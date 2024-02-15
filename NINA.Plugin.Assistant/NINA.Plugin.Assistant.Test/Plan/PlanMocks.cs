@@ -48,6 +48,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pp.SetupProperty(m => m.DitherEvery, 0);
             pp.SetupProperty(m => m.EnableGrader, false);
             pp.SetupProperty(m => m.IsMosaic, false);
+            pp.SetupProperty(m => m.ExposureCompletionHelper, new ExposureCompletionHelper(false, 125));
 
             Dictionary<string, double> rw = new Dictionary<string, double>();
             Dictionary<string, IScoringRule> allRules = ScoringRule.GetAllScoringRules();
@@ -68,6 +69,12 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pt.SetupProperty(m => m.ExposurePlans, new List<IPlanExposure>());
             pt.SetupProperty(m => m.CompletedExposurePlans, new List<IPlanExposure>());
 
+            Mock<IPlanProject> pp = new Mock<IPlanProject>();
+            pp.SetupAllProperties();
+            pp.SetupProperty(m => m.ExposureCompletionHelper, new ExposureCompletionHelper(true, 100));
+
+            pt.SetupProperty(m => m.Project, pp.Object);
+
             return pt;
         }
 
@@ -83,7 +90,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pe.SetupProperty(m => m.Desired, desired);
             pe.SetupProperty(m => m.Acquired, 0);
             pe.SetupProperty(m => m.Accepted, accepted);
-            pe.Setup(m => m.NeededExposures(125)).Returns(accepted > desired ? 0 : desired - accepted);
+            pe.Setup(m => m.NeededExposures()).Returns(accepted > desired ? 0 : desired - accepted);
             pe.Setup(m => m.IsIncomplete()).Returns(accepted < desired);
             return pe;
         }

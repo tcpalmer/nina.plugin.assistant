@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Assistant.NINAPlugin.Database.Schema {
 
-    public class ExposurePlan : INotifyPropertyChanged {
+    public class ExposurePlan : IExposureCounts, INotifyPropertyChanged {
         [Key] public int Id { get; set; }
         [Required] public string profileId { get; set; }
         [NotMapped] private int exposureTemplateId;
@@ -76,11 +76,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
-        public double PercentComplete {
-            get {
-                return Desired == 0 ? 0 : ((double)Accepted / (double)Desired) * 100;
-            }
-        }
+        public double PercentComplete { get; set; }
 
         public ExposurePlan() {
         }
@@ -123,5 +119,11 @@ namespace Assistant.NINAPlugin.Database.Schema {
 
             return sb.ToString();
         }
+    }
+
+    public interface IExposureCounts {
+        int Desired { get; set; }
+        int Accepted { get; set; }
+        int Acquired { get; set; }
     }
 }
