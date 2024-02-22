@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Controls.Util;
 using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan;
 using LinqKit;
 using NINA.Core.Model.Equipment;
 using NINA.Core.MyMessageBox;
@@ -15,10 +16,12 @@ using NINA.WPF.Base.Interfaces.ViewModel;
 using NINA.WPF.Base.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
@@ -31,6 +34,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private TreeDataItem selectedTreeDataItem;
         private TreeDataItem activeTreeDataItem;
+
+        private TreeDisplayMode SelectedDisplayMode;
+        private bool SelectedColorizeMode;
 
         public AssistantManagerVM(IProfileService profileService,
             IApplicationMediator applicationMediator,
@@ -46,12 +52,14 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             database = new SchedulerDatabaseInteraction();
 
             SelectedItemChangedCommand = new RelayCommand(SelectedItemChanged);
+            SelectedDisplayMode = TreeDisplayMode.DisplayAll;
+            InitializeProjectsColorize();
         }
 
         public SchedulerDatabaseInteraction Database { get { return database; } }
 
         public AssistantTreeViewVM ProjectsTreeViewVM {
-            get => new AssistantTreeViewVM(this, profileService, "Projects", RootProjectsList, 350);
+            get => new AssistantTreeViewVM(this, profileService, "Projects", RootProjectsList, 350, true);
         }
 
         public AssistantTreeViewVM ExposureTemplatesTreeViewVM {
@@ -343,6 +351,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             if (rootList == RootProjectsList) {
                 RootProjectsList = LoadProjectsTree();
                 TreeDataItem.VisitAll(RootProjectsList[0], i => { i.IsExpanded = false; });
+                SelectedDisplayMode = TreeDisplayMode.DisplayAll;
                 return RootProjectsList;
             }
 
@@ -497,20 +506,14 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         public void ViewProfilePreferences(ProfileMeta profile) {
-            ProfilePreference profilePreference;
-            using (var context = database.GetContext()) {
-                profilePreference = context.GetProfilePreference(profile.Id.ToString(), true);
-            }
-
-            ProfilePreferencesViewVM = new ProfilePreferencesViewVM(this, profileService, profilePreference, profile.Name);
+            ProfilePreferencesViewVM = new ProfilePreferencesViewVM(this, profileService, GetProfilePreference(profile.Id.ToString()), profile.Name);
             CollapseAllViews();
             ShowProfilePreferencesView = Visibility.Visible;
         }
 
         public ProfilePreference GetProfilePreference(string profileId) {
             using (var context = database.GetContext()) {
-                ProfilePreference profilePreference = context.GetProfilePreference(profileId);
-                return profilePreference != null ? profilePreference : new ProfilePreference(profileId);
+                return context.GetProfilePreference(profileId, true);
             }
         }
 
@@ -534,6 +537,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     parentItem.Items.Add(projectItem);
                     projectItem.IsSelected = true;
                     parentItem.IsExpanded = true;
+                    SetTreeColorizeMode(SelectedColorizeMode);
                     return newProject;
                 } else {
                     Notification.ShowError("Failed to save new Scheduler Project (see log for details)");
@@ -546,10 +550,13 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             using (var context = database.GetContext()) {
                 if (context.SaveProject(project) != null) {
                     activeTreeDataItem.Data = project;
-                    if (activeTreeDataItem.Header.ToString() != project.Name) {
-                        activeTreeDataItem.Header = project.Name;
+                    TextBlock textBlock = activeTreeDataItem.Header as TextBlock;
+                    if (textBlock.Text != project.Name) {
+                        textBlock.Text = project.Name;
                         activeTreeDataItem.SortName = project.Name;
                     }
+
+                    SetTreeColorizeMode(SelectedColorizeMode);
                 } else {
                     Notification.ShowError("Failed to save Scheduler Project (see log for details)");
                 }
@@ -577,6 +584,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         TreeDataItem targetItem = new TreeDataItem(TreeDataType.Target, target.Name, target, newProjectItem);
                         newProjectItem.Items.Add(targetItem);
                     });
+
+                    SetTreeColorizeMode(SelectedColorizeMode);
                 } else {
                     Notification.ShowError("Failed to paste new Scheduler Project (see log for details)");
                 }
@@ -644,6 +653,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     parentItem.Items.Add(targetItem);
                     targetItem.IsSelected = true;
                     parentItem.IsExpanded = true;
+
+                    SetTreeColorizeMode(SelectedColorizeMode);
                 } else {
                     Notification.ShowError("Failed to add new Scheduler Target (see log for details)");
                 }
@@ -663,6 +674,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                         Notification.ShowError("Failed to add new Scheduler Target (see log for details)");
                     }
                 }
+
+                SetTreeColorizeMode(SelectedColorizeMode);
             }
         }
 
@@ -670,14 +683,17 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             using (var context = database.GetContext()) {
                 if (context.SaveTarget(target) != null) {
                     activeTreeDataItem.Data = target;
-                    if (activeTreeDataItem.Header.ToString() != target.Name) {
-                        activeTreeDataItem.Header = target.Name;
+                    TextBlock textBlock = activeTreeDataItem.Header as TextBlock;
+                    if (textBlock.Text != target.Name) {
+                        textBlock.Text = target.Name;
                         activeTreeDataItem.SortName = target.Name;
                     }
 
                     // Refresh the parent project
                     TreeDataItem parentItem = activeTreeDataItem.TreeParent;
                     parentItem.Data = context.GetProject(target.ProjectId);
+
+                    SetTreeColorizeMode(SelectedColorizeMode);
                 } else {
                     Notification.ShowError("Failed to save Scheduler Target (see log for details)");
                 }
@@ -700,6 +716,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     parentItem.Items.Add(newTargetItem);
                     newTargetItem.IsSelected = true;
                     parentItem.IsExpanded = true;
+                    SetTreeColorizeMode(SelectedColorizeMode);
                 } else {
                     Notification.ShowError("Failed to paste new Scheduler Project (see log for details)");
                 }
@@ -727,6 +744,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 Target updatedTarget = context.DeleteExposurePlan(target, exposurePlan);
                 if (updatedTarget != null) {
                     activeTreeDataItem.Data = updatedTarget;
+                    SetTreeColorizeMode(SelectedColorizeMode);
                 } else {
                     Notification.ShowError("Failed to delete Scheduler Exposure Plan (see log for details)");
                 }
@@ -740,6 +758,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 Target updatedTarget = context.DeleteAllExposurePlans(target);
                 if (updatedTarget != null) {
                     activeTreeDataItem.Data = updatedTarget;
+                    SetTreeColorizeMode(SelectedColorizeMode);
                 } else {
                     Notification.ShowError("Failed to delete all Scheduler Exposure Plans (see log for details)");
                 }
@@ -901,6 +920,116 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             TSLogger.Error($"Failed to find profile in nav tree: {profileId}");
             throw new Exception($"Failed to find profile in nav tree: {profileId}");
         }
+
+        internal void SetTreeDisplayMode(TreeDisplayMode displayMode) {
+            SelectedDisplayMode = displayMode;
+
+            if (SelectedDisplayMode == TreeDisplayMode.DisplayAll) {
+                TreeDataItem.VisitAll(RootProjectsList[0], item => { item.Visibility = Visibility.Visible; });
+                return;
+            }
+
+            ExposureCompletionHelper helper = null;
+
+            TreeDataItem.VisitAll(RootProjectsList[0], item => {
+                switch (item.Type) {
+                    case TreeDataType.Project:
+                        Project project = item.Data as Project;
+                        helper = GetExposureCompletionHelper(item.TreeParent.Data as ProfileMeta, project);
+                        item.Visibility = ProjectActive(helper, project) ? Visibility.Visible : Visibility.Collapsed;
+                        break;
+
+                    case TreeDataType.Target:
+                        Target target = item.Data as Target;
+                        project = item.TreeParent.Data as Project;
+                        item.Visibility = TargetActive(helper, project, target) ? Visibility.Visible : Visibility.Collapsed;
+                        break;
+                }
+            });
+        }
+
+        private void InitializeProjectsColorize() {
+            profileService.ActiveProfile.PropertyChanged += ActiveProfile_PropertyChanged;
+            profileService.ActiveProfile.ColorSchemaSettings.PropertyChanged += ColorSchemaSettings_PropertyChanged;
+            ColorSchemaPrimaryColorBrush = (SolidColorBrush)new BrushConverter().ConvertFromString(profileService.ActiveProfile.ColorSchemaSettings.ColorSchema.PrimaryColor.ToString());
+        }
+
+        private void ActiveProfile_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+            ColorSchemaPrimaryColorBrush = new SolidColorBrush(profileService.ActiveProfile.ColorSchemaSettings.ColorSchema.PrimaryColor);
+
+            // TODO: following not working?
+            RaisePropertyChanged(nameof(ProjectsTreeViewVM));
+        }
+
+        private void ColorSchemaSettings_PropertyChanged(object sender, PropertyChangedEventArgs e) {
+            ColorSchemaPrimaryColorBrush = new SolidColorBrush(profileService.ActiveProfile.ColorSchemaSettings.ColorSchema.PrimaryColor);
+
+            // TODO: following not working?
+            RaisePropertyChanged(nameof(ProjectsTreeViewVM));
+        }
+
+        private Brush ColorSchemaPrimaryColorBrush;
+        private static Brush ActiveBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#008000"));
+        private static Brush InactiveBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC143C"));
+
+        internal void SetTreeColorizeMode(bool colorize) {
+            ExposureCompletionHelper helper = null;
+            TextBlock textBlock = null;
+            SelectedColorizeMode = colorize;
+
+            TreeDataItem.VisitAll(RootProjectsList[0], item => {
+                switch (item.Type) {
+                    case TreeDataType.Project:
+                        Project project = item.Data as Project;
+                        textBlock = item.Header as TextBlock;
+
+                        if (colorize) {
+                            helper = GetExposureCompletionHelper(item.TreeParent.Data as ProfileMeta, project);
+                            textBlock.Foreground = ProjectActive(helper, project) ? ActiveBrush : InactiveBrush;
+                        } else {
+                            textBlock.Foreground = ColorSchemaPrimaryColorBrush;
+                        }
+
+                        break;
+
+                    case TreeDataType.Target:
+                        Target target = item.Data as Target;
+                        textBlock = item.Header as TextBlock;
+
+                        if (colorize) {
+                            project = item.TreeParent.Data as Project;
+                            textBlock.Foreground = TargetActive(helper, project, target) ? ActiveBrush : InactiveBrush;
+                        } else {
+                            textBlock.Foreground = ColorSchemaPrimaryColorBrush;
+                        }
+
+                        break;
+                }
+            });
+        }
+
+        private ExposureCompletionHelper GetExposureCompletionHelper(ProfileMeta profile, Project project) {
+            ProfilePreference profilePreference = GetProfilePreference(profile.Id.ToString());
+            return new ExposureCompletionHelper(project.EnableGrader, profilePreference.ExposureThrottle);
+        }
+
+        private bool ProjectActive(ExposureCompletionHelper helper, Project project) {
+            if (!project.ActiveNow || project.Targets == null || project.Targets.Count == 0) {
+                return false;
+            }
+
+            foreach (Target target in project.Targets) {
+                if (target.Enabled && helper.PercentComplete(target, true) < 100) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool TargetActive(ExposureCompletionHelper helper, Project project, Target target) {
+            return project.ActiveNow && target.Enabled && target.ExposurePlans.Count > 0 && helper.PercentComplete(target) < 100;
+        }
     }
 
     public enum TreeDataType {
@@ -929,7 +1058,14 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             TreeParent = parent;
             Data = data;
             SortName = name;
-            Header = name;
+
+            if (type == TreeDataType.Project || type == TreeDataType.Target) {
+                TextBlock textBlock = new TextBlock();
+                textBlock.Text = name;
+                Header = textBlock;
+            } else {
+                Header = name;
+            }
         }
 
         public TreeDataItem GetRoot() {

@@ -90,7 +90,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private bool ActiveWithActiveExposurePlans(Target target) {
-            return target.Enabled && target.ExposurePlans.Count > 0 && exposureCompletionHelper.PercentComplete(target) < 100;
+            return target.Project.ActiveNow && target.Enabled && target.ExposurePlans.Count > 0 && exposureCompletionHelper.PercentComplete(target) < 100;
         }
 
         private TargetProxy targetProxy;
