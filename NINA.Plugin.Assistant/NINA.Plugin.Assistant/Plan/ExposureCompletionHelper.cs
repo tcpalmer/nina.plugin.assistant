@@ -24,8 +24,11 @@ namespace Assistant.NINAPlugin.Plan {
             return percent < 100 ? percent : 100;
         }
 
-        public double PercentComplete(Target target) {
-            if (target.ExposurePlans.Count == 0) { return 0; }
+        public double PercentComplete(Target target, bool noExposurePlansIsComplete = false) {
+            if (target.ExposurePlans.Count == 0) {
+                return noExposurePlansIsComplete ? 100 : 0;
+            }
+
             return target.ExposurePlans.Sum(ep => PercentComplete(ep)) / target.ExposurePlans.Count;
         }
 
