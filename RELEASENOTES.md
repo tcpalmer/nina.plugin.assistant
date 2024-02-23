@@ -1,5 +1,10 @@
 # Release Notes
 
+## 4.3.4.0 - 2024-02-23
+* Added toggle in Projects navigation to color projects/targets by whether they are active or not
+* Added toggle in Projects navigation to show/hide projects/targets by whether they are active or not
+* Added copy/paste/reset for Project Scoring Rule Weights
+
 ## 4.3.3.0 - 2024-02-15
 * Refactored target and exposure planning percent complete handling
 

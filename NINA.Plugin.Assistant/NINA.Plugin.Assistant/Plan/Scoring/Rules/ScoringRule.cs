@@ -26,15 +26,6 @@ namespace Assistant.NINAPlugin.Plan.Scoring.Rules {
         /// <returns></returns>
         public abstract double Score(IScoringEngine scoringEngine, IPlanTarget potentialTarget);
 
-        /* TODO: additional rules:
-           - Meridian window: assign a higher score to targets that would be taking exposures closer to the meridian sweet spot. Would need to compute a metric based on the target time span overlap with changing distance from the meridian (integrate).
-           - Meridian Flip: assign a lower score to targets that will require an immediate MF. Related: if a target is east of the meridian but ?close? (check NINA profile MF settings), don?t switch to it until it?s well past the meridian.
-           - Mosaic completion priority: assign a higher score to mosaic targets that are closer to 100% complete to wrap them up.
-           - Mosaic balance priority: assign a higher score to mosaic targets that are closer to 0% complete to balance exposures across frames. (Obviously in conflict with Mosaic completion priority so only one should be used.)
-
-        Could have a rule that checks target visibility at TIME RANGE and de-weights targets that are blocked for some of that period (horizon tree problem)
-         */
-
         public static Dictionary<string, IScoringRule> GetAllScoringRules() {
             IEnumerable<Type> ruleTypes = Assembly.GetAssembly(typeof(ScoringRule)).GetTypes().
                     Where(ruleType => ruleType.IsClass && !ruleType.IsAbstract && ruleType.IsSubclassOf(typeof(ScoringRule)));
