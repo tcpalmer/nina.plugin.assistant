@@ -1162,6 +1162,33 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
     }
 
+    public class ScoringRuleWeightsClipboard {
+        private static readonly ScoringRuleWeightsClipboard Instance = new ScoringRuleWeightsClipboard();
+        private List<RuleWeight> item { get; set; }
+
+        public static bool HasCopyItem() {
+            return Instance.item != null;
+        }
+
+        public static void SetItem(Project project) {
+            Instance.item = new List<RuleWeight>(project.RuleWeights.Count);
+            foreach (RuleWeight ruleWeight in project.RuleWeights) {
+                Instance.item.Add(ruleWeight.GetPasteCopy());
+            }
+        }
+
+        public static List<RuleWeight> GetItem() {
+            return Instance.item;
+        }
+
+        public static void Clear() {
+            Instance.item = null;
+        }
+
+        private ScoringRuleWeightsClipboard() {
+        }
+    }
+
     public class ExposurePlansSpec {
         public List<ExposurePlan> ExposurePlans { get; private set; }
         public string OverrideExposureOrder { get; private set; }

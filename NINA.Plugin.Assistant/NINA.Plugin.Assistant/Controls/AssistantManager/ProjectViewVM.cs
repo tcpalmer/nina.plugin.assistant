@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.Plan.Scoring.Rules;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.MyMessageBox;
@@ -10,6 +11,7 @@ using NINA.WPF.Base.Interfaces.ViewModel;
 using NINA.WPF.Base.ViewModel;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
@@ -49,6 +51,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             AddTargetCommand = new RelayCommand(AddTarget);
             PasteTargetCommand = new RelayCommand(PasteTarget);
             ImportMosaicPanelsCommand = new RelayCommand(ImportMosaicPanels);
+            CopyScoringRuleWeightsCommand = new RelayCommand(CopyScoringRuleWeights);
+            PasteScoringRuleWeightsCommand = new RelayCommand(PasteScoringRuleWeights);
+            ResetScoringRuleWeightsCommand = new RelayCommand(ResetScoringRuleWeights);
         }
 
         private ExposureCompletionHelper GetExposureCompletionHelper(Project project) {
@@ -176,6 +181,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             set {
                 showEditView = value;
                 RaisePropertyChanged(nameof(ShowEditView));
+                RaisePropertyChanged(nameof(PasteScoringRuleWeightsEnabled));
             }
         }
 
@@ -189,9 +195,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
-        public bool PasteEnabled {
-            get => Clipboard.HasType(TreeDataType.Target);
-        }
+        public bool PasteTargetEnabled { get => Clipboard.HasType(TreeDataType.Target); }
+        public bool PasteScoringRuleWeightsEnabled { get => ScoringRuleWeightsClipboard.HasCopyItem() && !ShowEditView; }
 
         public bool MosaicPanelsAvailable {
             get => FramingAssistantPanelsDefined() > 1;
@@ -205,6 +210,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand AddTargetCommand { get; private set; }
         public ICommand PasteTargetCommand { get; private set; }
         public ICommand ImportMosaicPanelsCommand { get; private set; }
+        public ICommand CopyScoringRuleWeightsCommand { get; private set; }
+        public ICommand PasteScoringRuleWeightsCommand { get; private set; }
+        public ICommand ResetScoringRuleWeightsCommand { get; private set; }
 
         private void Edit(object obj) {
             ProjectProxy.PropertyChanged += ProjectProxy_PropertyChanged;
@@ -284,6 +292,40 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 ProjectProxy.Proxy.IsMosaic = true;
                 Save(null);
             }
+        }
+
+        private void CopyScoringRuleWeights(object obj) {
+            ScoringRuleWeightsClipboard.SetItem(projectProxy.Project);
+            RaisePropertyChanged(nameof(PasteScoringRuleWeightsEnabled));
+        }
+
+        private void PasteScoringRuleWeights(object obj) {
+            List<RuleWeight> weights = ScoringRuleWeightsClipboard.GetItem();
+            foreach (RuleWeight weight in ProjectProxy.Proxy.RuleWeights) {
+                RuleWeight newRuleWeight = weights.Where(rw => rw.Name == weight.Name).FirstOrDefault();
+                weight.Weight = newRuleWeight.Weight;
+            }
+
+            managerVM.SaveProject(ProjectProxy.Proxy);
+            ProjectProxy.OnSave();
+            InitializeRuleWeights(ProjectProxy.Proxy);
+        }
+
+        private void ResetScoringRuleWeights(object obj) {
+            Dictionary<string, IScoringRule> rules = ScoringRule.GetAllScoringRules();
+            List<RuleWeight> weights = new List<RuleWeight>(rules.Count);
+            foreach (var rule in rules) {
+                weights.Add(new RuleWeight { Name = rule.Value.Name, Weight = rule.Value.DefaultWeight });
+            }
+
+            foreach (RuleWeight weight in ProjectProxy.Proxy.RuleWeights) {
+                RuleWeight newRuleWeight = weights.Where(rw => rw.Name == weight.Name).FirstOrDefault();
+                weight.Weight = newRuleWeight.Weight;
+            }
+
+            managerVM.SaveProject(ProjectProxy.Proxy);
+            ProjectProxy.OnSave();
+            InitializeRuleWeights(ProjectProxy.Proxy);
         }
 
         private int FramingAssistantPanelsDefined() {
