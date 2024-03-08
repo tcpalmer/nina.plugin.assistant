@@ -22,9 +22,9 @@ namespace NINA.Plugin.Assistant.Test.Database.Schema {
 
         [Test]
         public void TestExposureTemplatesOrder() {
-            Assert.IsTrue(TwilightLevel.Nighttime < TwilightLevel.Astronomical);
-            Assert.IsTrue(TwilightLevel.Astronomical < TwilightLevel.Nautical);
-            Assert.IsTrue(TwilightLevel.Nautical < TwilightLevel.Civil);
+            Assert.That(TwilightLevel.Nighttime, Is.LessThan(TwilightLevel.Astronomical));
+            Assert.That(TwilightLevel.Astronomical, Is.LessThan(TwilightLevel.Nautical));
+            Assert.That(TwilightLevel.Nautical, Is.LessThan(TwilightLevel.Civil));
         }
 
         [Test]

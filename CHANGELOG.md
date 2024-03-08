@@ -1,7 +1,13 @@
 # Target Scheduler
 
+## 4.3.5.0 - 2024-03-08
+* Fixed problem with CSV import due to NINA package updates
+
 ## 4.3.4.0 - 2024-02-23
-* Added toggle in Projects navigation to color projects/targets by whether they are active or not
+*## 4.3.5.0 - 2024-03-08
+* Fixed problem with CSV import due to NINA package updates
+
+ Added toggle in Projects navigation to color projects/targets by whether they are active or not
 * Added toggle in Projects navigation to show/hide projects/targets by whether they are active or not
 * Added copy/paste/reset for Project Scoring Rule Weights
 
