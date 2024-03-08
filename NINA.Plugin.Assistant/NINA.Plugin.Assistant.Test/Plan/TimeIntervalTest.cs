@@ -24,9 +24,9 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             TimeInterval ti1 = new TimeInterval(t1, t2);
             TimeInterval ti2 = new TimeInterval(t3, t4);
             TimeInterval overlap = ti1.Overlap(ti2);
-            Assert.IsNull(overlap);
+            Assert.That(overlap, Is.Null);
             overlap = ti2.Overlap(ti1);
-            Assert.IsNull(overlap);
+            Assert.That(overlap, Is.Null);
 
             ti1 = new TimeInterval(t2, t4);
             ti2 = new TimeInterval(t1, t3);
@@ -89,7 +89,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         [Test]
         public void TestBad() {
             var ex = Assert.Throws<ArgumentException>(() => new TimeInterval(DateTime.Now, DateTime.Now.AddSeconds(-1)));
-            Assert.AreEqual("startTime must be before endTime", ex.Message);
+            Assert.That(ex.Message, Is.EqualTo("startTime must be before endTime"));
         }
     }
 }

@@ -31,13 +31,13 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt, window, ntc).Plan();
             AssertPlan(GetExpectedTestTypical(ntc), list);
 
-            Assert.AreEqual(nbExposures, pt.ExposurePlans[0].PlannedExposures);
-            Assert.AreEqual(nbExposures, pt.ExposurePlans[1].PlannedExposures);
-            Assert.AreEqual(nbExposures, pt.ExposurePlans[2].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.ExposurePlans[3].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.ExposurePlans[4].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.ExposurePlans[5].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.ExposurePlans[6].PlannedExposures);
+            Assert.That(pt.ExposurePlans[0].PlannedExposures, Is.EqualTo(nbExposures));
+            Assert.That(pt.ExposurePlans[1].PlannedExposures, Is.EqualTo(nbExposures));
+            Assert.That(pt.ExposurePlans[2].PlannedExposures, Is.EqualTo(nbExposures));
+            Assert.That(pt.ExposurePlans[3].PlannedExposures, Is.EqualTo(wbExposures));
+            Assert.That(pt.ExposurePlans[4].PlannedExposures, Is.EqualTo(wbExposures));
+            Assert.That(pt.ExposurePlans[5].PlannedExposures, Is.EqualTo(wbExposures));
+            Assert.That(pt.ExposurePlans[6].PlannedExposures, Is.EqualTo(wbExposures));
         }
 
         [Test]
@@ -57,13 +57,13 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt, window, ntc).Plan();
             AssertPlan(GetExpectedTestTypicalFS2(ntc), list);
 
-            Assert.AreEqual(11, pt.ExposurePlans[0].PlannedExposures);
-            Assert.AreEqual(9, pt.ExposurePlans[1].PlannedExposures);
-            Assert.AreEqual(8, pt.ExposurePlans[2].PlannedExposures);
-            Assert.AreEqual(4, pt.ExposurePlans[3].PlannedExposures);
-            Assert.AreEqual(4, pt.ExposurePlans[4].PlannedExposures);
-            Assert.AreEqual(4, pt.ExposurePlans[5].PlannedExposures);
-            Assert.AreEqual(4, pt.ExposurePlans[6].PlannedExposures);
+            Assert.That(pt.ExposurePlans[0].PlannedExposures, Is.EqualTo(11));
+            Assert.That(pt.ExposurePlans[1].PlannedExposures, Is.EqualTo(9));
+            Assert.That(pt.ExposurePlans[2].PlannedExposures, Is.EqualTo(8));
+            Assert.That(pt.ExposurePlans[3].PlannedExposures, Is.EqualTo(4));
+            Assert.That(pt.ExposurePlans[4].PlannedExposures, Is.EqualTo(4));
+            Assert.That(pt.ExposurePlans[5].PlannedExposures, Is.EqualTo(4));
+            Assert.That(pt.ExposurePlans[6].PlannedExposures, Is.EqualTo(4));
         }
 
         [Test]
@@ -83,13 +83,13 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt, window, ntc).Plan();
             AssertPlan(GetExpectedWindowNotFilled(ntc), list);
 
-            Assert.AreEqual(nbExposures, pt.ExposurePlans[0].PlannedExposures);
-            Assert.AreEqual(nbExposures, pt.ExposurePlans[1].PlannedExposures);
-            Assert.AreEqual(nbExposures, pt.ExposurePlans[2].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.ExposurePlans[3].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.ExposurePlans[4].PlannedExposures);
-            Assert.AreEqual(9, pt.ExposurePlans[5].PlannedExposures);
-            Assert.AreEqual(0, pt.ExposurePlans[6].PlannedExposures);
+            Assert.That(pt.ExposurePlans[0].PlannedExposures, Is.EqualTo(nbExposures));
+            Assert.That(pt.ExposurePlans[1].PlannedExposures, Is.EqualTo(nbExposures));
+            Assert.That(pt.ExposurePlans[2].PlannedExposures, Is.EqualTo(nbExposures));
+            Assert.That(pt.ExposurePlans[3].PlannedExposures, Is.EqualTo(wbExposures));
+            Assert.That(pt.ExposurePlans[4].PlannedExposures, Is.EqualTo(wbExposures));
+            Assert.That(pt.ExposurePlans[5].PlannedExposures, Is.EqualTo(9));
+            Assert.That(pt.ExposurePlans[6].PlannedExposures, Is.EqualTo(0));
         }
 
         [Test]
@@ -107,10 +107,10 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt, window, ntc).Plan();
             AssertPlan(GetExpectedTestNoNightAtDusk(ntc), list);
 
-            Assert.AreEqual(exposures, pt.ExposurePlans[0].PlannedExposures);
-            Assert.AreEqual(exposures, pt.ExposurePlans[1].PlannedExposures);
-            Assert.AreEqual(exposures, pt.ExposurePlans[2].PlannedExposures);
-            Assert.AreEqual(0, pt.ExposurePlans[3].PlannedExposures);
+            Assert.That(pt.ExposurePlans[0].PlannedExposures, Is.EqualTo(exposures));
+            Assert.That(pt.ExposurePlans[1].PlannedExposures, Is.EqualTo(exposures));
+            Assert.That(pt.ExposurePlans[2].PlannedExposures, Is.EqualTo(exposures));
+            Assert.That(pt.ExposurePlans[3].PlannedExposures, Is.EqualTo(0));
         }
 
         [Test]
@@ -128,10 +128,10 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt, window, ntc).Plan();
             AssertPlan(GetExpectedTestNoNightAtDawn(ntc), list);
 
-            Assert.AreEqual(exposures, pt.ExposurePlans[0].PlannedExposures);
-            Assert.AreEqual(18, pt.ExposurePlans[1].PlannedExposures);
-            Assert.AreEqual(0, pt.ExposurePlans[2].PlannedExposures);
-            Assert.AreEqual(0, pt.ExposurePlans[3].PlannedExposures);
+            Assert.That(pt.ExposurePlans[0].PlannedExposures, Is.EqualTo(exposures));
+            Assert.That(pt.ExposurePlans[1].PlannedExposures, Is.EqualTo(18));
+            Assert.That(pt.ExposurePlans[2].PlannedExposures, Is.EqualTo(0));
+            Assert.That(pt.ExposurePlans[3].PlannedExposures, Is.EqualTo(0));
         }
 
         [Test]
@@ -245,13 +245,13 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt, window, ntc).Plan();
 
             AssertPlan(GetExpectedTestOverride1(ntc), list);
-            Assert.AreEqual(nbExposures, pt.ExposurePlans[0].PlannedExposures);
-            Assert.AreEqual(nbExposures, pt.ExposurePlans[1].PlannedExposures);
-            Assert.AreEqual(nbExposures, pt.ExposurePlans[2].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.ExposurePlans[3].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.ExposurePlans[4].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.ExposurePlans[5].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.ExposurePlans[6].PlannedExposures);
+            Assert.That(pt.ExposurePlans[0].PlannedExposures, Is.EqualTo(nbExposures));
+            Assert.That(pt.ExposurePlans[1].PlannedExposures, Is.EqualTo(nbExposures));
+            Assert.That(pt.ExposurePlans[2].PlannedExposures, Is.EqualTo(nbExposures));
+            Assert.That(pt.ExposurePlans[3].PlannedExposures, Is.EqualTo(wbExposures));
+            Assert.That(pt.ExposurePlans[4].PlannedExposures, Is.EqualTo(wbExposures));
+            Assert.That(pt.ExposurePlans[5].PlannedExposures, Is.EqualTo(wbExposures));
+            Assert.That(pt.ExposurePlans[6].PlannedExposures, Is.EqualTo(wbExposures));
         }
 
         [Test]
@@ -279,13 +279,13 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanInstruction> list = new ExposurePlanner(GetPrefs(), pt, window, ntc).Plan();
 
             AssertPlan(GetExpectedTestOverride2(ntc), list);
-            Assert.AreEqual(nbExposures, pt.ExposurePlans[0].PlannedExposures);
-            Assert.AreEqual(nbExposures, pt.ExposurePlans[1].PlannedExposures);
-            Assert.AreEqual(nbExposures, pt.ExposurePlans[2].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.ExposurePlans[3].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.ExposurePlans[4].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.ExposurePlans[5].PlannedExposures);
-            Assert.AreEqual(wbExposures, pt.ExposurePlans[6].PlannedExposures);
+            Assert.That(pt.ExposurePlans[0].PlannedExposures, Is.EqualTo(nbExposures));
+            Assert.That(pt.ExposurePlans[1].PlannedExposures, Is.EqualTo(nbExposures));
+            Assert.That(pt.ExposurePlans[2].PlannedExposures, Is.EqualTo(nbExposures));
+            Assert.That(pt.ExposurePlans[3].PlannedExposures, Is.EqualTo(wbExposures));
+            Assert.That(pt.ExposurePlans[4].PlannedExposures, Is.EqualTo(wbExposures));
+            Assert.That(pt.ExposurePlans[5].PlannedExposures, Is.EqualTo(wbExposures));
+            Assert.That(pt.ExposurePlans[6].PlannedExposures, Is.EqualTo(wbExposures));
         }
 
         private ProfilePreference GetPrefs(string profileId = "abcd-1234") {
@@ -362,36 +362,36 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             }
             */
 
-            Assert.AreEqual(expectedPlan.Count, actualPlan.Count);
+            Assert.That(actualPlan.Count, Is.EqualTo(expectedPlan.Count));
 
             for (int i = 0; i < expectedPlan.Count; i++) {
                 IPlanInstruction expected = expectedPlan[i];
                 IPlanInstruction actual = actualPlan[i];
                 //TestContext.Error.WriteLine($"i {i}");
 
-                Assert.IsTrue(expected.GetType() == actual.GetType());
+                Assert.That(expected.GetType(), Is.EqualTo(actual.GetType()));
 
                 if (expected is PlanMessage) {
                     continue;
                 }
 
                 if (expected is PlanSwitchFilter) {
-                    Assert.AreEqual(expected.planExposure.FilterName, actual.planExposure.FilterName);
+                    Assert.That(actual.planExposure.FilterName, Is.EqualTo(expected.planExposure.FilterName));
                     continue;
                 }
 
                 if (expected is PlanSetReadoutMode) {
-                    Assert.AreEqual(expected.planExposure.ReadoutMode, actual.planExposure.ReadoutMode);
+                    Assert.That(actual.planExposure.ReadoutMode, Is.EqualTo(expected.planExposure.ReadoutMode));
                     continue;
                 }
 
                 if (expected is PlanTakeExposure) {
-                    Assert.AreEqual(expected.planExposure.FilterName, actual.planExposure.FilterName);
+                    Assert.That(actual.planExposure.FilterName, Is.EqualTo(expected.planExposure.FilterName));
                     continue;
                 }
 
                 if (expected is PlanWait) {
-                    Assert.AreEqual(((PlanWait)expected).waitForTime, ((PlanWait)actual).waitForTime);
+                    Assert.That(((PlanWait)actual).waitForTime, Is.EqualTo(((PlanWait)expected).waitForTime));
                     continue;
                 }
 

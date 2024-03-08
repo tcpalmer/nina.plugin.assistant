@@ -34,11 +34,11 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             PlanMocks.AddMockPlanFilter(pt, pf);
             PlanMocks.AddMockPlanTarget(pp2, pt);
 
-            Assert.IsNull(new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).FilterForIncomplete(null));
+            Assert.That(new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).FilterForIncomplete(null), Is.Null);
 
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object, pp2.Object);
             projects = new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).FilterForIncomplete(projects);
-            Assert.IsNotNull(projects);
+            Assert.That(projects, Is.Not.Null);
             projects.Count.Should().Be(2);
 
             IPlanProject pp = projects[0];
@@ -81,7 +81,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
             projects = new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).FilterForIncomplete(projects);
-            Assert.IsNotNull(projects);
+            Assert.That(projects, Is.Not.Null);
             projects.Count.Should().Be(1);
 
             IPlanProject pp = projects[0];
@@ -170,7 +170,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
 
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
             projects = new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).FilterForIncomplete(projects);
-            Assert.IsNotNull(projects);
+            Assert.That(projects, Is.Not.Null);
             projects.Count.Should().Be(1);
 
             IPlanProject pp = projects[0];
@@ -199,7 +199,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
 
             projects = new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).FilterForVisibility(projects);
-            Assert.IsNotNull(projects);
+            Assert.That(projects, Is.Not.Null);
             projects.Count.Should().Be(1);
 
             IPlanProject pp = projects[0];
@@ -223,7 +223,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
 
             projects = new Planner(new DateTime(2023, 6, 17, 18, 0, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).FilterForVisibility(projects);
-            Assert.IsNotNull(projects);
+            Assert.That(projects, Is.Not.Null);
             projects.Count.Should().Be(1);
 
             IPlanProject pp = projects[0];
@@ -260,7 +260,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
 
             projects = new Planner(new DateTime(2023, 12, 17, 19, 0, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).FilterForVisibility(projects);
-            Assert.IsNotNull(projects);
+            Assert.That(projects, Is.Not.Null);
             projects.Count.Should().Be(1);
 
             IPlanProject pp = projects[0];
@@ -302,7 +302,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
 
             projects = new Planner(new DateTime(2023, 12, 17, 23, 36, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).FilterForVisibility(projects);
-            Assert.IsNotNull(projects);
+            Assert.That(projects, Is.Not.Null);
             projects.Count.Should().Be(1);
 
             IPlanProject pp = projects[0];
@@ -344,7 +344,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
 
             projects = new Planner(new DateTime(2023, 12, 17, 19, 0, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).FilterForVisibility(projects);
-            Assert.IsNotNull(projects);
+            Assert.That(projects, Is.Not.Null);
             projects.Count.Should().Be(1);
 
             IPlanProject pp = projects[0];
@@ -383,7 +383,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
 
             projects = new Planner(new DateTime(2023, 12, 17, 20, 34, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).FilterForVisibility(projects);
-            Assert.IsNotNull(projects);
+            Assert.That(projects, Is.Not.Null);
             projects.Count.Should().Be(1);
 
             IPlanProject pp = projects[0];
@@ -411,7 +411,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
 
             projects = new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).FilterForVisibility(projects);
-            Assert.IsNotNull(projects);
+            Assert.That(projects, Is.Not.Null);
             projects.Count.Should().Be(1);
 
             IPlanProject pp = projects[0];
@@ -448,7 +448,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
 
             projects = new Planner(new DateTime(2023, 12, 25, 18, 0, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).FilterForMoonAvoidance(projects);
-            Assert.IsNotNull(projects);
+            Assert.That(projects, Is.Not.Null);
             projects.Count.Should().Be(1);
 
             IPlanProject pp = projects[0];
@@ -535,7 +535,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             scoringEngineMock.Setup(m => m.ScoreTarget(It.Is<IPlanTarget>(t => t.Name.Equals("IC1805")))).Returns(1);
 
             IPlanTarget selected = new Planner(new DateTime(2023, 12, 17, 18, 0, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).SelectTargetByScore(projects, scoringEngineMock.Object);
-            Assert.IsNotNull(selected);
+            Assert.That(selected, Is.Not.Null);
             selected.Name.Should().Be("IC1805");
             selected.Rejected.Should().BeFalse();
 

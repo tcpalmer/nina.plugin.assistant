@@ -33,7 +33,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
             }
 
             db = new SchedulerDatabaseInteraction(string.Format(@"Data Source={0};", testDatabasePath));
-            Assert.NotNull(db);
+            Assert.That(db, Is.Not.Null);
             LoadTestDatabase();
         }
 

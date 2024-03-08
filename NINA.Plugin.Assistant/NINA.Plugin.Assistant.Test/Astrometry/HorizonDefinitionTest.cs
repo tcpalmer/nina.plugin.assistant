@@ -32,7 +32,7 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
             sut.GetTargetAltitude(GetAAT(301)).Should().Be(21);
 
             var ex = Assert.Throws<ArgumentException>(() => sut.GetFixedMinimumAltitude());
-            Assert.AreEqual("minimumAltitude n/a in this context", ex.Message);
+            Assert.That(ex.Message, Is.EqualTo("minimumAltitude n/a in this context"));
         }
 
         [Test]
