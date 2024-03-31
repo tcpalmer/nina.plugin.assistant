@@ -18,7 +18,9 @@
     xmlns:ninactrl="clr-namespace:NINA.CustomControlLibrary;assembly=NINA.CustomControlLibrary"
     xmlns:ns="clr-namespace:NINA.Core.Locale;assembly=NINA.Core"
     xmlns:util="clr-namespace:NINA.Core.Utility;assembly=NINA.Core"
-    xmlns:view="clr-namespace:NINA.View.Sequencer;assembly=NINA.Sequencer">
+    xmlns:view="clr-namespace:NINA.View.Sequencer;assembly=NINA.Sequencer"
+    xmlns:wpfbehaviors="clr-namespace:NINA.WPF.Base.Behaviors;assembly=NINA.WPF.Base"
+    xmlns:wpfutil="clr-namespace:NINA.WPF.Base.Utility;assembly=NINA.WPF.Base">
     <Style x:Key="DSOHeaderExpanderStyle" TargetType="ToggleButton">
         <Setter Property="Template">
             <Setter.Value>
@@ -151,8 +153,228 @@
     </GeometryGroup>
 
     <DataTemplate DataType="{x:Type local:TargetSchedulerContainer}">
-        <nina:SequenceBlockView DataContext="{Binding}">
-            <nina:SequenceBlockView.SequenceItemContent>
+        <Border>
+            <Border.Resources>
+                <wpfutil:SharedResourceDictionary Source="/NINA.Sequencer;component/Resources/Styles/ProgressStyle.xaml" />
+            </Border.Resources>
+            <i:Interaction.Behaviors>
+                <!--  Drop area above and below the Sequence Container  -->
+                <behaviors:DragOverBehavior
+                    AllowDragCenter="False"
+                    DragAboveSize="25"
+                    DragBelowSize="15" />
+            </i:Interaction.Behaviors>
+            <ninactrl:DetachingExpander>
+                <ninactrl:DetachingExpander.Header>
+                    <Grid
+                        MinHeight="35"
+                        Margin="0"
+                        HorizontalAlignment="{Binding HorizontalAlignment, RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWayToSource}"
+                        Background="{StaticResource SecondaryBackgroundBrush}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                MinHeight="25"
+                                Margin="10,10,10,0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Foreground="{StaticResource ButtonForegroundBrush}"
+                                Text="{Binding Name}" />
+                            <Border
+                                Width="20"
+                                Height="20"
+                                Margin="5,0,5,0"
+                                Background="{StaticResource NotificationErrorBrush}"
+                                BorderBrush="Transparent"
+                                CornerRadius="10">
+                                <Border.Visibility>
+                                    <PriorityBinding>
+                                        <Binding
+                                            Converter="{StaticResource ZeroToVisibilityConverter}"
+                                            FallbackValue="Collapsed"
+                                            Path="Issues.Count" />
+                                    </PriorityBinding>
+                                </Border.Visibility>
+                                <Path
+                                    HorizontalAlignment="Right"
+                                    Data="{StaticResource ExclamationCircledSVG}"
+                                    Fill="{StaticResource ButtonForegroundBrush}"
+                                    Stretch="Uniform" />
+                                <Border.ToolTip>
+                                    <ItemsControl ItemsSource="{Binding Issues}" />
+                                </Border.ToolTip>
+                            </Border>
+                        </StackPanel>
+                        <Border Grid.Column="1" Background="{StaticResource SecondaryBackgroundBrush}">
+                            <ContentPresenter
+                                Margin="2,0,10,0"
+                                HorizontalAlignment="Right"
+                                Content="{Binding}"
+                                DockPanel.Dock="Right"
+                                Style="{StaticResource ProgressPresenter}" />
+                        </Border>
+                        <Border
+                            x:Name="ButtonCommands"
+                            Grid.Column="2"
+                            HorizontalAlignment="Stretch"
+                            Background="{StaticResource SecondaryBackgroundBrush}">
+                            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                                <Button
+                                    x:Name="EnableDisableButton"
+                                    Width="25"
+                                    Height="25"
+                                    Margin="25,0,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding DisableEnableCommand}"
+                                    Style="{StaticResource SecondaryBackgroundButton}"
+                                    Visibility="{Binding DisableEnableCommand, Converter={StaticResource NullToVisibilityCollapsedConverter}}">
+                                    <Grid>
+                                        <Path
+                                            Margin="5"
+                                            Data="{StaticResource PowerSVG}"
+                                            Fill="{StaticResource ButtonForegroundBrush}"
+                                            Stretch="Uniform"
+                                            UseLayoutRounding="True" />
+                                    </Grid>
+                                    <Button.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock Foreground="{StaticResource PrimaryBrush}" Text="{ns:Loc Lbl_SequenceContainer_DisableEnable_Tooltip}" />
+                                        </ToolTip>
+                                    </Button.ToolTip>
+                                </Button>
+
+                                <Button
+                                    x:Name="CloseButton"
+                                    Width="25"
+                                    Height="25"
+                                    Margin="25,0,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding DetachCommand}"
+                                    Style="{StaticResource SecondaryBackgroundButton}"
+                                    Visibility="{Binding DetachCommand, Converter={StaticResource NullToVisibilityCollapsedConverter}}">
+                                    <Grid>
+                                        <Path
+                                            Margin="5"
+                                            Data="{StaticResource TrashCanSVG}"
+                                            Fill="{StaticResource ButtonForegroundBrush}"
+                                            Stretch="Uniform"
+                                            UseLayoutRounding="True" />
+                                    </Grid>
+                                    <Button.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock Foreground="{StaticResource PrimaryBrush}" Text="{ns:Loc Lbl_SequenceContainer_Delete_Tooltip}" />
+                                        </ToolTip>
+                                    </Button.ToolTip>
+                                </Button>
+
+                                <Button
+                                    x:Name="ResetProgressButton"
+                                    Width="25"
+                                    Height="25"
+                                    Margin="25,0,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding ResetProgressCommand}"
+                                    Style="{StaticResource SecondaryBackgroundButton}">
+                                    <Grid>
+                                        <Path
+                                            Margin="5"
+                                            Data="{StaticResource RefreshSVG}"
+                                            Fill="{StaticResource ButtonForegroundBrush}"
+                                            Stretch="Uniform"
+                                            UseLayoutRounding="True" />
+                                    </Grid>
+                                    <Button.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock Foreground="{StaticResource PrimaryBrush}" Text="{ns:Loc Lbl_SequenceContainer_Reset_Tooltip}" />
+                                        </ToolTip>
+                                    </Button.ToolTip>
+                                </Button>
+
+                                <Button
+                                    x:Name="CloneContainerButton"
+                                    Width="25"
+                                    Height="25"
+                                    Margin="25,0,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding AddCloneToParentCommand}"
+                                    Style="{StaticResource SecondaryBackgroundButton}"
+                                    Visibility="{Binding AddCloneToParentCommand, Converter={StaticResource NullToVisibilityCollapsedConverter}}">
+                                    <Grid>
+                                        <Path
+                                            Margin="5"
+                                            Data="{StaticResource CopySVG}"
+                                            Fill="{StaticResource ButtonForegroundBrush}"
+                                            Stretch="Uniform"
+                                            UseLayoutRounding="True" />
+                                    </Grid>
+                                    <Button.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock Foreground="{StaticResource PrimaryBrush}" Text="{ns:Loc Lbl_SequenceContainer_Duplicate_Tooltip}" />
+                                        </ToolTip>
+                                    </Button.ToolTip>
+                                </Button>
+
+                                <Button
+                                    x:Name="MoveUpButton"
+                                    Width="25"
+                                    Height="25"
+                                    Margin="25,0,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding MoveUpCommand}"
+                                    Style="{StaticResource SecondaryBackgroundButton}">
+                                    <Grid>
+                                        <Path
+                                            Margin="5"
+                                            Data="{StaticResource ArrowUpSVG}"
+                                            Fill="{StaticResource ButtonForegroundBrush}"
+                                            Stretch="Uniform"
+                                            UseLayoutRounding="True" />
+                                    </Grid>
+                                    <Button.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock Foreground="{StaticResource PrimaryBrush}" Text="{ns:Loc Lbl_SequenceContainer_MoveUp_Tooltip}" />
+                                        </ToolTip>
+                                    </Button.ToolTip>
+                                </Button>
+
+                                <Button
+                                    x:Name="MoveDownButton"
+                                    Width="25"
+                                    Height="25"
+                                    Margin="10,0,5,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding MoveDownCommand}"
+                                    Style="{StaticResource SecondaryBackgroundButton}"
+                                    Visibility="{Binding MoveDownCommand, Converter={StaticResource NullToVisibilityCollapsedConverter}}">
+                                    <Grid>
+                                        <Path
+                                            Margin="5"
+                                            Data="{StaticResource ArrowDownSVG}"
+                                            Fill="{StaticResource ButtonForegroundBrush}"
+                                            Stretch="Uniform"
+                                            UseLayoutRounding="True" />
+                                    </Grid>
+                                    <Button.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock Foreground="{StaticResource PrimaryBrush}" Text="{ns:Loc Lbl_SequenceContainer_MoveDown_Tooltip}" />
+                                        </ToolTip>
+                                    </Button.ToolTip>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </ninactrl:DetachingExpander.Header>
+
                 <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,2">
                     <StackPanel Orientation="Vertical">
                         <ninactrl:DetachingExpander IsExpanded="{Binding Target.Expanded}" Style="{StaticResource DSOExpander}">
@@ -301,6 +523,9 @@
                                     ItemsSource="{Binding ProgressItemsView}"
                                     ScrollViewer.CanContentScroll="False"
                                     VerticalScrollBarVisibility="Auto">
+                                    <i:Interaction.Behaviors>
+                                        <wpfbehaviors:BubbleScrollEvent />
+                                    </i:Interaction.Behaviors>
 
                                     <DataGrid.GroupStyle>
                                         <GroupStyle>
@@ -647,8 +872,8 @@
                         </ninactrl:DetachingExpander>
                     </StackPanel>
                 </Border>
-            </nina:SequenceBlockView.SequenceItemContent>
-        </nina:SequenceBlockView>
+            </ninactrl:DetachingExpander>
+        </Border>
     </DataTemplate>
 
     <DataTemplate x:Key="Assistant.NINAPlugin.Sequencer.TestContainer_Mini" DataType="{x:Type local:TargetSchedulerContainer}">
