@@ -1,5 +1,8 @@
 # Release Notes
 
+## 4.3.6.0 - 2024-04-XX
+* Added Target Scheduler Background Condition
+
 ## 4.3.5.0 - 2024-03-08
 * Fixed problem with CSV import due to NINA package updates
 
