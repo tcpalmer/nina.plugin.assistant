@@ -2,6 +2,7 @@
 
 ## 4.3.6.0 - 2024-04-XX
 * Added Target Scheduler Background Condition
+* TS Container UI reworked to be more like a standard container and better scrolling behavior (thanks Stefan)
 
 ## 4.3.5.0 - 2024-03-08
 * Fixed problem with CSV import due to NINA package updates
