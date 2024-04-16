@@ -211,6 +211,17 @@ namespace NINA.Plugin.Assistant.Test.Database {
 
                 context.GetImageData(ai[1].Id, "tag2").Should().BeNull();
                 context.GetImageData(ai[2].Id, "tag1").Should().BeNull();
+
+                // Test non-nullable filter column
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1), null, true, "rr1", new ImageMetadata(msg, 1, 100, 0)));
+                context.Invoking(db => db.SaveChanges())
+                    .Should().Throw<DbEntityValidationException>()
+                    .WithMessage("Validation failed for one or more entities. See 'EntityValidationErrors' property for more details.");
+
+                context.AcquiredImageSet.Add(new AcquiredImage("abcd-1234", 1, 1, markDate.AddDays(1), "", true, "rr1", new ImageMetadata(msg, 1, 100, 0)));
+                context.Invoking(db => db.SaveChanges())
+                    .Should().Throw<DbEntityValidationException>()
+                    .WithMessage("Validation failed for one or more entities. See 'EntityValidationErrors' property for more details.");
             }
         }
 

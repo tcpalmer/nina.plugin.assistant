@@ -211,8 +211,9 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 }
 
                 // If have a target template, grab EPs from that and clone for each target
+                Target templateTarget = null;
                 if (SelectedTargetId != -1) {
-                    Target templateTarget = targetsDict.Where(d => d.Key.Id == SelectedTargetId).FirstOrDefault().Key;
+                    templateTarget = targetsDict.Where(d => d.Key.Id == SelectedTargetId).FirstOrDefault().Key;
                     TSLogger.Info($"applying exposure plans from target '{templateTarget.Name}' to imported targets");
                     foreach (Target target in targets) {
                         target.ExposurePlans = CloneTemplateExposurePlans(templateTarget.ExposurePlans);
@@ -230,6 +231,16 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                                 managerVM.AddTargets(project, targets, item);
                                 break;
                             }
+                        }
+                    }
+                }
+
+                // If we have a template with an override exposure order, we have to remap to new exposure plans for each target.
+                if (templateTarget?.OverrideExposureOrder != null) {
+                    using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+                        foreach (Target target in targets) {
+                            target.OverrideExposureOrder = OverrideExposureOrder.Remap(templateTarget.OverrideExposureOrder, templateTarget.ExposurePlans, target.ExposurePlans);
+                            context.SaveTarget(target);
                         }
                     }
                 }

@@ -3,6 +3,8 @@
 ## 4.3.6.0 - 2024-04-XX
 * Added Target Scheduler Background Condition
 * TS Container UI reworked to be more like a standard container and better scrolling behavior (thanks Stefan)
+* Fixed problem with override exposure order not being copied on paste options and bulk import
+* Fixed bug where internal filter name is unknown for OCS users
 
 ## 4.3.5.0 - 2024-03-08
 * Fixed problem with CSV import due to NINA package updates

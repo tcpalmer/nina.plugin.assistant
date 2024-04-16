@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Migrations;
 using System.Data.Entity.ModelConfiguration.Conventions;
+using System.Data.Entity.Validation;
 using System.Data.SQLite;
 using System.Linq;
 using System.Reflection;
@@ -586,6 +587,23 @@ namespace Assistant.NINAPlugin.Database {
 
         public static DateTime UnixSecondsToDateTime(long? seconds) {
             return CoreUtil.UnixTimeStampToDateTime(seconds == null ? 0 : seconds.Value);
+        }
+
+        public static void CheckValidationErrors(Exception ex) {
+            try {
+                DbEntityValidationException entityValidationException = ex as DbEntityValidationException;
+                if (entityValidationException != null && entityValidationException.EntityValidationErrors.Count() > 0) {
+                    TSLogger.Error("Entity validation errors found:");
+                    foreach (DbEntityValidationResult eve in entityValidationException.EntityValidationErrors) {
+                        TSLogger.Error($"  Entity of type {eve.Entry.Entity.GetType().Name} in state {eve.Entry.State} has validation errors:");
+                        foreach (var ve in eve.ValidationErrors) {
+                            TSLogger.Error($"    Property {ve.PropertyName}, Error: {ve.ErrorMessage}");
+                        }
+                    }
+                }
+            } catch (Exception ex2) {
+                TSLogger.Error($"exception logging entity validation errors: {ex2.Message}");
+            }
         }
 
         private static void RollbackTransaction(DbContextTransaction transaction) {
