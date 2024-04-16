@@ -4,7 +4,7 @@
 * Added Target Scheduler Background Condition
 * TS Container UI reworked to be more like a standard container and with better scrolling behavior (thanks Stefan)
 * Fixed problem with override exposure order not being copied on paste operations and bulk import
-* Fixed bug where internal filter name is unknown for OCS users
+* Fixed bug where internal filter name is unknown for OSC users
 * Fixed bug (hopefully) where sync client was failing to process images and update the database
 
 ## 4.3.5.0 - 2024-03-08
