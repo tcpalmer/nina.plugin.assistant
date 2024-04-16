@@ -150,7 +150,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                             planTarget.Project.DatabaseId,
                             planTarget.DatabaseId,
                             msg.MetaData.Image.ExposureStart,
-                            filterName,
+                            GetFilterName(filterName, exposurePlan),
                             accepted,
                             rejectReason,
                             new ImageMetadata(msg, planTarget.Project.SessionId, planTarget.ROI, exposurePlan?.ExposureTemplate.ReadoutMode));
@@ -160,9 +160,20 @@ namespace Assistant.NINAPlugin.Sequencer {
                         transaction.Commit();
                     } catch (Exception e) {
                         TSLogger.Error($"exception updating database for saved image: {e.Message}\n{e.StackTrace}");
+                        SchedulerDatabaseContext.CheckValidationErrors(e);
                     }
                 }
             }
+        }
+
+        private string GetFilterName(string filterName, ExposurePlan exposurePlan) {
+            if (!string.IsNullOrEmpty(filterName)) {
+                return filterName;
+            }
+
+            // OSC users may not have a filter wheel so metadata doesn't have filter name
+            string fromTemplate = exposurePlan?.ExposureTemplate?.FilterName;
+            return fromTemplate == null ? "n/a" : fromTemplate;
         }
 
         private Task BeforeFinalizeImageSaved(object sender, BeforeFinalizeImageSavedEventArgs args) {

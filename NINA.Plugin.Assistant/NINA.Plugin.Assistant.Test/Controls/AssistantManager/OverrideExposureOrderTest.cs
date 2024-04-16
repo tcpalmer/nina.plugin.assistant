@@ -73,6 +73,25 @@ namespace NINA.Plugin.Assistant.Test.Controls.AssistantManager {
             sut.OverrideItems.Count.Should().Be(8);
         }
 
+        [Test]
+        public void TestRemap() {
+            string srcOverrideExposureOrder = $"3|1|2|{OverrideExposureOrder.DITHER}|1|{OverrideExposureOrder.DITHER}";
+
+            ExposureTemplate et = new ExposureTemplate { Name = "n/a" };
+            List<ExposurePlan> srcExposurePlans = new List<ExposurePlan>();
+            srcExposurePlans.Add(new ExposurePlan { Id = 1, ExposureTemplate = et });
+            srcExposurePlans.Add(new ExposurePlan { Id = 2, ExposureTemplate = et });
+            srcExposurePlans.Add(new ExposurePlan { Id = 3, ExposureTemplate = et });
+
+            List<ExposurePlan> newExposurePlans = new List<ExposurePlan>();
+            newExposurePlans.Add(new ExposurePlan { Id = 4, ExposureTemplate = et });
+            newExposurePlans.Add(new ExposurePlan { Id = 5, ExposureTemplate = et });
+            newExposurePlans.Add(new ExposurePlan { Id = 6, ExposureTemplate = et });
+
+            string newOverride = OverrideExposureOrder.Remap(srcOverrideExposureOrder, srcExposurePlans, newExposurePlans);
+            newOverride.Should().Be("6|4|5|Dither|4|Dither");
+        }
+
         private List<ExposurePlan> GetEPList() {
             int i = 0;
             List<ExposurePlan> list = new List<ExposurePlan>();

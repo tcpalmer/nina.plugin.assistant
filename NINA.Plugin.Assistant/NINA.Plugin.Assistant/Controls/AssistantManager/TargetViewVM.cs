@@ -379,30 +379,31 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private void PasteExposurePlans(object obj) {
-            ExposurePlansSpec spec = ExposurePlansClipboard.GetItem();
-            List<ExposurePlan> copiedExposurePlans = spec.ExposurePlans;
-            string overrideExposureOrder = spec.OverrideExposureOrder;
+            ExposurePlansSpec source = ExposurePlansClipboard.GetItem();
+            List<ExposurePlan> srcExposurePlans = source.ExposurePlans;
 
-            if (copiedExposurePlans?.Count == 0) {
+            if (srcExposurePlans?.Count == 0) {
                 return;
             }
 
-            if (ExposurePlans.Count > 0 && overrideExposureOrder != null) {
-                overrideExposureOrder = null;
+            // If existing target already has one or more exposure plans, we won't paste an override order
+            string srcOverrideExposureOrder = new string(source.OverrideExposureOrder);
+            if (ExposurePlans.Count > 0 && srcOverrideExposureOrder != null) {
+                srcOverrideExposureOrder = null;
             }
 
             ExposureTemplate exposureTemplate = null;
-            if (copiedExposurePlans[0].ExposureTemplate.ProfileId != profileId) {
+            if (srcExposurePlans[0].ExposureTemplate.ProfileId != profileId) {
                 MyMessageBox.Show("The copied Exposure Plans reference Exposure Templates from a different profile.  They will be defaulted to the default (first) Exposure Template for this profile.");
                 exposureTemplate = GetDefaultExposureTemplate();
                 if (exposureTemplate == null) {
                     return;
                 }
 
-                overrideExposureOrder = null;
+                srcOverrideExposureOrder = null;
             }
 
-            foreach (ExposurePlan copy in copiedExposurePlans) {
+            foreach (ExposurePlan copy in srcExposurePlans) {
                 ExposurePlan ep = copy.GetPasteCopy(profileId);
                 ep.TargetId = TargetProxy.Original.Id;
 
@@ -415,12 +416,21 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
 
             TargetProxy.Proxy.ExposurePlans = ExposurePlans;
-            TargetProxy.Proxy.OverrideExposureOrder = overrideExposureOrder;
+            TargetProxy.Proxy.OverrideExposureOrder = srcOverrideExposureOrder;
 
             managerVM.SaveTarget(TargetProxy.Proxy);
             TargetProxy.OnSave();
             InitializeExposurePlans(TargetProxy.Proxy);
-            OverrideExposureOrder = overrideExposureOrder == null ? null : new OverrideExposureOrder(overrideExposureOrder, ExposurePlans);
+
+            // If the copy had an override exposure order, we need to remap it for the new exposure plan records
+            if (srcOverrideExposureOrder != null) {
+                TargetProxy.Proxy.OverrideExposureOrder = OverrideExposureOrder.Remap(srcOverrideExposureOrder, srcExposurePlans, TargetProxy.Proxy.ExposurePlans);
+                managerVM.SaveTarget(TargetProxy.Proxy);
+                TargetProxy.OnSave();
+                OverrideExposureOrder = new OverrideExposureOrder(TargetProxy.Proxy.OverrideExposureOrder, TargetProxy.Proxy.ExposurePlans);
+            } else {
+                OverrideExposureOrder = null;
+            }
 
             RaisePropertyChanged(nameof(ExposurePlans));
             RaisePropertyChanged(nameof(ExposurePlansCopyEnabled));

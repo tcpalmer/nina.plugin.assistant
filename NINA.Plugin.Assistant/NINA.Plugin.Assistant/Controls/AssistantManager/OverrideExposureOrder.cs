@@ -1,7 +1,9 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
+using NINA.Plugin.Assistant.Shared.Utility;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
 
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
@@ -57,6 +59,36 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         public ObservableCollection<OverrideItem> GetDisplayList() {
             return new ObservableCollection<OverrideItem>(OverrideItems);
+        }
+
+        public static string Remap(string srcOverrideExposureOrder, List<ExposurePlan> srcExposurePlans, List<ExposurePlan> newExposurePlans) {
+            if (string.IsNullOrEmpty(srcOverrideExposureOrder)) { return null; }
+            if (srcExposurePlans?.Count != newExposurePlans?.Count) { return null; }
+
+            List<Tuple<int, int>> map = new List<Tuple<int, int>>();
+            for (int i = 0; i < srcExposurePlans.Count; i++) {
+                map.Add(new Tuple<int, int>(srcExposurePlans[i].Id, newExposurePlans[i].Id));
+            }
+
+            OverrideExposureOrder overrideExposureOrder = new OverrideExposureOrder(srcOverrideExposureOrder, srcExposurePlans);
+            StringBuilder sb = new StringBuilder();
+
+            foreach (OverrideItem item in overrideExposureOrder.OverrideItems) {
+                if (item.IsDither) {
+                    sb.Append(DITHER).Append(SEP);
+                    continue;
+                }
+
+                Tuple<int, int> entry = map.FirstOrDefault(i => i.Item1 == item.ExposurePlanDatabaseId);
+                if (entry != null) {
+                    sb.Append(entry.Item2).Append(SEP);
+                } else {
+                    TSLogger.Warning($"failed to find EP ID while remapping pasted exposure plans");
+                    return null;
+                }
+            }
+
+            return sb.ToString().TrimEnd(SEP);
         }
     }
 
