@@ -102,7 +102,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private IPlanTarget GetPlanTarget(int targetDatabaseId) {
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 Target target = context.GetTargetOnly(targetDatabaseId);
-                target = context.GetTarget(target.ProjectId, targetDatabaseId);
+                target = context.GetTargetByProject(target.ProjectId, targetDatabaseId);
 
                 ProfilePreference profilePreference = context.GetProfilePreference(target.Project.ProfileId, true);
                 ExposureCompletionHelper helper = new ExposureCompletionHelper(target.Project.EnableGrader, profilePreference.ExposureThrottle);

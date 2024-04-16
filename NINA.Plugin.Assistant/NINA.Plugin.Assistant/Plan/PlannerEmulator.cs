@@ -334,6 +334,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             IPlanProject planProject = new PlanProjectEmulator();
             planProject.Name = "M31";
+            planProject.DatabaseId = 4;
             planProject.UseCustomHorizon = false;
             planProject.MinimumAltitude = 10;
             planProject.DitherEvery = 0;
