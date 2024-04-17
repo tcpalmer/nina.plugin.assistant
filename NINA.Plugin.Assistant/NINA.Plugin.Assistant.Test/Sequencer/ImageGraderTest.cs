@@ -28,7 +28,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         [Test]
         public void TestNoGradersEnabled() {
             ImageGrader sut = new ImageGrader(GetMockProfile(0, 0), GetPreferences(0, false, false, 0, false, 0, false, 0, false, 0, false, 0));
-            (bool accepted, string rejectReason) = sut.GradeImage(null, null);
+            (bool accepted, string rejectReason) = sut.GradeImage(null, null, null);
             accepted.Should().BeTrue();
             rejectReason.Should().Be("");
         }
@@ -42,26 +42,26 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             string rejectReason;
 
             ImageSavedEventArgs msg = GetMockMsg(0.6, 1, "L", 0, 0);
-            (accepted, rejectReason) = sut.GradeImage(null, msg);
+            (accepted, rejectReason) = sut.GradeImage(null, msg, "L");
             accepted.Should().BeTrue();
             rejectReason.Should().Be("");
 
             msg = GetMockMsg(1, 1, "L", 0, 0);
-            (accepted, rejectReason) = sut.GradeImage(null, msg);
+            (accepted, rejectReason) = sut.GradeImage(null, msg, "L");
             accepted.Should().BeFalse();
             rejectReason.Should().Be(ImageGrader.REJECT_RMS);
 
             prefs = GetPreferences(0, false, true, 1.35, false, 0, false, 0, false, 0, false, 0);
             sut = new ImageGrader(profile, prefs);
             msg = GetMockMsg(0.6, 1, "L", 0, 0, 0, 0, 60, 10, 20, "2x2");
-            (accepted, rejectReason) = sut.GradeImage(null, msg);
+            (accepted, rejectReason) = sut.GradeImage(null, msg, "L");
             accepted.Should().BeTrue();
             rejectReason.Should().Be("");
 
             prefs = GetPreferences(0, false, true, 1.34, false, 0, false, 0, false, 0, false, 0);
             sut = new ImageGrader(profile, prefs);
             msg = GetMockMsg(0.6, 1, "L", 0, 0, 0, 0, 60, 10, 20, "2x2");
-            (accepted, rejectReason) = sut.GradeImage(null, msg);
+            (accepted, rejectReason) = sut.GradeImage(null, msg, "L");
             accepted.Should().BeFalse();
             rejectReason.Should().Be(ImageGrader.REJECT_RMS);
         }
@@ -86,12 +86,12 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             planTargetMock.SetupProperty(m => m.ROI, 100);
 
             ImageSavedEventArgs msg = GetMockMsg(0, 0, "L", 500, 0);
-            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg, "L");
             accepted.Should().BeTrue();
             rejectReason.Should().Be("");
 
             msg = GetMockMsg(0, 0, "L", 400, 0);
-            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg, "L");
             accepted.Should().BeFalse();
             rejectReason.Should().Be(ImageGrader.REJECT_STARS);
         }
@@ -116,7 +116,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             planTargetMock.SetupProperty(m => m.ROI, 100);
 
             ImageSavedEventArgs msg = GetMockMsg(0, 0, "L", 0, 0);
-            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg, "L");
             accepted.Should().BeFalse();
             rejectReason.Should().Be(ImageGrader.REJECT_STARS);
         }
@@ -141,12 +141,12 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             planTargetMock.SetupProperty(m => m.ROI, 100);
 
             ImageSavedEventArgs msg = GetMockMsg(0, 0, "L", 1000, 0); // way outside variance but an improvement
-            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg, "L");
             accepted.Should().BeTrue();
             rejectReason.Should().Be("");
 
             msg = GetMockMsg(0, 0, "L", 400, 0);
-            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg, "L");
             accepted.Should().BeFalse();
             rejectReason.Should().Be(ImageGrader.REJECT_STARS);
         }
@@ -171,12 +171,12 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             planTargetMock.SetupProperty(m => m.ROI, 100);
 
             ImageSavedEventArgs msg = GetMockMsg(0, 0, "L", 0, 1.5);
-            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg, "L");
             accepted.Should().BeTrue();
             rejectReason.Should().Be("");
 
             msg = GetMockMsg(0, 0, "L", 0, 3);
-            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg, "L");
             accepted.Should().BeFalse();
             rejectReason.Should().Be(ImageGrader.REJECT_HFR);
         }
@@ -201,12 +201,12 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             planTargetMock.SetupProperty(m => m.ROI, 100);
 
             ImageSavedEventArgs msg = GetMockMsg(0, 0, "L", 0, 0.1);
-            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg, "L");
             accepted.Should().BeTrue();
             rejectReason.Should().Be("");
 
             msg = GetMockMsg(0, 0, "L", 0, 3);
-            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg, "L");
             accepted.Should().BeFalse();
             rejectReason.Should().Be(ImageGrader.REJECT_HFR);
         }
@@ -231,7 +231,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             planTargetMock.SetupProperty(m => m.ROI, 100);
 
             ImageSavedEventArgs msg = GetMockMsg(0, 0, "L", 0, 0);
-            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg, "L");
             accepted.Should().BeFalse();
             rejectReason.Should().Be(ImageGrader.REJECT_HFR);
         }
@@ -258,13 +258,13 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             ImageSavedEventArgs msg = GetMockMsg(0, 0, "L", 0, 0, 1.5, 0);
             mock.Setup(m => m.GetHocusFocusMetric(msg.StarDetectionAnalysis, "FWHM")).Returns(2.234);
 
-            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg, "L");
             accepted.Should().BeTrue();
             rejectReason.Should().Be("");
 
             msg = GetMockMsg(0, 0, "L", 0, 3);
             mock.Setup(m => m.GetHocusFocusMetric(msg.StarDetectionAnalysis, "FWHM")).Returns(10.456);
-            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg, "L");
             accepted.Should().BeFalse();
             rejectReason.Should().Be(ImageGrader.REJECT_FWHM);
         }
@@ -291,13 +291,13 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             ImageSavedEventArgs msg = GetMockMsg(0, 0, "L", 0, 0, 1.5, 0);
             mock.Setup(m => m.GetHocusFocusMetric(msg.StarDetectionAnalysis, "Eccentricity")).Returns(3.456);
 
-            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg, "L");
             accepted.Should().BeTrue();
             rejectReason.Should().Be("");
 
             msg = GetMockMsg(0, 0, "L", 0, 3);
             mock.Setup(m => m.GetHocusFocusMetric(msg.StarDetectionAnalysis, "Eccentricity")).Returns(10.456);
-            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg);
+            (accepted, rejectReason) = sut.GradeImage(planTargetMock.Object, msg, "L");
             accepted.Should().BeFalse();
             rejectReason.Should().Be(ImageGrader.REJECT_ECCENTRICITY);
         }

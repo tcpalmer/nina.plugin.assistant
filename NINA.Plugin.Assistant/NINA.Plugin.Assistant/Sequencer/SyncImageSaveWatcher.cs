@@ -11,6 +11,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Data.Entity.Migrations;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -66,24 +67,29 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             int? imageId = msg.MetaData?.Image?.Id;
             if (imageId == null) {
-                TSLogger.Warning("SYNC client failed to get image ID for saved image");
+                TSLogger.Warning("SYNC client failed to get image ID for saved image, aborting image save");
                 return;
             }
 
             ExposureDetails exposureDetails;
             if (!exposureDictionary.TryGetValue((int)imageId, out exposureDetails)) {
-                TSLogger.Warning($"SYNC client failed to get exposure details for saved image ID: {imageId}");
+                TSLogger.Warning($"SYNC client failed to get exposure details for saved image ID: {imageId}, aborting image save");
                 return;
             }
 
             planTarget = GetPlanTarget(exposureDetails.targetDatabaseId);
-            bool enableGrader = planTarget.Project.EnableGrader;
+            IPlanExposure planExposure = GetPlanExposure(exposureDetails);
+            if (planExposure == null) {
+                TSLogger.Error($"SYNC client failed to get planExposure for saved image ID: {imageId}, aborting image save");
+                return;
+            }
 
+            bool enableGrader = planTarget.Project.EnableGrader;
             bool accepted = false;
             string rejectReason = "not graded";
 
             if (enableGrader) {
-                (accepted, rejectReason) = new ImageGrader(profile).GradeImage(planTarget, msg);
+                (accepted, rejectReason) = new ImageGrader(profile).GradeImage(planTarget, msg, planExposure.FilterName);
                 if (!accepted && profilePreference.EnableMoveRejected) {
                     string dstDir = Path.Combine(Path.GetDirectoryName(msg.PathToImage.LocalPath), ImageSaveWatcher.REJECTED_SUBDIR);
                     TSLogger.Debug($"moving rejected image to {dstDir}");
@@ -91,12 +97,20 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
             }
 
-            TSLogger.Debug($"SYNC client image save for {planTarget.Project.Name}/{planTarget.Name}, filter={msg.Filter}, grader enabled={enableGrader}, accepted={accepted}, rejectReason={rejectReason}, image id={imageId}");
-
-            UpdateDatabase(planTarget, msg.Filter, accepted, rejectReason, msg, imageId, exposureDetails.exposureDatabaseId);
+            TSLogger.Debug($"SYNC client image save for {planTarget.Project.Name}/{planTarget.Name}, filter={planExposure.FilterName}, grader enabled={enableGrader}, accepted={accepted}, rejectReason={rejectReason}, image id={imageId}");
+            UpdateDatabase(planTarget, planExposure.FilterName, accepted, rejectReason, msg, imageId, exposureDetails.exposureDatabaseId);
 
             SyncClient.Instance.SubmitCompletedExposure(exposureDetails.exposureId).Wait();
             exposureDictionary.TryRemove((int)imageId, out exposureDetails);
+        }
+
+        private IPlanExposure GetPlanExposure(ExposureDetails exposureDetails) {
+            IPlanExposure planExposure = planTarget.ExposurePlans.FirstOrDefault(ep => ep.DatabaseId == exposureDetails.exposureDatabaseId);
+            if (planExposure != null) {
+                return planExposure;
+            }
+
+            return planTarget.CompletedExposurePlans.FirstOrDefault(ep => ep.DatabaseId == exposureDetails.exposureDatabaseId);
         }
 
         private IPlanTarget GetPlanTarget(int targetDatabaseId) {
@@ -107,7 +121,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                 ProfilePreference profilePreference = context.GetProfilePreference(target.Project.ProfileId, true);
                 ExposureCompletionHelper helper = new ExposureCompletionHelper(target.Project.EnableGrader, profilePreference.ExposureThrottle);
 
-                target = context.GetTargetByProject(target.ProjectId, targetDatabaseId);
                 PlanProject planProject = new PlanProject(profile, target.Project, helper);
                 return new PlanTarget(planProject, target);
             }
@@ -136,7 +149,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                             planTarget.Project.DatabaseId,
                             planTarget.DatabaseId,
                             msg.MetaData.Image.ExposureStart,
-                            GetFilterName(filterName, exposurePlan),
+                            filterName,
                             accepted,
                             rejectReason,
                             new ImageMetadata(msg, planTarget.Project.SessionId, planTarget.ROI, exposurePlan?.ExposureTemplate.ReadoutMode));
@@ -150,16 +163,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
                 }
             }
-        }
-
-        private string GetFilterName(string filterName, ExposurePlan exposurePlan) {
-            if (!string.IsNullOrEmpty(filterName)) {
-                return filterName;
-            }
-
-            // OSC users may not have a filter wheel so metadata doesn't have filter name
-            string fromTemplate = exposurePlan?.ExposureTemplate?.FilterName;
-            return fromTemplate == null ? "n/a" : fromTemplate;
         }
 
         private Task BeforeFinalizeImageSaved(object sender, BeforeFinalizeImageSavedEventArgs args) {

@@ -41,7 +41,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             enableGradeRMS = EnableGradeRMS(Preferences.EnableGradeRMS);
         }
 
-        public (bool, string) GradeImage(IPlanTarget planTarget, ImageSavedEventArgs msg) {
+        public (bool, string) GradeImage(IPlanTarget planTarget, ImageSavedEventArgs msg, string filterName) {
             if (!enableGradeRMS && NoGradingMetricsEnabled()) {
                 TSLogger.Info("image grading: no metrics enabled => accepted");
                 return (true, "");
@@ -59,7 +59,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 // Get comparable images to compare against; if we don't have at least 3 to compare against, assume this one is acceptable
-                List<AcquiredImage> images = GetSampleImageData(planTarget, msg.Filter, msg);
+                List<AcquiredImage> images = GetSampleImageData(planTarget, filterName, msg);
                 if (images == null) {
                     TSLogger.Info("image grading: not enough matching images => accepted");
                     return (true, "");

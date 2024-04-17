@@ -30,14 +30,15 @@ namespace Assistant.NINAPlugin.Plan {
             TSLogger.Info($"PlannerEmulator.GetPlan: {CallNumber}");
             SchedulerPlan plan;
 
+            /*
             if (CallNumber < 4) {
                 plan = SyncPlan1();
             } else { return null; }
+            */
 
-            /*
             switch (CallNumber) {
-                case 1: plan = WaitForTime(DateTime.Now.AddSeconds(6)); break;
-                case 2: plan = SyncPlan1(); break;
+                case 1: plan = WaitForTime(DateTime.Now.AddSeconds(3)); break;
+                case 2: plan = SyncPlan2(); break;
                 //case 3: plan = Plan4(); break;
                 //case 3: plan = Plan5(); break;
                 //case 5: plan = Plan3(); break;
@@ -46,9 +47,8 @@ namespace Assistant.NINAPlugin.Plan {
                 default:
                     CallNumber = 0;
                     return null;
-            }*/
+            }
 
-            //plan = SyncPlan1();
             plan.IsEmulator = true;
             return plan;
         }
@@ -328,6 +328,50 @@ namespace Assistant.NINAPlugin.Plan {
             return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions, false);
         }
 
+        private SchedulerPlan Plan7() {
+            // This is used to test the real image save pipeline with schedulerdb-EMU-PLAN7.sqlite and sequence ts-emu-plan7.json
+            DateTime endTime = atTime.AddMinutes(5);
+            TimeInterval timeInterval = new TimeInterval(atTime, endTime);
+
+            IPlanProject planProject = new PlanProjectEmulator();
+            planProject.Name = "Plan7-P1";
+            planProject.UseCustomHorizon = false;
+            planProject.MinimumAltitude = 10;
+            planProject.DitherEvery = 0;
+            planProject.EnableGrader = false;
+            planProject.CreateDate = DateTime.Now.AddDays(-42);
+            planProject.FlatsHandling = Project.FLATS_HANDLING_IMMEDIATE;
+            planProject.DatabaseId = 1;
+
+            IPlanTarget planTarget = GetBasePlanTarget("Plan7-T1", planProject, Cp5n5);
+            planTarget.EndTime = endTime;
+            planTarget.DatabaseId = 1;
+            planTarget.Project = planProject;
+
+            IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3, 1);
+            IPlanExposure red = GetExposurePlan("Red", 4, null, null, 3, 2);
+            IPlanExposure grn = GetExposurePlan("Green", 4, null, null, 3, 3);
+            IPlanExposure blu = GetExposurePlan("Blue", 4, null, null, 3, 4);
+            planTarget.ExposurePlans.Add(lum);
+            planTarget.ExposurePlans.Add(red);
+            planTarget.ExposurePlans.Add(grn);
+            planTarget.ExposurePlans.Add(blu);
+
+            List<IPlanInstruction> instructions = new List<IPlanInstruction>();
+            instructions.Add(new PlanMessage("planner emulator: Plan7"));
+            instructions.Add(new PlanSlew(false));
+            instructions.Add(new PlanSwitchFilter(lum));
+            instructions.Add(new PlanTakeExposure(lum));
+            instructions.Add(new PlanSwitchFilter(red));
+            instructions.Add(new PlanTakeExposure(red));
+            instructions.Add(new PlanSwitchFilter(grn));
+            instructions.Add(new PlanTakeExposure(grn));
+            instructions.Add(new PlanSwitchFilter(blu));
+            instructions.Add(new PlanTakeExposure(blu));
+
+            return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions, false);
+        }
+
         private SchedulerPlan SyncPlan1() {
             DateTime endTime = atTime.AddMinutes(5);
             TimeInterval timeInterval = new TimeInterval(atTime, endTime);
@@ -368,6 +412,51 @@ namespace Assistant.NINAPlugin.Plan {
             //instructions.Add(new PlanTakeExposure(lum));
             //instructions.Add(new PlanTakeExposure(lum));
             //instructions.Add(new PlanTakeExposure(lum));
+
+            instructions.Add(new PlanSetReadoutMode(red));
+            instructions.Add(new PlanSwitchFilter(red));
+            instructions.Add(new PlanTakeExposure(red));
+            instructions.Add(new PlanTakeExposure(red));
+
+            return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions, false);
+        }
+
+        private SchedulerPlan SyncPlan2() {
+            DateTime endTime = atTime.AddMinutes(5);
+            TimeInterval timeInterval = new TimeInterval(atTime, endTime);
+
+            IPlanProject planProject = new PlanProjectEmulator();
+            planProject.Name = "Sync2-P1";
+            planProject.DatabaseId = 1;
+            planProject.UseCustomHorizon = false;
+            planProject.MinimumAltitude = 10;
+            planProject.DitherEvery = 0;
+            planProject.EnableGrader = true;
+            planProject.FlatsHandling = Project.FLATS_HANDLING_TARGET_COMPLETION;
+
+            IPlanTarget planTarget = GetBasePlanTarget("Sync2-T1", planProject, Cp5n5);
+            planTarget.DatabaseId = 1;
+            planTarget.EndTime = endTime;
+            planTarget.Rotation = 12.345;
+            planTarget.ROI = 100;
+
+            IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3, 1);
+            lum.ReadoutMode = 0;
+            planTarget.ExposurePlans.Add(lum);
+
+            IPlanExposure red = GetExposurePlan("Red", 4, null, null, 3, 2);
+            red.ReadoutMode = 0;
+            planTarget.ExposurePlans.Add(red);
+
+            List<IPlanInstruction> instructions = new List<IPlanInstruction>();
+            instructions.Add(new PlanMessage("planner emulator: SyncPlan2"));
+            //instructions.Add(new PlanSlew(true));
+            instructions.Add(new PlanBeforeNewTargetContainer());
+
+            instructions.Add(new PlanSetReadoutMode(lum));
+            instructions.Add(new PlanSwitchFilter(lum));
+            instructions.Add(new PlanTakeExposure(lum));
+            instructions.Add(new PlanTakeExposure(lum));
 
             instructions.Add(new PlanSetReadoutMode(red));
             instructions.Add(new PlanSwitchFilter(red));

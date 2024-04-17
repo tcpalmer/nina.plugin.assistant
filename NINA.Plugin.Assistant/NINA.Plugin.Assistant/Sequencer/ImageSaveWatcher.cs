@@ -10,6 +10,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Data.Entity.Migrations;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -94,8 +95,15 @@ namespace Assistant.NINAPlugin.Sequencer {
             bool accepted = false;
             string rejectReason = "not graded";
 
+            int? imageId = msg.MetaData?.Image?.Id;
+            IPlanExposure planExposure = GetPlanExposure(imageId);
+            if (planExposure == null) {
+                TSLogger.Error($"failed to get planExposure for image ID: {imageId}, aborting image save");
+                return;
+            }
+
             if (enableGrader) {
-                (accepted, rejectReason) = new ImageGrader(profile).GradeImage(planTarget, msg);
+                (accepted, rejectReason) = new ImageGrader(profile).GradeImage(planTarget, msg, planExposure.FilterName);
                 if (!accepted && profilePreference.EnableMoveRejected) {
                     string dstDir = Path.Combine(Path.GetDirectoryName(msg.PathToImage.LocalPath), REJECTED_SUBDIR);
                     TSLogger.Debug($"moving rejected image to {dstDir}");
@@ -103,10 +111,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
             }
 
-            int? imageId = msg.MetaData?.Image?.Id;
-            TSLogger.Debug($"image save for {planTarget.Project.Name}/{planTarget.Name}, filter={msg.Filter}, grader enabled={enableGrader}, accepted={accepted}, rejectReason={rejectReason}, image id={imageId}");
-
-            UpdateDatabase(planTarget, msg.Filter, accepted, rejectReason, msg, imageId);
+            TSLogger.Debug($"image save for {planTarget.Project.Name}/{planTarget.Name}, filter={planExposure.FilterName}, grader enabled={enableGrader}, accepted={accepted}, rejectReason={rejectReason}, image id={imageId}");
+            UpdateDatabase(planTarget, planExposure, planExposure.FilterName, accepted, rejectReason, msg);
 
             if (imageId != null) {
                 int old;
@@ -116,32 +122,35 @@ namespace Assistant.NINAPlugin.Sequencer {
             TSLogger.Debug($"ImageSaved: id={imageId}");
         }
 
-        private void UpdateDatabase(IPlanTarget planTarget, string filterName, bool accepted, string rejectReason, ImageSavedEventArgs msg, int? imageId) {
+        private IPlanExposure GetPlanExposure(int? imageId) {
+            IPlanExposure planExposure = null;
+
+            if (imageId != null) {
+                int exposureDatabaseId;
+                bool found = exposureDictionary.TryGetValue((int)imageId, out exposureDatabaseId);
+                if (found) {
+                    planExposure = planTarget.ExposurePlans.FirstOrDefault(ep => ep.DatabaseId == exposureDatabaseId);
+                    if (planExposure == null) {
+                        planExposure = planTarget.CompletedExposurePlans.FirstOrDefault(ep => ep.DatabaseId == exposureDatabaseId);
+                    }
+                }
+            }
+
+            return planExposure;
+        }
+
+        private void UpdateDatabase(IPlanTarget planTarget, IPlanExposure planExposure, string filterName, bool accepted, string rejectReason, ImageSavedEventArgs msg) {
             using (var context = new SchedulerDatabaseInteraction().GetContext()) {
                 using (var transaction = context.Database.BeginTransaction()) {
                     try {
-                        ExposurePlan exposurePlan = null;
-
-                        if (imageId != null) {
-                            int exposureDatabaseId;
-                            bool found = exposureDictionary.TryGetValue((int)imageId, out exposureDatabaseId);
-
-                            if (found) {
-                                // Update the exposure plan record
-                                exposurePlan = context.GetExposurePlan(exposureDatabaseId);
-                                if (exposurePlan != null) {
-                                    exposurePlan.Acquired++;
-
-                                    if (accepted) { exposurePlan.Accepted++; }
-                                    context.ExposurePlanSet.AddOrUpdate(exposurePlan);
-                                } else {
-                                    TSLogger.Warning($"failed to get exposure plan for id={exposureDatabaseId}, image id={imageId}");
-                                }
-                            } else {
-                                TSLogger.Warning($"not waiting for image id={imageId}");
-                            }
+                        // Update the exposure plan record
+                        ExposurePlan exposurePlan = context.GetExposurePlan(planExposure.DatabaseId);
+                        if (exposurePlan != null) {
+                            exposurePlan.Acquired++;
+                            if (accepted) { exposurePlan.Accepted++; }
+                            context.ExposurePlanSet.AddOrUpdate(exposurePlan);
                         } else {
-                            TSLogger.Warning("no image id to determine exposure plan database id?!");
+                            TSLogger.Warning($"failed to get exposure plan for id={planExposure.DatabaseId}");
                         }
 
                         // Save the acquired image record
@@ -150,10 +159,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                             planTarget.Project.DatabaseId,
                             planTarget.DatabaseId,
                             msg.MetaData.Image.ExposureStart,
-                            GetFilterName(filterName, exposurePlan),
+                            filterName,
                             accepted,
                             rejectReason,
-                            new ImageMetadata(msg, planTarget.Project.SessionId, planTarget.ROI, exposurePlan?.ExposureTemplate.ReadoutMode));
+                            new ImageMetadata(msg, planTarget.Project.SessionId, planTarget.ROI, planExposure.ReadoutMode));
                         context.AcquiredImageSet.Add(acquiredImage);
 
                         context.SaveChanges();
@@ -164,16 +173,6 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
                 }
             }
-        }
-
-        private string GetFilterName(string filterName, ExposurePlan exposurePlan) {
-            if (!string.IsNullOrEmpty(filterName)) {
-                return filterName;
-            }
-
-            // OSC users may not have a filter wheel so metadata doesn't have filter name
-            string fromTemplate = exposurePlan?.ExposureTemplate?.FilterName;
-            return fromTemplate == null ? "n/a" : fromTemplate;
         }
 
         private Task BeforeFinalizeImageSaved(object sender, BeforeFinalizeImageSavedEventArgs args) {
