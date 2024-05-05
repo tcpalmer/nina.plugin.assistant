@@ -1,13 +1,13 @@
-﻿<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ac="clr-namespace:Assistant.NINAPlugin.Controls.Converters"
-    xmlns:nc="clr-namespace:NINA.Core.Utility.Converters;assembly=NINA.Core">
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ac="clr-namespace:Assistant.NINAPlugin.Controls.Converters"
+                    xmlns:nc="clr-namespace:NINA.Core.Utility.Converters;assembly=NINA.Core">
 
     <ac:AllowEmptyConverter x:Key="AllowEmptyConverter" />
     <ac:ImagingMinutesConverter x:Key="ImagingMinutesConverter" />
     <ac:AltitudeChoicesConverter x:Key="AltitudeChoicesConverter" />
     <ac:FlatsHandlingChoicesConverter x:Key="FlatsHandlingChoicesConverter" />
+    <ac:RelaxScaleChoicesConverter x:Key="RelaxScaleChoicesConverter" />
     <nc:BooleanToVisibilityCollapsedConverter x:Key="BooleanToVisibilityCollapsedConverter" />
     <nc:InverseBooleanToVisibilityCollapsedConverter x:Key="InverseBooleanToVisibilityCollapsedConverter" />
     <nc:MinusOneToEmptyStringConverter x:Key="MinusOneToEmptyStringConverter" />

@@ -559,6 +559,10 @@ namespace Assistant.NINAPlugin.Plan {
         public bool MoonAvoidanceEnabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public double MoonAvoidanceSeparation { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public int MoonAvoidanceWidth { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public double MoonMaxAltitude { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public double MoonRelaxScale { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public double MoonRelaxMaxAltitude { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public double MoonRelaxMinAltitude { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public double MaximumHumidity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public PlanExposureEmulator() {

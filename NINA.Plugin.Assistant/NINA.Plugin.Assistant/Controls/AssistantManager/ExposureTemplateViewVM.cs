@@ -1,4 +1,5 @@
-﻿using Assistant.NINAPlugin.Database.Schema;
+﻿using Assistant.NINAPlugin.Controls.Converters;
+using Assistant.NINAPlugin.Database.Schema;
 using NINA.Core.Model.Equipment;
 using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
@@ -39,6 +40,14 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                     new BinningMode(3,3),
                     new BinningMode(4,4),
             };
+
+            RelaxScaleChoices = [RelaxScaleChoicesConverter.OFF];
+            for (int d = 1; d <= 8; d++) {
+                RelaxScaleChoices.Add(d.ToString());
+            }
+
+            MoonAvoidanceEnabledProxy = ExposureTemplateProxy.Proxy.MoonAvoidanceEnabled;
+            RelaxScaleProxy = ExposureTemplateProxy.Proxy.MoonRelaxScale;
         }
 
         private List<string> GetFilterNamesForProfile() {
@@ -69,6 +78,62 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 _binningModeChoices = value;
                 RaisePropertyChanged(nameof(BinningModeChoices));
             }
+        }
+
+        private bool _relaxEnabled;
+
+        public bool RelaxEnabled {
+            get => _relaxEnabled;
+            set {
+                _relaxEnabled = value;
+                RaisePropertyChanged(nameof(RelaxEnabled));
+            }
+        }
+
+        private List<string> _relaxScaleChoices;
+
+        public List<string> RelaxScaleChoices {
+            get {
+                return _relaxScaleChoices;
+            }
+            set {
+                _relaxScaleChoices = value;
+                RaisePropertyChanged(nameof(RelaxScaleChoices));
+            }
+        }
+
+        // These proxies let us manage enable/disable of avoidance relaxed fields
+
+        private bool _moonAvoidanceEnabledProxy;
+
+        public bool MoonAvoidanceEnabledProxy {
+            get {
+                return _moonAvoidanceEnabledProxy;
+            }
+            set {
+                _moonAvoidanceEnabledProxy = value;
+                ExposureTemplateProxy.Proxy.MoonAvoidanceEnabled = _moonAvoidanceEnabledProxy;
+                RaisePropertyChanged(nameof(MoonAvoidanceEnabledProxy));
+                SetRelaxEnabled();
+            }
+        }
+
+        private double _relaxScaleProxy;
+
+        public double RelaxScaleProxy {
+            get {
+                return _relaxScaleProxy;
+            }
+            set {
+                _relaxScaleProxy = value;
+                ExposureTemplateProxy.Proxy.MoonRelaxScale = _relaxScaleProxy;
+                RaisePropertyChanged(nameof(RelaxScaleProxy));
+                SetRelaxEnabled();
+            }
+        }
+
+        private void SetRelaxEnabled() {
+            RelaxEnabled = ExposureTemplateProxy.Proxy.MoonAvoidanceEnabled && RelaxScaleProxy > 0;
         }
 
         private ExposureTemplateProxy exposureTemplateProxy;

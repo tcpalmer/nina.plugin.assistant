@@ -10,5 +10,8 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ExposureTemplateView() {
             InitializeComponent();
         }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+        }
     }
 }
