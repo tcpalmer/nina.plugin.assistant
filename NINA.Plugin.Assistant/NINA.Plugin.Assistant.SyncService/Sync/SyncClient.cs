@@ -42,7 +42,7 @@ namespace Assistant.NINAPlugin.Sync {
             };
 
             try {
-                RegistrationResponse response = base.Register(request, null, deadline: DateTime.UtcNow.AddSeconds(60));
+                RegistrationResponse response = base.Register(request, null, deadline: DateTime.UtcNow.AddSeconds(SyncManager.CLIENT_REGISTRATION_DEADLINE));
                 if (response.Success) {
                     ServerProfileId = response.ServerProfileId;
                     SetClientState(ClientState.Ready);
@@ -78,7 +78,7 @@ namespace Assistant.NINAPlugin.Sync {
                 ClientState = ClientState
             };
 
-            StatusResponse response = await base.KeepaliveAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: token);
+            StatusResponse response = await base.KeepaliveAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(SyncManager.CLIENT_BASIC_DEADLINE), cancellationToken: token);
             return response;
         }
 
@@ -94,7 +94,7 @@ namespace Assistant.NINAPlugin.Sync {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 while (true) {
-                    SyncWaitResponse response = await base.SyncWaitAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: token);
+                    SyncWaitResponse response = await base.SyncWaitAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(SyncManager.CLIENT_BASIC_DEADLINE), cancellationToken: token);
                     if (!response.Continue) {
                         TSLogger.Info("SYNC client sync wait completed");
                         break;
@@ -121,7 +121,7 @@ namespace Assistant.NINAPlugin.Sync {
 
             while (true) {
                 try {
-                    ActionResponse response = await base.RequestActionAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(5), cancellationToken: token);
+                    ActionResponse response = await base.RequestActionAsync(request, null, deadline: DateTime.UtcNow.AddSeconds(SyncManager.CLIENT_BASIC_DEADLINE), cancellationToken: token);
 
                     if (response.Terminate) {
                         TSLogger.Info("SYNC client completed");
