@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 4.3.8.0 - 2024-05-09
+* Fixed problem impacting sequences used for sync clients.
+
 ## 4.3.7.0 - 2024-05-05
 * Raised timeouts/deadlines for sync operations
 
