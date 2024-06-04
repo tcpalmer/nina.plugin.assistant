@@ -1,6 +1,7 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.PubSub;
 using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Core.Model;
@@ -10,6 +11,7 @@ using NINA.Equipment.Interfaces.Mediator;
 using NINA.PlateSolving.Interfaces;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.SyncService.Sync;
+using NINA.Plugin.Interfaces;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Container;
 using NINA.Sequencer.SequenceItem;
@@ -60,6 +62,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         private int syncActionTimeout;
         private int syncSolveRotateTimeout;
 
+        private TargetStartPublisher targetStartPublisher;
+
         public PlanTargetContainer(
                 TargetSchedulerContainer parentContainer,
                 IProfileService profileService,
@@ -76,6 +80,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 IDomeFollower domeFollower,
                 IPlateSolverFactory plateSolverFactory,
                 IWindowServiceFactory windowServiceFactory,
+                IMessageBroker messageBroker,
                 bool synchronizationEnabled,
                 IPlanTarget previousPlanTarget,
                 SchedulerPlan plan,
@@ -118,6 +123,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 ImageSaveWatcher = new ImageSaveWatcher(activeProfile, imageSaveMediator, plan.PlanTarget, synchronizationEnabled);
             else
                 ImageSaveWatcher = new ImageSaveWatcherEmulator();
+
+            targetStartPublisher = new TargetStartPublisher(messageBroker);
 
             // These have no impact on the container itself but are used to assign to each added instruction
             Attempts = 1;
@@ -203,6 +210,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 if (instruction is PlanBeforeNewTargetContainer) {
+                    targetStartPublisher.Publish(plan);
                     AddBeforeNewTargetInstructions();
                     continue;
                 }

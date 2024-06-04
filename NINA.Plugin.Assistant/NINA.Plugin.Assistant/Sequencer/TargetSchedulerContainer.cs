@@ -2,6 +2,7 @@
 using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.PubSub;
 using Assistant.NINAPlugin.Sync;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
@@ -16,6 +17,7 @@ using NINA.Equipment.Interfaces.Mediator;
 using NINA.PlateSolving.Interfaces;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.SyncService.Sync;
+using NINA.Plugin.Interfaces;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Conditions;
 using NINA.Sequencer.Container;
@@ -66,7 +68,9 @@ namespace Assistant.NINAPlugin.Sequencer {
         private readonly IWindowServiceFactory windowServiceFactory;
         private readonly IFramingAssistantVM framingAssistantVM;
         private readonly IApplicationMediator applicationMediator;
+        private readonly IMessageBroker messageBroker;
         private bool synchronizationEnabled;
+        private WaitStartPublisher waitStartPublisher;
 
         /* Before renaming BeforeTargetContainer and AfterTargetContainer to contain 'New'
          * (again) consider that it would break any existing sequence using those. */
@@ -111,7 +115,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 INighttimeCalculator nighttimeCalculator,
                 IWindowServiceFactory windowServiceFactory,
                 IFramingAssistantVM framingAssistantVM,
-                IApplicationMediator applicationMediator) : base() {
+                IApplicationMediator applicationMediator,
+                IMessageBroker messageBroker) : base() {
             this.profileService = profileService;
             this.dateTimeProviders = dateTimeProviders;
             this.telescopeMediator = telescopeMediator;
@@ -128,6 +133,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.nighttimeCalculator = nighttimeCalculator;
             this.windowServiceFactory = windowServiceFactory;
             this.applicationMediator = applicationMediator;
+            this.messageBroker = messageBroker;
             this.framingAssistantVM = framingAssistantVM;
 
             BeforeWaitContainer = new InstructionContainer("BeforeWait", Parent);
@@ -141,6 +147,8 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             TotalExposureCount = -1;
             ClearTarget();
+
+            waitStartPublisher = new WaitStartPublisher(messageBroker);
 
             WeakEventManager<IProfileService, EventArgs>.AddHandler(profileService, nameof(profileService.LocationChanged), ProfileService_LocationChanged);
             WeakEventManager<IProfileService, EventArgs>.AddHandler(profileService, nameof(profileService.HorizonChanged), ProfileService_HorizonChanged);
@@ -262,6 +270,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                     }
 
                     TSLogger.Info($"planner waiting for next target to become available: {Utils.FormatDateTimeFull(plan.WaitForNextTargetTime)}");
+                    waitStartPublisher.Publish((DateTime)plan.WaitForNextTargetTime);
 
                     SetSyncServerState(ServerState.PlanWait);
                     SchedulerProgress.WaitStart(plan.WaitForNextTargetTime);
@@ -384,9 +393,10 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private PlanTargetContainer GetPlanTargetContainer(IPlanTarget previousPlanTarget, SchedulerPlan plan, SchedulerProgressVM schedulerProgress) {
             PlanTargetContainer targetContainer = new PlanTargetContainer(this, profileService, dateTimeProviders, telescopeMediator,
-            rotatorMediator, guiderMediator, cameraMediator, imagingMediator, imageSaveMediator,
-            imageHistoryVM, filterWheelMediator, domeMediator, domeFollower,
-                plateSolverFactory, windowServiceFactory, synchronizationEnabled, previousPlanTarget, plan, schedulerProgress);
+                rotatorMediator, guiderMediator, cameraMediator, imagingMediator, imageSaveMediator,
+                imageHistoryVM, filterWheelMediator, domeMediator, domeFollower,
+                plateSolverFactory, windowServiceFactory, messageBroker,
+                synchronizationEnabled, previousPlanTarget, plan, schedulerProgress);
             return targetContainer;
         }
 
@@ -601,7 +611,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private DeepSkyObject GetDeepSkyObject(DateTime referenceDate, IProfile activeProfile, IPlanTarget planTarget, CustomHorizon customHorizon) {
-            DeepSkyObject dso = new DeepSkyObject(string.Empty, planTarget.Coordinates, null, customHorizon);
+            DeepSkyObject dso = new DeepSkyObject(string.Empty, planTarget.Coordinates, customHorizon);
             dso.Name = planTarget.Name;
             dso.SetDateAndPosition(referenceDate, activeProfile.AstrometrySettings.Latitude, activeProfile.AstrometrySettings.Longitude);
             dso.Refresh();
@@ -625,7 +635,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 cloneMe.nighttimeCalculator,
                 cloneMe.windowServiceFactory,
                 cloneMe.framingAssistantVM,
-                cloneMe.applicationMediator
+                cloneMe.applicationMediator,
+                cloneMe.messageBroker
             ) {
             CopyMetaData(cloneMe);
         }
@@ -648,7 +659,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 nighttimeCalculator,
                 windowServiceFactory,
                 framingAssistantVM,
-                applicationMediator) {
+                applicationMediator,
+                messageBroker) {
                 Icon = Icon,
                 Name = Name,
                 Category = Category,
