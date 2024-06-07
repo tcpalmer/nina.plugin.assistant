@@ -196,7 +196,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             MoonAvoidanceEnabled = false;
             MoonAvoidanceSeparation = 60;
             MoonAvoidanceWidth = 7;
-            MoonRelaxScale = 2;
+            MoonRelaxScale = 0;
             MoonRelaxMaxAltitude = 5;
             MoonRelaxMinAltitude = -15;
 
