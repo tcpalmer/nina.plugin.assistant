@@ -11,8 +11,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("windows")]
-[assembly: AssemblyVersion("4.3.8.0")]
-[assembly: AssemblyFileVersion("4.3.8.0")]
+[assembly: AssemblyVersion("4.4.0.0")]
+[assembly: AssemblyFileVersion("4.4.0.0")]
 
 // The minimum Version of N.I.N.A. that this plugin is compatible with
 [assembly: AssemblyMetadata("MinimumApplicationVersion", "3.0.0.3005")]
@@ -30,7 +30,7 @@ using System.Runtime.InteropServices;
 * Easy to use interface for entering and managing projects, targets, and exposure plans
 * Multiple target import options: NINA catalog, NINA Framing Assistant (including mosaic panels), attached planetarium programs, Telescopius CSV, and more
 * Dynamic target selection based on visibility and weighted scoring rules
-* Flexible exposure/filter planning including moon avoidance
+* Flexible exposure/filter planning including enhanced moon avoidance
 * Plan previewing
 * Image grading
 * Automated flats support

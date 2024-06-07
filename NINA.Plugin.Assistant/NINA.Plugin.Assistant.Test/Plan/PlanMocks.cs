@@ -90,6 +90,8 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pe.SetupProperty(m => m.Desired, desired);
             pe.SetupProperty(m => m.Acquired, 0);
             pe.SetupProperty(m => m.Accepted, accepted);
+            pe.SetupProperty(m => m.MoonRelaxScale, 0);
+
             pe.Setup(m => m.NeededExposures()).Returns(accepted > desired ? 0 : desired - accepted);
             pe.Setup(m => m.IsIncomplete()).Returns(accepted < desired);
             return pe;

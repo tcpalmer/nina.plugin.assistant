@@ -542,6 +542,9 @@ namespace Assistant.NINAPlugin.Plan {
         bool MoonAvoidanceEnabled { get; set; }
         double MoonAvoidanceSeparation { get; set; }
         int MoonAvoidanceWidth { get; set; }
+        double MoonRelaxScale { get; set; }
+        double MoonRelaxMaxAltitude { get; set; }
+        double MoonRelaxMinAltitude { get; set; }
         double MaximumHumidity { get; set; }
 
         bool Rejected { get; set; }
@@ -570,9 +573,14 @@ namespace Assistant.NINAPlugin.Plan {
         public IPlanTarget PlanTarget { get; set; }
 
         public TwilightLevel TwilightLevel { get; set; }
+
         public bool MoonAvoidanceEnabled { get; set; }
         public double MoonAvoidanceSeparation { get; set; }
         public int MoonAvoidanceWidth { get; set; }
+        public double MoonRelaxScale { get; set; }
+        public double MoonRelaxMaxAltitude { get; set; }
+        public double MoonRelaxMinAltitude { get; set; }
+
         public double MaximumHumidity { get; set; }
 
         public bool Rejected { get; set; }
@@ -595,9 +603,14 @@ namespace Assistant.NINAPlugin.Plan {
             this.PlanTarget = planTarget;
 
             this.TwilightLevel = exposureTemplate.TwilightLevel;
+
             this.MoonAvoidanceEnabled = exposureTemplate.MoonAvoidanceEnabled;
             this.MoonAvoidanceSeparation = exposureTemplate.MoonAvoidanceSeparation;
             this.MoonAvoidanceWidth = exposureTemplate.MoonAvoidanceWidth;
+            this.MoonRelaxScale = exposureTemplate.MoonRelaxScale;
+            this.MoonRelaxMaxAltitude = exposureTemplate.MoonRelaxMaxAltitude;
+            this.MoonRelaxMinAltitude = exposureTemplate.MoonRelaxMinAltitude;
+
             this.MaximumHumidity = exposureTemplate.MaximumHumidity;
 
             this.Rejected = false;

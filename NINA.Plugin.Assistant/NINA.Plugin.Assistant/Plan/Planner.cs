@@ -273,6 +273,7 @@ namespace Assistant.NINAPlugin.Plan {
         /// <returns></returns>
         public List<IPlanProject> FilterForMoonAvoidance(List<IPlanProject> projects) {
             if (NoProjects(projects)) { return null; }
+            MoonAvoidanceExpert expert = new MoonAvoidanceExpert(observerInfo);
 
             foreach (IPlanProject planProject in projects) {
                 if (planProject.Rejected) { continue; }
@@ -281,8 +282,8 @@ namespace Assistant.NINAPlugin.Plan {
                     if (planTarget.Rejected && planTarget.RejectedReason != Reasons.TargetNotYetVisible) { continue; }
 
                     foreach (IPlanExposure planExposure in planTarget.ExposurePlans) {
-                        if (planExposure.IsIncomplete() && planExposure.MoonAvoidanceEnabled) {
-                            if (RejectForMoonAvoidance(planTarget, planExposure)) {
+                        if (planExposure.IsIncomplete()) {
+                            if (expert.IsRejected(planTarget, planExposure)) {
                                 SetRejected(planExposure, Reasons.FilterMoonAvoidance);
                             }
                         }
@@ -515,7 +516,7 @@ namespace Assistant.NINAPlugin.Plan {
             return twilightLevel;
         }
 
-        private bool RejectForMoonAvoidance(IPlanTarget planTarget, IPlanExposure planExposure) {
+        private bool RejectForMoonAvoidanceOLD(IPlanTarget planTarget, IPlanExposure planExposure) {
             DateTime midPointTime = Utils.GetMidpointTime(planTarget.StartTime, planTarget.EndTime);
             double moonAge = AstrometryUtils.GetMoonAge(midPointTime);
             double moonSeparation = AstrometryUtils.GetMoonSeparationAngle(observerInfo, midPointTime, planTarget.Coordinates);

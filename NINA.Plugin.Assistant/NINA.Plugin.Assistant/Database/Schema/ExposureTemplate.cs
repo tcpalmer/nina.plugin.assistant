@@ -23,9 +23,14 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public int readoutMode { get; set; }
 
         public int twilightlevel_col { get; set; }
+
         public bool moonAvoidanceEnabled { get; set; }
         public double moonAvoidanceSeparation { get; set; }
         public int moonAvoidanceWidth { get; set; }
+        public double moonRelaxScale { get; set; }
+        public double moonRelaxMaxAltitude { get; set; }
+        public double moonRelaxMinAltitude { get; set; }
+
         public double maximumHumidity { get; set; }
 
         [NotMapped]
@@ -137,6 +142,33 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
+        public double MoonRelaxScale {
+            get { return moonRelaxScale; }
+            set {
+                moonRelaxScale = value;
+                RaisePropertyChanged(nameof(MoonRelaxScale));
+            }
+        }
+
+        [NotMapped]
+        public double MoonRelaxMaxAltitude {
+            get { return moonRelaxMaxAltitude; }
+            set {
+                moonRelaxMaxAltitude = value;
+                RaisePropertyChanged(nameof(MoonRelaxMaxAltitude));
+            }
+        }
+
+        [NotMapped]
+        public double MoonRelaxMinAltitude {
+            get { return moonRelaxMinAltitude; }
+            set {
+                moonRelaxMinAltitude = value;
+                RaisePropertyChanged(nameof(MoonRelaxMinAltitude));
+            }
+        }
+
+        [NotMapped]
         public double MaximumHumidity {
             get { return maximumHumidity; }
             set {
@@ -160,9 +192,14 @@ namespace Assistant.NINAPlugin.Database.Schema {
             ReadoutMode = -1;
 
             TwilightLevel = TwilightLevel.Nighttime;
+
             MoonAvoidanceEnabled = false;
             MoonAvoidanceSeparation = 60;
             MoonAvoidanceWidth = 7;
+            MoonRelaxScale = 0;
+            MoonRelaxMaxAltitude = 5;
+            MoonRelaxMinAltitude = -15;
+
             MaximumHumidity = 0;
         }
 
@@ -194,6 +231,9 @@ namespace Assistant.NINAPlugin.Database.Schema {
             copy.MoonAvoidanceEnabled = MoonAvoidanceEnabled;
             copy.MoonAvoidanceSeparation = MoonAvoidanceSeparation;
             copy.MoonAvoidanceWidth = MoonAvoidanceWidth;
+            copy.MoonRelaxScale = MoonRelaxScale;
+            copy.MoonRelaxMaxAltitude = MoonRelaxMaxAltitude;
+            copy.MoonRelaxMinAltitude = MoonRelaxMinAltitude;
             copy.MaximumHumidity = MaximumHumidity;
 
             return copy;
@@ -213,6 +253,9 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"MoonAvoidanceEnabled: {MoonAvoidanceEnabled}");
             sb.AppendLine($"MoonAvoidanceSeparation: {MoonAvoidanceSeparation}");
             sb.AppendLine($"MoonAvoidanceWidth: {MoonAvoidanceWidth}");
+            sb.AppendLine($"MoonRelaxScale: {MoonRelaxScale}");
+            sb.AppendLine($"MoonRelaxMaxAltitude: {MoonRelaxMaxAltitude}");
+            sb.AppendLine($"MoonRelaxMinAltitude: {MoonRelaxMinAltitude}");
             sb.AppendLine($"MaximumHumidity: {MaximumHumidity}");
 
             return sb.ToString();
