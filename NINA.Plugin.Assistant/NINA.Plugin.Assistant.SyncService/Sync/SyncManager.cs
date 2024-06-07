@@ -18,7 +18,7 @@ namespace NINA.Plugin.Assistant.SyncService.Sync {
 
         public static readonly int SERVER_WAIT_POLL_PERIOD = 500;
         public static readonly int SERVER_STALE_CLIENT_PURGE_CHECK_PERIOD = 3000;
-        public static readonly int SERVER_STALE_CLIENT_PURGE_TIMEOUT = 10;
+        public static readonly int SERVER_STALE_CLIENT_PURGE_TIMEOUT = 120;
         public static readonly int SERVER_AWAIT_EXPOSURE_POLL_PERIOD = 1000;
         public static readonly int SERVER_AWAIT_EXPOSURE_COMPLETE_POLL_PERIOD = 1000;
         public static readonly int SERVER_AWAIT_EXPOSURE_COMPLETE_TIMEOUT = 30;
@@ -27,6 +27,8 @@ namespace NINA.Plugin.Assistant.SyncService.Sync {
         public static readonly int CLIENT_KEEPALIVE_PERIOD = 3000;
         public static readonly int CLIENT_WAIT_POLL_PERIOD = 1000;
         public static readonly int CLIENT_ACTION_READY_POLL_PERIOD = 3000;
+        public static readonly int CLIENT_REGISTRATION_DEADLINE = 60;
+        public static readonly int CLIENT_BASIC_DEADLINE = 20;
         public static readonly int DEFAULT_SYNC_WAIT_TIMEOUT = 300;
         public static readonly int DEFAULT_SYNC_ACTION_TIMEOUT = 300;
         public static readonly int DEFAULT_SYNC_SOLVEROTATE_TIMEOUT = 300;

@@ -191,6 +191,13 @@ namespace Assistant.NINAPlugin.Sequencer {
             syncImageSaveWatcher.Stop();
         }
 
+        [OnSerializing]
+        public void OnSerializing(StreamingContext context) {
+            this.Items.Clear();
+            this.Conditions.Clear();
+            this.Triggers.Clear();
+        }
+
         [OnDeserializing]
         public void OnDeserializing(StreamingContext context) {
             this.Items.Clear();

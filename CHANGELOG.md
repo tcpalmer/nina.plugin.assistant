@@ -3,6 +3,12 @@
 ## 4.4.0.0 - 2024-05-XX
 * Added ability to progressively relax classic moon avoidance when the moon is near or below the horizon
 
+## 4.3.8.0 - 2024-05-09
+* Fixed problem impacting sequences used for sync clients.
+
+## 4.3.7.0 - 2024-05-05
+* Raised timeouts/deadlines for sync operations
+
 ## 4.3.6.0 - 2024-04-17
 * Added Target Scheduler Background Condition
 * TS Container UI reworked to be more like a standard container and with better scrolling behavior (thanks Stefan)
