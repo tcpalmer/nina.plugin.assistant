@@ -212,6 +212,13 @@ namespace Assistant.NINAPlugin.Plan {
                     NighttimeCircumstances nighttimeCircumstances = NighttimeCircumstances.AdjustNighttimeCircumstances(observerInfo, atTime);
                     TimeInterval twilightSpan = nighttimeCircumstances.GetTwilightSpan(GetOverallTwilight(planTarget));
 
+                    // At high latitudes near the summer solsice, you can lose nighttime completely (even below the polar circle)
+                    if (twilightSpan == null) {
+                        TSLogger.Warning($"No twilight span for target {planProject.Name}/{planTarget.Name} on {Utils.FormatDateTimeFull(atTime)} at latitude {observerInfo.Latitude}");
+                        SetRejected(planTarget, Reasons.TargetAllExposurePlans);
+                        continue;
+                    }
+
                     // Determine the potential imaging time span
                     TargetCircumstances targetCircumstances = new TargetCircumstances(planTarget.Coordinates, observerInfo, planProject.HorizonDefinition, twilightSpan);
 
