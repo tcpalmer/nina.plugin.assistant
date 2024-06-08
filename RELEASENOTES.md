@@ -1,7 +1,10 @@
 # Release Notes
 
-## 4.4.0.0 - 2024-05-XX
+## 4.4.0.0 - 2024-06-08
 * Added ability to progressively relax classic moon avoidance when the moon is near or below the horizon
+* Fixed (hopefully) crash when making some TS database changes after other NINA operations
+* Fixed bug with nighttime only exposures and high latitudes near summer solstice
+* Fixed bug logging training flat details which broke taking some flats
 
 ## 4.3.8.0 - 2024-05-09
 * Fixed problem impacting sequences used for sync clients.

@@ -441,8 +441,10 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             StringBuilder sb = new StringBuilder();
             foreach (TrainedFlatExposureSetting trainedFlat in settings) {
-                string filterName = profileService.ActiveProfile.FilterWheelSettings.FilterWheelFilters[trainedFlat.Filter].Name;
-                sb.AppendLine($"    filter[{trainedFlat.Filter}]: {filterName} gain: {trainedFlat.Gain} offset: {trainedFlat.Offset} binning: {trainedFlat.Binning} exposure: {trainedFlat.Time} brightness: {trainedFlat.Brightness}");
+                FilterInfo filterInfo = profileService.ActiveProfile.FilterWheelSettings.FilterWheelFilters[trainedFlat.Filter];
+                if (filterInfo != null) {
+                    sb.AppendLine($"    filter[{trainedFlat.Filter}]: {filterInfo.Name} gain: {trainedFlat.Gain} offset: {trainedFlat.Offset} binning: {trainedFlat.Binning} exposure: {trainedFlat.Time} brightness: {trainedFlat.Brightness}");
+                }
             }
 
             TSLogger.Debug($"TS Flats: trained flat exposure details:\n{sb}");
