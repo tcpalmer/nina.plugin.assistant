@@ -956,11 +956,18 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         private void InitializeProjectsColorize() {
             profileService.ActiveProfile.PropertyChanged += ActiveProfile_PropertyChanged;
             profileService.ActiveProfile.ColorSchemaSettings.PropertyChanged += ColorSchemaSettings_PropertyChanged;
+
             ColorSchemaPrimaryColorBrush = (SolidColorBrush)new BrushConverter().ConvertFromString(profileService.ActiveProfile.ColorSchemaSettings.ColorSchema.PrimaryColor.ToString());
+            ColorSchemaPrimaryColorBrush.Freeze();
+            ActiveBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#008000"));
+            ActiveBrush.Freeze();
+            InactiveBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC143C"));
+            InactiveBrush.Freeze();
         }
 
         private void ActiveProfile_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             ColorSchemaPrimaryColorBrush = new SolidColorBrush(profileService.ActiveProfile.ColorSchemaSettings.ColorSchema.PrimaryColor);
+            ColorSchemaPrimaryColorBrush.Freeze();
 
             // TODO: following not working?
             RaisePropertyChanged(nameof(ProjectsTreeViewVM));
@@ -968,14 +975,15 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private void ColorSchemaSettings_PropertyChanged(object sender, PropertyChangedEventArgs e) {
             ColorSchemaPrimaryColorBrush = new SolidColorBrush(profileService.ActiveProfile.ColorSchemaSettings.ColorSchema.PrimaryColor);
+            ColorSchemaPrimaryColorBrush.Freeze();
 
             // TODO: following not working?
             RaisePropertyChanged(nameof(ProjectsTreeViewVM));
         }
 
         private Brush ColorSchemaPrimaryColorBrush;
-        private static Brush ActiveBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#008000"));
-        private static Brush InactiveBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DC143C"));
+        private Brush ActiveBrush;
+        private Brush InactiveBrush;
 
         internal void SetTreeColorizeMode(bool colorize) {
             ExposureCompletionHelper helper = null;
