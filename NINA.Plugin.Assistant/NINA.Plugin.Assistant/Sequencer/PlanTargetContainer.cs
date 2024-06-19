@@ -261,7 +261,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator);
             SetItemDefaults(switchFilter, nameof(SwitchFilter));
 
-            switchFilter.Filter = Utils.LookupFilter(profileService, planExposure.FilterName);
+            switchFilter.Filter = Utils.LookupFilter(profileService.ActiveProfile, planExposure.FilterName);
             Add(switchFilter);
         }
 

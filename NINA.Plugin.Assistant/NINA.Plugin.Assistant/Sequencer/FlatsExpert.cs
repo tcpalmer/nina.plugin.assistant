@@ -4,9 +4,11 @@ using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Util;
 using NINA.Core.Model.Equipment;
 using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Profile;
 using NINA.Profile.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
@@ -223,6 +225,87 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 return targets;
             }
+        }
+
+        /// <summary>
+        /// Find the best match in trained flat exposures for the flat spec.
+        /// </summary>
+        /// <param name="profile"></param>
+        /// <param name="flatSpec"></param>
+        /// <returns></returns>
+        public TrainedFlatExposureSetting GetTrainedFlatExposureSetting(IProfile profile, FlatSpec flatSpec) {
+            int filterPosition = GetFilterPosition(profile, flatSpec.FilterName);
+            if (filterPosition == -1) { return null; }
+
+            Collection<TrainedFlatExposureSetting> settings = profile.FlatDeviceSettings.TrainedFlatExposureSettings;
+            TrainedFlatExposureSetting setting;
+
+            // Exact match?
+            setting = settings.FirstOrDefault(
+                setting => setting.Filter == filterPosition
+                && setting.Binning.X == flatSpec.BinningMode.X
+                && setting.Binning.Y == flatSpec.BinningMode.Y
+                && setting.Gain == flatSpec.Gain
+                && setting.Offset == flatSpec.Offset);
+            if (setting != null) { return setting; }
+
+            // Match without gain?
+            setting = settings.FirstOrDefault(
+                x => x.Filter == filterPosition
+                && x.Binning.X == flatSpec.BinningMode.X
+                && x.Binning.Y == flatSpec.BinningMode.Y
+                && x.Gain == -1
+                && x.Offset == flatSpec.Offset);
+            if (setting != null) { return setting; }
+
+            // Match without offset?
+            setting = settings.FirstOrDefault(
+                x => x.Filter == filterPosition
+                && x.Binning.X == flatSpec.BinningMode.X
+                && x.Binning.Y == flatSpec.BinningMode.Y
+                && x.Gain == flatSpec.Gain
+                && x.Offset == -1);
+            if (setting != null) { return setting; }
+
+            // Match without gain or offset?
+            setting = settings.FirstOrDefault(
+                x => x.Filter == filterPosition
+                && x.Binning.X == flatSpec.BinningMode.X
+                && x.Binning.Y == flatSpec.BinningMode.Y
+                && x.Gain == -1
+                && x.Offset == -1);
+            if (setting != null) { return setting; }
+
+            // Match without considering gain or offset?
+            setting = settings.FirstOrDefault(
+                x => x.Filter == filterPosition
+                && x.Binning.X == flatSpec.BinningMode.X
+                && x.Binning.Y == flatSpec.BinningMode.Y);
+
+            return setting;
+        }
+
+        /// <summary>
+        /// Get the filter position in the filter wheel.
+        /// </summary>
+        /// <param name="profile"></param>
+        /// <param name="filterName"></param>
+        /// <returns></returns>
+        public short GetFilterPosition(IProfile profile, string filterName) {
+            FilterInfo info = null;
+            try {
+                info = Utils.LookupFilter(profile, filterName);
+            } catch (Exception ex) {
+                TSLogger.Error($"No configured filter in filter wheel for filter '{filterName}'");
+                return -1;
+            }
+
+            if (info != null) {
+                return info.Position;
+            }
+
+            TSLogger.Error($"No configured filter in filter wheel for filter '{filterName}'");
+            return -1;
         }
 
         /// <summary>

@@ -1,5 +1,9 @@
 # Target Scheduler
 
+## 4.5.0.0 - 2024-06-19
+* Relaxed matching criteria for trained flats, will now match if gain or offset is not equal
+* Added additional logging for flat panel operations
+
 ## 4.4.0.0 - 2024-06-08
 * Added ability to progressively relax classic moon avoidance when the moon is near or below the horizon
 * Fixed (hopefully) crash when making some TS database changes after other NINA operations

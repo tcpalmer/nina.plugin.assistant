@@ -31,7 +31,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -148,7 +147,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             Target target = GetTarget(neededFlat.TargetId);
 
             try {
-                TrainedFlatExposureSetting setting = GetTrainedFlatExposureSetting(flatSpec);
+                TrainedFlatExposureSetting setting = new FlatsExpert().GetTrainedFlatExposureSetting(profileService.ActiveProfile, flatSpec);
                 if (setting == null) {
                     TSLogger.Warning($"TS Flats: failed to find trained settings for {flatSpec}");
                     Notification.ShowWarning($"TS Flats: failed to find trained settings for {flatSpec}");
@@ -174,7 +173,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 // Switch filters
                 TSLogger.Info($"TS Flats: switching filter: {flatSpec.FilterName}");
-                SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator) { Filter = Utils.LookupFilter(profileService, flatSpec.FilterName) };
+                SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator) { Filter = Utils.LookupFilter(profileService.ActiveProfile, flatSpec.FilterName) };
                 await switchFilter.Execute(progress, token);
 
                 // Set the panel brightness
@@ -360,61 +359,6 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             Issues = i;
             return i.Count == 0;
-        }
-
-        protected TrainedFlatExposureSetting GetTrainedFlatExposureSetting(FlatSpec flatSpec) {
-            int filterPosition = GetFilterPosition(flatSpec.FilterName);
-            if (filterPosition == -1) { return null; }
-
-            Collection<TrainedFlatExposureSetting> settings = profileService.ActiveProfile.FlatDeviceSettings.TrainedFlatExposureSettings;
-            TrainedFlatExposureSetting setting;
-
-            // Exact match?
-            setting = settings.FirstOrDefault(
-                setting => setting.Filter == filterPosition
-                && setting.Binning.X == flatSpec.BinningMode.X
-                && setting.Binning.Y == flatSpec.BinningMode.Y
-                && setting.Gain == flatSpec.Gain
-                && setting.Offset == flatSpec.Offset);
-            if (setting != null) { return setting; }
-
-            // Match without gain?
-            setting = settings.FirstOrDefault(
-                x => x.Filter == filterPosition
-                && x.Binning.X == flatSpec.BinningMode.X
-                && x.Binning.Y == flatSpec.BinningMode.Y
-                && x.Gain == -1
-                && x.Offset == flatSpec.Offset);
-            if (setting != null) { return setting; }
-
-            // Match without offset?
-            setting = settings.FirstOrDefault(
-                x => x.Filter == filterPosition
-                && x.Binning.X == flatSpec.BinningMode.X
-                && x.Binning.Y == flatSpec.BinningMode.Y
-                && x.Gain == flatSpec.Gain
-                && x.Offset == -1);
-            if (setting != null) { return setting; }
-
-            // Match without gain or offset?
-            setting = settings.FirstOrDefault(
-                x => x.Filter == filterPosition
-                && x.Binning.X == flatSpec.BinningMode.X
-                && x.Binning.Y == flatSpec.BinningMode.Y
-                && x.Gain == -1
-                && x.Offset == -1);
-
-            return setting;
-        }
-
-        protected short GetFilterPosition(string filterName) {
-            FilterInfo info = Utils.LookupFilter(profileService, filterName);
-            if (info != null) {
-                return info.Position;
-            }
-
-            TSLogger.Error($"No configured filter in filter wheel for filter '{filterName}'");
-            return -1;
         }
 
         protected void LogTrainedFlatDetails() {
