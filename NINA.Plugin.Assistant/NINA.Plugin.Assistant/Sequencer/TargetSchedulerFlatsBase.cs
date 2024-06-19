@@ -287,12 +287,14 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             coverState = flatDeviceMediator.GetInfo().CoverState;
             if (coverState != CoverState.Closed) {
-                throw new SequenceEntityFailedException($"Failed to close flat cover");
+                TSLogger.Error("TS Flats: failed to close flat cover");
+                throw new SequenceEntityFailedException("TS Flats: failed to close flat cover");
             }
         }
 
         protected async Task OpenCover(IProgress<ApplicationStatus> progress, CancellationToken token) {
             if (!flatDeviceMediator.GetInfo().SupportsOpenClose) {
+                TSLogger.Info("TS Flats: flat panel doesn't support open/close");
                 return;
             }
 
@@ -305,15 +307,18 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             if (coverState == CoverState.Open) {
+                TSLogger.Warning("TS Flats: flat panel is unexpectedly already open");
                 return;
             }
 
             TSLogger.Info("TS Flats: opening flat device");
             await flatDeviceMediator.OpenCover(progress, token);
+            TSLogger.Info("TS Flats: flat device opened");
 
             coverState = flatDeviceMediator.GetInfo().CoverState;
             if (coverState != CoverState.Open) {
-                throw new SequenceEntityFailedException($"Failed to open flat cover");
+                TSLogger.Error("TS Flats: failed to open flat cover");
+                throw new SequenceEntityFailedException($"TS Flats: failed to open flat cover");
             }
         }
 
@@ -326,7 +331,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             await flatDeviceMediator.ToggleLight(onOff, progress, token);
 
             if (flatDeviceMediator.GetInfo().LightOn != onOff) {
-                throw new SequenceEntityFailedException($"Failed to toggle flat panel light");
+                TSLogger.Error("TS Flats: failed to toggle flat panel light");
+                throw new SequenceEntityFailedException($"TS Flats: failed to toggle flat panel light");
             }
         }
 
