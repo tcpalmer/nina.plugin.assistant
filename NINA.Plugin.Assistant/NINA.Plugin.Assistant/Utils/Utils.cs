@@ -16,8 +16,8 @@ namespace Assistant.NINAPlugin.Util {
     public class Utils {
         public static readonly string DateFMT = "yyyy-MM-dd HH:mm:ss";
 
-        public static FilterInfo LookupFilter(IProfileService profileService, string filterName) {
-            foreach (FilterInfo filterInfo in profileService?.ActiveProfile?.FilterWheelSettings?.FilterWheelFilters) {
+        public static FilterInfo LookupFilter(IProfile profile, string filterName) {
+            foreach (FilterInfo filterInfo in profile?.FilterWheelSettings?.FilterWheelFilters) {
                 if (filterInfo.Name == filterName) {
                     return filterInfo;
                 }

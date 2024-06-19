@@ -100,7 +100,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private ISequenceItem GetSwitchFilter() {
             SwitchFilter switchFilter = new SwitchFilter(profileService, filterWheelMediator);
-            switchFilter.Filter = Utils.LookupFilter(profileService, exposureTemplate.FilterName);
+            switchFilter.Filter = Utils.LookupFilter(profileService.ActiveProfile, exposureTemplate.FilterName);
             switchFilter.Category = PlanTargetContainer.INSTRUCTION_CATEGORY;
 
             return switchFilter;

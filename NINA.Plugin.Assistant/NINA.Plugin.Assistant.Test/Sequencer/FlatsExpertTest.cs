@@ -4,7 +4,9 @@ using Assistant.NINAPlugin.Util;
 using FluentAssertions;
 using Moq;
 using NINA.Core.Model.Equipment;
+using NINA.Core.Utility;
 using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NUnit.Framework;
 using System;
@@ -310,6 +312,69 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
             // ... but not if Always repeat is true ... have to retake even if already taken
             sut.IsRequiredFlat(true, neededFlat, targetTakenFlats, allTakenFlats).Should().BeTrue();
+        }
+
+        [Test]
+        public void TestGetTrainedFlatExposureSetting() {
+            Mock<IProfile> profileMock = GetMockProfile();
+
+            FlatDeviceSettings flatDeviceSettings = new FlatDeviceSettings();
+            profileMock.SetupProperty(m => m.FlatDeviceSettings, flatDeviceSettings);
+
+            ObserveAllCollection<TrainedFlatExposureSetting> trainedFlats = new ObserveAllCollection<TrainedFlatExposureSetting>();
+            flatDeviceSettings.TrainedFlatExposureSettings = trainedFlats;
+
+            BinningMode binning = new BinningMode(1, 1);
+            FlatsExpert sut = new FlatsExpert();
+            FlatSpec flatSpec = new FlatSpec("Lum", 10, 20, binning, 0, 0, 100);
+
+            sut.GetTrainedFlatExposureSetting(profileMock.Object, flatSpec).Should().BeNull();
+
+            // Don't even consider gain or offet
+            trainedFlats.Add(new TrainedFlatExposureSetting() { Filter = 0, Gain = 0, Offset = 0, Binning = binning, Time = 1, Brightness = 21 });
+            var setting = sut.GetTrainedFlatExposureSetting(profileMock.Object, flatSpec);
+            setting.Should().NotBeNull();
+            setting.Filter.Should().Be(0);
+            setting.Time.Should().Be(1);
+
+            // Gain and offet 'not set'
+            trainedFlats.Add(new TrainedFlatExposureSetting() { Filter = 0, Gain = -1, Offset = -1, Binning = binning, Time = 2, Brightness = 21 });
+            setting = sut.GetTrainedFlatExposureSetting(profileMock.Object, flatSpec);
+            setting.Should().NotBeNull();
+            setting.Filter.Should().Be(0);
+            setting.Time.Should().Be(2);
+
+            // Exact match
+            trainedFlats.Add(new TrainedFlatExposureSetting() { Filter = 0, Gain = 10, Offset = 20, Binning = binning, Time = 3, Brightness = 21 });
+            setting = sut.GetTrainedFlatExposureSetting(profileMock.Object, flatSpec);
+            setting.Should().NotBeNull();
+            setting.Filter.Should().Be(0);
+            setting.Time.Should().Be(3);
+        }
+
+        [Test]
+        public void TestGetFilterPosition() {
+            FlatsExpert sut = new FlatsExpert();
+            sut.GetFilterPosition(GetMockProfile().Object, "Lum").Should().Be(0);
+        }
+
+        private Mock<IProfile> GetMockProfile() {
+            Mock<IProfile> activeProfileMock = new Mock<IProfile>();
+            activeProfileMock.SetupAllProperties();
+
+            Mock<IFilterWheelSettings> filterWheelSettingsMock = new Mock<IFilterWheelSettings>();
+            filterWheelSettingsMock.SetupAllProperties();
+
+            ObserveAllCollection<FilterInfo> filterInfoList = new ObserveAllCollection<FilterInfo>();
+
+            filterWheelSettingsMock.SetupProperty(m => m.FilterWheelFilters, filterInfoList);
+            activeProfileMock.SetupProperty(m => m.FilterWheelSettings, filterWheelSettingsMock.Object);
+
+            FilterInfo fi = new FilterInfo();
+            fi.Name = "Lum";
+            filterInfoList.Add(fi);
+
+            return activeProfileMock;
         }
 
         [Test]
