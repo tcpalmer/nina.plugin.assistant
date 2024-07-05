@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 4.5.1.0 - 2024-07-05
+* Fixed bug with smart plan window and concurrent or future potential targets
+
 ## 4.5.0.0 - 2024-06-19
 * Relaxed matching criteria for trained flats, will now match if gain or offset is not equal
 * Added additional logging for flat panel operations
