@@ -252,6 +252,7 @@ namespace Assistant.NINAPlugin.Plan {
                     // If the start time is in the future, reject for now
                     if (actualStart > atTime) {
                         planTarget.StartTime = actualStart;
+                        planTarget.EndTime = targetEndTime;
                         string reason = meridianClippedSpan != null ? Reasons.TargetBeforeMeridianWindow : Reasons.TargetNotYetVisible;
                         SetRejected(planTarget, reason);
                         continue;

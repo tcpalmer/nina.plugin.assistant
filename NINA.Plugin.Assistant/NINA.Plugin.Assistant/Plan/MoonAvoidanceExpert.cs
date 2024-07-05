@@ -59,7 +59,7 @@ namespace Assistant.NINAPlugin.Plan {
                 moonSeparationParameter, moonWidthParameter);
 
             bool rejected = moonSeparation < moonAvoidanceSeparation;
-            TSLogger.Trace($"moon avoidance {planTarget.Name}/{planExposure.FilterName} rejected={rejected}, midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
+            TSLogger.Debug($"moon avoidance {planTarget.Name}/{planExposure.FilterName} rejected={rejected}, midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
 
             return rejected;
         }
