@@ -38,7 +38,7 @@ namespace Assistant.NINAPlugin.Plan {
 
             switch (CallNumber) {
                 case 1: plan = WaitForTime(DateTime.Now.AddSeconds(3)); break;
-                case 2: plan = SyncPlan2(); break;
+                case 2: plan = Plan1(); break;
                 //case 3: plan = Plan4(); break;
                 //case 3: plan = Plan5(); break;
                 //case 5: plan = Plan3(); break;
@@ -74,9 +74,9 @@ namespace Assistant.NINAPlugin.Plan {
 
             IPlanExposure lum = GetExposurePlan("Lum", 4, null, null, 3, 14);
             lum.ReadoutMode = 0;
-            IPlanExposure red = GetExposurePlan("R", 4, null, null, 3, 15);
-            IPlanExposure grn = GetExposurePlan("G", 4, null, null, 3, 16);
-            IPlanExposure blu = GetExposurePlan("B", 4, null, null, 3, 17);
+            IPlanExposure red = GetExposurePlan("Red", 4, null, null, 3, 15);
+            IPlanExposure grn = GetExposurePlan("Green", 4, null, null, 3, 16);
+            IPlanExposure blu = GetExposurePlan("Blue", 4, null, null, 3, 17);
             planTarget.ExposurePlans.Add(lum);
             planTarget.ExposurePlans.Add(red);
             planTarget.ExposurePlans.Add(grn);

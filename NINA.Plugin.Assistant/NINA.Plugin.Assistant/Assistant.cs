@@ -35,6 +35,8 @@ namespace Assistant.NINAPlugin {
         // Plugin specific image file patterns
         public static readonly ImagePattern FlatSessionIdImagePattern = new ImagePattern("$$TSSESSIONID$$", "Session identifier for working with TS lights and flats", "Target Scheduler");
 
+        public static readonly ImagePattern ProjectNameImagePattern = new ImagePattern("$$TSPROJECTNAME$$", "TS project name (if available)", "Target Scheduler");
+
         [ImportingConstructor]
         public AssistantPlugin(IProfileService profileService,
             IOptionsVM options,
@@ -58,6 +60,7 @@ namespace Assistant.NINAPlugin {
             profileService.ProfileChanged += ProfileService_ProfileChanged;
 
             options.AddImagePattern(FlatSessionIdImagePattern);
+            options.AddImagePattern(ProjectNameImagePattern);
         }
 
         public override async Task Initialize() {

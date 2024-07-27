@@ -11,8 +11,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("windows")]
-[assembly: AssemblyVersion("4.5.1.0")]
-[assembly: AssemblyFileVersion("4.5.1.0")]
+[assembly: AssemblyVersion("4.6.0.0")]
+[assembly: AssemblyFileVersion("4.6.0.0")]
 
 // The minimum Version of N.I.N.A. that this plugin is compatible with
 [assembly: AssemblyMetadata("MinimumApplicationVersion", "3.0.0.3005")]
@@ -45,7 +45,7 @@ The [plugin documentation](https://tcpalmer.github.io/nina-scheduler/) provides 
 ## Acknowledgements
 * Chris Woodhouse has been involved since the beginning and was instrumental in hashing out the initial design and requirements.
 * Matt Nudi also provided design feedback and critical early beta testing.
-* Linda Thomas-Fowler and Chris Kagy continue to provide invaluable early testing and feedback on features.
+* Linda Thomas-Fowler and Chris Kagy continue to provide invaluable testing and feedback on features.
 * The concept for the plugin was originally inspired by the AIC video [Tim Hutchison: Automating a Backyard Observatory](https://www.youtube.com/watch?v=a4IkAUZkXH0).
 * Any automated scheduler is going to owe a debt of gratitude to [ACP](https://acpx.dc3.com/) for pioneering in this area.
 * Finally, it's a tribute to the elegant design of NINA and the Advanced Sequencer that a plugin of this type is not only possible, but can also interact correctly with other elements in a sequence.

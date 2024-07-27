@@ -180,6 +180,10 @@ namespace Assistant.NINAPlugin.Sequencer {
             ImagePattern proto = AssistantPlugin.FlatSessionIdImagePattern;
             args.AddImagePattern(new ImagePattern(proto.Key, proto.Description) { Value = sessionIdentifier });
 
+            string projectName = planTarget?.Project?.Name ?? string.Empty;
+            proto = AssistantPlugin.ProjectNameImagePattern;
+            args.AddImagePattern(new ImagePattern(proto.Key, proto.Description) { Value = projectName });
+
             return Task.CompletedTask;
         }
 
