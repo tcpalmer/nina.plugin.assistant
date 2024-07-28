@@ -320,7 +320,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             DateTime cutoff = DateTime.Now.Date.AddDays(FlatsExpert.ACQUIRED_IMAGES_CUTOFF_DAYS);
 
             using (var context = GetDatabase().GetContext()) {
-                return context.GetAcquiredImages(profileId, cutoff).Where(ai => ai.Metadata.SessionId != 0).ToList();
+                //return context.GetAcquiredImages(profileId, cutoff).Where(ai => ai.Metadata.SessionId != 0).ToList();
+                return context.GetAcquiredImages(profileId, DateTime.Now.Date.AddDays(-1000)).ToList();
             }
         }
 
@@ -392,11 +393,14 @@ namespace Assistant.NINAPlugin.Sequencer {
         /// coming through the image pipeline so we can save name/sid in the image metadata where it
         /// follows the image on the same thread.
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="targetName"></param>
         /// <param name="sessionId"></param>
+        /// <param name="projectName"></param>
         /// <returns></returns>
-        public string GetOverloadTargetName(string name, int sessionId) {
-            return name != null ? $"{name}{OVERLOAD_SEP}{sessionId}" : $"{OVERLOAD_SEP}{sessionId}";
+        public string GetOverloadTargetName(string targetName, int sessionId, string projectName) {
+            targetName = targetName ?? string.Empty;
+            projectName = projectName ?? string.Empty;
+            return $"{targetName}{OVERLOAD_SEP}{sessionId}{OVERLOAD_SEP}{projectName}";
         }
 
         /// <summary>
@@ -404,21 +408,22 @@ namespace Assistant.NINAPlugin.Sequencer {
         /// </summary>
         /// <param name="overloadedName"></param>
         /// <returns></returns>
-        public Tuple<string, string> DeOverloadTargetName(string overloadedName) {
-            if (overloadedName == null) {
-                TSLogger.Warning("TS Flats: overloaded target name is null");
-                return new Tuple<string, string>("", "0");
+        public Tuple<string, string, string> DeOverloadTargetName(string overloadedName) {
+            if (string.IsNullOrEmpty(overloadedName)) {
+                TSLogger.Warning("TS Flats: overloaded target name is empty");
+                return new Tuple<string, string, string>("", "0", "");
             }
 
-            int pos = overloadedName.LastIndexOf(OVERLOAD_SEP);
-            if (pos == -1) {
-                TSLogger.Warning($"TS Flats: overloaded target name is missing sep: {overloadedName}");
-                return new Tuple<string, string>("", "0");
+            string[] parts = overloadedName.Split(OVERLOAD_SEP);
+            if (parts.Length != 3) {
+                TSLogger.Warning($"TS Flats: malformed overloaded target name: {overloadedName}");
+                return new Tuple<string, string, string>("", "0", "");
             }
 
-            string name = overloadedName.Substring(0, pos);
-            string sid = overloadedName.Substring(pos + 1);
-            return new Tuple<string, string>(name, sid);
+            string targetName = parts[0];
+            string sid = string.IsNullOrEmpty(parts[1]) ? "0" : parts[1];
+            string projectName = parts[2];
+            return new Tuple<string, string, string>(targetName, sid, projectName);
         }
 
         public Target GetTarget(int projectId, int targetId) {

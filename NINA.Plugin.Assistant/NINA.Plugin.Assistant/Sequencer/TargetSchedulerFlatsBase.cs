@@ -99,6 +99,10 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
         }
 
+        public string TotalProgressDisplay {
+            get => TotalFlatSets == 0 && CompletedFlatSets == 0 ? "..." : $"{CompletedFlatSets}/{TotalFlatSets}";
+        }
+
         private int totalFlatSets = 0;
 
         public int TotalFlatSets {
@@ -106,6 +110,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             set {
                 totalFlatSets = value;
                 RaisePropertyChanged(nameof(TotalFlatSets));
+                RaisePropertyChanged(nameof(TotalProgressDisplay));
             }
         }
 
@@ -116,7 +121,12 @@ namespace Assistant.NINAPlugin.Sequencer {
             set {
                 completedFlatSets = value;
                 RaisePropertyChanged(nameof(CompletedFlatSets));
+                RaisePropertyChanged(nameof(TotalProgressDisplay));
             }
+        }
+
+        public string SetProgressDisplay {
+            get => CompletedIterations == 0 && Iterations == 0 ? "..." : $"{CompletedIterations}/{Iterations}";
         }
 
         private int iterations = 0;
@@ -126,6 +136,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             set {
                 iterations = value;
                 RaisePropertyChanged(nameof(Iterations));
+                RaisePropertyChanged(nameof(SetProgressDisplay));
             }
         }
 
@@ -136,6 +147,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             set {
                 completedIterations = value;
                 RaisePropertyChanged(nameof(CompletedIterations));
+                RaisePropertyChanged(nameof(SetProgressDisplay));
             }
         }
 
@@ -211,34 +223,41 @@ namespace Assistant.NINAPlugin.Sequencer {
                     TSLogger.Warning($"TS Flats: failed to load target for id={targetId}");
                 }
 
+                Project project = context.GetProject(target.ProjectId);
+                target.Project = project;
+
                 return target;
             }
         }
 
         protected Task BeforeImageSaved(object sender, BeforeImageSavedEventArgs args) {
-            var tuple = flatsExpert.DeOverloadTargetName(args.Image.MetaData.Target.Name);
+            string overloadedName = args.Image.MetaData.Target.Name;
+            var tuple = flatsExpert.DeOverloadTargetName(overloadedName);
             string targetName = tuple.Item1;
             string sessionId = tuple.Item2;
+            string projectName = tuple.Item3;
 
-            TSLogger.Debug($"TS Flats: BeforeImageSaved: {targetName} sid={sessionId} filter={args.Image?.MetaData?.FilterWheel?.Filter}");
+            TSLogger.Debug($"TS Flats: BeforeImageSaved: {projectName}/{targetName} sid={sessionId} filter={args.Image?.MetaData?.FilterWheel?.Filter}");
             args.Image.MetaData.Target.Name = targetName;
-            args.Image.MetaData.Sequence.Title = sessionId;
+            args.Image.MetaData.Sequence.Title = overloadedName;
 
             return Task.CompletedTask;
         }
 
         protected Task BeforeFinalizeImageSaved(object sender, BeforeFinalizeImageSavedEventArgs args) {
-            string sid = args.Image?.RawImageData?.MetaData?.Sequence?.Title;
-            if (sid == null) {
-                TSLogger.Warning($"TS Flats: failed to get sessionId from squirrelled sequence title");
-                sid = "0";
-            }
+            var tuple = flatsExpert.DeOverloadTargetName(args.Image?.RawImageData?.MetaData?.Sequence?.Title);
+            string targetName = tuple.Item1;
+            string sessionId = tuple.Item2;
+            string projectName = tuple.Item3;
 
-            string sessionIdentifier = flatsExpert.FormatSessionIdentifier(int.Parse(sid));
+            string sessionIdentifier = flatsExpert.FormatSessionIdentifier(int.Parse(sessionId));
             ImagePattern proto = AssistantPlugin.FlatSessionIdImagePattern;
             args.AddImagePattern(new ImagePattern(proto.Key, proto.Description) { Value = sessionIdentifier });
 
-            TSLogger.Debug($"TS Flats: BeforeFinalizeImageSaved: setting sid={sessionIdentifier}");
+            proto = AssistantPlugin.ProjectNameImagePattern;
+            args.AddImagePattern(new ImagePattern(proto.Key, proto.Description) { Value = projectName });
+
+            TSLogger.Debug($"TS Flats: BeforeFinalizeImageSaved: for {projectName}/{targetName}: sid={sessionIdentifier}");
 
             return Task.CompletedTask;
         }
@@ -391,6 +410,11 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             StringBuilder sb = new StringBuilder();
             foreach (TrainedFlatExposureSetting trainedFlat in settings) {
+                if (trainedFlat.Filter < 0 || trainedFlat.Filter >= profileService.ActiveProfile.FilterWheelSettings.FilterWheelFilters.Count) {
+                    TSLogger.Warning($"out of range trained flat index, skipping: {trainedFlat.Filter}");
+                    continue;
+                }
+
                 FilterInfo filterInfo = profileService.ActiveProfile.FilterWheelSettings.FilterWheelFilters[trainedFlat.Filter];
                 if (filterInfo != null) {
                     sb.AppendLine($"    filter[{trainedFlat.Filter}]: {filterInfo.Name} gain: {trainedFlat.Gain} offset: {trainedFlat.Offset} binning: {trainedFlat.Binning} exposure: {trainedFlat.Time} brightness: {trainedFlat.Brightness}");
@@ -432,7 +456,7 @@ namespace Assistant.NINAPlugin.Sequencer {
     /// they can be picked up as the images come through the pipeline.
     ///
     /// A bit squirrelly with the overload but it's necessary to get the details into image metadata
-    /// so that images get the right target name and session ID.
+    /// so that images get the right target name, session ID, and project name.
     /// </summary>
     public class FlatTargetContainer : SequentialContainer, IDeepSkyObjectContainer {
         private TargetSchedulerFlatsBase parent;
@@ -442,7 +466,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         public FlatTargetContainer(TargetSchedulerFlatsBase parent, Target target, int count, int sessionId) {
             this.parent = parent;
 
-            string overloadedName = new FlatsExpert().GetOverloadTargetName(target?.Name, sessionId);
+            string overloadedName = new FlatsExpert().GetOverloadTargetName(target?.Name, sessionId, target?.Project?.Name);
             inputTarget = new InputTarget(Angle.Zero, Angle.Zero, null) { TargetName = overloadedName };
 
             loopCondition = new LoopCondition() { Iterations = count };

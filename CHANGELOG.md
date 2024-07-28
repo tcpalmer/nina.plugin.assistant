@@ -2,6 +2,7 @@
 
 ## 4.6.0.0 - 2024-XX-XX
 * Added support for TSPROJECTNAME path variable.
+* TS Flats instruction no longer displays misleading progress when idle.
 
 ## 4.5.1.0 - 2024-07-05
 * Fixed bug with smart plan window and concurrent or future potential targets
