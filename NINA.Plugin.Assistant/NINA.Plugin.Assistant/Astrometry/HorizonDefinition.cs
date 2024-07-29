@@ -70,7 +70,7 @@ namespace Assistant.NINAPlugin.Astrometry {
             sum += horizon.GetAltitude(270);
             sum += horizon.GetAltitude(315);
 
-            return sum.ToString();
+            return $"{minimumAltitude}_{offset}_{sum}";
         }
 
         public override string ToString() {
