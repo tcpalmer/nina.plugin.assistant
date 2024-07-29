@@ -320,8 +320,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             DateTime cutoff = DateTime.Now.Date.AddDays(FlatsExpert.ACQUIRED_IMAGES_CUTOFF_DAYS);
 
             using (var context = GetDatabase().GetContext()) {
-                //return context.GetAcquiredImages(profileId, cutoff).Where(ai => ai.Metadata.SessionId != 0).ToList();
-                return context.GetAcquiredImages(profileId, DateTime.Now.Date.AddDays(-1000)).ToList();
+                return context.GetAcquiredImages(profileId, cutoff).Where(ai => ai.Metadata.SessionId != 0).ToList();
             }
         }
 
