@@ -29,7 +29,7 @@ namespace Assistant.NINAPlugin.Astrometry {
             this.endTime = twilightSpan.EndTime;
 
             string cacheKey = GetCacheKey();
-            TSLogger.Debug($"TargetCircumstances cache key: {cacheKey}");
+            TSLogger.Trace($"TargetCircumstances cache key: {cacheKey}");
 
             TargetCircumstances targetCircumstances = TargetCircumstancesCache.GetTargetCircumstances(cacheKey);
             if (targetCircumstances == null) {
