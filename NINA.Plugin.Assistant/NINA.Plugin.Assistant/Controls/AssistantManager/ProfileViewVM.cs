@@ -1,9 +1,11 @@
 ﻿using Assistant.NINAPlugin.Database.Schema;
+using NINA.Core.MyMessageBox;
 using NINA.Core.Utility;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.WPF.Base.ViewModel;
 using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Input;
 
 namespace Assistant.NINAPlugin.Controls.AssistantManager {
@@ -44,6 +46,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             AddProjectCommand = new RelayCommand(AddProject);
             PasteProjectCommand = new RelayCommand(PasteProject);
             ImportCommand = new RelayCommand(DisplayProfileImport);
+            ResetProfileCommand = new RelayCommand(ResetProfile);
             ViewProjectCommand = new RelayCommand(ViewProject);
             CopyProjectCommand = new RelayCommand(CopyProject);
         }
@@ -81,6 +84,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand AddProjectCommand { get; private set; }
         public ICommand PasteProjectCommand { get; private set; }
         public ICommand ImportCommand { get; private set; }
+        public ICommand ResetProfileCommand { get; private set; }
         public ICommand ViewProjectCommand { get; private set; }
         public ICommand CopyProjectCommand { get; private set; }
 
@@ -100,6 +104,13 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             ShowProfileImportView = !ShowProfileImportView;
             if (ShowProfileImportView) {
                 ProfileImportVM = new ProfileImportViewVM(managerVM, parentItem, profileService);
+            }
+        }
+
+        private void ResetProfile(object obj) {
+            string message = $"Reset target completion (accepted and acquired counts) on all projects/targets under '{Profile.Name}'?  This cannot be undone.";
+            if (MyMessageBox.Show(message, "Reset Target Completion?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
+                managerVM.ResetProfile(parentItem);
             }
         }
 

@@ -1,6 +1,7 @@
 # Target Scheduler
 
 ## 4.6.0.0 - 2024-XX-XX
+* Added ability to reset target completion at the profile, project, and target levels.
 * Added support for TSPROJECTNAME path variable.
 * TS Flats instruction no longer displays misleading progress when idle.
 * Fixed bug with caching and project/target horizon changes.

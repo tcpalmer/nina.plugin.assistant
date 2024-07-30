@@ -473,6 +473,27 @@ namespace Assistant.NINAPlugin.Database {
             }
         }
 
+        public Target ResetExposurePlans(Target target) {
+            using (var transaction = Database.BeginTransaction()) {
+                try {
+                    TargetSet.AddOrUpdate(target);
+                    foreach (var ep in target.ExposurePlans) {
+                        ExposurePlan exposurePlan = GetExposurePlan(ep.Id);
+                        exposurePlan.Accepted = 0;
+                        exposurePlan.Acquired = 0;
+                    }
+
+                    SaveChanges();
+                    transaction.Commit();
+                    return GetTargetByProject(target.ProjectId, target.Id);
+                } catch (Exception e) {
+                    TSLogger.Error($"error resetting exposure plan: {e.Message} {e.StackTrace}");
+                    RollbackTransaction(transaction);
+                    return null;
+                }
+            }
+        }
+
         public Target DeleteAllExposurePlans(Target target) {
             using (var transaction = Database.BeginTransaction()) {
                 try {

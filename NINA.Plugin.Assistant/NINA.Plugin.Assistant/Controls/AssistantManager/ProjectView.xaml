@@ -66,6 +66,23 @@
                             Margin="10,0,0,0"
                             VerticalAlignment="Center"
                             HorizontalContentAlignment="Right"
+                            Command="{Binding ResetTargetsCommand}"
+                            IsEnabled="{Binding ShowEditView, Converter={StaticResource InverseBooleanConverter}}"
+                            Style="{StaticResource BackgroundButton}"
+                            ToolTip="Reset completion on all targets"
+                            ToolTipService.ShowOnDisabled="True">
+                        <Grid>
+                            <Path Margin="5"
+                                  Data="{StaticResource SS_RefreshSVG}"
+                                  Fill="{StaticResource ButtonForegroundBrush}"
+                                  Stretch="Uniform" />
+                        </Grid>
+                    </Button>
+                    <Button Width="25"
+                            Height="25"
+                            Margin="10,0,0,0"
+                            VerticalAlignment="Center"
+                            HorizontalContentAlignment="Right"
                             Command="{Binding PasteTargetCommand}"
                             IsEnabled="{Binding PasteTargetEnabled}"
                             Style="{StaticResource BackgroundButton}"

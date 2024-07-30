@@ -728,6 +728,43 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
         }
 
+        public void ResetProfile(TreeDataItem parentItem) {
+            foreach (TreeDataItem projectItem in parentItem.Items) {
+                ResetProjectTargets(projectItem);
+            }
+        }
+
+        public void ResetProjectTargets(TreeDataItem projectItem = null) {
+            TreeDataItem useItem = projectItem != null ? projectItem : activeTreeDataItem;
+            foreach (TreeDataItem targetItem in useItem.Items) {
+                ResetTarget((Target)targetItem.Data, targetItem);
+            }
+        }
+
+        public Target ResetTarget(Target target, TreeDataItem targetItem = null) {
+            using (var context = database.GetContext()) {
+                Target updatedTarget = context.ResetExposurePlans(target);
+                if (updatedTarget != null) {
+                    if (targetItem != null) {
+                        targetItem.Data = updatedTarget;
+                    } else {
+                        activeTreeDataItem.Data = updatedTarget;
+                    }
+
+                    int idx = target.Project.Targets.FindIndex(t => t.Id == target.Id);
+                    if (idx != -1) {
+                        target.Project.Targets[idx] = updatedTarget;
+                    }
+
+                    SetTreeColorizeMode(SelectedColorizeMode);
+                } else {
+                    Notification.ShowError("Failed to reset Target Exposure Plans (see log for details)");
+                }
+
+                return updatedTarget;
+            }
+        }
+
         public void DeleteTarget(Target target, bool deleteAcquiredImagesWithTarget) {
             using (var context = database.GetContext()) {
                 if (deleteAcquiredImagesWithTarget) {

@@ -29,7 +29,7 @@ namespace Assistant.NINAPlugin.Plan {
                 return noExposurePlansIsComplete ? 100 : 0;
             }
 
-            return target.ExposurePlans.Sum(ep => PercentComplete(ep)) / target.ExposurePlans.Count;
+            return target.ExposurePlans.Sum(PercentComplete) / target.ExposurePlans.Count;
         }
 
         public double PercentComplete(IPlanTarget target) {
@@ -38,7 +38,7 @@ namespace Assistant.NINAPlugin.Plan {
             list.AddRange(target.CompletedExposurePlans);
 
             if (list.Count == 0) { return 0; }
-            return list.Sum(ep => PercentComplete(ep)) / list.Count;
+            return list.Sum(PercentComplete) / list.Count;
         }
 
         public int RemainingExposures(IExposureCounts exposurePlan) {

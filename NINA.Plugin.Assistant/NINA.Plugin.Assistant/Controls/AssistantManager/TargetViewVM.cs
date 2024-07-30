@@ -56,6 +56,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             CancelCommand = new RelayCommand(Cancel);
             CopyCommand = new RelayCommand(Copy);
             DeleteCommand = new RelayCommand(Delete);
+            ResetTargetCommand = new RelayCommand(ResetTarget);
             RefreshCommand = new RelayCommand(Refresh);
 
             ShowTargetImportViewCommand = new RelayCommand(ShowTargetImportViewCmd);
@@ -250,6 +251,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand CancelCommand { get; private set; }
         public ICommand CopyCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }
+        public ICommand ResetTargetCommand { get; private set; }
         public ICommand RefreshCommand { get; private set; }
 
         public ICommand SendCoordinatesToFramingAssistantCommand { get; private set; }
@@ -323,6 +325,18 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 : $"Delete target '{TargetProxy.Target.Name}'?  This cannot be undone.";
             if (MyMessageBox.Show(message, "Delete Target?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
                 managerVM.DeleteTarget(TargetProxy.Proxy, deleteAcquiredImagesWithTarget);
+            }
+        }
+
+        private void ResetTarget(object obj) {
+            string message = $"Reset target completion (accepted and acquired counts) on all Exposure Plans for '{TargetProxy.Proxy.Name}'?  This cannot be undone.";
+            if (MyMessageBox.Show(message, "Reset Target Completion?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
+                Target updatedTarget = managerVM.ResetTarget(TargetProxy.Original);
+                if (updatedTarget != null) {
+                    TargetProxy = new TargetProxy(updatedTarget);
+                    InitializeExposurePlans(TargetProxy.Proxy);
+                    TargetActive = ActiveWithActiveExposurePlans(TargetProxy.Target);
+                }
             }
         }
 

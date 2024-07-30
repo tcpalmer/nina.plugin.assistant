@@ -49,6 +49,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             CopyCommand = new RelayCommand(Copy);
             DeleteCommand = new RelayCommand(Delete);
             AddTargetCommand = new RelayCommand(AddTarget);
+            ResetTargetsCommand = new RelayCommand(ResetTargets);
             PasteTargetCommand = new RelayCommand(PasteTarget);
             ImportMosaicPanelsCommand = new RelayCommand(ImportMosaicPanels);
             CopyScoringRuleWeightsCommand = new RelayCommand(CopyScoringRuleWeights);
@@ -208,6 +209,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public ICommand CopyCommand { get; private set; }
         public ICommand DeleteCommand { get; private set; }
         public ICommand AddTargetCommand { get; private set; }
+        public ICommand ResetTargetsCommand { get; private set; }
         public ICommand PasteTargetCommand { get; private set; }
         public ICommand ImportMosaicPanelsCommand { get; private set; }
         public ICommand CopyScoringRuleWeightsCommand { get; private set; }
@@ -261,6 +263,13 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         private void AddTarget(object obj) {
             managerVM.AddNewTarget(ProjectProxy.Proxy);
+        }
+
+        private void ResetTargets(object obj) {
+            string message = $"Reset target completion (accepted and acquired counts) on all targets under '{ProjectProxy.Project.Name}'?  This cannot be undone.";
+            if (MyMessageBox.Show(message, "Reset Target Completion?", MessageBoxButton.YesNo, MessageBoxResult.No) == MessageBoxResult.Yes) {
+                managerVM.ResetProjectTargets();
+            }
         }
 
         private void PasteTarget(object obj) {
