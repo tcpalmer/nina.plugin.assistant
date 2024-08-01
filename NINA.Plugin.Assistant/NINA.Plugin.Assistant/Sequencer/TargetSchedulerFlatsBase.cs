@@ -296,6 +296,10 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         protected async Task CloseCover(IProgress<ApplicationStatus> progress, CancellationToken token) {
+            if (!flatDeviceMediator.GetInfo().Connected) {
+                return;
+            }
+
             if (!flatDeviceMediator.GetInfo().SupportsOpenClose) {
                 return;
             }
@@ -323,6 +327,10 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         protected async Task OpenCover(IProgress<ApplicationStatus> progress, CancellationToken token) {
+            if (!flatDeviceMediator.GetInfo().Connected) {
+                return;
+            }
+
             if (!flatDeviceMediator.GetInfo().SupportsOpenClose) {
                 TSLogger.Info("TS Flats: flat panel doesn't support open/close");
                 return;
@@ -353,6 +361,10 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         protected async Task ToggleLight(bool onOff, IProgress<ApplicationStatus> progress, CancellationToken token) {
+            if (!flatDeviceMediator.GetInfo().Connected) {
+                return;
+            }
+
             if (flatDeviceMediator.GetInfo().LightOn == onOff) {
                 return;
             }
