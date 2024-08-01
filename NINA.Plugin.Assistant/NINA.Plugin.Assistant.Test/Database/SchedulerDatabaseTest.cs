@@ -370,9 +370,9 @@ namespace NINA.Plugin.Assistant.Test.Database {
             }
 
             using (var context = db.GetContext()) {
-                List<FlatHistory> records = context.GetFlatsHistory(dt.AddDays(-1));
+                List<FlatHistory> records = context.GetFlatsHistory(dt.AddDays(-1), "abcd-1234");
                 records.Count.Should().Be(0);
-                records = context.GetFlatsHistory(dt);
+                records = context.GetFlatsHistory(dt, "abcd-1234");
                 records.Count.Should().Be(1);
 
                 FlatHistory sut = records[0];
@@ -390,7 +390,7 @@ namespace NINA.Plugin.Assistant.Test.Database {
                 sut.Rotation.Should().Be(123.4);
                 sut.ROI.Should().Be(89);
 
-                records = context.GetFlatsHistory(1);
+                records = context.GetFlatsHistory(1, "abcd-1234");
                 records.Sort();
                 records.Count.Should().Be(3);
 

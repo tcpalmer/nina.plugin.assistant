@@ -1,6 +1,9 @@
 # Target Scheduler
 
-## 4.6.0.0 - 2024-XX-XX
+## 4.7.0.0 - 2024-08-XX
+* Added support for running TS Flats instruction in a sync client sequence.
+
+## 4.6.0.0 - 2024-07-30
 * Added ability to reset target completion at the profile, project, and target levels.
 * Added support for TSPROJECTNAME path variable.
 * TS Flats instruction no longer displays misleading progress when idle.

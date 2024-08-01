@@ -35,55 +35,60 @@ namespace NINA.Plugin.Assistant.Test.Database {
             double rotation = ImageMetadata.NO_ROTATOR_ANGLE;
             string binning = "1x1";
 
-            string profileId = "c0e1645f-4d4c-4cff-b6f8-c66a58be9cd4";
-            //string profileId = "4033c406-2709-488c-bf12-5c9387302c05"; // TS Flats Test on astropc
+            int projectId = 4;
+            int targetId = 10;
+
+            // string profileId = "c0e1645f-4d4c-4cff-b6f8-c66a58be9cd4";
+            // string profileId = "53d28ce2-f175-40d9-b765-3ab410efb1de"; // TS-Sync-Primary
+            string profileId = "8160c97e-17eb-49cd-87e8-46f249b78e55"; // TS-Sync-Secondary1
+            // string profileId = "4033c406-2709-488c-bf12-5c9387302c05"; // TS Flats Test on astropc
 
             using (SchedulerDatabaseContext context = db.GetContext()) {
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Lum", 5, gain, offset, binning, 0, rotation, 100));
+                    AcquiredImage ai = GetAcquiredImage(dt, projectId, targetId, profileId, GetImageMetadata("Lum", 5, gain, offset, binning, 0, rotation, 100));
                     context.AcquiredImageSet.Add(ai);
                 }
 
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Lum", 6, gain, offset, binning, 0, rotation, 100));
+                    AcquiredImage ai = GetAcquiredImage(dt, projectId, targetId, profileId, GetImageMetadata("Lum", 6, gain, offset, binning, 0, rotation, 100));
                     context.AcquiredImageSet.Add(ai);
                 }
 
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Red", 6, gain, offset, binning, 0, rotation, 100));
+                    AcquiredImage ai = GetAcquiredImage(dt, projectId, targetId, profileId, GetImageMetadata("Red", 6, gain, offset, binning, 0, rotation, 100));
                     context.AcquiredImageSet.Add(ai);
                 }
 
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 1, 1, profileId, GetImageMetadata("Green", 7, gain, offset, binning, 0, rotation, 100));
+                    AcquiredImage ai = GetAcquiredImage(dt, projectId, targetId, profileId, GetImageMetadata("Green", 7, gain, offset, binning, 0, rotation, 100));
                     context.AcquiredImageSet.Add(ai);
                 }
 
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 2, 2, profileId, GetImageMetadata("Lum", 21, gain, offset, binning, 0, rotation, 100));
+                    AcquiredImage ai = GetAcquiredImage(dt, projectId, targetId, profileId, GetImageMetadata("Lum", 21, gain, offset, binning, 0, rotation, 100));
                     context.AcquiredImageSet.Add(ai);
                 }
 
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 2, 2, profileId, GetImageMetadata("Red", 22, gain, offset, binning, 0, rotation, 100));
+                    AcquiredImage ai = GetAcquiredImage(dt, projectId, targetId, profileId, GetImageMetadata("Red", 22, gain, offset, binning, 0, rotation, 100));
                     context.AcquiredImageSet.Add(ai);
                 }
 
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 2, 2, profileId, GetImageMetadata("Green", 23, gain, offset, binning, 0, rotation, 100));
+                    AcquiredImage ai = GetAcquiredImage(dt, projectId, targetId, profileId, GetImageMetadata("Green", 23, gain, offset, binning, 0, rotation, 100));
                     context.AcquiredImageSet.Add(ai);
                 }
 
                 for (int i = 0; i < 5; i++) {
                     dt = dt.AddMinutes(i * 3);
-                    AcquiredImage ai = GetAcquiredImage(dt, 2, 2, profileId, GetImageMetadata("Blue", 24, gain, offset, binning, 0, rotation, 100));
+                    AcquiredImage ai = GetAcquiredImage(dt, projectId, targetId, profileId, GetImageMetadata("Blue", 24, gain, offset, binning, 0, rotation, 100));
                     context.AcquiredImageSet.Add(ai);
                 }
 
