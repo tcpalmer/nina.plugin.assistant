@@ -14,8 +14,10 @@ service SchedulerSync {
 	rpc RequestAction (ClientIdRequest) returns (ActionResponse);
 	rpc AcceptExposure (ExposureRequest) returns (StatusResponse);
 	rpc AcceptSolveRotate (SolveRotateRequest) returns (StatusResponse);
+	rpc AcceptEventContainer (EventContainerRequest) returns (StatusResponse);
 	rpc CompleteExposure (ExposureRequest) returns (StatusResponse);
 	rpc CompleteSolveRotate (SolveRotateRequest) returns (StatusResponse);
+	rpc CompleteEventContainer (EventContainerRequest) returns (StatusResponse);
 	rpc Keepalive (ClientIdRequest) returns (StatusResponse);
 }
 
@@ -27,6 +29,8 @@ enum ClientState {
 	EXPOSING = 4;
 	SOLVING = 5;
 	ENDING = 6;
+	EVENTCONTAINER = 7;
+
 }
 
 message RegistrationRequest {
@@ -71,6 +75,9 @@ message ActionResponse {
 	int32 pierSide = 11;
 	int32 targetDatabaseId = 12;
 	int32 exposurePlanDatabaseId = 13;
+	bool eventContainer = 14;
+	string eventContainerType = 15;
+	string eventContainerId = 16;
 }
 
 message ExposureRequest {
@@ -81,4 +88,10 @@ message ExposureRequest {
 message SolveRotateRequest {
 	string guid = 1;
 	string solveRotateId = 2;
+}
+
+message EventContainerRequest {
+	string guid = 1;
+	string eventContainerId = 2;
+	string eventContainerType = 3;
 }

@@ -2,18 +2,182 @@
     x:Class="Assistant.NINAPlugin.Sequencer.TargetSchedulerSyncContainerTemplate"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:NINA.Sequencer.Behaviors;assembly=NINA.Sequencer"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:Assistant.NINAPlugin.Sequencer"
     xmlns:mini="clr-namespace:NINA.View.Sequencer.MiniSequencer;assembly=NINA.Sequencer"
-    xmlns:nina="clr-namespace:NINA.View.Sequencer;assembly=NINA.Sequencer">
+    xmlns:nina="clr-namespace:NINA.View.Sequencer;assembly=NINA.Sequencer"
+    xmlns:ninactrl="clr-namespace:NINA.CustomControlLibrary;assembly=NINA.CustomControlLibrary">
 
     <DataTemplate DataType="{x:Type local:TargetSchedulerSyncContainer}">
-        <nina:SequenceBlockView DataContext="{Binding}">
-            <nina:SequenceBlockView.SequenceItemContent>
-                <WrapPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding DisplayText}" />
-                </WrapPanel>
-            </nina:SequenceBlockView.SequenceItemContent>
-        </nina:SequenceBlockView>
+        <StackPanel Orientation="Vertical">
+            <nina:SequenceBlockView DataContext="{Binding}">
+                <nina:SequenceBlockView.SequenceItemContent>
+                    <WrapPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding DisplayText}" />
+                    </WrapPanel>
+                </nina:SequenceBlockView.SequenceItemContent>
+            </nina:SequenceBlockView>
+
+            <ninactrl:DetachingExpander>
+                <ninactrl:DetachingExpander.Header>
+                    <TextBlock Text="Custom Event Containers" ToolTip="Expand to see custom event containers" />
+                </ninactrl:DetachingExpander.Header>
+
+                <StackPanel Margin="0,12,0,0" Orientation="Vertical">
+
+                    <ninactrl:DetachingExpander>
+                        <ninactrl:DetachingExpander.Header>
+                            <TextBlock Text="Before Wait Instructions" />
+                        </ninactrl:DetachingExpander.Header>
+                        <StackPanel Orientation="Vertical">
+                            <Border
+                                MinHeight="50"
+                                Margin="0,10,0,0"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1">
+                                <Grid Background="{StaticResource BackgroundBrush}" DataContext="{Binding BeforeWaitContainer}">
+                                    <ItemsControl MinHeight="50" ItemsSource="{Binding Items}" />
+                                    <TextBlock
+                                        Height="18"
+                                        MaxHeight="18"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Top"
+                                        FontStyle="Italic"
+                                        Opacity="0.4"
+                                        Text="Drop instructions here to run BEFORE each scheduler wait period"
+                                        Visibility="{Binding Items.Count, Converter={StaticResource InverseZeroToVisibilityConverter}}" />
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:DragOverBehavior DragAboveSize="0" DragBelowSize="0" />
+                                        <behaviors:DropIntoBehavior AllowedDragDropTypesString="NINA.Sequencer.Container.ISequenceContainer;NINA.Sequencer.SequenceItem.ISequenceItem;NINA.Sequencer.TemplatedSequenceContainer" OnDropCommand="DropIntoCommand" />
+                                    </i:Interaction.Behaviors>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ninactrl:DetachingExpander>
+
+                    <ninactrl:DetachingExpander>
+                        <ninactrl:DetachingExpander.Header>
+                            <TextBlock Text="After Wait Instructions" />
+                        </ninactrl:DetachingExpander.Header>
+                        <StackPanel Orientation="Vertical">
+                            <Border
+                                MinHeight="50"
+                                Margin="0,10,0,0"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1">
+                                <Grid Background="{StaticResource BackgroundBrush}" DataContext="{Binding AfterWaitContainer}">
+                                    <ItemsControl MinHeight="50" ItemsSource="{Binding Items}" />
+                                    <TextBlock
+                                        Height="18"
+                                        MaxHeight="18"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Top"
+                                        FontStyle="Italic"
+                                        Opacity="0.4"
+                                        Text="Drop instructions here to run AFTER each scheduler wait period"
+                                        Visibility="{Binding Items.Count, Converter={StaticResource InverseZeroToVisibilityConverter}}" />
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:DragOverBehavior DragAboveSize="0" DragBelowSize="0" />
+                                        <behaviors:DropIntoBehavior AllowedDragDropTypesString="NINA.Sequencer.Container.ISequenceContainer;NINA.Sequencer.SequenceItem.ISequenceItem;NINA.Sequencer.TemplatedSequenceContainer" OnDropCommand="DropIntoCommand" />
+                                    </i:Interaction.Behaviors>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ninactrl:DetachingExpander>
+
+                    <ninactrl:DetachingExpander>
+                        <ninactrl:DetachingExpander.Header>
+                            <TextBlock Text="Before New Target Instructions" />
+                        </ninactrl:DetachingExpander.Header>
+                        <StackPanel Orientation="Vertical">
+                            <Border
+                                MinHeight="50"
+                                Margin="0,10,0,0"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1">
+                                <Grid Background="{StaticResource BackgroundBrush}" DataContext="{Binding BeforeNewTargetContainer}">
+                                    <ItemsControl MinHeight="50" ItemsSource="{Binding Items}" />
+                                    <TextBlock
+                                        Height="18"
+                                        MaxHeight="18"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Top"
+                                        FontStyle="Italic"
+                                        Opacity="0.4"
+                                        Text="Drop instructions here to run BEFORE each new/changed target imaging start"
+                                        Visibility="{Binding Items.Count, Converter={StaticResource InverseZeroToVisibilityConverter}}" />
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:DragOverBehavior DragAboveSize="0" DragBelowSize="0" />
+                                        <behaviors:DropIntoBehavior AllowedDragDropTypesString="NINA.Sequencer.Container.ISequenceContainer;NINA.Sequencer.SequenceItem.ISequenceItem;NINA.Sequencer.TemplatedSequenceContainer" OnDropCommand="DropIntoCommand" />
+                                    </i:Interaction.Behaviors>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ninactrl:DetachingExpander>
+
+                    <ninactrl:DetachingExpander>
+                        <ninactrl:DetachingExpander.Header>
+                            <TextBlock Text="After New Target Instructions" />
+                        </ninactrl:DetachingExpander.Header>
+                        <StackPanel Orientation="Vertical">
+                            <Border
+                                MinHeight="50"
+                                Margin="0,10,0,0"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1">
+                                <Grid Background="{StaticResource BackgroundBrush}" DataContext="{Binding AfterNewTargetContainer}">
+                                    <ItemsControl MinHeight="50" ItemsSource="{Binding Items}" />
+                                    <TextBlock
+                                        Height="18"
+                                        MaxHeight="18"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Top"
+                                        FontStyle="Italic"
+                                        Opacity="0.4"
+                                        Text="Drop instructions here to run AFTER each new/changed target imaging completes"
+                                        Visibility="{Binding Items.Count, Converter={StaticResource InverseZeroToVisibilityConverter}}" />
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:DragOverBehavior DragAboveSize="0" DragBelowSize="0" />
+                                        <behaviors:DropIntoBehavior AllowedDragDropTypesString="NINA.Sequencer.Container.ISequenceContainer;NINA.Sequencer.SequenceItem.ISequenceItem;NINA.Sequencer.TemplatedSequenceContainer" OnDropCommand="DropIntoCommand" />
+                                    </i:Interaction.Behaviors>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ninactrl:DetachingExpander>
+
+                    <ninactrl:DetachingExpander>
+                        <ninactrl:DetachingExpander.Header>
+                            <TextBlock Text="After Each Target Instructions" />
+                        </ninactrl:DetachingExpander.Header>
+                        <StackPanel Orientation="Vertical">
+                            <Border
+                                MinHeight="50"
+                                Margin="0,10,0,0"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1">
+                                <Grid Background="{StaticResource BackgroundBrush}" DataContext="{Binding AfterEachTargetContainer}">
+                                    <ItemsControl MinHeight="50" ItemsSource="{Binding Items}" />
+                                    <TextBlock
+                                        Height="18"
+                                        MaxHeight="18"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Top"
+                                        FontStyle="Italic"
+                                        Opacity="0.4"
+                                        Text="Drop instructions here to run AFTER imaging completes for every target plan"
+                                        Visibility="{Binding Items.Count, Converter={StaticResource InverseZeroToVisibilityConverter}}" />
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:DragOverBehavior DragAboveSize="0" DragBelowSize="0" />
+                                        <behaviors:DropIntoBehavior AllowedDragDropTypesString="NINA.Sequencer.Container.ISequenceContainer;NINA.Sequencer.SequenceItem.ISequenceItem;NINA.Sequencer.TemplatedSequenceContainer" OnDropCommand="DropIntoCommand" />
+                                    </i:Interaction.Behaviors>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ninactrl:DetachingExpander>
+                </StackPanel>
+            </ninactrl:DetachingExpander>
+        </StackPanel>
     </DataTemplate>
 
     <DataTemplate x:Key="Assistant.NINAPlugin.Sequencer.TargetSchedulerSyncContainer_Mini">

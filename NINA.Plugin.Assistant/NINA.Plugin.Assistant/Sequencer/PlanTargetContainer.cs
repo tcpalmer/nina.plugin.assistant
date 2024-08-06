@@ -248,11 +248,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private void AddBeforeNewTargetInstructions() {
             int? numInstructions = parentContainer.BeforeTargetContainer.Items?.Count;
-            if (numInstructions != null && numInstructions > 0) {
-                TSLogger.Info($"adding BeforeNewTarget container with {numInstructions} instruction(s)");
-                parentContainer.BeforeTargetContainer.ResetAll();
-                Add(parentContainer.BeforeTargetContainer);
-            }
+            TSLogger.Info($"adding BeforeNewTarget container with {numInstructions} instruction(s)");
+            parentContainer.BeforeTargetContainer.ResetAll();
+            Add(parentContainer.BeforeTargetContainer);
         }
 
         private void AddSwitchFilter(IPlanExposure planExposure) {

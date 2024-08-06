@@ -37,8 +37,8 @@ namespace Assistant.NINAPlugin.Plan {
             */
 
             switch (CallNumber) {
-                case 1: plan = WaitForTime(DateTime.Now.AddSeconds(3)); break;
-                case 2: plan = Plan1(); break;
+                case 1: plan = WaitForTime(DateTime.Now.AddSeconds(10)); break;
+                case 2: plan = SyncPlan1(); break;
                 //case 3: plan = Plan4(); break;
                 //case 3: plan = Plan5(); break;
                 //case 5: plan = Plan3(); break;

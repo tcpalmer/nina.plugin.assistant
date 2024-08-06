@@ -71,20 +71,11 @@ namespace Assistant.NINAPlugin.Sequencer {
         /* Before renaming BeforeTargetContainer and AfterTargetContainer to contain 'New'
          * (again) consider that it would break any existing sequence using those. */
 
-        [JsonProperty]
-        public InstructionContainer BeforeWaitContainer { get; set; }
-
-        [JsonProperty]
-        public InstructionContainer AfterWaitContainer { get; set; }
-
-        [JsonProperty]
-        public InstructionContainer BeforeTargetContainer { get; set; }
-
-        [JsonProperty]
-        public InstructionContainer AfterTargetContainer { get; set; }
-
-        [JsonProperty]
-        public InstructionContainer AfterAllTargetsContainer { get; set; }
+        [JsonProperty] public InstructionContainer BeforeWaitContainer { get; set; }
+        [JsonProperty] public InstructionContainer AfterWaitContainer { get; set; }
+        [JsonProperty] public InstructionContainer BeforeTargetContainer { get; set; }
+        [JsonProperty] public InstructionContainer AfterTargetContainer { get; set; }
+        [JsonProperty] public InstructionContainer AfterAllTargetsContainer { get; set; }
 
         private ProfilePreference profilePreferences;
 
@@ -130,11 +121,11 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.applicationMediator = applicationMediator;
             this.framingAssistantVM = framingAssistantVM;
 
-            BeforeWaitContainer = new InstructionContainer("BeforeWait", Parent);
-            AfterWaitContainer = new InstructionContainer("AfterWait", Parent);
-            BeforeTargetContainer = new InstructionContainer("BeforeNewTarget", Parent);
-            AfterTargetContainer = new InstructionContainer("AfterNewTarget", Parent);
-            AfterAllTargetsContainer = new InstructionContainer("AfterEachTarget", this);
+            BeforeWaitContainer = new InstructionContainer(profileService, EventContainerType.BeforeWait, Parent);
+            AfterWaitContainer = new InstructionContainer(profileService, EventContainerType.AfterWait, Parent);
+            BeforeTargetContainer = new InstructionContainer(profileService, EventContainerType.BeforeNewTarget, Parent);
+            AfterTargetContainer = new InstructionContainer(profileService, EventContainerType.AfterNewTarget, Parent);
+            AfterAllTargetsContainer = new InstructionContainer(profileService, EventContainerType.AfterEachTarget, this);
 
             Task.Run(() => NighttimeData = nighttimeCalculator.Calculate());
             Target = new InputTarget(Angle.ByDegree(profileService.ActiveProfile.AstrometrySettings.Latitude), Angle.ByDegree(profileService.ActiveProfile.AstrometrySettings.Longitude), profileService.ActiveProfile.AstrometrySettings.Horizon);
@@ -328,7 +319,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public async Task ExecuteEventContainer(InstructionContainer container, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            if (container.Items?.Count > 0) {
+            if (container.Items?.Count > 0 || SyncManager.Instance.RunningServer) {
                 SchedulerProgress.Add(container.Name);
                 TSLogger.Info($"begin executing '{container.Name}' event instructions");
 

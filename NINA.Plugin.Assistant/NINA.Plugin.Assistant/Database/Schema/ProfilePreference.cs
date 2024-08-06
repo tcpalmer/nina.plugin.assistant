@@ -19,6 +19,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public int syncWaitTimeout { get; set; }
         public int syncActionTimeout { get; set; }
         public int syncSolveRotateTimeout { get; set; }
+        public int syncEventContainerTimeout { get; set; }
 
         public int enableGradeRMS { get; set; }
         public int enableGradeStars { get; set; }
@@ -134,6 +135,15 @@ namespace Assistant.NINAPlugin.Database.Schema {
             set {
                 syncSolveRotateTimeout = value;
                 RaisePropertyChanged(nameof(SyncSolveRotateTimeout));
+            }
+        }
+
+        [NotMapped]
+        public int SyncEventContainerTimeout {
+            get { return syncEventContainerTimeout; }
+            set {
+                syncEventContainerTimeout = value;
+                RaisePropertyChanged(nameof(SyncEventContainerTimeout));
             }
         }
 
