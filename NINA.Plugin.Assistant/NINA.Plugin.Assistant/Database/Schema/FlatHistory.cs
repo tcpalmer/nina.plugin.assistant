@@ -143,7 +143,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         public override string ToString() {
-            return $"tid={TargetId} lsd={LightSessionDate} ftd={FlatsTakenDate} sid={LightSessionId} filter={FilterName}";
+            return $"tid={TargetId} lsd={LightSessionDate} ftd={FlatsTakenDate} sid={LightSessionId} filter={FilterName} pid={profileId}";
         }
     }
 }

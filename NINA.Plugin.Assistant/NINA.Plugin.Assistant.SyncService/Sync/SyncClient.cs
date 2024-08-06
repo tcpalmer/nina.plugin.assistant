@@ -141,6 +141,13 @@ namespace Assistant.NINAPlugin.Sync {
                         return new SyncedSolveRotate(response.SolveRotateId, response.TargetName, response.TargetRa, response.TargetDec, response.TargetPositionAngle, PierSide.pierUnknown);
                     }
 
+                    if (response.EventContainer) {
+                        await AcceptEventContainer(response.EventContainerId, response.EventContainerType);
+                        EventContainerType eventContainerType = EventContainerHelper.Convert(response.EventContainerType);
+                        SetClientState(ClientState.Eventcontainer);
+                        return new SyncedEventContainer(response.EventContainerId, eventContainerType);
+                    }
+
                     await Task.Delay(SyncManager.CLIENT_ACTION_READY_POLL_PERIOD, token);
                 } catch (Exception e) {
                     if (e is TaskCanceledException || (e is RpcException && e.Message.Contains("Cancelled"))) {
@@ -189,6 +196,24 @@ namespace Assistant.NINAPlugin.Sync {
             }
         }
 
+        private async Task AcceptEventContainer(string eventContainerId, string eventContainerType) {
+            EventContainerRequest request = new EventContainerRequest {
+                Guid = Id,
+                EventContainerId = eventContainerId,
+                EventContainerType = eventContainerType
+            };
+
+            try {
+                TSLogger.Info($"SYNC client accepting event container: {request.EventContainerType}");
+                StatusResponse response = await base.AcceptEventContainerAsync(request);
+                if (!response.Success) {
+                    TSLogger.Error($"SYNC client problem accepting event container {eventContainerId}, {eventContainerType}: {response.Message}");
+                }
+            } catch (Exception e) {
+                TSLogger.Error($"SYNC client exception accepting event container {eventContainerId}, {eventContainerType}", e);
+            }
+        }
+
         public async Task SubmitCompletedExposure(string exposureId) {
             ExposureRequest request = new ExposureRequest {
                 Guid = Id,
@@ -220,6 +245,23 @@ namespace Assistant.NINAPlugin.Sync {
                 }
             } catch (Exception e) {
                 TSLogger.Error("SYNC client exception submitting completed solve/rotate", e);
+            }
+        }
+
+        public async Task CompleteEventContainer(string eventContainerId, EventContainerType eventContainerType) {
+            EventContainerRequest request = new EventContainerRequest {
+                Guid = Id,
+                EventContainerId = eventContainerId,
+                EventContainerType = eventContainerType.ToString()
+            };
+            try {
+                TSLogger.Info($"SYNC client submitting completed event container to server ({request.EventContainerId})");
+                StatusResponse response = await base.CompleteEventContainerAsync(request);
+                if (!response.Success) {
+                    TSLogger.Error($"SYNC client problem submitting completed event container: {response.Message}");
+                }
+            } catch (Exception e) {
+                TSLogger.Error("SYNC client exception submitting completed event container", e);
             }
         }
 
@@ -313,6 +355,16 @@ namespace Assistant.NINAPlugin.Sync {
             TargetDec = targetDec;
             TargetPositionAngle = targetPositionAngle;
             PierSide = pierSide;
+        }
+    }
+
+    public class SyncedEventContainer : SyncedAction {
+        public string EventContainerId { get; private set; }
+        public EventContainerType EventContainerType { get; private set; }
+
+        public SyncedEventContainer(string eventContainerId, EventContainerType eventContainerType) {
+            EventContainerId = eventContainerId;
+            EventContainerType = eventContainerType;
         }
     }
 }

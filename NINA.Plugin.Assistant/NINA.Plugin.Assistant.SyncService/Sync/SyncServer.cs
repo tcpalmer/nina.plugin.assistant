@@ -16,7 +16,8 @@ namespace Assistant.NINAPlugin.Sync {
         PlanWait,
         ExposureReady,
         SolveRotateReady,
-        EndSyncContainers
+        EndSyncContainers,
+        EventContainerReady
     }
 
     public class SyncServer : SchedulerSync.SchedulerSyncBase {
@@ -28,6 +29,7 @@ namespace Assistant.NINAPlugin.Sync {
         private Dictionary<string, SyncClientInstance> registeredClients;
         private ClientActiveState clientActiveExposures = new ClientActiveState();
         private ClientActiveState clientActiveSolveRotates = new ClientActiveState();
+        private ClientActiveState clientActiveEventContainers = new ClientActiveState();
 
         public ServerState State { get; set; }
         public string ProfileId { get; internal set; }
@@ -104,9 +106,12 @@ namespace Assistant.NINAPlugin.Sync {
                         return Task.FromResult(new ActionResponse { Success = true, Terminate = true });
                     }
 
-                    ActionResponse response = (State == ServerState.ExposureReady || State == ServerState.SolveRotateReady) ?
+                    ActionResponse response = (
+                        State == ServerState.ExposureReady ||
+                        State == ServerState.SolveRotateReady ||
+                        State == ServerState.EventContainerReady) ?
                                                 activeActionResponse :
-                                                new ActionResponse { Success = true, ExposureReady = false, Terminate = false };
+                                                new ActionResponse { Success = true, ExposureReady = false, Terminate = false, EventContainer = false };
 
                     LogRegisteredClients();
                     return Task.FromResult(response);
@@ -139,6 +144,7 @@ namespace Assistant.NINAPlugin.Sync {
                 ExposureReady = true,
                 SolveRotateReady = false,
                 Terminate = false,
+                EventContainer = false,
                 ExposureId = exposureId,
                 TargetName = target.DeepSkyObject.NameAsAscii,
                 TargetRa = target.InputCoordinates.Coordinates.RAString,
@@ -158,7 +164,7 @@ namespace Assistant.NINAPlugin.Sync {
                 if (AllClientsInState(ClientState.Exposing)) {
                     TSLogger.Info("SYNC server all clients now have the exposure, continuing");
                     SetServerState(ServerState.Ready);
-                    activeActionResponse = new ActionResponse { Success = true, ExposureReady = false, SolveRotateReady = false, Terminate = false };
+                    activeActionResponse = new ActionResponse { Success = true, ExposureReady = false, SolveRotateReady = false, Terminate = false, EventContainer = false };
                     SetClientActiveExposureList(exposureId);
                     return;
                 }
@@ -193,6 +199,7 @@ namespace Assistant.NINAPlugin.Sync {
                 ExposureReady = false,
                 SolveRotateReady = true,
                 Terminate = false,
+                EventContainer = false,
                 SolveRotateId = solveRotateId,
                 TargetName = target.DeepSkyObject.NameAsAscii,
                 TargetRa = target.InputCoordinates.Coordinates.RAString,
@@ -212,7 +219,7 @@ namespace Assistant.NINAPlugin.Sync {
                 if (AllClientsInState(ClientState.Solving)) {
                     TSLogger.Info("SYNC server all clients now solving, continuing");
                     SetServerState(ServerState.Ready);
-                    activeActionResponse = new ActionResponse { Success = true, ExposureReady = false, SolveRotateReady = false, Terminate = false };
+                    activeActionResponse = new ActionResponse { Success = true, ExposureReady = false, SolveRotateReady = false, Terminate = false, EventContainer = false };
                     SetClientActiveSolveRotateList(solveRotateId);
                     return;
                 }
@@ -238,6 +245,60 @@ namespace Assistant.NINAPlugin.Sync {
             } else {
                 TSLogger.Warning($"SYNC server client not found in active solve/rotate list: {request.Guid}");
                 return Task.FromResult(new StatusResponse { Success = false, Message = "client not found in active solve/rotate list" });
+            }
+        }
+
+        public async Task SyncEventContainer(string eventContainerId, EventContainerType eventContainerType, int syncActionTimeout, CancellationToken token) {
+            string eventTypeName = eventContainerType.ToString();
+            ServerState serverState = ServerState.EventContainerReady;
+            ClientState clientReadyState = ClientState.Eventcontainer;
+
+            activeActionResponse = new ActionResponse {
+                Success = true,
+                ExposureReady = false,
+                SolveRotateReady = false,
+                Terminate = false,
+                EventContainer = true,
+                EventContainerId = eventContainerId,
+                EventContainerType = eventTypeName
+            };
+
+            SetServerState(serverState);
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            TimeSpan timeout = TimeSpan.FromSeconds(syncActionTimeout);
+
+            TSLogger.Info($"SYNC server informing clients of {eventContainerType}, timeout {timeout.TotalSeconds}s");
+
+            while (NotTimedOut(stopwatch, timeout)) {
+                if (AllClientsInState(clientReadyState)) {
+                    TSLogger.Info($"SYNC server all clients now in {eventContainerType}, continuing");
+                    SetServerState(ServerState.Ready);
+                    activeActionResponse = new ActionResponse { Success = true, ExposureReady = false, SolveRotateReady = false, Terminate = false, EventContainer = false };
+                    SetClientActiveEventContainerList(eventContainerId);
+                    return;
+                }
+
+                await Task.Delay(SyncManager.SERVER_AWAIT_EVENTCONTAINER_POLL_PERIOD, token);
+            }
+
+            TSLogger.Warning($"SYNC server timed out waiting for one or more clients to accept {eventContainerType}, continuing");
+        }
+
+        public override Task<StatusResponse> AcceptEventContainer(EventContainerRequest request, ServerCallContext context) {
+            TSLogger.Info($"SYNC server accepted event container ({request.EventContainerId}) from client ({request.Guid})");
+            registeredClients[request.Guid].SetState(ClientState.Eventcontainer);
+            return Task.FromResult(new StatusResponse { Success = true, Message = "" });
+        }
+
+        public override Task<StatusResponse> CompleteEventContainer(EventContainerRequest request, ServerCallContext context) {
+            TSLogger.Info($"SYNC server received completed event container ({request.EventContainerId}) from client ({request.Guid})");
+
+            if (RemoveClientFromActiveEventContainerList(request.Guid, request.EventContainerId)) {
+                registeredClients[request.Guid].SetState(ClientState.Actionready);
+                return Task.FromResult(new StatusResponse { Success = true, Message = "" });
+            } else {
+                TSLogger.Warning($"SYNC server client not found in active event container list: {request.Guid}");
+                return Task.FromResult(new StatusResponse { Success = false, Message = "client not found in active event container list" });
             }
         }
 
@@ -346,6 +407,56 @@ namespace Assistant.NINAPlugin.Sync {
                 if (clientActiveSolveRotates.ContainsKey(clientId)) {
                     clientActiveSolveRotates.Remove(clientId, solveRotateId);
                     clientActiveSolveRotates.Log();
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        public async Task WaitForClientEventContainerCompletion(EventContainerType eventContainerType, string eventContainerId, int syncEventContainerTimeout, CancellationToken token) {
+            if (clientActiveEventContainers.IsEmpty()) {
+                TSLogger.Warning("SYNC server not waiting on any clients for completed event container");
+                return;
+            }
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            TimeSpan timeout = TimeSpan.FromSeconds(syncEventContainerTimeout);
+            TSLogger.Info($"SYNC server waiting for all clients to complete event container {eventContainerType}: {eventContainerId}, timeout {syncEventContainerTimeout}s");
+
+            while (NotTimedOut(stopwatch, timeout)) {
+                if (clientActiveEventContainers.IsEmpty()) {
+                    TSLogger.Info($"SYNC server all clients have completed event container: {eventContainerId}");
+                    return;
+                }
+
+                await Task.Delay(SyncManager.SERVER_AWAIT_EVENTCONTAINER_COMPLETE_POLL_PERIOD, token);
+            }
+
+            // If we timed out waiting for client event container, then we need clear the list and let the server continue
+            TSLogger.Warning($"SYNC server timed out waiting for all clients to complete event container {eventContainerType}: {eventContainerId}, clearing wait list and continuing.  Remaining was:");
+            clientActiveEventContainers.Log();
+            clientActiveEventContainers.Clear();
+        }
+
+        private void SetClientActiveEventContainerList(string eventContainerId) {
+            lock (lockObj) {
+                clientActiveEventContainers.Clear();
+                foreach (SyncClientInstance client in registeredClients.Values) {
+                    if (client.ClientState == ClientState.Eventcontainer) {
+                        clientActiveEventContainers.Add(client.Guid, eventContainerId);
+                    }
+                }
+
+                clientActiveEventContainers.Log();
+            }
+        }
+
+        private bool RemoveClientFromActiveEventContainerList(string clientId, string eventContainerId) {
+            lock (lockObj) {
+                if (clientActiveEventContainers.ContainsKey(clientId)) {
+                    clientActiveEventContainers.Remove(clientId, eventContainerId);
+                    clientActiveEventContainers.Log();
                     return true;
                 }
 

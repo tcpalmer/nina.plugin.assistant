@@ -62,6 +62,8 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
             try {
+                InitSync();
+
                 DisplayText = "Determining needed flats";
                 List<LightSession> neededFlats = flatsExpert.GetNeededFlats(profileService.ActiveProfile, DateTime.Now);
                 if (neededFlats.Count == 0) {

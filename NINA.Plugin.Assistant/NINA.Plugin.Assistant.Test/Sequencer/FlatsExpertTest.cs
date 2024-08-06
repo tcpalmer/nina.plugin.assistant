@@ -31,7 +31,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             mock.Setup(m => m.GetTargetsForPeriodicFlats(It.IsAny<IProfile>())).Returns(cadenceTargets);
             mock.Setup(m => m.GetTargetsForCompletionFlats(It.IsAny<IProfile>())).Returns(completedTargets);
             mock.Setup(m => m.GetAcquiredImages(It.IsAny<IProfile>())).Returns(acquiredImages);
-            mock.Setup(m => m.GetFlatHistory(It.IsAny<Target>())).Returns(flatHistories);
+            mock.Setup(m => m.GetFlatHistory(It.IsAny<Target>(), It.IsAny<IProfile>())).Returns(flatHistories);
 
             mock.Object.GetNeededFlats(profileMock.Object, baseDate).Count.Should().Be(0);
 

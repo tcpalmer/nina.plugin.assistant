@@ -213,7 +213,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             if (!AlwaysRepeatFlatSet && neededFlats.Count > 0) {
                 List<FlatHistory> takenFlats;
                 using (var context = database.GetContext()) {
-                    takenFlats = context.GetFlatsHistory(lightSessionDate)
+                    takenFlats = context.GetFlatsHistory(lightSessionDate, profileService.ActiveProfile.Id.ToString())
                        .Where(fh => fh.TargetId == plan.PlanTarget.DatabaseId)
                        .ToList();
                 }

@@ -226,21 +226,22 @@ namespace Assistant.NINAPlugin.Database {
             }
         }
 
-        public List<FlatHistory> GetFlatsHistory(DateTime lightSessionDate) {
+        public List<FlatHistory> GetFlatsHistory(DateTime lightSessionDate, string profileId) {
             var predicate = PredicateBuilder.New<FlatHistory>();
             long lightSessionDateSecs = DateTimeToUnixSeconds(lightSessionDate);
             predicate = predicate.And(f => f.lightSessionDate == lightSessionDateSecs);
+            predicate = predicate.And(f => f.profileId == profileId);
             return FlatHistorySet.AsNoTracking().Where(predicate).ToList();
         }
 
-        public List<FlatHistory> GetFlatsHistory(int targetId) {
-            return FlatHistorySet.AsNoTracking().Where(fh => fh.targetId == targetId).ToList();
+        public List<FlatHistory> GetFlatsHistory(int targetId, string profileId) {
+            return FlatHistorySet.AsNoTracking().Where(fh => fh.targetId == targetId && fh.profileId == profileId).ToList();
         }
 
-        public List<FlatHistory> GetFlatsHistory(List<Target> targets) {
+        public List<FlatHistory> GetFlatsHistory(List<Target> targets, string profileId) {
             List<FlatHistory> records = new List<FlatHistory>();
             foreach (Target target in targets) {
-                records.AddRange(FlatHistorySet.AsNoTracking().Where(fh => fh.targetId == target.Id));
+                records.AddRange(FlatHistorySet.AsNoTracking().Where(fh => fh.targetId == target.Id && fh.profileId == profileId));
             }
 
             return records;

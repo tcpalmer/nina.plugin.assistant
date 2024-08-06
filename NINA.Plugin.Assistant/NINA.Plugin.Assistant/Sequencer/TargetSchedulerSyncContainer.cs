@@ -17,6 +17,7 @@ using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
 using Scheduler.SyncService;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -47,6 +48,12 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private ISyncImageSaveWatcher syncImageSaveWatcher;
 
+        [JsonProperty] public InstructionContainer BeforeWaitContainer { get; set; }
+        [JsonProperty] public InstructionContainer AfterWaitContainer { get; set; }
+        [JsonProperty] public InstructionContainer BeforeNewTargetContainer { get; set; }
+        [JsonProperty] public InstructionContainer AfterNewTargetContainer { get; set; }
+        [JsonProperty] public InstructionContainer AfterEachTargetContainer { get; set; }
+
         [ImportingConstructor]
         public TargetSchedulerSyncContainer(
             IProfileService profileService,
@@ -71,21 +78,39 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.guiderMediator = guiderMediator;
             this.plateSolverFactory = plateSolverFactory;
             this.windowServiceFactory = windowServiceFactory;
+
+            BeforeWaitContainer = new InstructionContainer(profileService, EventContainerType.BeforeWait, Parent);
+            AfterWaitContainer = new InstructionContainer(profileService, EventContainerType.AfterWait, Parent);
+            BeforeNewTargetContainer = new InstructionContainer(profileService, EventContainerType.BeforeNewTarget, Parent);
+            AfterNewTargetContainer = new InstructionContainer(profileService, EventContainerType.AfterNewTarget, Parent);
+            AfterEachTargetContainer = new InstructionContainer(profileService, EventContainerType.AfterEachTarget, Parent);
         }
 
-        public TargetSchedulerSyncContainer(TargetSchedulerSyncContainer cloneMe) : this(
-            cloneMe.profileService,
-            cloneMe.telescopeMediator,
-            cloneMe.rotatorMediator,
-            cloneMe.cameraMediator,
-            cloneMe.imagingMediator,
-            cloneMe.imageSaveMediator,
-            cloneMe.imageHistoryVM,
-            cloneMe.filterWheelMediator,
-            cloneMe.guiderMediator,
-            cloneMe.plateSolverFactory,
-            cloneMe.windowServiceFactory) {
-            CopyMetaData(cloneMe);
+        public TargetSchedulerSyncContainer(TargetSchedulerSyncContainer clone) : this(
+            clone.profileService,
+            clone.telescopeMediator,
+            clone.rotatorMediator,
+            clone.cameraMediator,
+            clone.imagingMediator,
+            clone.imageSaveMediator,
+            clone.imageHistoryVM,
+            clone.filterWheelMediator,
+            clone.guiderMediator,
+            clone.plateSolverFactory,
+            clone.windowServiceFactory) {
+            CopyMetaData(clone);
+
+            clone.BeforeWaitContainer = (InstructionContainer)BeforeWaitContainer.Clone();
+            clone.AfterWaitContainer = (InstructionContainer)AfterWaitContainer.Clone();
+            clone.BeforeNewTargetContainer = (InstructionContainer)BeforeNewTargetContainer.Clone();
+            clone.AfterNewTargetContainer = (InstructionContainer)AfterNewTargetContainer.Clone();
+            clone.AfterEachTargetContainer = (InstructionContainer)AfterEachTargetContainer.Clone();
+
+            clone.BeforeWaitContainer.AttachNewParent(clone);
+            clone.AfterWaitContainer.AttachNewParent(clone);
+            clone.BeforeNewTargetContainer.AttachNewParent(clone);
+            clone.AfterNewTargetContainer.AttachNewParent(clone);
+            clone.AfterEachTargetContainer.AttachNewParent(clone);
         }
 
         public override object Clone() {
@@ -96,6 +121,30 @@ namespace Assistant.NINAPlugin.Sequencer {
             TSLogger.Debug("TargetSchedulerSyncContainer: Initialize");
             if (SyncManager.Instance.RunningClient) {
                 SyncClient.Instance.SetClientState(ClientState.Ready);
+
+                BeforeWaitContainer.Initialize();
+                AfterWaitContainer.Initialize();
+                BeforeNewTargetContainer.Initialize();
+                AfterNewTargetContainer.Initialize();
+                AfterEachTargetContainer.Initialize();
+            }
+        }
+
+        public override void AfterParentChanged() {
+            base.AfterParentChanged();
+
+            if (Parent == null) {
+                SequenceBlockTeardown();
+            } else {
+                BeforeWaitContainer.AttachNewParent(Parent);
+                AfterWaitContainer.AttachNewParent(Parent);
+                BeforeNewTargetContainer.AttachNewParent(Parent);
+                AfterNewTargetContainer.AttachNewParent(Parent);
+                AfterEachTargetContainer.AttachNewParent(Parent);
+
+                if (Parent.Status == SequenceEntityStatus.RUNNING) {
+                    SequenceBlockInitialize();
+                }
             }
         }
 
@@ -104,6 +153,12 @@ namespace Assistant.NINAPlugin.Sequencer {
             // TODO: do we really want to do this here??  Better in SequenceBlockFinished?
             if (SyncManager.Instance.RunningClient) {
                 SyncClient.Instance.SetClientState(ClientState.Ready);
+
+                BeforeWaitContainer.ResetProgress();
+                AfterWaitContainer.ResetProgress();
+                BeforeNewTargetContainer.ResetProgress();
+                AfterNewTargetContainer.ResetProgress();
+                AfterEachTargetContainer.ResetProgress();
             }
         }
 
@@ -174,6 +229,13 @@ namespace Assistant.NINAPlugin.Sequencer {
                         TSLogger.Info($"SYNC client received solve/rotate: {syncedSolveRotate.SolveRotateId} for {syncedSolveRotate.TargetName}");
                         await DoSyncedSolveRotate(syncedSolveRotate, progress, token);
                     }
+
+                    if (syncedAction is SyncedEventContainer) {
+                        SyncedEventContainer syncedEventContainer = syncedAction as SyncedEventContainer;
+                        DisplayText = $"Executing event container {syncedEventContainer.EventContainerType}";
+                        TSLogger.Info($"SYNC client received event container: {syncedEventContainer.EventContainerType}");
+                        await DoEventContainer(syncedEventContainer, progress, token);
+                    }
                 } catch (Exception ex) {
                     if (Utils.IsCancelException(ex)) {
                         TSLogger.Warning("TargetSchedulerSyncContainer was canceled or interrupted, execution is incomplete");
@@ -189,6 +251,23 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             DisplayText = "";
             syncImageSaveWatcher.Stop();
+        }
+
+        public override bool Validate() {
+            var issues = new List<string>();
+
+            bool beforeWaitValid = BeforeWaitContainer.Validate();
+            bool afterWaitValid = AfterWaitContainer.Validate();
+            bool beforeNewTargetValid = BeforeNewTargetContainer.Validate();
+            bool afterNewTargetValid = AfterNewTargetContainer.Validate();
+            bool afterEachTargetValid = AfterEachTargetContainer.Validate();
+
+            if (!beforeWaitValid || !afterWaitValid || !beforeNewTargetValid || !afterNewTargetValid || !afterEachTargetValid) {
+                issues.Add("One or more custom containers is not valid");
+            }
+
+            Issues = issues;
+            return issues.Count == 0;
         }
 
         [OnSerializing]
@@ -242,6 +321,43 @@ namespace Assistant.NINAPlugin.Sequencer {
             }
 
             await SyncClient.Instance.CompleteSolveRotate(syncedSolveRotate.SolveRotateId);
+        }
+
+        private async Task DoEventContainer(SyncedEventContainer syncedEventContainer, IProgress<ApplicationStatus> progress, CancellationToken token) {
+            InstructionContainer targetContainer = null;
+            switch (syncedEventContainer.EventContainerType) {
+                case EventContainerType.BeforeWait: { targetContainer = BeforeWaitContainer; break; }
+                case EventContainerType.AfterWait: { targetContainer = AfterWaitContainer; break; }
+                case EventContainerType.BeforeNewTarget: { targetContainer = BeforeNewTargetContainer; break; }
+                case EventContainerType.AfterNewTarget: { targetContainer = AfterNewTargetContainer; break; }
+                case EventContainerType.AfterEachTarget: { targetContainer = AfterEachTargetContainer; break; }
+            }
+
+            await ExecuteEventContainer(targetContainer, progress, token);
+            await SyncClient.Instance.CompleteEventContainer(syncedEventContainer.EventContainerId, syncedEventContainer.EventContainerType);
+        }
+
+        private async Task ExecuteEventContainer(InstructionContainer container, IProgress<ApplicationStatus> progress, CancellationToken token) {
+            if (container.Items?.Count == 0) {
+                TSLogger.Info($"SYNC client event container is empty: {container.Name}");
+            }
+
+            TSLogger.Info($"SYNC client starting event container: {container.Name}");
+
+            try {
+                await container.Execute(progress, token);
+            } catch (Exception ex) {
+                TSLogger.Error($"exception executing {container.Name} instruction container: {ex}");
+
+                if (ex is SequenceEntityFailedException) {
+                    throw;
+                }
+
+                throw new SequenceEntityFailedException($"exception executing {container.Name} instruction container: {ex.Message}", ex);
+            } finally {
+                TSLogger.Info($"SYNC client completed event container: {container.Name}, resetting progress for next execution");
+                container.ResetAll();
+            }
         }
     }
 }

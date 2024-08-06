@@ -23,6 +23,30 @@ namespace Assistant.NINAPlugin.Sequencer {
         public FlatsExpert() {
         }
 
+        private bool isSyncClient = false;
+        public bool IsSyncClient { get => isSyncClient; private set => isSyncClient = value; }
+
+        private string syncServerProfileId = null;
+        public string SyncServerProfileId { get => syncServerProfileId; private set => syncServerProfileId = value; }
+
+        public void InitSync(bool isSyncClient, string syncServerProfileId) {
+            IsSyncClient = isSyncClient;
+            SyncServerProfileId = syncServerProfileId;
+
+            if (IsSyncClient) {
+                TSLogger.Info($"running flats as sync client, server profile ID is {SyncServerProfileId}");
+            }
+        }
+
+        /// <summary>
+        /// If running as a sync client, return the server's profile ID.  Otherwise, return the provided ID.
+        /// </summary>
+        /// <param name="profileId"></param>
+        /// <returns></returns>
+        public string GetSyncProfileId(string profileId) {
+            return IsSyncClient ? SyncServerProfileId : profileId;
+        }
+
         /// <summary>
         /// Get all needed flats across all targets that are either cadence type or target completed
         /// flats handling, as determined at the provided check time.
@@ -45,7 +69,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 if (lightSessions.Count > 0) {
                     lightSessions = CullByCadencePeriod(target, lightSessions, checkDateTime);
                     if (lightSessions.Count > 0) {
-                        List<FlatHistory> targetFlatHistories = GetFlatHistory(target);
+                        List<FlatHistory> targetFlatHistories = GetFlatHistory(target, activeProfile);
                         LogFlatHistories($"flat history for {target.Name}", targetFlatHistories);
                         lightSessions = CullByFlatsHistory(target, lightSessions, targetFlatHistories);
                         neededFlats.AddRange(lightSessions);
@@ -62,7 +86,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 List<LightSession> lightSessions = GetLightSessions(target, targetAcquiredImages);
 
                 if (lightSessions.Count > 0) {
-                    List<FlatHistory> targetFlatHistories = GetFlatHistory(target);
+                    List<FlatHistory> targetFlatHistories = GetFlatHistory(target, activeProfile);
                     LogFlatHistories($"flat history for {target.Name}", targetFlatHistories);
                     lightSessions = CullByFlatsHistory(target, lightSessions, targetFlatHistories);
                     neededFlats.AddRange(lightSessions);
@@ -187,7 +211,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         /// <param name="activeProfile"></param>
         /// <returns></returns>
         public virtual List<Target> GetTargetsForPeriodicFlats(IProfile activeProfile) {
-            string profileId = activeProfile.Id.ToString();
+            string profileId = GetSyncProfileId(activeProfile.Id.ToString());
 
             using (var context = GetDatabase().GetContext()) {
                 List<Project> activeProjects = context.GetActiveProjects(profileId);
@@ -211,7 +235,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         /// <param name="activeProfile"></param>
         /// <returns></returns>
         public virtual List<Target> GetTargetsForCompletionFlats(IProfile activeProfile) {
-            string profileId = activeProfile.Id.ToString();
+            string profileId = GetSyncProfileId(activeProfile.Id.ToString());
 
             using (var context = GetDatabase().GetContext()) {
                 List<Project> activeProjects = context.GetActiveProjects(profileId);
@@ -325,13 +349,15 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         /// <summary>
-        /// Get all flat history records for the target.
+        /// Get all flat history records for the target and profile.
         /// </summary>
         /// <param name="target"></param>
+        /// <param name="activeProfile"></param>
         /// <returns></returns>
-        public virtual List<FlatHistory> GetFlatHistory(Target target) {
+        public virtual List<FlatHistory> GetFlatHistory(Target target, IProfile activeProfile) {
+            string profileId = activeProfile.Id.ToString();
             using (var context = GetDatabase().GetContext()) {
-                return context.GetFlatsHistory(target.Id);
+                return context.GetFlatsHistory(target.Id, profileId);
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Sync;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
 using NINA.Astrometry;
@@ -14,6 +15,7 @@ using NINA.Equipment.Interfaces;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.Equipment.Model;
 using NINA.Plugin.Assistant.Shared.Utility;
+using NINA.Plugin.Assistant.SyncService.Sync;
 using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Conditions;
@@ -154,9 +156,18 @@ namespace Assistant.NINAPlugin.Sequencer {
         private string targetName = null;
         public string TargetName { get => targetName; set => targetName = value; }
 
+        protected void InitSync() {
+            if (SyncManager.Instance.RunningClient) {
+                flatsExpert.InitSync(true, SyncClient.Instance.ServerProfileId);
+            }
+        }
+
         protected async Task<bool> TakeFlatSet(LightSession neededFlat, bool applyRotation, IProgress<ApplicationStatus> progress, CancellationToken token) {
             FlatSpec flatSpec = neededFlat.FlatSpec;
             Target target = GetTarget(neededFlat.TargetId);
+            if (target == null) {
+                return false;
+            }
 
             try {
                 TrainedFlatExposureSetting setting = new FlatsExpert().GetTrainedFlatExposureSetting(profileService.ActiveProfile, flatSpec);
@@ -221,6 +232,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 Target target = context.GetTargetOnly(targetId);
                 if (target == null) {
                     TSLogger.Warning($"TS Flats: failed to load target for id={targetId}");
+                    return null;
                 }
 
                 Project project = context.GetProject(target.ProjectId);
@@ -284,6 +296,10 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         protected async Task CloseCover(IProgress<ApplicationStatus> progress, CancellationToken token) {
+            if (!flatDeviceMediator.GetInfo().Connected) {
+                return;
+            }
+
             if (!flatDeviceMediator.GetInfo().SupportsOpenClose) {
                 return;
             }
@@ -311,6 +327,10 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         protected async Task OpenCover(IProgress<ApplicationStatus> progress, CancellationToken token) {
+            if (!flatDeviceMediator.GetInfo().Connected) {
+                return;
+            }
+
             if (!flatDeviceMediator.GetInfo().SupportsOpenClose) {
                 TSLogger.Info("TS Flats: flat panel doesn't support open/close");
                 return;
@@ -341,6 +361,10 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         protected async Task ToggleLight(bool onOff, IProgress<ApplicationStatus> progress, CancellationToken token) {
+            if (!flatDeviceMediator.GetInfo().Connected) {
+                return;
+            }
+
             if (flatDeviceMediator.GetInfo().LightOn == onOff) {
                 return;
             }
