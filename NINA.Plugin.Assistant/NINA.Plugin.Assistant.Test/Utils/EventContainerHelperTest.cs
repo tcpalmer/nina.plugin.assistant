@@ -12,8 +12,8 @@ namespace NINA.Plugin.Assistant.Test.EventContainer {
         public void TestConvert() {
             EventContainerHelper.Convert(EventContainerType.BeforeWait.ToString()).Should().Be(EventContainerType.BeforeWait);
             EventContainerHelper.Convert(EventContainerType.AfterWait.ToString()).Should().Be(EventContainerType.AfterWait);
-            EventContainerHelper.Convert(EventContainerType.BeforeNewTarget.ToString()).Should().Be(EventContainerType.BeforeNewTarget);
-            EventContainerHelper.Convert(EventContainerType.AfterNewTarget.ToString()).Should().Be(EventContainerType.AfterNewTarget);
+            EventContainerHelper.Convert(EventContainerType.BeforeTarget.ToString()).Should().Be(EventContainerType.BeforeTarget);
+            EventContainerHelper.Convert(EventContainerType.AfterTarget.ToString()).Should().Be(EventContainerType.AfterTarget);
             EventContainerHelper.Convert(EventContainerType.AfterEachTarget.ToString()).Should().Be(EventContainerType.AfterEachTarget);
         }
 

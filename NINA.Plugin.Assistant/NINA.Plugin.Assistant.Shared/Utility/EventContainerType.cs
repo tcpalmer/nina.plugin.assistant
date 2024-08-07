@@ -3,8 +3,8 @@
     public enum EventContainerType {
         BeforeWait,
         AfterWait,
-        BeforeNewTarget,
-        AfterNewTarget,
+        BeforeTarget,
+        AfterTarget,
         AfterEachTarget
     }
 
@@ -23,12 +23,12 @@
                 return EventContainerType.AfterWait;
             }
 
-            if (eventContainerType == EventContainerType.BeforeNewTarget.ToString()) {
-                return EventContainerType.BeforeNewTarget;
+            if (eventContainerType == EventContainerType.BeforeTarget.ToString()) {
+                return EventContainerType.BeforeTarget;
             }
 
-            if (eventContainerType == EventContainerType.AfterNewTarget.ToString()) {
-                return EventContainerType.AfterNewTarget;
+            if (eventContainerType == EventContainerType.AfterTarget.ToString()) {
+                return EventContainerType.AfterTarget;
             }
 
             if (eventContainerType == EventContainerType.AfterEachTarget.ToString()) {

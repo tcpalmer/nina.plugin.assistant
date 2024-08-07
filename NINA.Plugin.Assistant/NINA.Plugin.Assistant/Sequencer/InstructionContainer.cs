@@ -25,7 +25,7 @@ namespace Assistant.NINAPlugin.Sequencer {
     [Export(typeof(ISequenceContainer))]
     [JsonObject(MemberSerialization.OptIn)]
     public class InstructionContainer : SequenceContainer, ISequenceContainer, IValidatable {
-        private readonly IProfileService profileService;
+        private IProfileService profileService;
         private Object lockObj = new Object();
 
         private int syncActionTimeout;
@@ -37,8 +37,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         [ImportingConstructor]
         public InstructionContainer() : base(new InstructionContainerStrategy()) { }
 
-        public InstructionContainer(IProfileService profileService, EventContainerType containerType, ISequenceContainer parent) : base(new InstructionContainerStrategy()) {
-            this.profileService = profileService;
+        public InstructionContainer(EventContainerType containerType, ISequenceContainer parent) : base(new InstructionContainerStrategy()) {
             EventContainerType = containerType;
             Name = containerType.ToString();
             AttachNewParent(Parent);
@@ -47,6 +46,11 @@ namespace Assistant.NINAPlugin.Sequencer {
         [OnDeserialized]
         public void OnDeserializedMethod(StreamingContext context) {
             EventContainerType = EventContainerHelper.Convert(Name);
+        }
+
+        public void Initialize(IProfileService profileService) {
+            this.profileService = profileService;
+            Initialize();
         }
 
         public override void Initialize() {
@@ -96,7 +100,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override object Clone() {
-            InstructionContainer ic = new InstructionContainer(profileService, EventContainerType, Parent);
+            InstructionContainer ic = new InstructionContainer(EventContainerType, Parent);
             ic.Items = new ObservableCollection<ISequenceItem>(Items.Select(i => i.Clone() as ISequenceItem));
             foreach (var item in ic.Items) {
                 item.AttachNewParent(ic);

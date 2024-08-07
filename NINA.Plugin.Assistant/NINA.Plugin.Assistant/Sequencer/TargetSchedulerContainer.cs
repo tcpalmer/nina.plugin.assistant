@@ -121,11 +121,11 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.applicationMediator = applicationMediator;
             this.framingAssistantVM = framingAssistantVM;
 
-            BeforeWaitContainer = new InstructionContainer(profileService, EventContainerType.BeforeWait, Parent);
-            AfterWaitContainer = new InstructionContainer(profileService, EventContainerType.AfterWait, Parent);
-            BeforeTargetContainer = new InstructionContainer(profileService, EventContainerType.BeforeNewTarget, Parent);
-            AfterTargetContainer = new InstructionContainer(profileService, EventContainerType.AfterNewTarget, Parent);
-            AfterAllTargetsContainer = new InstructionContainer(profileService, EventContainerType.AfterEachTarget, this);
+            BeforeWaitContainer = new InstructionContainer(EventContainerType.BeforeWait, Parent);
+            AfterWaitContainer = new InstructionContainer(EventContainerType.AfterWait, Parent);
+            BeforeTargetContainer = new InstructionContainer(EventContainerType.BeforeTarget, Parent);
+            AfterTargetContainer = new InstructionContainer(EventContainerType.AfterTarget, Parent);
+            AfterAllTargetsContainer = new InstructionContainer(EventContainerType.AfterEachTarget, this);
 
             Task.Run(() => NighttimeData = nighttimeCalculator.Calculate());
             Target = new InputTarget(Angle.ByDegree(profileService.ActiveProfile.AstrometrySettings.Latitude), Angle.ByDegree(profileService.ActiveProfile.AstrometrySettings.Longitude), profileService.ActiveProfile.AstrometrySettings.Horizon);
@@ -149,11 +149,11 @@ namespace Assistant.NINAPlugin.Sequencer {
             SchedulerProgress = new SchedulerProgressVM();
             SchedulerProgress.PropertyChanged += SchedulerProgress_PropertyChanged;
 
-            BeforeWaitContainer.Initialize();
-            AfterWaitContainer.Initialize();
-            BeforeTargetContainer.Initialize();
-            AfterTargetContainer.Initialize();
-            AfterAllTargetsContainer.Initialize();
+            BeforeWaitContainer.Initialize(profileService);
+            AfterWaitContainer.Initialize(profileService);
+            BeforeTargetContainer.Initialize(profileService);
+            AfterTargetContainer.Initialize(profileService);
+            AfterAllTargetsContainer.Initialize(profileService);
         }
 
         public override void AfterParentChanged() {

@@ -1,6 +1,9 @@
 # Target Scheduler
 
-## 4.7.0.0 - 2024-08-XX
+## 4.7.1.0 - 2024-08-07
+* Bug fix for event container naming.
+
+## 4.7.0.0 - 2024-08-06
 * Added support for custom event containers in the Target Scheduler Sync Container instruction.
 * Added support for running TS Flats instruction in a sync client sequence.
 
