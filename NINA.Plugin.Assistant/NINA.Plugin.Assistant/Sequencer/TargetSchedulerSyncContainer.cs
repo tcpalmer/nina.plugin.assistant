@@ -48,11 +48,11 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         private ISyncImageSaveWatcher syncImageSaveWatcher;
 
-        [JsonProperty] public InstructionContainer BeforeWaitContainer { get; set; }
-        [JsonProperty] public InstructionContainer AfterWaitContainer { get; set; }
-        [JsonProperty] public InstructionContainer BeforeNewTargetContainer { get; set; }
-        [JsonProperty] public InstructionContainer AfterNewTargetContainer { get; set; }
-        [JsonProperty] public InstructionContainer AfterEachTargetContainer { get; set; }
+        [JsonProperty] public InstructionContainer SyncBeforeWaitContainer { get; set; }
+        [JsonProperty] public InstructionContainer SyncAfterWaitContainer { get; set; }
+        [JsonProperty] public InstructionContainer SyncBeforeTargetContainer { get; set; }
+        [JsonProperty] public InstructionContainer SyncAfterTargetContainer { get; set; }
+        [JsonProperty] public InstructionContainer SyncAfterAllTargetsContainer { get; set; }
 
         [ImportingConstructor]
         public TargetSchedulerSyncContainer(
@@ -79,11 +79,11 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.plateSolverFactory = plateSolverFactory;
             this.windowServiceFactory = windowServiceFactory;
 
-            BeforeWaitContainer = new InstructionContainer(profileService, EventContainerType.BeforeWait, Parent);
-            AfterWaitContainer = new InstructionContainer(profileService, EventContainerType.AfterWait, Parent);
-            BeforeNewTargetContainer = new InstructionContainer(profileService, EventContainerType.BeforeNewTarget, Parent);
-            AfterNewTargetContainer = new InstructionContainer(profileService, EventContainerType.AfterNewTarget, Parent);
-            AfterEachTargetContainer = new InstructionContainer(profileService, EventContainerType.AfterEachTarget, Parent);
+            SyncBeforeWaitContainer = new InstructionContainer(EventContainerType.BeforeWait, Parent);
+            SyncAfterWaitContainer = new InstructionContainer(EventContainerType.AfterWait, Parent);
+            SyncBeforeTargetContainer = new InstructionContainer(EventContainerType.BeforeTarget, Parent);
+            SyncAfterTargetContainer = new InstructionContainer(EventContainerType.AfterTarget, Parent);
+            SyncAfterAllTargetsContainer = new InstructionContainer(EventContainerType.AfterEachTarget, Parent);
         }
 
         public TargetSchedulerSyncContainer(TargetSchedulerSyncContainer clone) : this(
@@ -100,17 +100,17 @@ namespace Assistant.NINAPlugin.Sequencer {
             clone.windowServiceFactory) {
             CopyMetaData(clone);
 
-            clone.BeforeWaitContainer = (InstructionContainer)BeforeWaitContainer.Clone();
-            clone.AfterWaitContainer = (InstructionContainer)AfterWaitContainer.Clone();
-            clone.BeforeNewTargetContainer = (InstructionContainer)BeforeNewTargetContainer.Clone();
-            clone.AfterNewTargetContainer = (InstructionContainer)AfterNewTargetContainer.Clone();
-            clone.AfterEachTargetContainer = (InstructionContainer)AfterEachTargetContainer.Clone();
+            clone.SyncBeforeWaitContainer = (InstructionContainer)SyncBeforeWaitContainer.Clone();
+            clone.SyncAfterWaitContainer = (InstructionContainer)SyncAfterWaitContainer.Clone();
+            clone.SyncBeforeTargetContainer = (InstructionContainer)SyncBeforeTargetContainer.Clone();
+            clone.SyncAfterTargetContainer = (InstructionContainer)SyncAfterTargetContainer.Clone();
+            clone.SyncAfterAllTargetsContainer = (InstructionContainer)SyncAfterAllTargetsContainer.Clone();
 
-            clone.BeforeWaitContainer.AttachNewParent(clone);
-            clone.AfterWaitContainer.AttachNewParent(clone);
-            clone.BeforeNewTargetContainer.AttachNewParent(clone);
-            clone.AfterNewTargetContainer.AttachNewParent(clone);
-            clone.AfterEachTargetContainer.AttachNewParent(clone);
+            clone.SyncBeforeWaitContainer.AttachNewParent(clone);
+            clone.SyncAfterWaitContainer.AttachNewParent(clone);
+            clone.SyncBeforeTargetContainer.AttachNewParent(clone);
+            clone.SyncAfterTargetContainer.AttachNewParent(clone);
+            clone.SyncAfterAllTargetsContainer.AttachNewParent(clone);
         }
 
         public override object Clone() {
@@ -122,11 +122,11 @@ namespace Assistant.NINAPlugin.Sequencer {
             if (SyncManager.Instance.RunningClient) {
                 SyncClient.Instance.SetClientState(ClientState.Ready);
 
-                BeforeWaitContainer.Initialize();
-                AfterWaitContainer.Initialize();
-                BeforeNewTargetContainer.Initialize();
-                AfterNewTargetContainer.Initialize();
-                AfterEachTargetContainer.Initialize();
+                SyncBeforeWaitContainer.Initialize(profileService);
+                SyncAfterWaitContainer.Initialize(profileService);
+                SyncBeforeTargetContainer.Initialize(profileService);
+                SyncAfterTargetContainer.Initialize(profileService);
+                SyncAfterAllTargetsContainer.Initialize(profileService);
             }
         }
 
@@ -136,11 +136,11 @@ namespace Assistant.NINAPlugin.Sequencer {
             if (Parent == null) {
                 SequenceBlockTeardown();
             } else {
-                BeforeWaitContainer.AttachNewParent(Parent);
-                AfterWaitContainer.AttachNewParent(Parent);
-                BeforeNewTargetContainer.AttachNewParent(Parent);
-                AfterNewTargetContainer.AttachNewParent(Parent);
-                AfterEachTargetContainer.AttachNewParent(Parent);
+                SyncBeforeWaitContainer.AttachNewParent(Parent);
+                SyncAfterWaitContainer.AttachNewParent(Parent);
+                SyncBeforeTargetContainer.AttachNewParent(Parent);
+                SyncAfterTargetContainer.AttachNewParent(Parent);
+                SyncAfterAllTargetsContainer.AttachNewParent(Parent);
 
                 if (Parent.Status == SequenceEntityStatus.RUNNING) {
                     SequenceBlockInitialize();
@@ -154,11 +154,11 @@ namespace Assistant.NINAPlugin.Sequencer {
             if (SyncManager.Instance.RunningClient) {
                 SyncClient.Instance.SetClientState(ClientState.Ready);
 
-                BeforeWaitContainer.ResetProgress();
-                AfterWaitContainer.ResetProgress();
-                BeforeNewTargetContainer.ResetProgress();
-                AfterNewTargetContainer.ResetProgress();
-                AfterEachTargetContainer.ResetProgress();
+                SyncBeforeWaitContainer.ResetProgress();
+                SyncAfterWaitContainer.ResetProgress();
+                SyncBeforeTargetContainer.ResetProgress();
+                SyncAfterTargetContainer.ResetProgress();
+                SyncAfterAllTargetsContainer.ResetProgress();
             }
         }
 
@@ -256,11 +256,11 @@ namespace Assistant.NINAPlugin.Sequencer {
         public override bool Validate() {
             var issues = new List<string>();
 
-            bool beforeWaitValid = BeforeWaitContainer.Validate();
-            bool afterWaitValid = AfterWaitContainer.Validate();
-            bool beforeNewTargetValid = BeforeNewTargetContainer.Validate();
-            bool afterNewTargetValid = AfterNewTargetContainer.Validate();
-            bool afterEachTargetValid = AfterEachTargetContainer.Validate();
+            bool beforeWaitValid = SyncBeforeWaitContainer.Validate();
+            bool afterWaitValid = SyncAfterWaitContainer.Validate();
+            bool beforeNewTargetValid = SyncBeforeTargetContainer.Validate();
+            bool afterNewTargetValid = SyncAfterTargetContainer.Validate();
+            bool afterEachTargetValid = SyncAfterAllTargetsContainer.Validate();
 
             if (!beforeWaitValid || !afterWaitValid || !beforeNewTargetValid || !afterNewTargetValid || !afterEachTargetValid) {
                 issues.Add("One or more custom containers is not valid");
@@ -326,11 +326,11 @@ namespace Assistant.NINAPlugin.Sequencer {
         private async Task DoEventContainer(SyncedEventContainer syncedEventContainer, IProgress<ApplicationStatus> progress, CancellationToken token) {
             InstructionContainer targetContainer = null;
             switch (syncedEventContainer.EventContainerType) {
-                case EventContainerType.BeforeWait: { targetContainer = BeforeWaitContainer; break; }
-                case EventContainerType.AfterWait: { targetContainer = AfterWaitContainer; break; }
-                case EventContainerType.BeforeNewTarget: { targetContainer = BeforeNewTargetContainer; break; }
-                case EventContainerType.AfterNewTarget: { targetContainer = AfterNewTargetContainer; break; }
-                case EventContainerType.AfterEachTarget: { targetContainer = AfterEachTargetContainer; break; }
+                case EventContainerType.BeforeWait: { targetContainer = SyncBeforeWaitContainer; break; }
+                case EventContainerType.AfterWait: { targetContainer = SyncAfterWaitContainer; break; }
+                case EventContainerType.BeforeTarget: { targetContainer = SyncBeforeTargetContainer; break; }
+                case EventContainerType.AfterTarget: { targetContainer = SyncAfterTargetContainer; break; }
+                case EventContainerType.AfterEachTarget: { targetContainer = SyncAfterAllTargetsContainer; break; }
             }
 
             await ExecuteEventContainer(targetContainer, progress, token);
