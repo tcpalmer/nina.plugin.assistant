@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 4.7.2.0 - 2024-08-09
+* Bug fix for event containers not waiting for completion before continuing.
+
 ## 4.7.1.0 - 2024-08-07
 * Bug fix for event container naming.
 

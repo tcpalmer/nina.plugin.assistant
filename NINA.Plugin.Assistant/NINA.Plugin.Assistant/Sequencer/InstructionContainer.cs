@@ -63,10 +63,13 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token) {
-            var result = Task.CompletedTask;
-
             if (!SyncManager.Instance.IsRunning) {
-                result = Items.Count > 0 ? base.Execute(progress, token) : Task.CompletedTask;
+                if (Items.Count > 0) {
+                    TSLogger.Info($"Event container {Name}: starting execution");
+                    await base.Execute(progress, token);
+                    TSLogger.Info($"Event container {Name}: finished execution");
+                }
+
                 return;
             }
 
@@ -80,7 +83,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 // Server can proceed with event container
                 if (Items.Count > 0) {
+                    TSLogger.Info($"Event container {Name}: starting execution on server");
                     await base.Execute(progress, token);
+                    TSLogger.Info($"Event container {Name}: finished execution on server");
                 }
 
                 // Wait for clients to complete the event container
@@ -92,7 +97,9 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             if (IsSyncClient()) {
                 if (Items.Count > 0) {
+                    TSLogger.Info($"Event container {Name}: starting execution on client");
                     await base.Execute(progress, token);
+                    TSLogger.Info($"Event container {Name}: finished execution on client");
                 }
             }
 
