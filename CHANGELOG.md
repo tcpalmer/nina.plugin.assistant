@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 4.7.4.0 - 2024-08-13
+* Bug fix for event container race condition.
+
 ## 4.7.3.0 - 2024-08-09
 * Bug fix for event containers not waiting for completion before continuing.
 

@@ -338,14 +338,11 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private async Task ExecuteEventContainer(InstructionContainer container, IProgress<ApplicationStatus> progress, CancellationToken token) {
-            if (container.Items?.Count == 0) {
-                TSLogger.Info($"SYNC client event container is empty: {container.Name}");
-            }
-
-            TSLogger.Info($"SYNC client starting event container: {container.Name}");
+            TSLogger.Info($"SYNC client starting event container: {container.Name} with {container.Items?.Count} instructions");
 
             try {
                 await container.Execute(progress, token);
+                await Task.Delay(2000, token);
             } catch (Exception ex) {
                 TSLogger.Error($"exception executing {container.Name} instruction container: {ex}");
 
