@@ -1,6 +1,7 @@
 # Target Scheduler
 
 ## 4.7.4.0 - 2024-08-13
+* Bug fix for immediate flats on sync client
 * Bug fix for event container race condition.
 
 ## 4.7.3.0 - 2024-08-09
