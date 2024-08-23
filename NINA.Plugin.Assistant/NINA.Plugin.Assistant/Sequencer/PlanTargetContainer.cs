@@ -114,10 +114,10 @@ namespace Assistant.NINAPlugin.Sequencer {
                 SetSyncTimeouts();
             }
 
-            if (!plan.IsEmulator)
-                ImageSaveWatcher = new ImageSaveWatcher(activeProfile, imageSaveMediator, plan.PlanTarget, synchronizationEnabled);
-            else
-                ImageSaveWatcher = new ImageSaveWatcherEmulator();
+            //if (!plan.IsEmulator)
+            ImageSaveWatcher = new ImageSaveWatcher(activeProfile, imageSaveMediator, plan.PlanTarget, synchronizationEnabled);
+            //else
+            //    ImageSaveWatcher = new ImageSaveWatcherEmulator();
 
             // These have no impact on the container itself but are used to assign to each added instruction
             Attempts = 1;

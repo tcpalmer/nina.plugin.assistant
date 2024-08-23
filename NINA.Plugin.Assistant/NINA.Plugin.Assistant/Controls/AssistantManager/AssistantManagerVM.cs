@@ -825,7 +825,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         public void AddNewExposureTemplate(TreeDataItem parentItem) {
             ProfileMeta profileMeta = (ProfileMeta)parentItem.Data;
 
-            IProfile profile = GetProfile(profileMeta.Id.ToString());
+            IProfile profile = ProfileLoader.GetProfile(profileService, profileMeta.Id.ToString());
             FilterInfo filterInfo = profile?.FilterWheelSettings?.FilterWheelFilters.FirstOrDefault();
             if (filterInfo == null) {
                 TSLogger.Error("failed to get the first filter in profile's filter wheel");
@@ -927,16 +927,6 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         public void CopyItem() {
             Clipboard.SetItem(activeTreeDataItem);
-        }
-
-        public IProfile GetProfile(string profileId) {
-            ProfileMeta profileMeta = profileService.Profiles.Where(p => p.Id.ToString() == profileId).FirstOrDefault();
-            if (profileMeta != null) {
-                return ProfileLoader.Load(profileService, profileMeta);
-            }
-
-            TSLogger.Error($"failed to load profile, id = {profileId}");
-            return null;
         }
 
         public List<ExposureTemplate> GetExposureTemplates(IProfile profile) {

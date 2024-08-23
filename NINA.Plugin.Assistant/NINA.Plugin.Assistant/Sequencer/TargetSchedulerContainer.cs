@@ -82,7 +82,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         public object lockObj = new object();
         public int TotalExposureCount { get; set; }
 
-        public SchedulerPlan previousSchedulerPlan { get; private set; }
+        public SchedulerPlan PreviousSchedulerPlan { get; private set; }
 
         [ImportingConstructor]
         public TargetSchedulerContainer(
@@ -221,7 +221,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             TSLogger.Debug("TargetSchedulerContainer: Execute");
 
             IPlanTarget previousPlanTarget = null;
-            previousSchedulerPlan = null;
+            PreviousSchedulerPlan = null;
             synchronizationEnabled = IsSynchronizationEnabled();
 
             while (true) {
@@ -249,7 +249,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         await ExecuteEventContainer(AfterTargetContainer, progress, token);
                         await ExecuteEventContainer(AfterAllTargetsContainer, progress, token);
                         previousPlanTarget = null;
-                        previousSchedulerPlan = null;
+                        PreviousSchedulerPlan = null;
                     }
 
                     TSLogger.Info($"planner waiting for next target to become available: {Utils.FormatDateTimeFull(plan.WaitForNextTargetTime)}");
@@ -271,7 +271,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                             await ExecuteEventContainer(AfterTargetContainer, progress, token);
                         }
 
-                        if (previousPlanTarget != null && previousSchedulerPlan != null) {
+                        if (previousPlanTarget != null && PreviousSchedulerPlan != null) {
                             await ExecuteEventContainer(AfterAllTargetsContainer, progress, token);
                         }
 
@@ -291,7 +291,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                         targetContainer.Execute(progress, token).Wait();
 
                         previousPlanTarget = planTarget;
-                        previousSchedulerPlan = plan;
+                        PreviousSchedulerPlan = plan;
                     } catch (Exception ex) {
                         if (Utils.IsCancelException(ex)) {
                             TSLogger.Warning("sequence was canceled or interrupted, target scheduler execution is incomplete");

@@ -3,6 +3,7 @@ using NINA.Profile;
 using NINA.Profile.Interfaces;
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.Caching;
 using System.Runtime.Serialization;
 using System.Text;
@@ -13,6 +14,16 @@ namespace Assistant.NINAPlugin.Controls.Util {
         private static readonly ProfileLoader Instance = new ProfileLoader();
         private static bool initialized = false;
         private ProfileCache cache;
+
+        public static IProfile GetProfile(IProfileService profileService, string profileId) {
+            ProfileMeta profileMeta = profileService.Profiles.Where(p => p.Id.ToString() == profileId).FirstOrDefault();
+            if (profileMeta != null) {
+                return Load(profileService, profileMeta);
+            }
+
+            TSLogger.Error($"failed to load profile, id = {profileId}");
+            return null;
+        }
 
         public static IProfile Load(IProfileService profileService, ProfileMeta profileMeta) {
             if (!initialized) {

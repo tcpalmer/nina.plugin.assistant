@@ -53,6 +53,18 @@ namespace Assistant.NINAPlugin.Plan {
             }
         }
 
+        // Stub version used on sync clients to support immediate flats
+        public SchedulerPlan(IPlanTarget planTarget) {
+            this.PlanId = Guid.NewGuid().ToString();
+            this.PlanTarget = planTarget;
+            this.PlanInstructions = new List<IPlanInstruction>();
+            this.WaitForNextTargetTime = null;
+        }
+
+        public void AddPlanInstruction(IPlanInstruction planInstruction) {
+            PlanInstructions.Add(planInstruction);
+        }
+
         public string LogPlanResults() {
             StringBuilder sb = new StringBuilder();
             string type = WaitForNextTargetTime != null ? "WAIT" : "TARGET";

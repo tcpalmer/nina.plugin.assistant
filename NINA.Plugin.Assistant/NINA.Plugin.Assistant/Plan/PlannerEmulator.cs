@@ -38,8 +38,8 @@ namespace Assistant.NINAPlugin.Plan {
 
             switch (CallNumber) {
                 case 1: plan = WaitForTime(DateTime.Now.AddSeconds(10)); break;
-                case 2: plan = SyncPlan1(); break;
-                //case 3: plan = Plan4(); break;
+                case 2: plan = SyncPlan1(true); break;
+                case 3: plan = SyncPlan1(false); break;
                 //case 3: plan = Plan5(); break;
                 //case 5: plan = Plan3(); break;
                 //case 6: plan = Plan3(); break;
@@ -372,51 +372,71 @@ namespace Assistant.NINAPlugin.Plan {
             return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions, false);
         }
 
-        private SchedulerPlan SyncPlan1() {
-            DateTime endTime = atTime.AddMinutes(5);
+        private SchedulerPlan SyncPlan1(bool targetOne) {
+            DateTime endTime = atTime.AddMinutes(6);
             TimeInterval timeInterval = new TimeInterval(atTime, endTime);
 
             IPlanProject planProject = new PlanProjectEmulator();
-            planProject.Name = "M31";
+            planProject.Name = "SYNC P1";
             planProject.DatabaseId = 4;
             planProject.UseCustomHorizon = false;
             planProject.MinimumAltitude = 10;
             planProject.DitherEvery = 0;
             planProject.EnableGrader = true;
-            planProject.FlatsHandling = Project.FLATS_HANDLING_TARGET_COMPLETION;
-
-            IPlanTarget planTarget = GetBasePlanTarget("M31", planProject, Cp5n5);
-            planTarget.DatabaseId = 10;
-            planTarget.EndTime = endTime;
-            planTarget.Rotation = 12.345;
-            planTarget.ROI = 100;
-
-            IPlanExposure lum = GetExposurePlan("Lum", 5, 139, 21, 3, 50);
-            lum.ReadoutMode = 0;
-            planTarget.ExposurePlans.Add(lum);
-
-            IPlanExposure red = GetExposurePlan("Red", 5, 139, 21, 3, 51);
-            red.ReadoutMode = 0;
-            planTarget.ExposurePlans.Add(red);
+            planProject.FlatsHandling = Project.FLATS_HANDLING_IMMEDIATE;
 
             List<IPlanInstruction> instructions = new List<IPlanInstruction>();
-            instructions.Add(new PlanMessage("planner emulator: SyncPlan1"));
-            //instructions.Add(new PlanSlew(true));
-            instructions.Add(new PlanBeforeNewTargetContainer());
+            IPlanTarget planTarget;
 
-            instructions.Add(new PlanSetReadoutMode(lum));
-            instructions.Add(new PlanSwitchFilter(lum));
-            instructions.Add(new PlanTakeExposure(lum));
-            instructions.Add(new PlanTakeExposure(lum));
-            //instructions.Add(new PlanTakeExposure(lum));
-            //instructions.Add(new PlanTakeExposure(lum));
-            //instructions.Add(new PlanTakeExposure(lum));
-            //instructions.Add(new PlanTakeExposure(lum));
+            if (targetOne) {
+                // Target 1 (id=10)
+                planTarget = GetBasePlanTarget("T1", planProject, Cp5n5);
+                planTarget.DatabaseId = 10;
+                planTarget.EndTime = endTime;
+                planTarget.Rotation = 12.34;
+                planTarget.ROI = 100;
 
-            instructions.Add(new PlanSetReadoutMode(red));
-            instructions.Add(new PlanSwitchFilter(red));
-            instructions.Add(new PlanTakeExposure(red));
-            instructions.Add(new PlanTakeExposure(red));
+                IPlanExposure lum = GetExposurePlan("Lum", 5, 139, 21, 3, 50);
+                lum.ReadoutMode = 0;
+                planTarget.ExposurePlans.Add(lum);
+
+                IPlanExposure red = GetExposurePlan("Red", 5, 139, 21, 3, 51);
+                red.ReadoutMode = 0;
+                planTarget.ExposurePlans.Add(red);
+
+                instructions.Add(new PlanMessage("planner emulator: SyncPlan1, Target 1"));
+                //instructions.Add(new PlanSlew(true));
+                //instructions.Add(new PlanBeforeNewTargetContainer());
+
+                instructions.Add(new PlanSetReadoutMode(lum));
+                instructions.Add(new PlanSwitchFilter(lum));
+                instructions.Add(new PlanTakeExposure(lum));
+                instructions.Add(new PlanTakeExposure(lum));
+            } else {
+                // Target 2 (id=11)
+                planTarget = GetBasePlanTarget("T2", planProject, Cp1525);
+                planTarget.DatabaseId = 11;
+                planTarget.EndTime = endTime;
+                planTarget.Rotation = 45.67;
+                planTarget.ROI = 100;
+
+                IPlanExposure lum = GetExposurePlan("Lum", 5, 139, 21, 3, 52);
+                lum.ReadoutMode = 0;
+                planTarget.ExposurePlans.Add(lum);
+
+                IPlanExposure red = GetExposurePlan("Red", 5, 139, 21, 3, 53);
+                red.ReadoutMode = 0;
+                planTarget.ExposurePlans.Add(red);
+
+                instructions.Add(new PlanMessage("planner emulator: SyncPlan1, Target 2"));
+                //instructions.Add(new PlanSlew(true));
+                //instructions.Add(new PlanBeforeNewTargetContainer());
+
+                instructions.Add(new PlanSetReadoutMode(red));
+                instructions.Add(new PlanSwitchFilter(red));
+                instructions.Add(new PlanTakeExposure(red));
+                instructions.Add(new PlanTakeExposure(red));
+            }
 
             return new SchedulerPlan(atTime, null, planTarget, timeInterval, instructions, false);
         }

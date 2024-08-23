@@ -338,6 +338,10 @@ namespace Assistant.NINAPlugin.Sync {
             TargetDatabaseId = targetDatabaseId;
             ExposurePlanDatabaseId = exposurePlanDatabaseId;
         }
+
+        public override string? ToString() {
+            return $"ExposureId={ExposureId}, TargetName={TargetName}, TargetRA={TargetRA}, TargetDec={TargetDec} TargetPositionAngle={TargetPositionAngle}, TargetDatabaseId={TargetDatabaseId}, ExposurePlanDatabaseId={ExposurePlanDatabaseId}";
+        }
     }
 
     public class SyncedSolveRotate : SyncedAction {

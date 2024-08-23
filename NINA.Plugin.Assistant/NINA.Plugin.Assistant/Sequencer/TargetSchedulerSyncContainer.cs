@@ -1,4 +1,8 @@
-﻿using Assistant.NINAPlugin.Sync;
+﻿using Assistant.NINAPlugin.Controls.Util;
+using Assistant.NINAPlugin.Database;
+using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.Plan;
+using Assistant.NINAPlugin.Sync;
 using Assistant.NINAPlugin.Util;
 using Newtonsoft.Json;
 using NINA.Core.Enum;
@@ -19,6 +23,7 @@ using Scheduler.SyncService;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,6 +59,9 @@ namespace Assistant.NINAPlugin.Sequencer {
         [JsonProperty] public InstructionContainer SyncAfterTargetContainer { get; set; }
         [JsonProperty] public InstructionContainer SyncAfterAllTargetsContainer { get; set; }
 
+        private IProfile serverProfile;
+        public SchedulerPlan PreviousSchedulerPlan { get; private set; }
+
         [ImportingConstructor]
         public TargetSchedulerSyncContainer(
             IProfileService profileService,
@@ -78,6 +86,11 @@ namespace Assistant.NINAPlugin.Sequencer {
             this.guiderMediator = guiderMediator;
             this.plateSolverFactory = plateSolverFactory;
             this.windowServiceFactory = windowServiceFactory;
+
+            /*  Since these are members of the class, they're not 'added' to the sequence like regular instructions.
+             *  This means they don't get the same sequence hierarchy as regular instructions and don't
+             *  have TargetSchedulerSyncContainer as their parent :(
+             */
 
             SyncBeforeWaitContainer = new InstructionContainer(EventContainerType.BeforeWait, Parent);
             SyncAfterWaitContainer = new InstructionContainer(EventContainerType.AfterWait, Parent);
@@ -120,6 +133,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         public override void Initialize() {
             TSLogger.Debug("TargetSchedulerSyncContainer: Initialize");
             if (SyncManager.Instance.RunningClient) {
+                serverProfile = ProfileLoader.GetProfile(profileService, SyncClient.Instance.ServerProfileId);
                 SyncClient.Instance.SetClientState(ClientState.Ready);
 
                 SyncBeforeWaitContainer.Initialize(profileService);
@@ -306,6 +320,39 @@ namespace Assistant.NINAPlugin.Sequencer {
             });
 
             await base.Execute(progress, token);
+            AddExposureToPlan(syncedExposure);
+        }
+
+        private void AddExposureToPlan(SyncedExposure syncedExposure) {
+            IPlanTarget planTarget = GetPlanTarget(syncedExposure.TargetDatabaseId);
+            if (PreviousSchedulerPlan == null) {
+                PreviousSchedulerPlan = new SchedulerPlan(planTarget);
+            }
+
+            IPlanInstruction planInstruction = new Plan.PlanTakeExposure(GetPlanExposure(planTarget, syncedExposure.ExposurePlanDatabaseId));
+            PreviousSchedulerPlan.AddPlanInstruction(planInstruction);
+        }
+
+        private IPlanTarget GetPlanTarget(int targetDatabaseId) {
+            using (var context = new SchedulerDatabaseInteraction().GetContext()) {
+                Target target = context.GetTargetOnly(targetDatabaseId);
+                target = context.GetTargetByProject(target.ProjectId, targetDatabaseId);
+
+                ProfilePreference profilePreference = context.GetProfilePreference(target.Project.ProfileId, true);
+                ExposureCompletionHelper helper = new ExposureCompletionHelper(target.Project.EnableGrader, profilePreference.ExposureThrottle);
+
+                PlanProject planProject = new PlanProject(serverProfile, target.Project, helper);
+                return new PlanTarget(planProject, target);
+            }
+        }
+
+        private IPlanExposure GetPlanExposure(IPlanTarget planTarget, int exposurePlanDatabaseId) {
+            IPlanExposure planExposure = planTarget.ExposurePlans.FirstOrDefault(ep => ep.DatabaseId == exposurePlanDatabaseId);
+            if (planExposure != null) {
+                return planExposure;
+            }
+
+            return planTarget.CompletedExposurePlans.FirstOrDefault(ep => ep.DatabaseId == exposurePlanDatabaseId);
         }
 
         private async Task DoSyncedSolveRotate(SyncedSolveRotate syncedSolveRotate, IProgress<ApplicationStatus> progress, CancellationToken token) {
@@ -335,6 +382,11 @@ namespace Assistant.NINAPlugin.Sequencer {
 
             await ExecuteEventContainer(targetContainer, progress, token);
             await SyncClient.Instance.CompleteEventContainer(syncedEventContainer.EventContainerId, syncedEventContainer.EventContainerType);
+
+            if (syncedEventContainer.EventContainerType == EventContainerType.BeforeTarget) {
+                TSLogger.Info("SYNC client: clearing previous scheduler plan for new target");
+                PreviousSchedulerPlan = null;
+            }
         }
 
         private async Task ExecuteEventContainer(InstructionContainer container, IProgress<ApplicationStatus> progress, CancellationToken token) {

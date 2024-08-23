@@ -40,7 +40,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         public InstructionContainer(EventContainerType containerType, ISequenceContainer parent) : base(new InstructionContainerStrategy()) {
             EventContainerType = containerType;
             Name = containerType.ToString();
-            AttachNewParent(Parent);
+            AttachNewParent(parent);
         }
 
         [OnDeserialized]

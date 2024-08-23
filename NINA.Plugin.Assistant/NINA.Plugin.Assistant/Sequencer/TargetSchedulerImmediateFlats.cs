@@ -143,22 +143,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private List<LightSession> GetNeededFlats() {
-            // Find parent TargetSchedulerContainer which should have the scheduler plan we need
-            ISequenceContainer parent = Parent;
-            while (parent != null) {
-                if (parent is TargetSchedulerContainer) {
-                    break;
-                }
+            SchedulerPlan plan = GetSchedulerPlan();
 
-                parent = parent.Parent;
-            }
-
-            if (parent == null) {
-                TSLogger.Error("TS Immediate Flats: failed to find TargetSchedulerContainer parent, instruction not placed correctly in sequence?");
-                return null;
-            }
-
-            SchedulerPlan plan = (parent as TargetSchedulerContainer).previousSchedulerPlan;
             if (plan == null) {
                 TSLogger.Error("TS Immediate Flats: failed to find previous plan on TargetSchedulerContainer parent, aborting flats");
                 return null;
@@ -232,6 +218,49 @@ namespace Assistant.NINAPlugin.Sequencer {
             flatsExpert.LogLightSessions("needed immediate flats", neededFlats);
 
             return neededFlats;
+        }
+
+        private SchedulerPlan GetSchedulerPlan() {
+            // Find parent TargetSchedulerContainer which should have the scheduler plan we need
+            ISequenceContainer parent = Parent;
+
+            while (parent != null) {
+                if (parent is TargetSchedulerContainer) {
+                    return (parent as TargetSchedulerContainer).PreviousSchedulerPlan;
+                }
+
+                parent = parent.Parent;
+            }
+
+            // If that failed, try to find TargetSchedulerSyncContainer; first find the root
+            ISequenceContainer sequenceContainer = Parent;
+            parent = Parent;
+            while (parent != null) {
+                if (parent is SequenceRootContainer) {
+                    sequenceContainer = parent as SequenceRootContainer;
+                    break;
+                }
+
+                parent = parent.Parent;
+            }
+
+            // Then recurse over all
+            return CheckContainer(sequenceContainer);
+        }
+
+        private SchedulerPlan CheckContainer(ISequenceContainer container) {
+            if (container == null) { return null; }
+            SchedulerPlan plan = null;
+            foreach (var item in container.Items) {
+                if (item is TargetSchedulerSyncContainer) {
+                    return (item as TargetSchedulerSyncContainer).PreviousSchedulerPlan;
+                } else if (item is ISequenceContainer) {
+                    plan = CheckContainer((ISequenceContainer)item);
+                    if (plan != null) { return plan; }
+                }
+            }
+
+            return null;
         }
 
         private int GetGain(int? gain) {

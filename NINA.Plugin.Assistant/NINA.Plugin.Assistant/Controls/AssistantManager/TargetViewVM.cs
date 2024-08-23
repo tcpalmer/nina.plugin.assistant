@@ -1,4 +1,5 @@
-﻿using Assistant.NINAPlugin.Database.Schema;
+﻿using Assistant.NINAPlugin.Controls.Util;
+using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Plan.Scoring;
 using NINA.Astrometry;
@@ -45,7 +46,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             TargetProxy = new TargetProxy(target);
             TargetActive = ActiveWithActiveExposurePlans(TargetProxy.Target);
 
-            profile = managerVM.GetProfile(profileId);
+            profile = ProfileLoader.GetProfile(profileService, profileId);
             profileService.ProfileChanged += ProfileService_ProfileChanged;
 
             InitializeExposurePlans(TargetProxy.Proxy);

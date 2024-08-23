@@ -1,4 +1,5 @@
 ﻿using Assistant.NINAPlugin.Controls.Converters;
+using Assistant.NINAPlugin.Controls.Util;
 using Assistant.NINAPlugin.Database.Schema;
 using NINA.Core.Model.Equipment;
 using NINA.Core.MyMessageBox;
@@ -18,7 +19,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
 
         public ExposureTemplateViewVM(AssistantManagerVM managerVM, IProfileService profileService, ExposureTemplate exposureTemplate) : base(profileService) {
             this.managerVM = managerVM;
-            this.profile = managerVM.GetProfile(exposureTemplate.ProfileId);
+            this.profile = ProfileLoader.GetProfile(profileService, exposureTemplate.ProfileId);
 
             ExposureTemplateProxy = new ExposureTemplateProxy(exposureTemplate);
 
