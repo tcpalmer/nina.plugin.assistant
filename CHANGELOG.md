@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 4.7.5.0 - 2024-09-01
+* Added ability to change scheduler preview start time to now.
+
 ## 4.7.4.0 - 2024-08-13
 * Bug fix for immediate flats on sync client
 * Bug fix for event container race condition.

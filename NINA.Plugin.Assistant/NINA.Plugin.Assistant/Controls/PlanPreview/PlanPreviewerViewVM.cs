@@ -32,6 +32,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
 
             InitializeCriteria();
 
+            SetNowCommand = new RelayCommand(SetPreviewTimeNow);
             PlanPreviewCommand = new RelayCommand(RunPlanPreview);
             PlanPreviewResultsCommand = new RelayCommand(RunPlanPreviewResults);
         }
@@ -151,6 +152,7 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
             }
         }
 
+        public ICommand SetNowCommand { get; private set; }
         public ICommand PlanPreviewCommand { get; private set; }
         public ICommand PlanPreviewResultsCommand { get; private set; }
 
@@ -199,6 +201,19 @@ namespace Assistant.NINAPlugin.Controls.PlanPreview {
                 SchedulerPlans = null;
                 return;
             }
+        }
+
+        private void SetPreviewTimeNow(object obj) {
+            DateTime now = DateTime.Now;
+            PlanDate = now.Date;
+            PlanHours = now.Hour;
+            PlanMinutes = now.Minute;
+            PlanSeconds = now.Second;
+
+            RaisePropertyChanged(nameof(PlanDate));
+            RaisePropertyChanged(nameof(PlanHours));
+            RaisePropertyChanged(nameof(PlanMinutes));
+            RaisePropertyChanged(nameof(PlanSeconds));
         }
 
         private void RunPlanPreview(object obj) {
