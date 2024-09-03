@@ -201,8 +201,13 @@ namespace Assistant.NINAPlugin.Sequencer {
 
                 // Set the panel brightness
                 TSLogger.Info($"TS Flats: setting panel brightness: {setting.Brightness}");
-                SetBrightness setBrightness = new SetBrightness(flatDeviceMediator) { Brightness = setting.Brightness };
-                await setBrightness.Execute(progress, token);
+                try {
+                    SetBrightness setBrightness = new SetBrightness(flatDeviceMediator) { Brightness = setting.Brightness };
+                    await setBrightness.Execute(progress, token);
+                } catch (Exception e) {
+                    TSLogger.Warning($"TS Flats: error setting panel brightness: {e.Message}");
+                    TSLogger.Warning("TS Flats: continuing with flat exposure but brightness might not be set correctly");
+                }
 
                 // Take the exposures
                 TakeSubframeExposure takeExposure = new TakeSubframeExposure(profileService, cameraMediator, imagingMediator, imageSaveMediator, imageHistoryVM) {
