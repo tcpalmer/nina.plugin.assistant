@@ -1,5 +1,4 @@
 ﻿using Assistant.NINAPlugin.Astrometry;
-using Assistant.NINAPlugin.Util;
 using NINA.Astrometry;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
@@ -22,17 +21,18 @@ namespace Assistant.NINAPlugin.Plan {
             };
         }
 
-        // TODO: use AVERAGE ALTITIDE for relaxation
-
-        public bool IsRejected(IPlanTarget planTarget, IPlanExposure planExposure) {
-            double planMoonAltitude = GetPlanMaxMoonAltitude(planTarget);
+        public bool IsRejected(DateTime atTime, IPlanTarget planTarget, IPlanExposure planExposure) {
+            // We evaluate avoidance halfway through a target's minimum plan time
+            DateTime evaluationTime = GetMoonEvaluationTime(atTime, planTarget);
+            double moonAltitude = GetRelaxationMoonAltitude(evaluationTime);
 
             if (!planExposure.MoonAvoidanceEnabled) {
                 return false;
             }
 
             // Avoidance is completely off if the moon is below the relaxation min altitude and relaxation applies
-            if (planMoonAltitude <= planExposure.MoonRelaxMinAltitude && planExposure.MoonRelaxScale > 0) {
+            if (moonAltitude <= planExposure.MoonRelaxMinAltitude && planExposure.MoonRelaxScale > 0) {
+                TSLogger.Info($"moon avoidance off: moon altitude ({moonAltitude}) is below relax min altitude ({planExposure.MoonRelaxMinAltitude})");
                 return false;
             }
 
@@ -40,9 +40,9 @@ namespace Assistant.NINAPlugin.Plan {
             double moonWidthParameter = planExposure.MoonAvoidanceWidth;
 
             // If moon altitude is in the relaxation zone, then modulate the separation and width parameters
-            if (planMoonAltitude <= planExposure.MoonRelaxMaxAltitude && planExposure.MoonRelaxScale > 0) {
-                moonSeparationParameter = moonSeparationParameter + (planExposure.MoonRelaxScale * (planMoonAltitude - planExposure.MoonRelaxMaxAltitude));
-                moonWidthParameter = moonWidthParameter * ((planMoonAltitude - planExposure.MoonRelaxMinAltitude) / (planExposure.MoonRelaxMaxAltitude - planExposure.MoonRelaxMinAltitude));
+            if (moonAltitude <= planExposure.MoonRelaxMaxAltitude && planExposure.MoonRelaxScale > 0) {
+                moonSeparationParameter = moonSeparationParameter + (planExposure.MoonRelaxScale * (moonAltitude - planExposure.MoonRelaxMaxAltitude));
+                moonWidthParameter = moonWidthParameter * ((moonAltitude - planExposure.MoonRelaxMinAltitude) / (planExposure.MoonRelaxMaxAltitude - planExposure.MoonRelaxMinAltitude));
             }
 
             // If the separation was relaxed into oblivion, avoidance is off
@@ -52,22 +52,23 @@ namespace Assistant.NINAPlugin.Plan {
             }
 
             // Determine avoidance
-            DateTime midPointTime = Utils.GetMidpointTime(planTarget.StartTime, planTarget.EndTime);
-            double moonAge = GetMoonAge(midPointTime);
-            double moonSeparation = GetMoonSeparationAngle(observerInfo, midPointTime, planTarget.Coordinates);
+            double moonAge = GetMoonAge(evaluationTime);
+            double moonSeparation = GetMoonSeparationAngle(observerInfo, evaluationTime, planTarget.Coordinates);
             double moonAvoidanceSeparation = AstrometryUtils.GetMoonAvoidanceLorentzianSeparation(moonAge,
                 moonSeparationParameter, moonWidthParameter);
 
             bool rejected = moonSeparation < moonAvoidanceSeparation;
-            TSLogger.Debug($"moon avoidance {planTarget.Name}/{planExposure.FilterName} rejected={rejected}, midpoint={midPointTime}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
+            TSLogger.Debug($"moon avoidance {planTarget.Name}/{planExposure.FilterName} rejected={rejected}, eval time={evaluationTime}, moon alt={moonAltitude}, moonSep={moonSeparation}, moonAvoidSep={moonAvoidanceSeparation}");
 
             return rejected;
         }
 
-        public virtual double GetPlanMaxMoonAltitude(IPlanTarget planTarget) {
-            double altitudeAtStart = AstroUtil.GetMoonAltitude(planTarget.StartTime, observerInfo);
-            double altitudeAtEnd = AstroUtil.GetMoonAltitude(planTarget.EndTime, observerInfo);
-            return Math.Max(altitudeAtStart, altitudeAtEnd);
+        public virtual DateTime GetMoonEvaluationTime(DateTime atTime, IPlanTarget planTarget) {
+            return atTime.AddSeconds(planTarget.Project.MinimumTime * 60 / 2);
+        }
+
+        public virtual double GetRelaxationMoonAltitude(DateTime evaluationTime) {
+            return AstroUtil.GetMoonAltitude(evaluationTime, observerInfo);
         }
 
         public virtual double GetMoonAge(DateTime atTime) {

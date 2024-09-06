@@ -2,6 +2,7 @@
 
 ## 4.7.6.0 - 2024-09-03
 * Don't abort a flat exposure if setting flat panel brightness throws an error, just warn
+* Changed the time at which moon avoidance is evaluated, now halfway through target's minimum time
 
 ## 4.7.5.0 - 2024-09-01
 * Added ability to change scheduler preview start time to now.
