@@ -553,8 +553,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private string GetKey() {
-            string rotationKey = Rotation != ImageMetadata.NO_ROTATOR_ANGLE ? $"{Rotation}" : "na";
-            return $"{FilterName}_{Gain}_{Offset}_{BinningMode}_{ReadoutMode}_{rotationKey}_{ROI}";
+            return $"{FilterName}_{Gain}_{Offset}_{BinningMode}_{ReadoutMode}_{ROI}";
         }
 
         public bool Equals(FlatSpec other) {
