@@ -291,7 +291,7 @@ namespace Assistant.NINAPlugin.Plan {
 
                     foreach (IPlanExposure planExposure in planTarget.ExposurePlans) {
                         if (planExposure.IsIncomplete()) {
-                            if (expert.IsRejected(planTarget, planExposure)) {
+                            if (expert.IsRejected(atTime, planTarget, planExposure)) {
                                 SetRejected(planExposure, Reasons.FilterMoonAvoidance);
                             }
                         }
