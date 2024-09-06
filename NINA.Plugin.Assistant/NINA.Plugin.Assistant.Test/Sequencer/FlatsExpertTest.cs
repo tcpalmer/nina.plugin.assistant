@@ -584,7 +584,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             fs1.ReadoutMode.Should().Be(0);
             fs1.Rotation.Should().Be(123.4);
             fs1.ROI.Should().Be(89);
-            fs1.Key.Should().Be("Ha_10_20_2x2_0_123.4_89");
+            fs1.Key.Should().Be("Ha_10_20_2x2_0_89");
 
             ImageMetadata imageMetaData = GetImageMetadata(1, "Ha", 10, 20, "2x2", 0, 123.4, 89);
             AcquiredImage acquiredImage = new AcquiredImage(imageMetaData);
@@ -597,7 +597,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             fs2.ReadoutMode.Should().Be(0);
             fs2.Rotation.Should().Be(123.4);
             fs2.ROI.Should().Be(89);
-            fs2.Key.Should().Be("Ha_10_20_2x2_0_123.4_89");
+            fs2.Key.Should().Be("Ha_10_20_2x2_0_89");
 
             fs1.Equals(fs2).Should().BeTrue();
 
@@ -609,27 +609,25 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             fs3.ReadoutMode.Should().Be(0);
             fs3.Rotation.Should().Be(ImageMetadata.NO_ROTATOR_ANGLE);
             fs3.ROI.Should().Be(89);
-            fs3.Key.Should().Be("Ha_10_20_2x2_0_na_89");
+            fs3.Key.Should().Be("Ha_10_20_2x2_0_89");
 
-            imageMetaData = GetImageMetadata(1, "Ha", 10, 20, "2x2", 0, ImageMetadata.NO_ROTATOR_ANGLE, 89);
+            imageMetaData = GetImageMetadata(1, "Ha", 11, 20, "2x2", 0, ImageMetadata.NO_ROTATOR_ANGLE, 89);
             acquiredImage = new AcquiredImage(imageMetaData);
             acquiredImage.FilterName = imageMetaData.FilterName;
             FlatSpec fs4 = new FlatSpec(acquiredImage);
             fs4.FilterName.Should().Be("Ha");
-            fs4.Gain.Should().Be(10);
+            fs4.Gain.Should().Be(11);
             fs4.Offset.Should().Be(20);
             fs4.BinningMode.X.Should().Be(2);
             fs4.ReadoutMode.Should().Be(0);
             fs4.Rotation.Should().Be(ImageMetadata.NO_ROTATOR_ANGLE);
             fs4.ROI.Should().Be(89);
-            fs4.Key.Should().Be("Ha_10_20_2x2_0_na_89");
+            fs4.Key.Should().Be("Ha_11_20_2x2_0_89");
 
-            fs3.Equals(fs4).Should().BeTrue();
-
-            fs1.Equals(fs3).Should().BeFalse();
-            fs1.Equals(fs4).Should().BeFalse();
-            fs2.Equals(fs3).Should().BeFalse();
+            fs1.Equals(fs3).Should().BeTrue();
+            fs2.Equals(fs3).Should().BeTrue();
             fs2.Equals(fs4).Should().BeFalse();
+            fs3.Equals(fs4).Should().BeFalse();
         }
 
         [Test]
