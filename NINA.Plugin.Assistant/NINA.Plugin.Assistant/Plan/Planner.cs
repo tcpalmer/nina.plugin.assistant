@@ -79,7 +79,9 @@ namespace Assistant.NINAPlugin.Plan {
                         TimeInterval targetWindow = GetTargetTimeWindow(profilePreferences.EnableSmartPlanWindow, atTime, planTarget, projects);
                         List<IPlanInstruction> planInstructions = PlanInstructions(planTarget, previousPlanTarget, targetWindow);
 
-                        return new SchedulerPlan(atTime, projects, planTarget, targetWindow, planInstructions, !checkCondition);
+                        return planInstructions != null
+                            ? new SchedulerPlan(atTime, projects, planTarget, targetWindow, planInstructions, !checkCondition)
+                            : null;
                     } else {
                         TSLogger.Debug("Scheduler Planner: no target selected");
                         return null;
@@ -416,7 +418,21 @@ namespace Assistant.NINAPlugin.Plan {
 
             NighttimeCircumstances nighttimeCircumstances = NighttimeCircumstances.AdjustNighttimeCircumstances(observerInfo, atTime);
             instructions.AddRange(new ExposurePlanner(profilePreferences, planTarget, targetWindow, nighttimeCircumstances).Plan());
-            return instructions;
+            return CheckPlanInstructions(planTarget, instructions);
+        }
+
+        public List<IPlanInstruction> CheckPlanInstructions(IPlanTarget planTarget, List<IPlanInstruction> instructions) {
+            foreach (IPlanInstruction instruction in instructions) {
+                if (instruction is PlanTakeExposure) return instructions;
+            }
+
+            string msg = $"Target Scheduler planner returned a plan with no exposures for target '{planTarget.Name}', aborting container.  This is typically due to a mismatch between project minimum time (too short) and exposure time (too long) OR between project minimum time and meridian window setting.";
+            TSLogger.Error(msg);
+            Logger.Error(msg);
+
+            Notification.ShowError($"Target Scheduler planner returned a plan with no exposures for target '{planTarget.Name}', aborting container.  See log for details.");
+
+            return null;
         }
 
         public bool HasActiveProjects(List<IPlanProject> projects) {

@@ -613,6 +613,38 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         }
 
         [Test]
+        public void testEmptyPlan() {
+            Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
+
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active);
+            pp1.SetupProperty(m => m.MinimumTime, 10);
+            Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
+            Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("Ha", 10, 0);
+            pf.SetupProperty(m => m.ExposureLength, 600);
+            PlanMocks.AddMockPlanFilter(pt, pf);
+            PlanMocks.AddMockPlanTarget(pp1, pt);
+
+            DateTime start = new DateTime(2024, 9, 11, 1, 0, 0);
+            Planner sut = new Planner(start, profileMock.Object.ActiveProfile, GetPrefs(), false);
+
+            // Plan should have one exposure instruction: one 10m exposure fits in 11m time interval
+            var span = new TimeInterval(start, start.AddMinutes(11));
+            var instructions = sut.PlanInstructions(pt.Object, null, span);
+
+            int expCount = 0;
+            foreach (var instruction in instructions) {
+                if (instruction is PlanTakeExposure) { expCount++; }
+            }
+
+            expCount.Should().Be(1);
+
+            // But if the interval is just 10m, it should abort
+            span = new TimeInterval(start, start.AddMinutes(10));
+            instructions = sut.PlanInstructions(pt.Object, null, span);
+            instructions.Should().BeNull();
+        }
+
+        [Test]
         [Ignore("should test in the future")]
         public void testPerfectPlan() {
             Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_4);
