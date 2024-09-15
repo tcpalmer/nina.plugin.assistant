@@ -1,62 +1,62 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net8.0-windows7.0</TargetFramework>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Assistant.NINAPlugin</RootNamespace>
-    <AssemblyName>Assistant.NINAPlugin</AssemblyName>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <UseWindowsForms>true</UseWindowsForms>
-    <UseWPF>true</UseWPF>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="CustomMarshalers" />
-    <Reference Include="ReachFramework" />
-    <Reference Include="System.Net" />
-    <Reference Include="System.Printing" />
-    <Reference Include="System.Security" />
-    <Reference Include="System.Windows" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Controls\ExposureOrder\" />
-    <Folder Include="Controls\Resources\SVG\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Properties\Resources.Designer.cs" />
-    <EmbeddedResource Remove="Properties\Resources.resx" />
-  </ItemGroup>
-  <PropertyGroup>
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0-windows7.0</TargetFramework>
+		<OutputType>Library</OutputType>
+		<RootNamespace>Assistant.NINAPlugin</RootNamespace>
+		<AssemblyName>Assistant.NINAPlugin</AssemblyName>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<UseWindowsForms>true</UseWindowsForms>
+		<UseWPF>true</UseWPF>
+		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
 	<ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="LinqKit" Version="1.2.4" />
-    <PackageReference Include="LinqKit.Core" Version="1.2.4" />
-    <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
-    <PackageReference Include="NINA.Plugin" Version="3.0.0.3005-rc" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NINA.Plugin.Assistant.Shared\NINA.Plugin.Assistant.Shared.csproj" />
-    <ProjectReference Include="..\NINA.Plugin.Assistant.SyncService\NINA.Plugin.Assistant.SyncService.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="Properties\Settings.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="      if not exist &quot;%25localappdata%25\NINA\Plugins\3.0.0&quot; (&#xD;&#xA;      echo &quot;Creating $(PlatformName) Plugins folder&quot;&#xD;&#xA;      mkdir  &quot;%25localappdata%25\NINA\Plugins\3.0.0&quot;&#xD;&#xA;      )&#xD;&#xA;      if not exist &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; (&#xD;&#xA;      echo &quot;Creating $(PlatformName) Plugins $(TargetName) folder&quot;&#xD;&#xA;      mkdir  &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot;&#xD;&#xA;      )&#xD;&#xA;&#xD;&#xA;      echo &quot;Copying $(PlatformName) $(TargetFileName)&quot;&#xD;&#xA;      xcopy &quot;$(TargetPath)&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)NINA.Plugin.Assistant.SyncService.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)NINA.Plugin.Assistant.Shared.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)LinqKit.Core.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)LinqKit.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)Microsoft.WindowsAPICodePack.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)Microsoft.WindowsAPICodePack.Shell.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y" />
-  </Target>
+		<Reference Include="CustomMarshalers" />
+		<Reference Include="ReachFramework" />
+		<Reference Include="System.Net" />
+		<Reference Include="System.Printing" />
+		<Reference Include="System.Security" />
+		<Reference Include="System.Windows" />
+	</ItemGroup>
+	<ItemGroup>
+		<Folder Include="Controls\ExposureOrder\" />
+		<Folder Include="Controls\Resources\SVG\" />
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Remove="Properties\Resources.Designer.cs" />
+		<EmbeddedResource Remove="Properties\Resources.resx" />
+	</ItemGroup>
+	<PropertyGroup>
+		<PlatformTarget>x64</PlatformTarget>
+	</PropertyGroup>
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="LinqKit" Version="1.2.4" />
+		<PackageReference Include="LinqKit.Core" Version="1.2.4" />
+		<PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
+		<PackageReference Include="NINA.Plugin" Version="3.1.0.2002-beta" />
+		<PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\NINA.Plugin.Assistant.Shared\NINA.Plugin.Assistant.Shared.csproj" />
+		<ProjectReference Include="..\NINA.Plugin.Assistant.SyncService\NINA.Plugin.Assistant.SyncService.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Update="Properties\Settings.Designer.cs">
+			<DesignTimeSharedInput>True</DesignTimeSharedInput>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Settings.settings</DependentUpon>
+		</Compile>
+	</ItemGroup>
+	<ItemGroup>
+		<None Update="Properties\Settings.settings">
+			<Generator>SettingsSingleFileGenerator</Generator>
+			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
+		</None>
+	</ItemGroup>
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="      if not exist &quot;%25localappdata%25\NINA\Plugins\3.0.0&quot; (&#xD;&#xA;      echo &quot;Creating $(PlatformName) Plugins folder&quot;&#xD;&#xA;      mkdir  &quot;%25localappdata%25\NINA\Plugins\3.0.0&quot;&#xD;&#xA;      )&#xD;&#xA;      if not exist &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; (&#xD;&#xA;      echo &quot;Creating $(PlatformName) Plugins $(TargetName) folder&quot;&#xD;&#xA;      mkdir  &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot;&#xD;&#xA;      )&#xD;&#xA;&#xD;&#xA;      echo &quot;Copying $(PlatformName) $(TargetFileName)&quot;&#xD;&#xA;      xcopy &quot;$(TargetPath)&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)NINA.Plugin.Assistant.SyncService.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)NINA.Plugin.Assistant.Shared.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)LinqKit.Core.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)LinqKit.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)Microsoft.WindowsAPICodePack.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y&#xD;&#xA;      xcopy &quot;$(TargetDir)Microsoft.WindowsAPICodePack.Shell.dll&quot; &quot;%25localappdata%25\NINA\Plugins\3.0.0\$(TargetName)&quot; /h/i/c/k/e/r/y" />
+	</Target>
 </Project>

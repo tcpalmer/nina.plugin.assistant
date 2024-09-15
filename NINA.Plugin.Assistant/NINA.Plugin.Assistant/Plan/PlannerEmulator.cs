@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 
 namespace Assistant.NINAPlugin.Plan {
-
     /// <summary>
     /// PlannerEmulator isolates the NINA Scheduler sequence instructions from the Planner, allowing comprehensive
     /// testing of the sequencer operation without having to have an working database or running planner that relies
@@ -551,7 +550,6 @@ namespace Assistant.NINAPlugin.Plan {
     }
 
     internal class PlanTargetEmulator : PlanTarget {
-
         public PlanTargetEmulator() : base() {
             this.PlanId = Guid.NewGuid().ToString();
             this.ExposurePlans = new List<IPlanExposure>();

@@ -3,6 +3,7 @@ using Assistant.NINAPlugin.Controls.AssistantManager;
 using Assistant.NINAPlugin.Controls.PlanPreview;
 using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
+using Assistant.NINAPlugin.PubSub;
 using NINA.Core.Model;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
@@ -43,7 +44,8 @@ namespace Assistant.NINAPlugin {
             IApplicationMediator applicationMediator,
             IFramingAssistantVM framingAssistantVM,
             IDeepSkyObjectSearchVM deepSkyObjectSearchVM,
-            IPlanetariumFactory planetariumFactory) {
+            IPlanetariumFactory planetariumFactory,
+            IMessageBroker messageBroker) {
             if (Properties.Settings.Default.UpdateSettings) {
                 Properties.Settings.Default.Upgrade();
                 Properties.Settings.Default.UpdateSettings = false;
@@ -59,6 +61,8 @@ namespace Assistant.NINAPlugin {
 
             profileService.ProfileChanged += ProfileService_ProfileChanged;
 
+            messageBroker.Subscribe("TargetScheduler-WaitStart", new TSLoggingSubscriber());
+            messageBroker.Subscribe("TargetScheduler-TargetStart", new TSLoggingSubscriber());
             options.AddImagePattern(FlatSessionIdImagePattern);
             options.AddImagePattern(ProjectNameImagePattern);
         }
