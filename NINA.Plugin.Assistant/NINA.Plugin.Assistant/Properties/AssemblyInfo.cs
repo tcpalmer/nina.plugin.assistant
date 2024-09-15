@@ -11,8 +11,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("windows")]
-[assembly: AssemblyVersion("4.7.6.2")]
-[assembly: AssemblyFileVersion("4.7.6.2")]
+[assembly: AssemblyVersion("4.7.6.3")]
+[assembly: AssemblyFileVersion("4.7.6.3")]
 
 // The minimum Version of N.I.N.A. that this plugin is compatible with
 [assembly: AssemblyMetadata("MinimumApplicationVersion", "3.0.0.3005")]
