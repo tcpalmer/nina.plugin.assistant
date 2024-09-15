@@ -1,7 +1,8 @@
 # Target Scheduler
 
-## 4.7.6.3 - 2024-09-12
-* Fixed a bug where the planner could return a plan with no exposures, will now abort container instead
+## 4.8.0.0 - 2024-09-12
+* Fixed a bug where the planner could return a plan with no exposures, will now abort container and warn instead
+* Added test support for inter-plugin messaging: TS will now message when a wait starts and when a target plan starts
 
 ## 4.7.6.2 - 2024-09-07
 * Don't abort a flat exposure if setting flat panel brightness throws an error, just warn
