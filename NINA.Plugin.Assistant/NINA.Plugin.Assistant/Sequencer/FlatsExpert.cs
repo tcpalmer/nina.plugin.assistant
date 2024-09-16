@@ -113,7 +113,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 LightSession lightSession = new LightSession(light.TargetId,
                                                          GetLightSessionDate(light.AcquiredDate),
                                                          light.Metadata.SessionId,
-                                                         new FlatSpec(light));
+                                                         new FlatSpec(light.TargetId, light));
                 if (!lightSessions.Contains(lightSession)) {
                     lightSessions.Add(lightSession);
                 }
@@ -508,6 +508,7 @@ namespace Assistant.NINAPlugin.Sequencer {
     }
 
     public class FlatSpec : IEquatable<FlatSpec> {
+        public int TargetId { get; private set; }
         public string FilterName { get; private set; }
         public int Gain { get; private set; }
         public int Offset { get; private set; }
@@ -517,7 +518,8 @@ namespace Assistant.NINAPlugin.Sequencer {
         public double ROI { get; private set; }
         public string Key { get; private set; }
 
-        public FlatSpec(string filterName, int gain, int offset, BinningMode binning, int readoutMode, double rotation, double roi) {
+        public FlatSpec(int targetId, string filterName, int gain, int offset, BinningMode binning, int readoutMode, double rotation, double roi) {
+            TargetId = targetId;
             FilterName = filterName;
             Gain = gain;
             Offset = offset;
@@ -528,7 +530,8 @@ namespace Assistant.NINAPlugin.Sequencer {
             Key = GetKey();
         }
 
-        public FlatSpec(AcquiredImage exposure) {
+        public FlatSpec(int targetId, AcquiredImage exposure) {
+            TargetId = targetId;
             FilterName = exposure.FilterName;
             Gain = exposure.Metadata.Gain;
             Offset = exposure.Metadata.Offset;
@@ -542,6 +545,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         public FlatSpec(FlatHistory flatHistory) {
+            TargetId = flatHistory.TargetId;
             FilterName = flatHistory.FilterName;
             Gain = flatHistory.Gain;
             Offset = flatHistory.Offset;
@@ -553,7 +557,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         }
 
         private string GetKey() {
-            return $"{FilterName}_{Gain}_{Offset}_{BinningMode}_{ReadoutMode}_{ROI}";
+            return $"{TargetId}_{FilterName}_{Gain}_{Offset}_{BinningMode}_{ReadoutMode}_{ROI}";
         }
 
         public bool Equals(FlatSpec other) {
@@ -566,7 +570,7 @@ namespace Assistant.NINAPlugin.Sequencer {
 
         public override string ToString() {
             string rot = Rotation != ImageMetadata.NO_ROTATOR_ANGLE ? Rotation.ToString() : "n/a";
-            return $"filter:{FilterName} gain:{Gain} offset:{Offset} bin:{BinningMode} readout:{ReadoutMode} rot:{rot} roi: {ROI}";
+            return $"tid:{TargetId} filter:{FilterName} gain:{Gain} offset:{Offset} bin:{BinningMode} readout:{ReadoutMode} rot:{rot} roi: {ROI}";
         }
     }
 

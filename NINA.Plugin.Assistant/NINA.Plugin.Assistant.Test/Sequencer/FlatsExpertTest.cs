@@ -51,9 +51,9 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             mock.Object.GetNeededFlats(profileMock.Object, baseDate.AddDays(9)).Count.Should().Be(9);
 
             // Skip for existing flat history
-            FlatSpec fs1 = new FlatSpec("R", 10, 20, new BinningMode(1, 1), 0, 10, 100);
-            FlatSpec fs2 = new FlatSpec("G", 10, 20, new BinningMode(1, 1), 0, 10, 100);
-            FlatSpec fs3 = new FlatSpec("B", 10, 20, new BinningMode(1, 1), 0, 10, 100);
+            FlatSpec fs1 = new FlatSpec(1, "R", 10, 20, new BinningMode(1, 1), 0, 10, 100);
+            FlatSpec fs2 = new FlatSpec(1, "G", 10, 20, new BinningMode(1, 1), 0, 10, 100);
+            FlatSpec fs3 = new FlatSpec(1, "B", 10, 20, new BinningMode(1, 1), 0, 10, 100);
             DateTime lightSessionDate = new FlatsExpert().GetLightSessionDate(baseDate);
             flatHistories.Add(GetFlatHistory(1, lightSessionDate, 1, baseDate.AddMinutes(0), fs1));
             flatHistories.Add(GetFlatHistory(1, lightSessionDate, 1, baseDate.AddMinutes(1), fs2));
@@ -194,9 +194,9 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             DateTime sd2 = sut.GetLightSessionDate(baseDate.AddDays(2));
             DateTime sd3 = sut.GetLightSessionDate(baseDate.AddDays(3));
 
-            FlatSpec fsR = new FlatSpec("R", 10, 20, new BinningMode(1, 1), 0, 10, 100);
-            FlatSpec fsG = new FlatSpec("G", 10, 20, new BinningMode(1, 1), 0, 10, 100);
-            FlatSpec fsB = new FlatSpec("B", 10, 20, new BinningMode(1, 1), 0, 10, 100);
+            FlatSpec fsR = new FlatSpec(1, "R", 10, 20, new BinningMode(1, 1), 0, 10, 100);
+            FlatSpec fsG = new FlatSpec(1, "G", 10, 20, new BinningMode(1, 1), 0, 10, 100);
+            FlatSpec fsB = new FlatSpec(1, "B", 10, 20, new BinningMode(1, 1), 0, 10, 100);
 
             lightSessions.Add(new LightSession(1, sd0, 1, fsR));
             lightSessions.Add(new LightSession(1, sd0, 1, fsG));
@@ -243,9 +243,9 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
             DateTime sd1 = sut.GetLightSessionDate(baseDate);
             DateTime sd2 = sut.GetLightSessionDate(baseDate.AddDays(-2));
-            FlatSpec fs1 = new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 12, 100);
-            FlatSpec fs2 = new FlatSpec("O3", 10, 20, new BinningMode(1, 1), 0, 12, 100);
-            FlatSpec fs3 = new FlatSpec("S2", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+            FlatSpec fs1 = new FlatSpec(1, "Ha", 12, 20, new BinningMode(1, 1), 0, 12, 100);
+            FlatSpec fs2 = new FlatSpec(1, "O3", 12, 20, new BinningMode(1, 1), 0, 12, 100);
+            FlatSpec fs3 = new FlatSpec(1, "S2", 12, 20, new BinningMode(1, 1), 0, 12, 100);
 
             LightSession ls1 = new LightSession(1, sd1, 1, fs1);
             LightSession ls2 = new LightSession(1, sd1, 1, fs2);
@@ -289,10 +289,10 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             DateTime baseDate = new DateTime(2023, 12, 1).AddHours(18);
             List<FlatSpec> allTakenFlats = new List<FlatSpec>();
 
-            FlatSpec fs1 = new FlatSpec("R", 10, 20, new BinningMode(1, 1), 0, 12, 100);
-            FlatSpec fs2 = new FlatSpec("G", 10, 20, new BinningMode(1, 1), 0, 12, 100);
-            FlatSpec fs3 = new FlatSpec("B", 10, 20, new BinningMode(1, 1), 0, 12, 100);
-            FlatSpec fs4 = new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+            FlatSpec fs1 = new FlatSpec(1, "R", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+            FlatSpec fs2 = new FlatSpec(1, "G", 12, 20, new BinningMode(1, 1), 0, 12, 100);
+            FlatSpec fs3 = new FlatSpec(1, "B", 12, 20, new BinningMode(1, 1), 0, 12, 100);
+            FlatSpec fs4 = new FlatSpec(1, "Ha", 12, 20, new BinningMode(1, 1), 0, 12, 100);
             List<FlatSpec> targetTakenFlats = new List<FlatSpec> { fs1, fs2, fs3 };
 
             // Always repeat is false ...
@@ -326,7 +326,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
             BinningMode binning = new BinningMode(1, 1);
             FlatsExpert sut = new FlatsExpert();
-            FlatSpec flatSpec = new FlatSpec("Lum", 10, 20, binning, 0, 0, 100);
+            FlatSpec flatSpec = new FlatSpec(1, "Lum", 10, 20, binning, 0, 0, 100);
 
             sut.GetTrainedFlatExposureSetting(profileMock.Object, flatSpec).Should().BeNull();
 
@@ -576,7 +576,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
 
         [Test]
         public void TestFlatsSpec() {
-            FlatSpec fs1 = new FlatSpec("Ha", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
+            FlatSpec fs1 = new FlatSpec(1, "Ha", 10, 20, new BinningMode(2, 2), 0, 123.4, 89);
             fs1.FilterName.Should().Be("Ha");
             fs1.Gain.Should().Be(10);
             fs1.Offset.Should().Be(20);
@@ -584,12 +584,12 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             fs1.ReadoutMode.Should().Be(0);
             fs1.Rotation.Should().Be(123.4);
             fs1.ROI.Should().Be(89);
-            fs1.Key.Should().Be("Ha_10_20_2x2_0_89");
+            fs1.Key.Should().Be("1_Ha_10_20_2x2_0_89");
 
             ImageMetadata imageMetaData = GetImageMetadata(1, "Ha", 10, 20, "2x2", 0, 123.4, 89);
             AcquiredImage acquiredImage = new AcquiredImage(imageMetaData);
             acquiredImage.FilterName = imageMetaData.FilterName;
-            FlatSpec fs2 = new FlatSpec(acquiredImage);
+            FlatSpec fs2 = new FlatSpec(1, acquiredImage);
             fs2.FilterName.Should().Be("Ha");
             fs2.Gain.Should().Be(10);
             fs2.Offset.Should().Be(20);
@@ -597,11 +597,11 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             fs2.ReadoutMode.Should().Be(0);
             fs2.Rotation.Should().Be(123.4);
             fs2.ROI.Should().Be(89);
-            fs2.Key.Should().Be("Ha_10_20_2x2_0_89");
+            fs2.Key.Should().Be("1_Ha_10_20_2x2_0_89");
 
             fs1.Equals(fs2).Should().BeTrue();
 
-            FlatSpec fs3 = new FlatSpec("Ha", 10, 20, new BinningMode(2, 2), 0, ImageMetadata.NO_ROTATOR_ANGLE, 89);
+            FlatSpec fs3 = new FlatSpec(1, "Ha", 10, 20, new BinningMode(2, 2), 0, ImageMetadata.NO_ROTATOR_ANGLE, 89);
             fs3.FilterName.Should().Be("Ha");
             fs3.Gain.Should().Be(10);
             fs3.Offset.Should().Be(20);
@@ -609,12 +609,12 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             fs3.ReadoutMode.Should().Be(0);
             fs3.Rotation.Should().Be(ImageMetadata.NO_ROTATOR_ANGLE);
             fs3.ROI.Should().Be(89);
-            fs3.Key.Should().Be("Ha_10_20_2x2_0_89");
+            fs3.Key.Should().Be("1_Ha_10_20_2x2_0_89");
 
             imageMetaData = GetImageMetadata(1, "Ha", 11, 20, "2x2", 0, ImageMetadata.NO_ROTATOR_ANGLE, 89);
             acquiredImage = new AcquiredImage(imageMetaData);
             acquiredImage.FilterName = imageMetaData.FilterName;
-            FlatSpec fs4 = new FlatSpec(acquiredImage);
+            FlatSpec fs4 = new FlatSpec(1, acquiredImage);
             fs4.FilterName.Should().Be("Ha");
             fs4.Gain.Should().Be(11);
             fs4.Offset.Should().Be(20);
@@ -622,23 +622,30 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             fs4.ReadoutMode.Should().Be(0);
             fs4.Rotation.Should().Be(ImageMetadata.NO_ROTATOR_ANGLE);
             fs4.ROI.Should().Be(89);
-            fs4.Key.Should().Be("Ha_11_20_2x2_0_89");
+            fs4.Key.Should().Be("1_Ha_11_20_2x2_0_89");
 
             fs1.Equals(fs3).Should().BeTrue();
             fs2.Equals(fs3).Should().BeTrue();
             fs2.Equals(fs4).Should().BeFalse();
             fs3.Equals(fs4).Should().BeFalse();
+
+            FlatSpec fs5 = new FlatSpec(1, "Lum", 10, 20, new BinningMode(1, 1), 0, 123.4, 100);
+            FlatSpec fs6 = new FlatSpec(1, "Lum", 10, 20, new BinningMode(1, 1), 0, 33.3, 100);
+            FlatSpec fs7 = new FlatSpec(2, "Lum", 10, 20, new BinningMode(1, 1), 0, 123.4, 100);
+
+            fs5.Equals(fs6).Should().BeTrue();
+            fs5.Equals(fs7).Should().BeFalse();
         }
 
         [Test]
         public void TestLightSession() {
             FlatsExpert fe = new FlatsExpert();
 
-            FlatSpec fs1 = new FlatSpec("Ha", 10, 20, new BinningMode(1, 1), 0, 123.4, 89);
-            FlatSpec fs2 = new FlatSpec("OIII", 10, 20, new BinningMode(1, 1), 0, 123.4, 89);
-            FlatSpec fs3 = new FlatSpec("SII", 10, 20, new BinningMode(1, 1), 0, 123.4, 89);
-            FlatSpec fs4 = new FlatSpec("Red", 10, 20, new BinningMode(1, 1), 0, ImageMetadata.NO_ROTATOR_ANGLE, 89);
-            FlatSpec fs5 = new FlatSpec("Red", 10, 20, new BinningMode(1, 1), 0, ImageMetadata.NO_ROTATOR_ANGLE, 100);
+            FlatSpec fs1 = new FlatSpec(1, "Ha", 10, 20, new BinningMode(1, 1), 0, 123.4, 89);
+            FlatSpec fs2 = new FlatSpec(1, "OIII", 10, 20, new BinningMode(1, 1), 0, 123.4, 89);
+            FlatSpec fs3 = new FlatSpec(1, "SII", 10, 20, new BinningMode(1, 1), 0, 123.4, 89);
+            FlatSpec fs4 = new FlatSpec(1, "Red", 10, 20, new BinningMode(1, 1), 0, ImageMetadata.NO_ROTATOR_ANGLE, 89);
+            FlatSpec fs5 = new FlatSpec(1, "Red", 10, 20, new BinningMode(1, 1), 0, ImageMetadata.NO_ROTATOR_ANGLE, 100);
 
             DateTime sd1 = fe.GetLightSessionDate(DateTime.Now.Date.AddHours(18));
             DateTime sd2 = fe.GetLightSessionDate(DateTime.Now.Date.AddDays(2).AddHours(18));

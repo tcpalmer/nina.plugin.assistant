@@ -170,7 +170,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 Plan.PlanTakeExposure takeExposure = instruction as Plan.PlanTakeExposure;
                 if (takeExposure != null) {
                     IPlanExposure exp = takeExposure.planExposure;
-                    FlatSpec flatSpec = new FlatSpec(exp.FilterName,
+                    FlatSpec flatSpec = new FlatSpec(plan.PlanTarget.DatabaseId, exp.FilterName,
                                                      GetGain(exp.Gain),
                                                      GetOffset(exp.Offset),
                                                      exp.BinningMode,
