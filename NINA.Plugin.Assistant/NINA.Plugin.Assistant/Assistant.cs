@@ -3,7 +3,6 @@ using Assistant.NINAPlugin.Controls.AssistantManager;
 using Assistant.NINAPlugin.Controls.PlanPreview;
 using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
-using Assistant.NINAPlugin.PubSub;
 using NINA.Core.Model;
 using NINA.Core.Utility;
 using NINA.Equipment.Interfaces;
@@ -61,8 +60,11 @@ namespace Assistant.NINAPlugin {
 
             profileService.ProfileChanged += ProfileService_ProfileChanged;
 
-            messageBroker.Subscribe("TargetScheduler-WaitStart", new TSLoggingSubscriber());
-            messageBroker.Subscribe("TargetScheduler-TargetStart", new TSLoggingSubscriber());
+            // Test receiving our own messages
+            //messageBroker.Subscribe("TargetScheduler-WaitStart", new TSLoggingSubscriber());
+            //messageBroker.Subscribe("TargetScheduler-NewTargetStart", new TSLoggingSubscriber());
+            //messageBroker.Subscribe("TargetScheduler-TargetStart", new TSLoggingSubscriber());
+
             options.AddImagePattern(FlatSessionIdImagePattern);
             options.AddImagePattern(ProjectNameImagePattern);
         }

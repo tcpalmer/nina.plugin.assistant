@@ -62,6 +62,7 @@ namespace Assistant.NINAPlugin.Sequencer {
         private int syncActionTimeout;
         private int syncSolveRotateTimeout;
 
+        private NewTargetStartPublisher newTargetStartPublisher;
         private TargetStartPublisher targetStartPublisher;
 
         public PlanTargetContainer(
@@ -124,6 +125,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             //else
             //    ImageSaveWatcher = new ImageSaveWatcherEmulator();
 
+            newTargetStartPublisher = new NewTargetStartPublisher(messageBroker);
             targetStartPublisher = new TargetStartPublisher(messageBroker);
 
             // These have no impact on the container itself but are used to assign to each added instruction
@@ -140,6 +142,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                 EnsureUnparked(progress, token);
 
                 ImageSaveWatcher.Start();
+                targetStartPublisher.Publish(plan);
+
                 base.Execute(progress, token).Wait();
             } catch (Exception ex) {
                 throw;
@@ -150,8 +154,8 @@ namespace Assistant.NINAPlugin.Sequencer {
                     item.AttachNewParent(null);
                 }
 
-                foreach (var condition in Triggers) {
-                    condition.AttachNewParent(null);
+                foreach (var trigger in Triggers) {
+                    trigger.AttachNewParent(null);
                 }
 
                 Items.Clear();
@@ -210,7 +214,7 @@ namespace Assistant.NINAPlugin.Sequencer {
                 }
 
                 if (instruction is PlanBeforeNewTargetContainer) {
-                    targetStartPublisher.Publish(plan);
+                    newTargetStartPublisher.Publish(plan);
                     AddBeforeNewTargetInstructions();
                     continue;
                 }

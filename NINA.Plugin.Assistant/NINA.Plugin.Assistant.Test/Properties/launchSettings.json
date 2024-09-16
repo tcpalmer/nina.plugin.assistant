@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "NINA.Plugin.Assistant.Test": {
+      "commandName": "Project"
+    },
+    "NINA": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Users\\Tom\\source\\repos\\nina\\NINA\\bin\\Debug\\net8.0-windows\\win-x64\\NINA.exe"
+    }
+  }
+}
