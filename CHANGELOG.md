@@ -2,6 +2,7 @@
 
 ## 4.8.0.0 - 2024-09-12
 * Fixed a bug where the planner could return a plan with no exposures, will now abort container and warn instead
+* Fixed a bug where needed flats were being improperly culled
 * Added test support for inter-plugin messaging: TS will now message when a wait starts and when a target plan starts
 
 ## 4.7.6.2 - 2024-09-07
