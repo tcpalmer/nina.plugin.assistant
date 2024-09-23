@@ -410,6 +410,26 @@
                 IsEnabled="{Binding RelaxEnabled}"
                 Text="{Binding ExposureTemplateProxy.ExposureTemplate.MoonRelaxMaxAltitude, Converter={StaticResource DegreesDisplayConverter}}"
                 Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+            <TextBlock
+                VerticalAlignment="Center"
+                FontWeight="Bold"
+                IsEnabled="{Binding RelaxEnabled}"
+                Text="Moon Must Be Down"
+                ToolTip="Moon avoidance is absolute above the Minimum Altitude, regardless of separation or moon phase"
+                ToolTipService.ShowOnDisabled="True" />
+            <CheckBox
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                IsEnabled="{Binding RelaxEnabled}"
+                IsChecked="{Binding Path=MoonDownEnabledProxy, Mode=TwoWay}"
+                Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}" />
+            <TextBlock
+                MaxHeight="20"
+                Margin="3,3,0,0"
+                IsEnabled="{Binding RelaxEnabled}"
+                Text="{Binding ExposureTemplateProxy.ExposureTemplate.MoonDownEnabled}"
+                Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
         </UniformGrid>
     </StackPanel>
 </UserControl>

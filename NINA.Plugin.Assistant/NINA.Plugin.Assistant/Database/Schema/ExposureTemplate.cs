@@ -30,6 +30,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public double moonRelaxScale { get; set; }
         public double moonRelaxMaxAltitude { get; set; }
         public double moonRelaxMinAltitude { get; set; }
+        public bool moonDownEnabled { get; set; }
 
         public double maximumHumidity { get; set; }
 
@@ -169,6 +170,17 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
+        public bool MoonDownEnabled
+        {
+            get { return moonDownEnabled; }
+            set
+            {
+                moonDownEnabled = value;
+                RaisePropertyChanged(nameof(MoonDownEnabled));
+            }
+        }
+
+        [NotMapped]
         public double MaximumHumidity {
             get { return maximumHumidity; }
             set {
@@ -234,6 +246,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             copy.MoonRelaxScale = MoonRelaxScale;
             copy.MoonRelaxMaxAltitude = MoonRelaxMaxAltitude;
             copy.MoonRelaxMinAltitude = MoonRelaxMinAltitude;
+            copy.MoonDownEnabled = MoonDownEnabled;
             copy.MaximumHumidity = MaximumHumidity;
 
             return copy;
@@ -256,6 +269,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"MoonRelaxScale: {MoonRelaxScale}");
             sb.AppendLine($"MoonRelaxMaxAltitude: {MoonRelaxMaxAltitude}");
             sb.AppendLine($"MoonRelaxMinAltitude: {MoonRelaxMinAltitude}");
+            sb.AppendLine($"MoonDownEnabled: {MoonDownEnabled}");
             sb.AppendLine($"MaximumHumidity: {MaximumHumidity}");
 
             return sb.ToString();

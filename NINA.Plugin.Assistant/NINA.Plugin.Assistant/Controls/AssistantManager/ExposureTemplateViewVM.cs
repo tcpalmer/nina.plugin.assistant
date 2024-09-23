@@ -48,6 +48,7 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
             }
 
             MoonAvoidanceEnabledProxy = ExposureTemplateProxy.Proxy.MoonAvoidanceEnabled;
+            MoonDownEnabledProxy = ExposureTemplateProxy.Proxy.MoonDownEnabled;
             RelaxScaleProxy = ExposureTemplateProxy.Proxy.MoonRelaxScale;
         }
 
@@ -116,6 +117,22 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
                 ExposureTemplateProxy.Proxy.MoonAvoidanceEnabled = _moonAvoidanceEnabledProxy;
                 RaisePropertyChanged(nameof(MoonAvoidanceEnabledProxy));
                 SetRelaxEnabled();
+            }
+        }
+
+        private bool _moonDownEnabledProxy;
+
+        public bool MoonDownEnabledProxy
+        {
+            get
+            {
+                return _moonDownEnabledProxy;
+            }
+            set
+            {
+                _moonDownEnabledProxy = value;
+                ExposureTemplateProxy.Proxy.MoonDownEnabled = _moonDownEnabledProxy;
+                RaisePropertyChanged(nameof(MoonDownEnabledProxy));
             }
         }
 
