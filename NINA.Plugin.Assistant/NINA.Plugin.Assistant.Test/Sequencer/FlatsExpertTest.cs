@@ -315,6 +315,24 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         }
 
         [Test]
+        public void TestIsRequiredSeveralTargets()
+        {
+            FlatsExpert sut = new FlatsExpert();
+            DateTime baseDate = new DateTime(2023, 12, 1).AddHours(18);
+
+            // We have already taken flat frame for target 1 with filter R
+            var allTakenFlats = new List<FlatSpec> { new FlatSpec(1, "R", 10, 20, new BinningMode(1, 1), 0, 12, 100) };
+
+            // We have not taken any flats for target 2 yet
+            List<FlatSpec> takenFlatsForTarget2 = new List<FlatSpec>();
+            FlatSpec flatSpecForTarget2 = new FlatSpec(2, "R", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+
+            // We check if we need to take flat for filter R with target 2, and we should not because it is already taken for target 1
+            LightSession neededFlat = new LightSession(2, baseDate, 1, flatSpecForTarget2);
+            sut.IsRequiredFlat(alwaysRepeatFlatSet: false, neededFlat, takenFlatsForTarget2, allTakenFlats).Should().BeFalse();
+        }
+
+        [Test]
         public void TestGetTrainedFlatExposureSetting() {
             Mock<IProfile> profileMock = GetMockProfile();
 
