@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 4.8.1.0 - 2024-10-24
+* Adjusted moon avoidance evaluation time for not yet visible targets
+
 ## 4.8.0.0 - 2024-09-12
 * Fixed a bug where the planner could return a plan with no exposures, will now abort container and warn instead
 * Fixed a bug where needed flats were being improperly culled
