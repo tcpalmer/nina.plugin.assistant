@@ -15,7 +15,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         [Test]
         public void testClassicRelaxOff() {
             IPlanTarget planTarget = GetPlanTarget();
-            IPlanExposure planExposure = GetPlanExposure(true, 120, 14, 0, 5, -15);
+            IPlanExposure planExposure = GetPlanExposure(true, 120, 14, 0, 5, -15, false);
             DateTime atTime = DateTime.Now;
 
             // Full moon, sep angle too small
@@ -38,7 +38,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         [Test]
         public void testClassicNotRelaxZone() {
             IPlanTarget planTarget = GetPlanTarget();
-            IPlanExposure planExposure = GetPlanExposure(true, 120, 14, 2, 5, -15);
+            IPlanExposure planExposure = GetPlanExposure(true, 120, 14, 2, 5, -15, false);
             DateTime atTime = DateTime.Now;
 
             // Full moon, sep angle too small
@@ -61,12 +61,28 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         [Test]
         public void testClassicRelaxZone() {
             IPlanTarget planTarget = GetPlanTarget();
-            IPlanExposure planExposure = GetPlanExposure(true, 120, 14, 2, 5, -15);
+            IPlanExposure planExposure = GetPlanExposure(true, 120, 14, 2, 5, -15, false);
             DateTime atTime = DateTime.Now;
 
             // With altitude 0, separation of 112 is now OK at full
             MoonAvoidanceExpert sut = new MoonAvoidanceExpertMock(TestUtil.TEST_LOCATION_1) { Altitude = 0, MoonAge = 14, SeparationAngle = 112 };
             sut.IsRejected(atTime, planTarget, planExposure).Should().BeFalse();
+
+            // Less than min altitude, don't reject
+            sut = new MoonAvoidanceExpertMock(TestUtil.TEST_LOCATION_1) { Altitude = -16, MoonAge = 14, SeparationAngle = 5 };
+            sut.IsRejected(atTime, planTarget, planExposure).Should().BeFalse();
+        }
+
+        [Test]
+        public void testMoonDownEnabled()
+        {
+            IPlanTarget planTarget = GetPlanTarget();
+            IPlanExposure planExposure = GetPlanExposure(true, 120, 14, 2, 5, -15, true);
+            DateTime atTime = DateTime.Now;
+
+            // With altitude 0, moon is above the minimum and should be rejected
+            MoonAvoidanceExpert sut = new MoonAvoidanceExpertMock(TestUtil.TEST_LOCATION_1) { Altitude = 0, MoonAge = 14, SeparationAngle = 112 };
+            sut.IsRejected(atTime, planTarget, planExposure).Should().BeTrue();
 
             // Less than min altitude, don't reject
             sut = new MoonAvoidanceExpertMock(TestUtil.TEST_LOCATION_1) { Altitude = -16, MoonAge = 14, SeparationAngle = 5 };
@@ -85,10 +101,10 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             planTarget.EndTime = new DateTime(2024, 1, 17, 20, 30, 0);
             planTarget.Project = PlanMocks.GetMockPlanProject("", ProjectState.Active).Object;
 
-            IPlanExposure planExposure = GetPlanExposure(true, 90, 12, 0, 5, -15);
+            IPlanExposure planExposure = GetPlanExposure(true, 90, 12, 0, 5, -15, false);
             sut.IsRejected(planTarget.StartTime, planTarget, planExposure).Should().BeTrue();
 
-            planExposure = GetPlanExposure(true, 90, 11, 0, 5, -15);
+            planExposure = GetPlanExposure(true, 90, 11, 0, 5, -15, false);
             sut.IsRejected(planTarget.StartTime, planTarget, planExposure).Should().BeFalse();
         }
 
@@ -100,7 +116,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             return pt.Object;
         }
 
-        private IPlanExposure GetPlanExposure(bool avoidanceEnabled, double separation, int width, double relaxScale, double relaxMaxAlt, double relaxMinAlt) {
+        private IPlanExposure GetPlanExposure(bool avoidanceEnabled, double separation, int width, double relaxScale, double relaxMaxAlt, double relaxMinAlt, bool moonDownEnabled) {
             Mock<IPlanExposure> pe = new Mock<IPlanExposure>();
             pe.SetupAllProperties();
             pe.SetupProperty(m => m.MoonAvoidanceEnabled, avoidanceEnabled);
@@ -109,6 +125,7 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             pe.SetupProperty(m => m.MoonRelaxScale, relaxScale);
             pe.SetupProperty(m => m.MoonRelaxMaxAltitude, relaxMaxAlt);
             pe.SetupProperty(m => m.MoonRelaxMinAltitude, relaxMinAlt);
+            pe.SetupProperty(m => m.MoonDownEnabled, moonDownEnabled);
             pe.SetupProperty(m => m.FilterName, "FLT");
             return pe.Object;
         }

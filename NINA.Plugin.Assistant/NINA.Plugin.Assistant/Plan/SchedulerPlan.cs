@@ -557,6 +557,7 @@ namespace Assistant.NINAPlugin.Plan {
         double MoonRelaxScale { get; set; }
         double MoonRelaxMaxAltitude { get; set; }
         double MoonRelaxMinAltitude { get; set; }
+        bool MoonDownEnabled { get; set; }
         double MaximumHumidity { get; set; }
 
         bool Rejected { get; set; }
@@ -592,6 +593,7 @@ namespace Assistant.NINAPlugin.Plan {
         public double MoonRelaxScale { get; set; }
         public double MoonRelaxMaxAltitude { get; set; }
         public double MoonRelaxMinAltitude { get; set; }
+        public bool MoonDownEnabled { get; set; }
 
         public double MaximumHumidity { get; set; }
 
@@ -622,6 +624,7 @@ namespace Assistant.NINAPlugin.Plan {
             this.MoonRelaxScale = exposureTemplate.MoonRelaxScale;
             this.MoonRelaxMaxAltitude = exposureTemplate.MoonRelaxMaxAltitude;
             this.MoonRelaxMinAltitude = exposureTemplate.MoonRelaxMinAltitude;
+            this.MoonDownEnabled = exposureTemplate.MoonDownEnabled;
 
             this.MaximumHumidity = exposureTemplate.MaximumHumidity;
 
