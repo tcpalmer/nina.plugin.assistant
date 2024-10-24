@@ -290,10 +290,13 @@ namespace Assistant.NINAPlugin.Plan {
 
                 foreach (IPlanTarget planTarget in planProject.Targets) {
                     if (planTarget.Rejected && planTarget.RejectedReason != Reasons.TargetNotYetVisible) { continue; }
+                    DateTime useTime = (planTarget.Rejected && planTarget.RejectedReason == Reasons.TargetNotVisible)
+                        ? planTarget.StartTime
+                        : atTime;
 
                     foreach (IPlanExposure planExposure in planTarget.ExposurePlans) {
                         if (planExposure.IsIncomplete()) {
-                            if (expert.IsRejected(atTime, planTarget, planExposure)) {
+                            if (expert.IsRejected(useTime, planTarget, planExposure)) {
                                 SetRejected(planExposure, Reasons.FilterMoonAvoidance);
                             }
                         }
