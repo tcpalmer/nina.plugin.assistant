@@ -1,8 +1,9 @@
 # Target Scheduler
 
-## 4.8.1.0 - 2024-10-24
-* Adjusted moon avoidance evaluation time for not yet visible targets
+## 4.9.0.0 - 2024-10-24
 * Added flag to trigger avoidance if moon altitude is above the relax maximum altitude - regardless of actual separation or moon phase
+* Adjusted moon avoidance evaluation time for not yet visible targets
+* Hopefully fixed issue with taking superfluous flats
 * Raised the max for Exposure Plan Desired and Accepted counts to 99999
 
 ## 4.8.0.0 - 2024-09-12

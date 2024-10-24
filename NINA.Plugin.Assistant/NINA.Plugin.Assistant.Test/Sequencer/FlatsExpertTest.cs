@@ -315,6 +315,23 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
         }
 
         [Test]
+        public void TestIsRequiredSeveralTargets() {
+            FlatsExpert sut = new FlatsExpert();
+            DateTime baseDate = new DateTime(2023, 12, 1).AddHours(18);
+
+            // We have already taken flat frame for target 1 with filter R
+            var allTakenFlats = new List<FlatSpec> { new FlatSpec(1, "R", 10, 20, new BinningMode(1, 1), 0, 12, 100) };
+
+            // We have not taken any flats for target 2 yet
+            List<FlatSpec> takenFlatsForTarget2 = new List<FlatSpec>();
+            FlatSpec flatSpecForTarget2 = new FlatSpec(2, "R", 10, 20, new BinningMode(1, 1), 0, 12, 100);
+
+            // We check if we need to take flat for filter R with target 2, and we should not because it is already taken for target 1
+            LightSession neededFlat = new LightSession(2, baseDate, 1, flatSpecForTarget2);
+            sut.IsRequiredFlat(alwaysRepeatFlatSet: false, neededFlat, takenFlatsForTarget2, allTakenFlats).Should().BeFalse();
+        }
+
+        [Test]
         public void TestGetTrainedFlatExposureSetting() {
             Mock<IProfile> profileMock = GetMockProfile();
 
@@ -584,7 +601,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             fs1.ReadoutMode.Should().Be(0);
             fs1.Rotation.Should().Be(123.4);
             fs1.ROI.Should().Be(89);
-            fs1.Key.Should().Be("1_Ha_10_20_2x2_0_89");
+            fs1.Key.Should().Be("Ha_10_20_2x2_0_89");
 
             ImageMetadata imageMetaData = GetImageMetadata(1, "Ha", 10, 20, "2x2", 0, 123.4, 89);
             AcquiredImage acquiredImage = new AcquiredImage(imageMetaData);
@@ -597,7 +614,7 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             fs2.ReadoutMode.Should().Be(0);
             fs2.Rotation.Should().Be(123.4);
             fs2.ROI.Should().Be(89);
-            fs2.Key.Should().Be("1_Ha_10_20_2x2_0_89");
+            fs2.Key.Should().Be("Ha_10_20_2x2_0_89");
 
             fs1.Equals(fs2).Should().BeTrue();
 
@@ -607,9 +624,9 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             fs3.Offset.Should().Be(20);
             fs3.BinningMode.X.Should().Be(2);
             fs3.ReadoutMode.Should().Be(0);
-            fs3.Rotation.Should().Be(ImageMetadata.NO_ROTATOR_ANGLE);
+            fs3.Rotation.Should().Be(0);
             fs3.ROI.Should().Be(89);
-            fs3.Key.Should().Be("1_Ha_10_20_2x2_0_89");
+            fs3.Key.Should().Be("Ha_10_20_2x2_0_89");
 
             imageMetaData = GetImageMetadata(1, "Ha", 11, 20, "2x2", 0, ImageMetadata.NO_ROTATOR_ANGLE, 89);
             acquiredImage = new AcquiredImage(imageMetaData);
@@ -620,9 +637,9 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             fs4.Offset.Should().Be(20);
             fs4.BinningMode.X.Should().Be(2);
             fs4.ReadoutMode.Should().Be(0);
-            fs4.Rotation.Should().Be(ImageMetadata.NO_ROTATOR_ANGLE);
+            fs4.Rotation.Should().Be(0);
             fs4.ROI.Should().Be(89);
-            fs4.Key.Should().Be("1_Ha_11_20_2x2_0_89");
+            fs4.Key.Should().Be("Ha_11_20_2x2_0_89");
 
             fs1.Equals(fs3).Should().BeTrue();
             fs2.Equals(fs3).Should().BeTrue();
@@ -634,7 +651,24 @@ namespace NINA.Plugin.Assistant.Test.Sequencer {
             FlatSpec fs7 = new FlatSpec(2, "Lum", 10, 20, new BinningMode(1, 1), 0, 123.4, 100);
 
             fs5.Equals(fs6).Should().BeTrue();
-            fs5.Equals(fs7).Should().BeFalse();
+            fs5.Equals(fs7).Should().BeTrue();
+        }
+
+        [Test]
+        public void TestFlatsSpecEquals() {
+            FlatSpec fs1 = new FlatSpec(1, "Ha", 10, 20, new BinningMode(2, 2), 0, 0, 100);
+            FlatSpec fs2 = new FlatSpec(2, "Ha", 10, 20, new BinningMode(2, 2), 0, 0, 100);
+            fs1.Equals(fs2).Should().BeTrue(); // different targets but otherwise same
+
+            FlatSpec fs3 = new FlatSpec(1, "Ha", 10, 20, new BinningMode(2, 2), 0, 10, 100);
+            fs1.Equals(fs3).Should().BeTrue(); // same target but different rotation - rotation ignored for same target
+            fs2.Equals(fs3).Should().BeFalse(); // different target and different rotation
+
+            FlatSpec fs4 = new FlatSpec(1, "O3", 10, 20, new BinningMode(2, 2), 0, 0, 100);
+            fs1.Equals(fs4).Should().BeFalse(); // same target and rotation but different filter
+
+            FlatSpec fs5 = new FlatSpec(1, "O3", 10, 20, new BinningMode(2, 2), 0, 10, 100);
+            fs1.Equals(fs5).Should().BeFalse(); // same target, different rotation but different filter
         }
 
         [Test]
