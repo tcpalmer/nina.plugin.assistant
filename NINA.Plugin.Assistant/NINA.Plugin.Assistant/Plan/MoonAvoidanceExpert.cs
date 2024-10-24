@@ -37,8 +37,7 @@ namespace Assistant.NINAPlugin.Plan {
             }
 
             // Avoidance is absolute regardless of moon phase or separation if Moon Must Be Down is enabled
-            if (moonAltitude >= planExposure.MoonRelaxMinAltitude && planExposure.MoonDownEnabled)
-            {
+            if (moonAltitude >= planExposure.MoonRelaxMaxAltitude && planExposure.MoonDownEnabled) {
                 TSLogger.Info($"moon avoidance absolute: moon altitude ({moonAltitude}) is above relax min altitude ({planExposure.MoonRelaxMinAltitude}) with Moon Must Be Down enabled");
                 return true;
             }

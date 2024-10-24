@@ -2,6 +2,7 @@
 
 ## 4.8.1.0 - 2024-10-24
 * Adjusted moon avoidance evaluation time for not yet visible targets
+* Added flag to trigger avoidance if moon altitude is above the relax maximum altitude - regardless of actual separation or moon phase
 
 ## 4.8.0.0 - 2024-09-12
 * Fixed a bug where the planner could return a plan with no exposures, will now abort container and warn instead

@@ -74,18 +74,17 @@ namespace NINA.Plugin.Assistant.Test.Plan {
         }
 
         [Test]
-        public void testMoonDownEnabled()
-        {
+        public void testMoonDownEnabled() {
             IPlanTarget planTarget = GetPlanTarget();
             IPlanExposure planExposure = GetPlanExposure(true, 120, 14, 2, 5, -15, true);
             DateTime atTime = DateTime.Now;
 
-            // With altitude 0, moon is above the minimum and should be rejected
-            MoonAvoidanceExpert sut = new MoonAvoidanceExpertMock(TestUtil.TEST_LOCATION_1) { Altitude = 0, MoonAge = 14, SeparationAngle = 112 };
+            // With altitude 0, moon is above the max and should be rejected
+            MoonAvoidanceExpert sut = new MoonAvoidanceExpertMock(TestUtil.TEST_LOCATION_1) { Altitude = 6, MoonAge = 14, SeparationAngle = 112 };
             sut.IsRejected(atTime, planTarget, planExposure).Should().BeTrue();
 
-            // Less than min altitude, don't reject
-            sut = new MoonAvoidanceExpertMock(TestUtil.TEST_LOCATION_1) { Altitude = -16, MoonAge = 14, SeparationAngle = 5 };
+            // Less than max altitude, don't reject
+            sut = new MoonAvoidanceExpertMock(TestUtil.TEST_LOCATION_1) { Altitude = -12, MoonAge = 14, SeparationAngle = 100 };
             sut.IsRejected(atTime, planTarget, planExposure).Should().BeFalse();
         }
 
