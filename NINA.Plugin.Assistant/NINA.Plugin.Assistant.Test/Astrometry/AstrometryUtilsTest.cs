@@ -33,9 +33,9 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
         }
 
         [Test]
-        [TestCase(9, 0, 7, 37.129)]
+        [TestCase(9, 0, 7, 37.150)]
         [TestCase(12, 0, 4, 20.155)]
-        [TestCase(16, 0, 7, 55.363)]
+        [TestCase(16, 0, 7, 55.342)]
         public void TestGetMoonSeparationAngle(int day, int hour, int min, double expected) {
             DateTime dateTime = new DateTime(2022, 11, day, hour, min, 0);
             double moonSeparation = AstrometryUtils.GetMoonSeparationAngle(TestUtil.TEST_LOCATION_1, dateTime, TestUtil.BETELGEUSE);

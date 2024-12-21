@@ -502,7 +502,7 @@ namespace Assistant.NINAPlugin.Sequencer {
             CenterAfterDriftTrigger centerAfterDriftTrigger = GetCenterAfterDriftTrigger();
             if (centerAfterDriftTrigger != null) {
                 TSLogger.Info("Resetting container CenterAfterDrift trigger for latest plan coordinates");
-                centerAfterDriftTrigger.Coordinates = Target.InputCoordinates;
+                centerAfterDriftTrigger.Coordinates = Target.InputCoordinates.Clone();
                 centerAfterDriftTrigger.Inherited = true;
                 centerAfterDriftTrigger.SequenceBlockInitialize();
             }
