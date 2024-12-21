@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 4.9.0.1 - 2024-12-21
+* Patch to prevent TS Target coordinates from getting cleared in certain scenarios (typically with CenterAfterDrift handling and Powerups usage)
+
 ## 4.9.0.0 - 2024-10-24
 * Added flag to trigger avoidance if moon altitude is above the relax maximum altitude - regardless of actual separation or moon phase
 * Adjusted moon avoidance evaluation time for not yet visible targets
