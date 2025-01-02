@@ -1,5 +1,8 @@
 # Target Scheduler
 
+## 4.9.1.0 - 2025-01-02
+* Fix for entering fractional seconds in target coordinates.  It will behave like core NINA: the fractional seconds will be stored and used but will be rounded for display.
+
 ## 4.9.0.1 - 2024-12-21
 * Patch to prevent TS Target coordinates from getting cleared in certain scenarios (typically with CenterAfterDrift handling and Powerups usage)
 

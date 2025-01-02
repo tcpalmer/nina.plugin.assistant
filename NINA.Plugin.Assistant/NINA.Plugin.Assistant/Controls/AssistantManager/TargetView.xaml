@@ -189,6 +189,7 @@
                          TextAlignment="Right">
                     <TextBox.Text>
                         <Binding Path="TargetProxy.Target.RASeconds"
+                                 StringFormat="N1"
                                  UpdateSourceTrigger="LostFocus">
                             <Binding.ValidationRules>
                                 <nrules:SecondsRule />
@@ -235,6 +236,7 @@
                          TextAlignment="Right">
                     <TextBox.Text>
                         <Binding Path="TargetProxy.Target.DecSeconds"
+                                 StringFormat="N1"
                                  UpdateSourceTrigger="LostFocus">
                             <Binding.ValidationRules>
                                 <nrules:SecondsRule />

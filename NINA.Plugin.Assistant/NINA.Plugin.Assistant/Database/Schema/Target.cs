@@ -120,10 +120,10 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
-        public int RASeconds {
+        public double RASeconds {
             get {
-                var seconds = (int)Math.Round((Math.Abs(Coordinates.RA * 60.0d * 60.0d) % 60));
-                if (seconds > 59) {
+                var seconds = Math.Round((Math.Abs(coordinates.RA * 60.0d * 60.0d) % 60), 5);
+                if (seconds >= 60.0) {
                     seconds = 0;
                 }
                 return seconds;
@@ -188,10 +188,10 @@ namespace Assistant.NINAPlugin.Database.Schema {
         }
 
         [NotMapped]
-        public int DecSeconds {
+        public double DecSeconds {
             get {
-                var seconds = (int)Math.Round((Math.Abs(Coordinates.Dec * 60.0d * 60.0d) % 60));
-                if (seconds > 59) {
+                var seconds = Math.Round((Math.Abs(coordinates.Dec * 60.0d * 60.0d) % 60), 5);
+                if (seconds >= 60.0) {
                     seconds = 0;
                 }
                 return seconds;
