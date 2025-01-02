@@ -67,16 +67,14 @@ namespace Assistant.NINAPlugin.Controls.AssistantManager {
         }
 
         private Coordinates GetFramingAssistantCoordinates() {
-            int raHours = framingAssistantVM.RAHours;
-            int raMinutes = framingAssistantVM.RAMinutes;
-            double raSeconds = framingAssistantVM.RASeconds;
-            int decDegrees = framingAssistantVM.DecDegrees;
-            int decMinutes = framingAssistantVM.DecMinutes;
-            double decSeconds = framingAssistantVM.DecSeconds;
-
-            string hms = string.Format("{0:00}:{1:00}:{2:00}", raHours, raMinutes, raSeconds);
-            string dms = string.Format("{0:00}:{1:00}:{2:00}", decDegrees, decMinutes, decSeconds);
-            return new Coordinates(AstroUtil.HMSToDegrees(hms), AstroUtil.DMSToDegrees(dms), Epoch.J2000, Coordinates.RAType.Degrees);
+            var inputCoords = new InputCoordinates();
+            inputCoords.RAHours = framingAssistantVM.RAHours;
+            inputCoords.RAMinutes = framingAssistantVM.RAMinutes;
+            inputCoords.RASeconds = framingAssistantVM.RASeconds;
+            inputCoords.DecDegrees = framingAssistantVM.DecDegrees;
+            inputCoords.DecMinutes = framingAssistantVM.DecMinutes;
+            inputCoords.DecSeconds = framingAssistantVM.DecSeconds;
+            return inputCoords.Coordinates;
         }
 
         public ICommand PlanetariumImportCommand { get; private set; }

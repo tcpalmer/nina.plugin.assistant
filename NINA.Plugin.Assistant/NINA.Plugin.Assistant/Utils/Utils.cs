@@ -110,24 +110,21 @@ namespace Assistant.NINAPlugin.Util {
         }
 
         // Cobbled from NINA (NINA private)
-        public static string GetRAString(double raDegrees) {
-            string pattern = "{0:0}h {1:0}m {2:0}s";
-            double hours = AstroUtil.DegreesToHours(raDegrees);
-
+        public static string DegreesToDMS(double value, string pattern) {
             bool negative = false;
-            if (hours < 0) {
+            if (value < 0) {
                 negative = true;
-                hours = -hours;
+                value = -value;
             }
             if (negative) {
                 pattern = "-" + pattern;
             }
 
-            var degree = Math.Floor(hours);
-            var arcmin = Math.Floor(AstroUtil.DegreeToArcmin(hours - degree));
+            var degree = Math.Floor(value);
+            var arcmin = Math.Floor(AstroUtil.DegreeToArcmin(value - degree));
             var arcminDeg = AstroUtil.ArcminToDegree(arcmin);
 
-            var arcsec = Math.Round(AstroUtil.DegreeToArcsec(hours - degree - arcminDeg), 0);
+            var arcsec = Math.Round(AstroUtil.DegreeToArcsec(value - degree - arcminDeg), 0);
             if (arcsec == 60) {
                 /* If arcsec got rounded to 60 add to arcmin instead */
                 arcsec = 0;
@@ -140,7 +137,16 @@ namespace Assistant.NINAPlugin.Util {
                 }
             }
 
+            // Prevent "-0" when using ToString
+            if (arcsec == 0) { arcsec = 0; }
+            if (arcmin == 0) { arcmin = 0; }
+            if (degree == 0) { degree = 0; }
+
             return string.Format(pattern, degree, arcmin, arcsec);
+        }
+
+        public static string GetRAString(double raDegrees) {
+            return DegreesToDMS(AstroUtil.DegreesToHours(raDegrees), "{0:0}h {1:0}m {2:0}s");
         }
 
         public static bool IsCancelException(Exception ex) {
